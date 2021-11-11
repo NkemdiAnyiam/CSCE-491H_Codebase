@@ -14,10 +14,10 @@ class Job {
   getFinish() { return this._finish; }
   getWeight() { return this._weight; }
   getSortedJobNum() { return this._sortedJobNum; }
-  getCompatibleJobNum() { return this._compatibleJobNum; }
+  // getCompatibleJobNum() { return this._compatibleJobNum; }
 
   setSortedJobNum(sortedJobNum) { this._sortedJobNum = sortedJobNum; }
-  setCompatibleJobNum(compatibleJobNum) { this._compatibleJobNum = compatibleJobNum; }
+  // setCompatibleJobNum(compatibleJobNum) { this._compatibleJobNum = compatibleJobNum; }
 
   findCompatibleJobNum(jobs) {
     for(let currIdx = this._sortedJobNum - 2; currIdx >= 0; --currIdx) {
@@ -41,8 +41,16 @@ class JobScheduler {
   _c = [];
   _M = [];
 
-  constructor(jobs) {
+  constructor(jobs = []) {
     this._jobs = jobs;
+    this._n_jobs = jobs.length;
+  }
+
+  getNumJobs() { return this._n_jobs; }
+
+  addJob(job) { 
+    this._jobs.push(job);
+    this._n_jobs++;
   }
 
   jobFinishComparator(job1, job2) {
@@ -61,9 +69,26 @@ class JobScheduler {
     this._c.push(null); // TODO potentially clear before starting
     this._jobs.forEach(job => {
       const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
-      job.setCompatibleJobNum(compatibleJobNum);
+      // job.setCompatibleJobNum(compatibleJobNum);
       this._c.push(compatibleJobNum);
     });
+  }
+
+  initializeM() {
+    for (let i = 1; i <= this._n_jobs; ++i) {
+      this._M[i] = null;
+    }
+    this._M[0] = 0;
+  }
+
+  computeOPT(j) {
+    if (this._M[j] === null) {
+      this._M[j] = Math.max(
+                            this._jobs[j-1].getWeight() + this.computeOPT(this._c[j]), // assuming this job is part of optimal set
+                            this.computeOPT(j - 1) // assuming this job is NOT part of optimal set
+      );
+    }
+    return this._M[j]
   }
 
   toStr() {
@@ -93,9 +118,18 @@ const jobs = [
   new Job(8, 3, 5, 6),
 ];
 
-const jobScheduler = new JobScheduler(jobs);
+const jobScheduler = new JobScheduler();
+
+jobs.forEach(job => {
+  jobScheduler.addJob(job);
+});
+
 jobScheduler.print();
 jobScheduler.sortJobsByFinish();
 jobScheduler.print();
 jobScheduler.setCompatibleJobNums();
+jobScheduler.print();
+jobScheduler.initializeM();
+jobScheduler.print();
+console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs()));
 jobScheduler.print();
