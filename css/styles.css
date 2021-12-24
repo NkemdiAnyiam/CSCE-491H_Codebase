@@ -24,6 +24,10 @@ span {
   display: inline-block;
 }
 
+.hidden {
+  display: none!important;
+}
+
 .box {
   width: 8rem;
   height: 8rem;
@@ -80,6 +84,14 @@ span {
   color: #FF0000;
 }
 
+.next-SJ-num-container {
+
+}
+
+.next-SJ-num-expression {
+  color: black;
+}
+
 .next-SJ-num {
   color: black;
 }
@@ -107,6 +119,11 @@ span {
 
 
 .formula-container {
+  display: flex;
+  align-items: center;
+}
+
+.formula-computation {
   display: flex;
   align-items: center;
 }
@@ -143,6 +160,10 @@ span {
 
 }
 
+.computation-result {
+  color: black;
+}
+
 .weight {
   color: #0000FF;
 }
@@ -151,10 +172,23 @@ span {
 
 }
 
+.OPT-expression-container {
+
+}
+
 .OPT-expression {
   color: #845C35;
 }
 
+.OPT-result {
+  color: black;
+}
+
+.c-access-container {
+
+}
+
+.c-access,
 .c-entry {
   color: #62B720;
 }
