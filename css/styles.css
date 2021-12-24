@@ -1,0 +1,142 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+  position: relative; /* Ensures that highlights can be placed properly */
+}
+
+html {
+  font-size: 33%;
+}
+
+body {
+  line-height: 1;
+  padding: 5rem;
+
+  font-family: 'Source Code Pro', monospace;
+  font-size: 4rem;
+}
+
+span {
+  display: inline-block;
+}
+
+.highlight::before {
+  display: block;
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -1rem;
+  left: -0.5rem;
+  border-radius: 1rem;
+
+  width: calc(100% + 1rem);
+  height: calc(100% + 2rem);
+  background-color: #F9F278;
+}
+
+.job-card {
+  width: max-content;
+  height: 30rem;
+  padding: 4rem;
+  background-color: #EFEFEF;
+  z-index: -2;
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+
+.M-entry {
+  color: #B36CD8;
+}
+
+.SJ-num {
+  color: #FF0000;
+}
+
+.next-SJ-num {
+  color: black;
+}
+
+
+.arrow-container {
+  display: flex;
+  align-items: center;
+}
+
+.arrow-head {
+  width: 2rem;
+  height: 3.6rem;
+  background-color: black;
+  clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+}
+
+.arrow-tail {
+  width: 16rem;
+  height: 1rem;
+  background-color: black;
+}
+
+
+
+
+.formula-container {
+  display: flex;
+  align-items: center;
+}
+
+.max-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.curly-brace {
+  height: 25rem;
+  width: auto;
+}
+
+.computations-container {
+  height: min-content;
+  margin-left: -1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8rem;
+}
+
+.computation {
+  color: black;
+}
+
+.computation-1 {
+  
+}
+
+.computation-2 {
+
+}
+
+.weight {
+  color: #0000FF;
+}
+
+.plus-sign {
+
+}
+
+.OPT-expression {
+  color: #845C35;
+}
+
+.c-entry {
+  color: #62B720;
+}
+
+

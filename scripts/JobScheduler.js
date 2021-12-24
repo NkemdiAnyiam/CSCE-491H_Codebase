@@ -36,10 +36,10 @@ class JobScheduler {
   }
 
   initializeM() {
+    this._M[0] = 0;
     for (let i = 1; i <= this._n_jobs; ++i) {
       this._M[i] = null;
     }
-    this._M[0] = 0;
   }
 
   computeOPT(j) {
