@@ -38,19 +38,68 @@ jobScheduler.print();
 // line.y1.baseVal.value = rect1.bottom;
 // line.x2.baseVal.value = rect2.left;
 // line.y2.baseVal.value = rect2.top;
+(async function() {
+  const arrow = document.querySelector('.arrow-container');
+  const highlightable = document.querySelector('.highlightable');
+  let boolVal = true;
 
-const highlight = document.querySelector('.highlightable');
-let boolVal = true;
+  class AnimObject {
+    constructor(domElem, enterClassName, exitClassName) {
+      this.domElem = domElem;
+      this.enterClassName = enterClassName;
+      this.exitClassName = exitClassName;
+    }
 
-window.addEventListener('click', function() {
-  if (boolVal) {
-    highlight.classList.remove('undo-highlight');
-    highlight.classList.add('highlight');
+    async animate(isEntering = true, isHighlighting = false) {
+      return new Promise(resolve => {
+        const func = () => {
+          this.domElem.removeEventListener('animationend', func);
+          if (!isEntering && !isHighlighting) { this.domElem.classList.add('hidden'); }
+          resolve();
+        }
+
+        this.domElem.style.animationPlayState = 'paused';
+        if (isEntering) {
+          this.domElem.classList.remove(this.exitClassName);
+          this.domElem.classList.add(this.enterClassName);
+          this.domElem.classList.remove('hidden');
+        }
+        else {
+          this.domElem.classList.remove(this.enterClassName);
+          this.domElem.classList.add(this.exitClassName);
+        }
+        this.domElem.addEventListener('animationend', func);
+        this.domElem.style.animationPlayState = 'running';
+      });
+    }
   }
-  else {
-    highlight.classList.remove('highlight');
-    highlight.classList.add('undo-highlight');
-  }
-  boolVal = !boolVal;
-  console.log(boolVal);
-});
+
+  const mContainerObject = new AnimObject(highlightable, 'highlight', 'undo-highlight');
+  const arrowObject = new AnimObject(arrow, 'enter-wipe-from-right', 'exit-wipe-to-right');
+
+  const goForward = async function() {
+    return new Promise(async function(resolve) {
+      window.removeEventListener('click', goForward);
+      await mContainerObject.animate(true, true);
+      await arrowObject.animate(true);
+      window.addEventListener('click', goBackward);
+
+      resolve();
+    });
+  };
+
+  const goBackward = async function() {
+    return new Promise(async function(resolve) {
+      window.removeEventListener('click', goBackward);
+      await Promise.all([
+        mContainerObject.animate(false, true),
+        arrowObject.animate(false),
+      ])
+      window.addEventListener('click', goForward);
+
+      resolve();
+    });
+  };
+
+  window.addEventListener('click', goForward);
+})();

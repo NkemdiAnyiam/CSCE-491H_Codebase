@@ -9,7 +9,7 @@
 }
 
 :root {
-  --highlightWidth: calc(100% + 1rem);
+
 }
 
 html {
@@ -59,22 +59,23 @@ span {
   position: absolute;
   z-index: -1;
   top: -1rem;
-  left: -0.5rem; /* Depends on highlightWidth */
+  left: -0.5rem;
   border-radius: 1rem;
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
 
-  width: 0;
+  width: calc(100% + 1rem);
   height: calc(100% + 2rem);
   background-color: #F9F278;
 }
 
 .highlight::before {
-  animation-name: highlighting;
+  animation-name: entering-wipe-from-left;
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
 }
 
 .undo-highlight::before {
-  animation-name: undo-highlighting;
+  animation-name: exiting-wipe-to-left;
   animation-duration: 0.5s;
   animation-fill-mode: forwards;
 }
@@ -114,6 +115,9 @@ span {
 
 
 .arrow-container {
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+
   display: flex;
   align-items: center;
 }
@@ -211,22 +215,67 @@ span {
 
 
 
-@keyframes highlighting {
+.fade-in {
+  animation-name: fading-in;
+}
+
+.enter-wipe-from-right {
+  animation-name: entering-wipe-from-right;
+}
+
+.exit-wipe-to-right {
+  animation-name: exiting-wipe-to-right;
+  /* animation-direction: reverse; */
+}
+
+
+@keyframes fading-in {
   0% {
-    width: 0;
+    opacity: 0;
   }
 
   100% {
-    width: var(--highlightWidth);
+    opacity: 1;
   }
 }
 
-@keyframes undo-highlighting {
+@keyframes entering-wipe-from-right {
   0% {
-  width: var(--highlightWidth);
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
   }
 
   100% {
-    width: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes exiting-wipe-to-right {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  100% {
+    clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+  }
+}
+
+@keyframes entering-wipe-from-left {
+  0% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes exiting-wipe-to-left {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  
+  100% {
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
   }
 }
