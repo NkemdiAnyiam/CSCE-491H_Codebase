@@ -8,6 +8,10 @@
   position: relative; /* Ensures that highlights can be placed properly */
 }
 
+:root {
+  --highlightWidth: calc(100% + 1rem);
+}
+
 html {
   font-size: 33%;
 }
@@ -49,18 +53,30 @@ span {
   marker-end:url(#markerArrow);
 }
 
-.highlight::before {
+.highlightable::before {
   display: block;
   content: "";
   position: absolute;
   z-index: -1;
   top: -1rem;
-  left: -0.5rem;
+  left: -0.5rem; /* Depends on highlightWidth */
   border-radius: 1rem;
 
-  width: calc(100% + 1rem);
+  width: 0;
   height: calc(100% + 2rem);
   background-color: #F9F278;
+}
+
+.highlight::before {
+  animation-name: highlighting;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+.undo-highlight::before {
+  animation-name: undo-highlighting;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
 }
 
 .job-card {
@@ -194,3 +210,23 @@ span {
 }
 
 
+
+@keyframes highlighting {
+  0% {
+    width: 0;
+  }
+
+  100% {
+    width: var(--highlightWidth);
+  }
+}
+
+@keyframes undo-highlighting {
+  0% {
+  width: var(--highlightWidth);
+  }
+
+  100% {
+    width: 0;
+  }
+}

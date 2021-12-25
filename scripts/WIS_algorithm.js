@@ -28,13 +28,29 @@ jobScheduler.print();
 console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs()));
 jobScheduler.print();
 
-const MContainer = document.querySelector('.M-container');
-const rect1 = MContainer.getBoundingClientRect();
-const box = document.querySelector('.box');
-const rect2 = box.getBoundingClientRect();
+// const MContainer = document.querySelector('.M-container');
+// const rect1 = MContainer.getBoundingClientRect();
+// const box = document.querySelector('.box');
+// const rect2 = box.getBoundingClientRect();
 
-const line = document.querySelector('.arrow-line');
-line.x1.baseVal.value = rect1.left;
-line.y1.baseVal.value = rect1.bottom;
-line.x2.baseVal.value = rect2.left;
-line.y2.baseVal.value = rect2.top;
+// const line = document.querySelector('.arrow-line');
+// line.x1.baseVal.value = rect1.left;
+// line.y1.baseVal.value = rect1.bottom;
+// line.x2.baseVal.value = rect2.left;
+// line.y2.baseVal.value = rect2.top;
+
+const highlight = document.querySelector('.highlightable');
+let boolVal = true;
+
+window.addEventListener('click', function() {
+  if (boolVal) {
+    highlight.classList.remove('undo-highlight');
+    highlight.classList.add('highlight');
+  }
+  else {
+    highlight.classList.remove('highlight');
+    highlight.classList.add('undo-highlight');
+  }
+  boolVal = !boolVal;
+  console.log(boolVal);
+});
