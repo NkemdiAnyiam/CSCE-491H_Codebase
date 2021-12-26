@@ -6,6 +6,8 @@
   border: 0;
   box-sizing: border-box;
   position: relative; /* Ensures that highlights can be placed properly */
+
+  animation-duration: 0.5s;
 }
 
 :root {
@@ -36,7 +38,15 @@ span {
   width: 8rem;
   height: 8rem;
   margin-top: 10rem;
+  display: inline-block;
+}
+
+.box--forward {
   background-color: blue;
+}
+
+.box--backward {
+  background-color: red;
 }
 
 .arrow {
@@ -62,22 +72,11 @@ span {
   left: -0.5rem;
   border-radius: 1rem;
   clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  animation-play-state: inherit;
 
   width: calc(100% + 1rem);
   height: calc(100% + 2rem);
   background-color: #F9F278;
-}
-
-.highlight::before {
-  animation-name: entering-wipe-from-left;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
-}
-
-.undo-highlight::before {
-  animation-name: exiting-wipe-to-left;
-  animation-duration: 0.5s;
-  animation-fill-mode: forwards;
 }
 
 .job-card {
@@ -215,17 +214,49 @@ span {
 
 
 
-.fade-in {
+
+.highlight::before,
+.undo--un-highlight::before {
+  animation-name: entering-wipe-from-left;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+.un-highlight::before,
+.undo--highlight::before {
+  animation-name: exiting-wipe-to-left;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+.fade-in,
+.undo--fade-out {
   animation-name: fading-in;
 }
 
-.enter-wipe-from-right {
+.fade-out,
+.undo--fade-in {
+  animation-name: fading-out;
+}
+
+.enter-wipe-from-right,
+.undo--exit-wipe-to-right {
   animation-name: entering-wipe-from-right;
 }
 
-.exit-wipe-to-right {
+.exit-wipe-to-right,
+.undo--enter-wipe-from-right {
   animation-name: exiting-wipe-to-right;
-  /* animation-direction: reverse; */
+}
+
+.enter-wipe-from-left,
+.undo--exit-wipe-to-left {
+  animation-name: entering-wipe-from-left;
+}
+
+.exit-wipe-to-left,
+.undo--enter-wipe-from-left {
+  animation-name: exiting-wipe-to-left;
 }
 
 
@@ -236,6 +267,16 @@ span {
 
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes fading-out {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 

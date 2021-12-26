@@ -41,48 +41,88 @@ jobScheduler.print();
 (async function() {
   const arrow = document.querySelector('.arrow-container');
   const highlightable = document.querySelector('.highlightable');
-  let boolVal = true;
 
   class AnimObject {
-    constructor(domElem, enterClassName, exitClassName) {
+    keyFrame = 0;
+    exitingList = ['fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left'];
+    enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
+    highlightingList = ['highlight', 'undo--un-highlight'];
+    unhighlightingList = ['un-highlight', 'undo--highlight'];
+    static counterParts = {};
+    recentlyAdded = ".";
+
+    constructor(domElem, animSequence) {
       this.domElem = domElem;
-      this.enterClassName = enterClassName;
-      this.exitClassName = exitClassName;
+      this.animSequence = animSequence;
+
+      this.exitingList.forEach((animName) => {
+        AnimObject.counterParts[animName] = this.enteringList;
+      });
+      this.enteringList.forEach((animName) => {
+        AnimObject.counterParts[animName] = this.exitingList;
+      });
+      this.highlightingList.forEach((animName) => {
+        AnimObject.counterParts[animName] = this.unhighlightingList;
+      });
+      this.unhighlightingList.forEach((animName) => {
+        AnimObject.counterParts[animName] = this.highlightingList;
+      });
     }
 
-    async animate(isEntering = true, isHighlighting = false) {
+    async stepForward() {
+      return new Promise(resolve => {
+        const animation = this.animSequence[this.keyFrame];
+        (this.exitingList.includes(animation) ? this.animate(animation, true) : this.animate(animation, false))
+        .then(() => {
+          ++this.keyFrame;
+          resolve();
+        });
+      });
+    }
+
+    async stepBackward() {
+      return new Promise(resolve => {
+        --this.keyFrame;
+
+        const animation = `undo--${this.animSequence[this.keyFrame]}`;
+        (this.exitingList.includes(animation) ? this.animate(animation, true) : this.animate(animation, false))
+        .then(() => resolve());
+      });
+    }
+
+    async animate(animClassAdd, isExiting) {
+      const removalList = AnimObject.counterParts[animClassAdd];
       return new Promise(resolve => {
         const func = () => {
           this.domElem.removeEventListener('animationend', func);
-          if (!isEntering && !isHighlighting) { this.domElem.classList.add('hidden'); }
+          if (isExiting) {
+            this.domElem.classList.add('hidden');
+            this.domElem.classList.remove(...this.unhighlightingList);
+          }
           resolve();
         }
 
         this.domElem.style.animationPlayState = 'paused';
-        if (isEntering) {
-          this.domElem.classList.remove(this.exitClassName);
-          this.domElem.classList.add(this.enterClassName);
-          this.domElem.classList.remove('hidden');
-        }
-        else {
-          this.domElem.classList.remove(this.enterClassName);
-          this.domElem.classList.add(this.exitClassName);
-        }
+        this.domElem.classList.remove(...removalList);
+        this.domElem.classList.add(animClassAdd);
+        !isExiting && this.domElem.classList.remove('hidden');
         this.domElem.addEventListener('animationend', func);
         this.domElem.style.animationPlayState = 'running';
       });
     }
   }
 
-  const mContainerObject = new AnimObject(highlightable, 'highlight', 'undo-highlight');
-  const arrowObject = new AnimObject(arrow, 'enter-wipe-from-right', 'exit-wipe-to-right');
+  const mContainerObject = new AnimObject(highlightable, ['fade-in', 'highlight', 'un-highlight', 'fade-out']);
+  const arrowObject = new AnimObject(arrow, ['enter-wipe-from-right', 'exit-wipe-to-left', 'enter-wipe-from-left', 'exit-wipe-to-right']);
 
   const goForward = async function() {
     return new Promise(async function(resolve) {
-      window.removeEventListener('click', goForward);
-      await mContainerObject.animate(true, true);
-      await arrowObject.animate(true);
-      window.addEventListener('click', goBackward);
+      backwardButton.removeEventListener('click', goBackward);
+      forwardButton.removeEventListener('click', goForward);
+      await mContainerObject.stepForward();
+      await arrowObject.stepForward();
+      backwardButton.addEventListener('click', goBackward);
+      forwardButton.addEventListener('click', goForward);
 
       resolve();
     });
@@ -90,16 +130,26 @@ jobScheduler.print();
 
   const goBackward = async function() {
     return new Promise(async function(resolve) {
-      window.removeEventListener('click', goBackward);
+      backwardButton.removeEventListener('click', goBackward);
+      forwardButton.removeEventListener('click', goForward);
       await Promise.all([
-        mContainerObject.animate(false, true),
-        arrowObject.animate(false),
-      ])
-      window.addEventListener('click', goForward);
+        mContainerObject.stepBackward(),
+        arrowObject.stepBackward(),
+      ]);
+      backwardButton.addEventListener('click', goBackward);
+      forwardButton.addEventListener('click', goForward);
 
       resolve();
     });
   };
 
-  window.addEventListener('click', goForward);
+  
+  const backwardButton = document.querySelector('.box--backward');
+  const forwardButton = document.querySelector('.box--forward');
+  backwardButton.addEventListener('click', goBackward);
+  forwardButton.addEventListener('click', goForward);
+
+  window.addEventListener('keydown', function() {
+    document.styleSheets[1].insertRule('*:not(html),*::before,*::after { animation-duration: 0.1s!important }');
+  });
 })();
