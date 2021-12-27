@@ -25,7 +25,7 @@ jobScheduler.setCompatibleJobNums();
 jobScheduler.print();
 jobScheduler.initializeM();
 jobScheduler.print();
-console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs()));
+console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
 jobScheduler.print();
 
 // const MContainer = document.querySelector('.M-container');
@@ -144,12 +144,16 @@ jobScheduler.print();
   };
 
   
-  const backwardButton = document.querySelector('.box--backward');
-  const forwardButton = document.querySelector('.box--forward');
-  backwardButton.addEventListener('click', goBackward);
-  forwardButton.addEventListener('click', goForward);
+  // const backwardButton = document.querySelector('.box--backward');
+  // const forwardButton = document.querySelector('.box--forward');
+  // backwardButton.addEventListener('click', goBackward);
+  // forwardButton.addEventListener('click', goForward);
 
-  window.addEventListener('keydown', function() {
-    document.styleSheets[1].insertRule('*:not(html),*::before,*::after { animation-duration: 0.1s!important }');
-  });
+  // window.addEventListener('keydown', function() {
+  //   document.styleSheets[1].insertRule('*:not(html),*::before,*::after { animation-duration: 0.1s!important }');
+  // });
+
+  // const card2 = document.querySelector('div[data-card-num="2"]');
+  // console.log(card2);
+  // card2.style.left = '30rem';
 })();

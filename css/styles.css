@@ -15,12 +15,13 @@
 }
 
 html {
-  font-size: 33%;
+  font-size: 20%;
 }
 
 body {
   line-height: 1;
   padding: 5rem;
+  /* background-color: #aaa; */
 
   font-family: 'Source Code Pro', monospace;
   font-size: 4rem;
@@ -79,9 +80,21 @@ span {
   background-color: #F9F278;
 }
 
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+}
+
 .job-card {
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+}
+
+.job-card-content {
   width: max-content;
-  height: 30rem;
+  height: 25rem;
   padding: 4rem;
   background-color: #EFEFEF;
   z-index: -2;
@@ -91,7 +104,19 @@ span {
   gap: 1rem;
 }
 
+.job-card-children {
+  left: 30rem;
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+}
 
+
+.M-access-container {
+
+}
+
+.M-access,
 .M-entry {
   color: #B36CD8;
 }
@@ -154,7 +179,7 @@ span {
 }
 
 .curly-brace {
-  height: 25rem;
+  height: 20rem;
   width: auto;
 }
 
@@ -164,7 +189,7 @@ span {
 
   display: flex;
   flex-direction: column;
-  gap: 8rem;
+  gap: 5rem;
 }
 
 .computation {
