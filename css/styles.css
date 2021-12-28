@@ -7,7 +7,7 @@
   box-sizing: border-box;
   position: relative; /* Ensures that highlights can be placed properly */
 
-  animation-duration: 0.5s;
+  animation-duration: 0.3s;
 }
 
 :root {
@@ -23,7 +23,7 @@ body {
   padding: 5rem;
   /* background-color: #aaa; */
 
-  font-family: 'Source Code Pro', monospace;
+  font-family: 'Roboto Mono', monospace;
   font-size: 4rem;
 }
 
@@ -50,9 +50,19 @@ span {
   background-color: red;
 }
 
+.text-box {
+  font-size: 3.6rem;
+  position: absolute;
+  width: 70rem;
+  bottom: 20rem;
+  left: 10rem;
+  padding: 2rem 1rem;
+  background-color: #F9F278;
+}
+
 .arrow {
-  width: 100%;
-  height: 100%;
+  width: 1000rem;
+  height: 1000rem;
   position: absolute;
   top: 0;
   left: 0;
@@ -60,7 +70,7 @@ span {
 
 .arrow-line {
   stroke:rgb(255,0,0);
-  stroke-width:4; 
+  stroke-width:2; 
   marker-end:url(#markerArrow);
 }
 
@@ -84,6 +94,7 @@ span {
   display: flex;
   flex-direction: column;
   gap: 25rem;
+  margin-top: 50rem;
 }
 
 .job-card {
@@ -139,7 +150,6 @@ span {
 
 
 .arrow-container {
-  animation-duration: 0.5s;
   animation-fill-mode: forwards;
 
   display: flex;
@@ -243,14 +253,12 @@ span {
 .highlight::before,
 .undo--un-highlight::before {
   animation-name: entering-wipe-from-left;
-  animation-duration: 0.5s;
   animation-fill-mode: forwards;
 }
 
 .un-highlight::before,
 .undo--highlight::before {
   animation-name: exiting-wipe-to-left;
-  animation-duration: 0.5s;
   animation-fill-mode: forwards;
 }
 

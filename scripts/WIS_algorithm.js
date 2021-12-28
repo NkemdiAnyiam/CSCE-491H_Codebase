@@ -1,6 +1,7 @@
 import Job from './Job.js';
 import JobScheduler from './JobScheduler.js';
 import AnimObject from './AnimObject.js';
+import AnimLine from './AnimLine.js';
 import AnimBlock from './AnimBlock.js';
 import AnimTimeline from "./AnimTimeline.js";
 
@@ -48,8 +49,12 @@ jobScheduler.print();
     new AnimObject(jobCard.querySelector('.job-card-content'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.M-access'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.M-access'), 'highlight'),
+    new AnimObject(jobCard.querySelector('.text-box'), 'fade-in'),
+    new AnimLine(jobCard.querySelector('.arrow'), 'fade-in', jobCard.querySelector('.M-access'), jobCard.querySelector('.text-box')),
   ]);
   const animBlock2 = new AnimBlock(...[
+    new AnimObject(jobCard.querySelector('.arrow'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.text-box'), 'fade-out'),
     new AnimObject(jobCard.querySelector('.M-access'), 'un-highlight'),
     new AnimObject(jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'),
     new AnimObject(jobCard.querySelector('.formula-computation'), 'fade-in'),
