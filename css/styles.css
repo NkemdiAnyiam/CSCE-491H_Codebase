@@ -7,7 +7,7 @@
   box-sizing: border-box;
   position: relative; /* Ensures that highlights can be placed properly */
 
-  animation-duration: 0.3s;
+  animation-duration: 0.2s;
 }
 
 :root {
@@ -54,10 +54,10 @@ span {
   font-size: 3.6rem;
   position: absolute;
   width: 70rem;
-  bottom: 20rem;
+  bottom: calc(100% + 5rem);
   left: 10rem;
-  padding: 2rem 1rem;
-  background-color: #F9F278;
+  padding: 1rem 1rem;
+  /* background-color: #fffccc; */
 }
 
 .arrow {
@@ -123,12 +123,20 @@ span {
 }
 
 
+
+.M-container {
+  height: 20rem;
+  display: flex;
+  align-items: center;
+}
+
 .M-access-container {
 
 }
 
 .M-access,
-.M-entry {
+.M-entry,
+.M-access-text {
   color: #B36CD8;
 }
 

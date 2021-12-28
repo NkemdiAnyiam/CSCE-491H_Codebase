@@ -1,10 +1,14 @@
 import AnimObject from "./AnimObject.js";
 
 class AnimLine extends AnimObject {
-  constructor(domElem, animClassName, startElem, endElem) {
+  constructor(domElem, animClassName, startElem, [left1, top1], endElem, [left2, top2]) {
     super(domElem, animClassName);
     this.startElem = startElem;
     this.endElem = endElem;
+    this.left1 = left1;
+    this.top1 = top1;
+    this.left2 = left2;
+    this.top2 = top2;
   }
 
   updateEndPoints() {
@@ -12,14 +16,14 @@ class AnimLine extends AnimObject {
     const rectEnd = this.endElem.getBoundingClientRect();
     const rectParent = this.domElem.parentElement.getBoundingClientRect();
 
-    const line = this.domElem.querySelector('.arrow-line');
     this.domElem.style.left = -rectParent.left;
     this.domElem.style.top = -rectParent.top;
-    line.x1.baseVal.value = rectStart.left;
-    line.y1.baseVal.value = rectStart.top;
-    line.x2.baseVal.value = rectEnd.left;
-    line.y2.baseVal.value = rectEnd.bottom;
-    console.log(line);
+
+    const line = this.domElem.querySelector('.arrow-line');
+    line.x1.baseVal.value = (1 - this.left1) * rectStart.left + (this.left1) * rectStart.right;
+    line.y1.baseVal.value = (1 - this.top1) * rectStart.top + (this.top1) * rectStart.bottom;
+    line.x2.baseVal.value = (1 - this.left2) * rectEnd.left + (this.left2) * rectEnd.right;
+    line.y2.baseVal.value = (1 - this.top2) * rectEnd.top + (this.top2) * rectEnd.bottom;
   }
 
   stepForward() {

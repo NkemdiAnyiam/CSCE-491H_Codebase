@@ -49,16 +49,22 @@ jobScheduler.print();
     new AnimObject(jobCard.querySelector('.job-card-content'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.M-access'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.M-access'), 'highlight'),
-    new AnimObject(jobCard.querySelector('.text-box'), 'fade-in'),
-    new AnimLine(jobCard.querySelector('.arrow'), 'fade-in', jobCard.querySelector('.M-access'), jobCard.querySelector('.text-box')),
+    new AnimObject(jobCard.querySelector('.M-container .text-box'), 'fade-in'),
+    new AnimLine(jobCard.querySelector('.M-container .arrow'), 'fade-in',
+      jobCard.querySelector('.M-access'), [0, 0], jobCard.querySelector('.M-container .text-box'), [0, 1]
+    ),
   ]);
   const animBlock2 = new AnimBlock(...[
-    new AnimObject(jobCard.querySelector('.arrow'), 'fade-out'),
-    new AnimObject(jobCard.querySelector('.text-box'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.M-container .arrow'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.M-container .text-box'), 'fade-out'),
     new AnimObject(jobCard.querySelector('.M-access'), 'un-highlight'),
     new AnimObject(jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'),
     new AnimObject(jobCard.querySelector('.formula-computation'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.formula-computation'), 'highlight'),
+    new AnimObject(jobCard.querySelector('.formula-container .text-box'), 'fade-in'),
+    new AnimLine(jobCard.querySelector('.formula-container .arrow'), 'fade-in',
+      jobCard.querySelector('.formula-computation'), [0.1, 0.2], jobCard.querySelector('.formula-container .text-box'), [0, 1]
+    ),
   ]);
 
   const animSequence = new AnimTimeline(...[
