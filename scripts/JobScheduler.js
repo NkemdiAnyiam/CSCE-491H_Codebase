@@ -128,7 +128,7 @@ class JobScheduler {
         nextSJNum: (j - 1),
       };
       const newCard = genNewJobCard(cardData);
-      parentContainer.append(newCard);
+      // parentContainer.append(newCard);
       const childrenContainer = newCard.querySelector('.job-card-children');
 
       const computationResult1 = this._jobs[j-1].getWeight() + this.computeOPT(this._c[j], childrenContainer); // assuming this job is part of optimal set

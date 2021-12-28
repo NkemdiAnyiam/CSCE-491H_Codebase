@@ -1,5 +1,7 @@
 import Job from './Job.js';
 import JobScheduler from './JobScheduler.js';
+import AnimTimeline from "./AnimTimeline.js";
+import AnimBlock from './AnimBlock.js';
 
 const jobs = [
   new Job(1, 5, 9, 7),
@@ -39,88 +41,33 @@ jobScheduler.print();
 // line.x2.baseVal.value = rect2.left;
 // line.y2.baseVal.value = rect2.top;
 (async function() {
-  const arrow = document.querySelector('.arrow-container');
-  const highlightable = document.querySelector('.highlightable');
+  const jobCard = document.querySelector('.job-card');
 
-  class AnimObject {
-    keyFrame = 0;
-    exitingList = ['fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left'];
-    enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
-    highlightingList = ['highlight', 'undo--un-highlight'];
-    unhighlightingList = ['un-highlight', 'undo--highlight'];
-    static counterParts = {};
-    recentlyAdded = ".";
+  const animBlock1 = new AnimBlock();
+  animBlock1.addAnimations([
+    [jobCard.querySelector('.job-card-content'), 'fade-in'],
+    [jobCard.querySelector('.M-access'), 'fade-in'],
+    [jobCard.querySelector('.M-access'), 'highlight'],
+  ]);
+  const animBlock2 = new AnimBlock();
+  animBlock2.addAnimations([
+    [jobCard.querySelector('.M-access'), 'un-highlight'],
+    [jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'],
+    [jobCard.querySelector('.formula-computation'), 'fade-in'],
+    [jobCard.querySelector('.formula-computation'), 'highlight'],
+  ]);
 
-    constructor(domElem, animSequence) {
-      this.domElem = domElem;
-      this.animSequence = animSequence;
+  const animSequence = new AnimTimeline(...[
+    animBlock1,
+    animBlock2,
+  ]);
 
-      this.exitingList.forEach((animName) => {
-        AnimObject.counterParts[animName] = this.enteringList;
-      });
-      this.enteringList.forEach((animName) => {
-        AnimObject.counterParts[animName] = this.exitingList;
-      });
-      this.highlightingList.forEach((animName) => {
-        AnimObject.counterParts[animName] = this.unhighlightingList;
-      });
-      this.unhighlightingList.forEach((animName) => {
-        AnimObject.counterParts[animName] = this.highlightingList;
-      });
-    }
-
-    async stepForward() {
-      return new Promise(resolve => {
-        const animation = this.animSequence[this.keyFrame];
-        (this.exitingList.includes(animation) ? this.animate(animation, true) : this.animate(animation, false))
-        .then(() => {
-          ++this.keyFrame;
-          resolve();
-        });
-      });
-    }
-
-    async stepBackward() {
-      return new Promise(resolve => {
-        --this.keyFrame;
-
-        const animation = `undo--${this.animSequence[this.keyFrame]}`;
-        (this.exitingList.includes(animation) ? this.animate(animation, true) : this.animate(animation, false))
-        .then(() => resolve());
-      });
-    }
-
-    async animate(animClassAdd, isExiting) {
-      const removalList = AnimObject.counterParts[animClassAdd];
-      return new Promise(resolve => {
-        const func = () => {
-          this.domElem.removeEventListener('animationend', func);
-          if (isExiting) {
-            this.domElem.classList.add('hidden');
-            this.domElem.classList.remove(...this.unhighlightingList);
-          }
-          resolve();
-        }
-
-        this.domElem.style.animationPlayState = 'paused';
-        this.domElem.classList.remove(...removalList);
-        this.domElem.classList.add(animClassAdd);
-        !isExiting && this.domElem.classList.remove('hidden');
-        this.domElem.addEventListener('animationend', func);
-        this.domElem.style.animationPlayState = 'running';
-      });
-    }
-  }
-
-  const mContainerObject = new AnimObject(highlightable, ['fade-in', 'highlight', 'un-highlight', 'fade-out']);
-  const arrowObject = new AnimObject(arrow, ['enter-wipe-from-right', 'exit-wipe-to-left', 'enter-wipe-from-left', 'exit-wipe-to-right']);
 
   const goForward = async function() {
     return new Promise(async function(resolve) {
       backwardButton.removeEventListener('click', goBackward);
       forwardButton.removeEventListener('click', goForward);
-      await mContainerObject.stepForward();
-      await arrowObject.stepForward();
+      await animSequence.stepForward();
       backwardButton.addEventListener('click', goBackward);
       forwardButton.addEventListener('click', goForward);
 
@@ -132,10 +79,7 @@ jobScheduler.print();
     return new Promise(async function(resolve) {
       backwardButton.removeEventListener('click', goBackward);
       forwardButton.removeEventListener('click', goForward);
-      await Promise.all([
-        mContainerObject.stepBackward(),
-        arrowObject.stepBackward(),
-      ]);
+      await animSequence.stepBackward();
       backwardButton.addEventListener('click', goBackward);
       forwardButton.addEventListener('click', goForward);
 
@@ -143,11 +87,14 @@ jobScheduler.print();
     });
   };
 
+
+
+
   
-  // const backwardButton = document.querySelector('.box--backward');
-  // const forwardButton = document.querySelector('.box--forward');
-  // backwardButton.addEventListener('click', goBackward);
-  // forwardButton.addEventListener('click', goForward);
+  const backwardButton = document.querySelector('.box--backward');
+  const forwardButton = document.querySelector('.box--forward');
+  backwardButton.addEventListener('click', goBackward);
+  forwardButton.addEventListener('click', goForward);
 
   // window.addEventListener('keydown', function() {
   //   document.styleSheets[1].insertRule('*:not(html),*::before,*::after { animation-duration: 0.1s!important }');
