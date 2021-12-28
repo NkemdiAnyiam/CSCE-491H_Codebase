@@ -1,7 +1,8 @@
 import Job from './Job.js';
 import JobScheduler from './JobScheduler.js';
-import AnimTimeline from "./AnimTimeline.js";
+import AnimObject from './AnimObject.js';
 import AnimBlock from './AnimBlock.js';
+import AnimTimeline from "./AnimTimeline.js";
 
 const jobs = [
   new Job(1, 5, 9, 7),
@@ -43,18 +44,16 @@ jobScheduler.print();
 (async function() {
   const jobCard = document.querySelector('.job-card');
 
-  const animBlock1 = new AnimBlock();
-  animBlock1.addAnimations([
-    [jobCard.querySelector('.job-card-content'), 'fade-in'],
-    [jobCard.querySelector('.M-access'), 'fade-in'],
-    [jobCard.querySelector('.M-access'), 'highlight'],
+  const animBlock1 = new AnimBlock(...[
+    new AnimObject(jobCard.querySelector('.job-card-content'), 'fade-in'),
+    new AnimObject(jobCard.querySelector('.M-access'), 'fade-in'),
+    new AnimObject(jobCard.querySelector('.M-access'), 'highlight'),
   ]);
-  const animBlock2 = new AnimBlock();
-  animBlock2.addAnimations([
-    [jobCard.querySelector('.M-access'), 'un-highlight'],
-    [jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'],
-    [jobCard.querySelector('.formula-computation'), 'fade-in'],
-    [jobCard.querySelector('.formula-computation'), 'highlight'],
+  const animBlock2 = new AnimBlock(...[
+    new AnimObject(jobCard.querySelector('.M-access'), 'un-highlight'),
+    new AnimObject(jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'),
+    new AnimObject(jobCard.querySelector('.formula-computation'), 'fade-in'),
+    new AnimObject(jobCard.querySelector('.formula-computation'), 'highlight'),
   ]);
 
   const animSequence = new AnimTimeline(...[

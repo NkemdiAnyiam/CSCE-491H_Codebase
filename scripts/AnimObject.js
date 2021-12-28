@@ -5,11 +5,16 @@ class AnimObject {
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static counterParts = {};
 
-  static stepForward(domElem, animClassName) {
+  constructor(domElem, animClassName) {
+    this.domElem = domElem;
+    this.animClassName = animClassName;
+  }
+
+  stepForward() {
     return new Promise(resolve => {
-      (AnimObject.exitingList.includes(animClassName) ?
-        AnimObject.animate(domElem, animClassName, true) :
-        AnimObject.animate(domElem, animClassName, false)
+      (AnimObject.exitingList.includes(this.animClassName) ?
+        this.animate(this.domElem, this.animClassName, true) :
+        this.animate(this.domElem, this.animClassName, false)
       )
       .then(() => {
         resolve();
@@ -17,18 +22,18 @@ class AnimObject {
     });
   }
 
-  static stepBackward(domElem, animClassName) {
+  stepBackward() {
     return new Promise(resolve => {
-      const animation = `undo--${animClassName}`;
+      const animation = `undo--${this.animClassName}`;
       (AnimObject.exitingList.includes(animation) ?
-        AnimObject.animate(domElem, animation, true) :
-        AnimObject.animate(domElem, animation, false)
+        this.animate(this.domElem, animation, true) :
+        this.animate(this.domElem, animation, false)
       )
       .then(() => resolve());
     });
   }
 
-  static animate(domElem, animClassAdd, isExiting) {
+  animate(domElem, animClassAdd, isExiting) {
     const removalList = AnimObject.counterParts[animClassAdd];
     return new Promise(resolve => {
       const func = () => {
@@ -48,6 +53,50 @@ class AnimObject {
       domElem.style.animationPlayState = 'running';
     });
   }
+
+  // static stepForward(domElem, animClassName) {
+  //   return new Promise(resolve => {
+  //     (AnimObject.exitingList.includes(animClassName) ?
+  //       AnimObject.animate(domElem, animClassName, true) :
+  //       AnimObject.animate(domElem, animClassName, false)
+  //     )
+  //     .then(() => {
+  //       resolve();
+  //     });
+  //   });
+  // }
+
+  // static stepBackward(domElem, animClassName) {
+  //   return new Promise(resolve => {
+  //     const animation = `undo--${animClassName}`;
+  //     (AnimObject.exitingList.includes(animation) ?
+  //       AnimObject.animate(domElem, animation, true) :
+  //       AnimObject.animate(domElem, animation, false)
+  //     )
+  //     .then(() => resolve());
+  //   });
+  // }
+
+  // static animate(domElem, animClassAdd, isExiting) {
+  //   const removalList = AnimObject.counterParts[animClassAdd];
+  //   return new Promise(resolve => {
+  //     const func = () => {
+  //       domElem.removeEventListener('animationend', func);
+  //       if (isExiting) {
+  //         domElem.classList.add('hidden');
+  //         domElem.classList.remove(...AnimObject.unhighlightingList);
+  //       }
+  //       resolve();
+  //     }
+
+  //     domElem.style.animationPlayState = 'paused';
+  //     domElem.classList.remove(...removalList);
+  //     domElem.classList.add(animClassAdd);
+  //     if (!isExiting) { domElem.classList.remove('hidden'); }
+  //     domElem.addEventListener('animationend', func);
+  //     domElem.style.animationPlayState = 'running';
+  //   });
+  // }
 }
 
 AnimObject.exitingList.forEach((animName) => {
