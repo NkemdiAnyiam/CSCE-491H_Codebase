@@ -36,8 +36,12 @@ span {
   display: inline-block;
 }
 
-.hidden {
+.hidden:not(.text-box) {
   display: none!important;
+}
+
+.text-box.hidden {
+  visibility: hidden;
 }
 
 .box {
@@ -56,6 +60,12 @@ span {
 }
 
 .text-boxes {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.text-box--arrow-group {
   position: absolute;
   left: 0;
   top: 0;
