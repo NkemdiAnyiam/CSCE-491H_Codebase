@@ -7,7 +7,9 @@
   box-sizing: border-box;
 }
 
-*:not(html):not(body) {
+*:not(html):not(body),
+*::before,
+*::after {
   position: relative; /* Ensures that highlights can be placed properly */
 
   animation-duration: 0.5s;
