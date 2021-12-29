@@ -3,8 +3,8 @@ import AnimObject from "./AnimObject.js";
 class AnimLine extends AnimObject {
   constructor(domElem, animClassName, startElem, [left1, top1], endElem, [left2, top2]) {
     super(domElem, animClassName);
-    this.startElem = startElem;
-    this.endElem = endElem;
+    this.startElem = startElem ? startElem : this.domElem.parentElement;
+    this.endElem = endElem ? endElem : this.domElem.parentElement;
     this.left1 = left1;
     this.top1 = top1;
     this.left2 = left2;
