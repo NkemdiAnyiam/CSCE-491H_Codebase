@@ -1,13 +1,16 @@
-*:not(html),
+*,
 *::before,
 *::after {
   margin: 0;
   padding: 0;
   border: 0;
   box-sizing: border-box;
+}
+
+*:not(html):not(body) {
   position: relative; /* Ensures that highlights can be placed properly */
 
-  animation-duration: 0.2s;
+  animation-duration: 0.5s;
 }
 
 :root {
@@ -83,11 +86,13 @@ span {
 } */
 
 .arrow {
-  width: 1000rem;
-  height: 1000rem;
+  width: auto;
+  height: auto;
   position: absolute;
   top: 0;
   left: 0;
+  pointer-events: none;
+  overflow:visible;
 }
 
 .arrow-line {
@@ -130,7 +135,7 @@ span {
   height: 25rem;
   padding: 4rem;
   background-color: #EFEFEF;
-  z-index: -2;
+  z-index: 0;
 
   display: flex;
   align-items: center;
