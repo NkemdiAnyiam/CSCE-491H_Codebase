@@ -5,9 +5,24 @@ class AnimObject {
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static counterParts = {};
 
-  constructor(domElem, animClassName) {
+  constructor(domElem, animClassName, offsetOptions) {
     this.domElem = domElem;
     this.animClassName = animClassName;
+
+    if (offsetOptions) {
+      const {
+        verticalAlignBy = 'top',
+        horizontalAlignBy = 'left',
+        verticalOffset,
+        horizontalOffset,
+      } = offsetOptions;
+      if ((verticalOffset !== null && verticalOffset !== undefined)) {
+        this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
+      }
+      if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
+        this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
+      }
+    }
   }
 
   stepForward() {
