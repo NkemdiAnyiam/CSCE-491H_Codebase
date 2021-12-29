@@ -61,12 +61,9 @@ span {
   position: absolute;
   height: min-content;
   width: 70rem;
-  bottom: calc(100% + 5rem);
-}
-
-.text-box__paragraph-wrapper {
   padding: 1rem 1rem;
   border: 0.75rem solid currentColor;
+  bottom: calc(100% + 5rem);
 }
 
 .text-box__paragraph {

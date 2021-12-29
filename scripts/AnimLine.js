@@ -16,8 +16,8 @@ class AnimLine extends AnimObject {
     const rectEnd = this.endElem.getBoundingClientRect();
     const rectParent = this.domElem.parentElement.getBoundingClientRect();
 
-    this.domElem.style.left = -rectParent.left;
-    this.domElem.style.top = -rectParent.top;
+    this.domElem.style.left = -rectParent.left - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderLeftWidth);
+    this.domElem.style.top = -rectParent.top - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderTopWidth);
 
     const line = this.domElem.querySelector('.arrow-line');
     line.x1.baseVal.value = (1 - this.left1) * rectStart.left + (this.left1) * rectStart.right;
