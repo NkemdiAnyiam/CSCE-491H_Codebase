@@ -61,9 +61,16 @@ span {
   position: absolute;
   height: min-content;
   width: 70rem;
-  padding: 1rem 1rem;
-  border: 1px solid black;
   bottom: calc(100% + 5rem);
+}
+
+.text-box__paragraph-wrapper {
+  padding: 1rem 1rem;
+  border: 0.75rem solid currentColor;
+}
+
+.text-box__paragraph {
+  color: black;
 }
 
 /* .text-box--M-access {
@@ -87,7 +94,7 @@ span {
 }
 
 .arrow-line {
-  stroke:rgb(255,0,0);
+  stroke: currentColor;
   stroke-width:2; 
   marker-end:url(#markerArrow);
 }
@@ -151,6 +158,7 @@ span {
 
 }
 
+.M-related,
 .M-access,
 .M-entry,
 .M-access-text {
@@ -243,6 +251,7 @@ span {
   color: black;
 }
 
+.weight-related,
 .weight {
   color: #0000FF;
 }
@@ -255,6 +264,7 @@ span {
 
 }
 
+.OPT-related,
 .OPT-expression {
   color: #845C35;
 }
@@ -267,6 +277,7 @@ span {
 
 }
 
+.c-related,
 .c-access,
 .c-entry {
   color: #62B720;
