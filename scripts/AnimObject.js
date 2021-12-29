@@ -55,8 +55,8 @@ class AnimObject {
         domElem.removeEventListener('animationend', func);
         if (isExiting) {
           domElem.classList.add('hidden');
-          domElem.classList.remove(...AnimObject.unhighlightingList);
         }
+        domElem.classList.remove(...AnimObject.unhighlightingList);
         resolve();
       }
 
