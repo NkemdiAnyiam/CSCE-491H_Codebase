@@ -70,11 +70,16 @@ jobScheduler.print();
       jobCard.querySelector('.computation-expression--1'), [0.5, -0.2], null, [0.5, 1]
     ),
   ]);
+  const animBlock4 = new AnimBlock(...[
+    new AnimObject(jobCard.querySelector('.text-box--computation-expression--1'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.text-box--computation-expression--1 .arrow'), 'fade-out'),
+  ]);
 
   const animSequence = new AnimTimeline(...[
     animBlock1,
     animBlock2,
     animBlock3,
+    animBlock4,
   ]);
 
 
@@ -112,9 +117,31 @@ jobScheduler.print();
   backwardButton.addEventListener('click', goBackward);
   forwardButton.addEventListener('click', goForward);
 
-  // window.addEventListener('keydown', function() {
-  //   document.styleSheets[1].insertRule('*:not(html),*::before,*::after { animation-duration: 0.1s!important }');
-  // });
+  const func2 = function() {
+    window.removeEventListener('keyup', func2);
+    console.log('UP');
+    window.addEventListener('keydown', func);
+  }
+
+  const func = function() {
+    window.removeEventListener('keydown', func);
+    console.log('DOWN');
+    window.addEventListener('keyup', func2);
+  }
+
+  // window.addEventListener('keydown', func);
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key.toLowerCase() === 'f' && !e.repeat) {
+      document.styleSheets[1].insertRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.1s!important }');
+    }
+  });
+
+  window.addEventListener('keyup', function(e) {
+    if (e.key.toLowerCase() === 'f') {
+      document.styleSheets[1].deleteRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.1s!important }');
+    }
+  })
 
   // const card2 = document.querySelector('div[data-card-num="2"]');
   // console.log(card2);
