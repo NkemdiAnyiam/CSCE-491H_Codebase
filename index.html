@@ -101,19 +101,37 @@
     <div class="job-card" data-cardnum="X">
 
       <div class="job-card-content hidden">
-        <div class="M-container">
-          <div class="text-box hidden">
-            Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+        <div class="text-boxes">
+          <div class="text-box text-box--M-access hidden">
+            <p class="text-box__paragraph">
+              Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+            </p>
+            <svg class="arrow hidden">
+              <line class="arrow-line" />
+            </svg>
           </div>
-          <svg class="arrow hidden">
-            <defs>
-              <!-- <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-                <path d="M0,0 L0,8 L6,4 L0,0" style="fill: #000000;" />
-              </marker> -->
-            </defs>
 
-            <line class="arrow-line" />
-          </svg>
+          <div class="text-box text-box--formula-computation hidden">
+            <p class="text-box__paragraph">
+              Entry doesn't exist, so start computing it.
+            </p>
+            <svg class="arrow hidden">
+              <line class="arrow-line" />
+            </svg>
+           </div>
+           
+           <div class="text-box text-box--computation-expression--1 hidden">
+            <p class="text-box__paragraph">
+              Describe that it will first assume that this job IS part of the optimal structure and compute that route
+            </p>
+            <svg class="arrow hidden">
+              <line class="arrow-line" />
+            </svg>
+           </div>
+        </div>
+
+        
+        <div class="M-container">
 
           <span class="M-access-container">
             <span class="M-access highlightable hidden">
@@ -128,19 +146,8 @@
           <div class="arrow-tail"></div>
         </div>
     
+        
         <div class="formula-container">
-          <div class="text-box hidden">
-           Entry doesn't exist, so start computing it.
-          </div>
-          <svg class="arrow hidden">
-            <defs>
-              <!-- <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-                <path d="M0,0 L0,8 L6,4 L0,0" style="fill: #000000;" />
-              </marker> -->
-            </defs>
-
-            <line class="arrow-line" />
-          </svg>
           <span class="formula-computation highlightable hidden">
             <div class="max-container">
               <span class="max-text">max</span>
@@ -151,7 +158,7 @@
             </div>
             <div class="computations-container">
               <div class="computation computation--1">
-                <span class="computation-expression highlightable">
+                <span class="computation-expression computation-expression--1 highlightable">
                   <span class="weight">X</span>
                   <span class="plus-sign">+</span>
                   <span class="OPT-expression-container">
