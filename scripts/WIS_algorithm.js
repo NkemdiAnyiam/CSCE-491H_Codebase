@@ -32,17 +32,11 @@ jobScheduler.print();
 console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
 jobScheduler.print();
 
-// const MContainer = document.querySelector('.M-container');
-// const rect1 = MContainer.getBoundingClientRect();
-// const box = document.querySelector('.box');
-// const rect2 = box.getBoundingClientRect();
 
-// const line = document.querySelector('.arrow-line');
-// line.x1.baseVal.value = rect1.left;
-// line.y1.baseVal.value = rect1.bottom;
-// line.x2.baseVal.value = rect2.left;
-// line.y2.baseVal.value = rect2.top;
-(async function() {
+
+
+
+(function() {
   const jobCard = document.querySelector('.job-card');
 
   const animBlock1 = new AnimBlock(...[
@@ -84,6 +78,10 @@ jobScheduler.print();
   ]);
 
 
+
+
+
+
   const goForward = async function() {
     return new Promise(async function(resolve) {
       backwardButton.removeEventListener('click', goBackward);
@@ -107,9 +105,6 @@ jobScheduler.print();
       resolve();
     });
   };
-
-
-
 
   
   const backwardButton = document.querySelector('.box--backward');

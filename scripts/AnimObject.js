@@ -9,41 +9,20 @@ class AnimObject {
     this.domElem = domElem;
     this.animClassName = animClassName;
 
-    if (offsetOptions) {
-      const {
-        verticalAlignBy = 'top',
-        horizontalAlignBy = 'left',
-        verticalOffset,
-        horizontalOffset,
-      } = offsetOptions;
-      if ((verticalOffset !== null && verticalOffset !== undefined)) {
-        this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
-      }
-      if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
-        this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
-      }
-    }
+    if (offsetOptions) { this.applyOptions(offsetOptions); }
   }
 
   stepForward() {
     return new Promise(resolve => {
-      (AnimObject.exitingList.includes(this.animClassName) ?
-        this.animate(this.domElem, this.animClassName, true) :
-        this.animate(this.domElem, this.animClassName, false)
-      )
-      .then(() => {
-        resolve();
-      });
+      this.animate(this.domElem, this.animClassName, AnimObject.exitingList.includes(this.animClassName))
+      .then(() => resolve());
     });
   }
 
   stepBackward() {
     return new Promise(resolve => {
-      const animation = `undo--${this.animClassName}`;
-      (AnimObject.exitingList.includes(animation) ?
-        this.animate(this.domElem, animation, true) :
-        this.animate(this.domElem, animation, false)
-      )
+      const undoAnimation = `undo--${this.animClassName}`;
+      this.animate(this.domElem, undoAnimation, AnimObject.exitingList.includes(undoAnimation))
       .then(() => resolve());
     });
   }
@@ -53,9 +32,7 @@ class AnimObject {
     return new Promise(resolve => {
       const func = () => {
         domElem.removeEventListener('animationend', func);
-        if (isExiting) {
-          domElem.classList.add('hidden');
-        }
+        if (isExiting) { domElem.classList.add('hidden'); }
         domElem.classList.remove(...AnimObject.unhighlightingList);
         resolve();
       }
@@ -67,6 +44,21 @@ class AnimObject {
       domElem.addEventListener('animationend', func);
       domElem.style.animationPlayState = 'running';
     });
+  }
+
+  applyOptions(offsetOptions) {
+    const {
+      verticalAlignBy = 'top',
+      horizontalAlignBy = 'left',
+      verticalOffset,
+      horizontalOffset,
+    } = offsetOptions;
+    if ((verticalOffset !== null && verticalOffset !== undefined)) {
+      this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
+    }
+    if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
+      this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
+    }
   }
 
   // static stepForward(domElem, animClassName) {
