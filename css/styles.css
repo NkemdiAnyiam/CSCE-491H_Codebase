@@ -7,13 +7,11 @@
   box-sizing: border-box;
 }
 
-*:not(html):not(body),
+/* *:not(html):not(body),
 *::before,
 *::after {
-  position: relative; /* Ensures that highlights can be placed properly */
-
-  animation-duration: 0.5s;
-}
+  
+} */
 
 :root {
 
@@ -113,20 +111,10 @@ span {
   marker-end:url(#markerArrow);
 }
 
-.highlightable::before {
-  display: block;
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: -1rem;
-  left: -0.5rem;
-  border-radius: 1rem;
-  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
-  animation-play-state: inherit;
-
-  width: calc(100% + 1rem);
-  height: calc(100% + 2rem);
-  background-color: #F9F278;
+.highlightable {
+  background-image: linear-gradient(to right, #F9F278 50%, transparent 50%);
+  background-size: 200%;
+  background-position-x: 100%;
 }
 
 .job-cards {
@@ -147,7 +135,8 @@ span {
   height: 25rem;
   padding: 4rem;
   background-color: #EFEFEF;
-  z-index: 0;
+  position: relative;
+  /* z-index: 0; */
 
   display: flex;
   align-items: center;
@@ -300,15 +289,15 @@ span {
 
 
 
-.highlight::before,
-.undo--un-highlight::before {
-  animation-name: entering-wipe-from-left;
+.highlight,
+.undo--un-highlight {
+  animation-name: highlighting;
   animation-fill-mode: forwards;
 }
 
-.un-highlight::before,
-.undo--highlight::before {
-  animation-name: exiting-wipe-to-left;
+.un-highlight,
+.undo--highlight {
+  animation-name: un-highlighting;
   animation-fill-mode: forwards;
 }
 
@@ -340,6 +329,26 @@ span {
 .exit-wipe-to-left,
 .undo--enter-wipe-from-left {
   animation-name: exiting-wipe-to-left;
+}
+
+@keyframes highlighting {
+  0% {
+    background-position-x: 100%;
+  }
+
+  100% {
+    background-position-x: 0%;
+  }
+}
+
+@keyframes un-highlighting {
+  0% {
+    background-position-x: 0%;
+  }
+
+  100% {
+    background-position-x: 100%;
+  }
 }
 
 

@@ -16,7 +16,7 @@ class AnimObject {
 
   stepForward() {
     return new Promise(resolve => {
-      this.animate(this.domElem, this.animClassName, AnimObject.exitingList.includes(this.animClassName))
+      this.animate(this.domElem, this.animClassName, AnimObject.exitingList.includes(this.animClassName), AnimObject.enteringList.includes(this.animClassName))
       .then(() => resolve());
     });
   }
@@ -24,29 +24,53 @@ class AnimObject {
   stepBackward() {
     return new Promise(resolve => {
       const undoAnimation = `undo--${this.animClassName}`;
-      this.animate(this.domElem, undoAnimation, AnimObject.exitingList.includes(undoAnimation))
+      this.animate(this.domElem, undoAnimation, AnimObject.exitingList.includes(undoAnimation), AnimObject.enteringList.includes(undoAnimation))
       .then(() => resolve());
     });
   }
 
-  animate(domElem, animClassAdd, isExiting) {
-    const removalList = AnimObject.counterParts[animClassAdd];
-    return new Promise(resolve => {
-      const func = (e) => {
-        e.stopPropagation();
-        domElem.removeEventListener('animationend', func);
-        if (isExiting) { domElem.classList.add('hidden'); }
-        domElem.classList.remove(...AnimObject.unhighlightingList);
-        resolve();
-      }
+  animate(domElem, animClassAdd, isExiting, isEntering) {
 
-      domElem.style.animationPlayState = 'paused';
-      domElem.classList.remove(...removalList);
-      domElem.classList.add(animClassAdd);
-      if (!isExiting) { domElem.classList.remove('hidden'); }
-      domElem.addEventListener('animationend', func, {once: true});
-      domElem.style.animationPlayState = 'running';
-    });
+    const animation = new Animation();
+    animation.effect = new KeyframeEffect(
+      domElem,
+      AnimObject[animClassAdd],
+      {
+        duration: 1000,
+        fill: 'forwards',
+      }
+    );
+    
+    animation.onfinish = () => {
+      animation.commitStyles();
+      animation.cancel();
+    };
+
+    if (isEntering) {
+      domElem.classList.remove('hidden');
+    }
+
+    animation.play();
+    return animation.finished;
+
+
+    // const removalList = AnimObject.counterParts[animClassAdd];
+    // return new Promise(resolve => {
+    //   const func = (e) => {
+    //     e.stopPropagation();
+    //     domElem.removeEventListener('animationend', func);
+    //     if (isExiting) { domElem.classList.add('hidden'); }
+    //     domElem.classList.remove(...AnimObject.unhighlightingList);
+    //     resolve();
+    //   }
+
+    //   domElem.style.animationPlayState = 'paused';
+    //   domElem.classList.remove(...removalList);
+    //   domElem.classList.add(animClassAdd);
+    //   if (!isExiting) { domElem.classList.remove('hidden'); }
+    //   domElem.addEventListener('animationend', func, {once: true});
+    //   domElem.style.animationPlayState = 'running';
+    // });
   }
 
   applyOptions(offsetOptions) {
@@ -67,51 +91,28 @@ class AnimObject {
     this.blocksNext = blocksNext;
     this.blocksPrev = blocksPrev;
   }
-
-  // static stepForward(domElem, animClassName) {
-  //   return new Promise(resolve => {
-  //     (AnimObject.exitingList.includes(animClassName) ?
-  //       AnimObject.animate(domElem, animClassName, true) :
-  //       AnimObject.animate(domElem, animClassName, false)
-  //     )
-  //     .then(() => {
-  //       resolve();
-  //     });
-  //   });
-  // }
-
-  // static stepBackward(domElem, animClassName) {
-  //   return new Promise(resolve => {
-  //     const animation = `undo--${animClassName}`;
-  //     (AnimObject.exitingList.includes(animation) ?
-  //       AnimObject.animate(domElem, animation, true) :
-  //       AnimObject.animate(domElem, animation, false)
-  //     )
-  //     .then(() => resolve());
-  //   });
-  // }
-
-  // static animate(domElem, animClassAdd, isExiting) {
-  //   const removalList = AnimObject.counterParts[animClassAdd];
-  //   return new Promise(resolve => {
-  //     const func = () => {
-  //       domElem.removeEventListener('animationend', func);
-  //       if (isExiting) {
-  //         domElem.classList.add('hidden');
-  //         domElem.classList.remove(...AnimObject.unhighlightingList);
-  //       }
-  //       resolve();
-  //     }
-
-  //     domElem.style.animationPlayState = 'paused';
-  //     domElem.classList.remove(...removalList);
-  //     domElem.classList.add(animClassAdd);
-  //     if (!isExiting) { domElem.classList.remove('hidden'); }
-  //     domElem.addEventListener('animationend', func);
-  //     domElem.style.animationPlayState = 'running';
-  //   });
-  // }
 }
+
+AnimObject['fade-in'] = AnimObject['undo--fade-out'] = [
+  {opacity: '0'},
+  {opacity: '1'}
+];
+
+AnimObject['fade-out'] = AnimObject['undo--fade-in'] = [
+  {opacity: '1'},
+  {opacity: '0'}
+];
+
+AnimObject['highlight'] = AnimObject['undo--un-highlight'] = [
+    {backgroundPositionX: '100%'},
+    {backgroundPositionX: '0%'},
+];
+
+AnimObject['un-highlight'] = AnimObject['undo--highlight'] = [
+  {backgroundPositionX: '0%'},
+  {backgroundPositionX: '100%'},
+];
+
 
 AnimObject.exitingList.forEach((animName) => {
   AnimObject.counterParts[animName] = AnimObject.enteringList;
