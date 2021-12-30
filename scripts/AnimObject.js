@@ -8,6 +8,8 @@ class AnimObject {
   constructor(domElem, animClassName, offsetOptions) {
     this.domElem = domElem;
     this.animClassName = animClassName;
+    this.blocksNext = true;
+    this.blocksPrev = true;
 
     if (offsetOptions) { this.applyOptions(offsetOptions); }
   }
@@ -30,7 +32,8 @@ class AnimObject {
   animate(domElem, animClassAdd, isExiting) {
     const removalList = AnimObject.counterParts[animClassAdd];
     return new Promise(resolve => {
-      const func = () => {
+      const func = (e) => {
+        e.stopPropagation();
         domElem.removeEventListener('animationend', func);
         if (isExiting) { domElem.classList.add('hidden'); }
         domElem.classList.remove(...AnimObject.unhighlightingList);
@@ -41,7 +44,7 @@ class AnimObject {
       domElem.classList.remove(...removalList);
       domElem.classList.add(animClassAdd);
       if (!isExiting) { domElem.classList.remove('hidden'); }
-      domElem.addEventListener('animationend', func);
+      domElem.addEventListener('animationend', func, {once: true});
       domElem.style.animationPlayState = 'running';
     });
   }
@@ -52,6 +55,8 @@ class AnimObject {
       horizontalAlignBy = 'left',
       verticalOffset,
       horizontalOffset,
+      blocksNext = true,
+      blocksPrev = true,
     } = offsetOptions;
     if ((verticalOffset !== null && verticalOffset !== undefined)) {
       this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
@@ -59,6 +64,8 @@ class AnimObject {
     if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
       this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
     }
+    this.blocksNext = blocksNext;
+    this.blocksPrev = blocksPrev;
   }
 
   // static stepForward(domElem, animClassName) {

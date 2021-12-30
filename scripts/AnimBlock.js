@@ -53,7 +53,12 @@ class AnimBlock {
 
   async play() {
     for (let i = 0; i < this.animObjects.length; ++i) {
-      await this.animObjects[i].stepForward();
+      if (this.animObjects[i].blocksNext) {
+        await this.animObjects[i].stepForward();
+      }
+      else {
+        this.animObjects[i].stepForward();
+      }
     }
 
     return Promise.resolve();
@@ -61,7 +66,12 @@ class AnimBlock {
 
   async rewind() {
     for (let i = this.animObjects.length - 1; i >= 0; --i) {
-      await this.animObjects[i].stepBackward();
+      if (this.animObjects[i].blocksPrev) {
+        await this.animObjects[i].stepBackward();
+      }
+      else {
+        this.animObjects[i].stepBackward();
+      }
     }
 
     return Promise.resolve();

@@ -42,37 +42,38 @@ jobScheduler.print();
   const animBlock1 = new AnimBlock(...[
     new AnimObject(jobCard.querySelector('.job-card-content'), 'fade-in'),
     new AnimObject(jobCard.querySelector('.M-access'), 'fade-in'),
-    new AnimObject(jobCard.querySelector('.M-access'), 'highlight'),
+    new AnimObject(jobCard.querySelector('.M-access'), 'highlight', {blocksNext: false}),
     new AnimLine(jobCard.querySelector('.text-box-arrow-group--M-access .arrow'), 'fade-in',
-      jobCard.querySelector('.M-access'), [0.5, -0.2], null, [0.5, 1]
+      jobCard.querySelector('.M-access'), [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}
     ),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .text-box'), 'fade-in', {horizontalOffset: '10rem'}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .text-box'), 'fade-in', {horizontalOffset: '10rem', blocksPrev: false}),
   ]);
   const animBlock2 = new AnimBlock(...[
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .text-box'), 'fade-out'),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .arrow'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .text-box'), 'fade-out', {blocksNext: false}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--M-access .arrow'), 'fade-out', {blocksNext: false}),
     new AnimObject(jobCard.querySelector('.M-access'), 'un-highlight'),
     new AnimObject(jobCard.querySelector('.arrow-container'), 'enter-wipe-from-right'),
-    new AnimObject(jobCard.querySelector('.formula-computation'), 'fade-in'),
-    new AnimObject(jobCard.querySelector('.formula-computation'), 'highlight'),
+    new AnimObject(jobCard.querySelector('.formula-computation'), 'fade-in', {blocksPrev: false}),
+    new AnimObject(jobCard.querySelector('.formula-computation'), 'highlight', {blocksNext: false}),
     new AnimLine(jobCard.querySelector('.text-box-arrow-group--formula-computation .arrow'), 'fade-in',
-      jobCard.querySelector('.formula-computation'), [0.1, 0.2], null, [0.5, 1]
+      jobCard.querySelector('.formula-computation'), [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}
     ),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box'), 'fade-in', {horizontalOffset: '20rem'}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box'), 'fade-in', {horizontalOffset: '20rem', blocksPrev: false}),
   ]);
   const animBlock3 = new AnimBlock(...[
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box'), 'fade-out'),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .arrow'), 'fade-out'),
-    new AnimObject(jobCard.querySelector('.formula-computation'), 'un-highlight'),
-    new AnimObject(jobCard.querySelector('.computation-expression--1'), 'highlight'),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box'), 'fade-out', {blocksNext: false}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--formula-computation .arrow'), 'fade-out', {blocksNext: false}),
+    new AnimObject(jobCard.querySelector('.formula-computation'), 'un-highlight', {blocksPrev: false}),
+    new AnimObject(jobCard.querySelector('.computation-expression--1'), 'highlight', {blocksNext: false}),
     new AnimLine(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .arrow'), 'fade-in',
-      jobCard.querySelector('.computation-expression--1'), [0.5, -0.2], null, [0.5, 1]
+      jobCard.querySelector('.computation-expression--1'), [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}
     ),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box'), 'fade-in', {horizontalOffset: '25rem'}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box'), 'fade-in', {horizontalOffset: '25rem', blocksPrev: false}),
   ]);
   const animBlock4 = new AnimBlock(...[
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .arrow'), 'fade-out'),
-    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box'), 'fade-out'),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box'), 'fade-out', {blocksNext: false}),
+    new AnimObject(jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .arrow'), 'fade-out', {blocksNext: false}),
+    new AnimObject(jobCard.querySelector('.computation-expression--1'), 'un-highlight', {blocksNext: false, blocksPrev: false}),
   ]);
 
   const animSequence = new AnimTimeline(...[
@@ -133,15 +134,15 @@ jobScheduler.print();
 
   window.addEventListener('keydown', function(e) {
     if (e.key.toLowerCase() === 'f' && !e.repeat) {
-      document.styleSheets[1].insertRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.1s!important }');
+      document.styleSheets[1].insertRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.0s!important }');
     }
   });
 
   window.addEventListener('keyup', function(e) {
     if (e.key.toLowerCase() === 'f') {
-      document.styleSheets[1].deleteRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.1s!important }');
+      document.styleSheets[1].deleteRule(0);
     }
-  })
+  });
 
   // const card2 = document.querySelector('div[data-card-num="2"]');
   // console.log(card2);
