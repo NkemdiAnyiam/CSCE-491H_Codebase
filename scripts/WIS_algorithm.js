@@ -48,6 +48,10 @@ jobScheduler.print();
   const arrow_formulaComputation = jobCard.querySelector('.text-box-arrow-group--formula-computation .arrow');
   const text_formulaComputation = jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box');
 
+  const computationExpression1 = jobCard.querySelector('.computation-expression--1');
+  const arrow_computationExpression1 = jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .arrow');
+  const text_computationExpression1 = jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box');
+
   // const animBlock1 = new AnimBlock(...[
   //   new AnimObject(jobCard.querySelector('.job-card-content'), 'fade-in'),
   //   new AnimObject(jobCard.querySelector('.M-access'), 'fade-in'),
@@ -111,55 +115,31 @@ jobScheduler.print();
     new AnimObject(text_formulaComputation, 'fade-in', {horizontalOffset: '20rem', blocksPrev: false}),
   ]);
 
+  const animBlock3 = new AnimBlock(...[
+    new AnimObject(text_formulaComputation, 'fade-out', {blocksNext: false}),
+    new AnimObject(arrow_formulaComputation, 'fade-out', {blocksNext: false}),
+    new AnimObject(formulaComputation, 'un-highlight', {blocksPrev: false}),
+    new AnimObject(computationExpression1, 'highlight', {blocksNext: false}),
+    new AnimLine(arrow_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimObject(text_computationExpression1, 'fade-in', {horizontalOffset: '25rem', blocksPrev: false}),
+  ]);
+
+  const animBlock4 = new AnimBlock(...[
+    new AnimObject(text_computationExpression1, 'fade-out', {blocksNext: false}),
+    new AnimObject(arrow_computationExpression1, 'fade-out', {blocksNext: false}),
+    new AnimObject(computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false}),
+  ]);
+
   const animSequence = new AnimTimeline(...[
     animBlock1,
-    animBlock2
+    animBlock2,
+    animBlock3,
+    animBlock4,
   ]);
 
 
-  // const trans = [
-  //   {opacity: '1'},
-  //   {opacity: '0'}
-  // ];
 
-  // const trans = [
-  //   {opacity: '-1'}
-  // ]
-
-  // const props = {
-  //   fill: 'forwards',
-  //   duration: 3000,
-  // };
-
-  // const trans2 = [
-  //   {fontSize: '1rem'}
-  // ];
-
-  // const animation = new Animation(
-  // );
-  // animation.effect = new KeyframeEffect(jobCard, trans, props);
-  // // animation.effect.composite = 'accumulate'
-
-  // const animation2 = new Animation(
-  //   );
-  //   animation2.effect = new KeyframeEffect(jobCard, trans2, props);
-  //   animation2.effect.composite = 'accumulate';
-  // animation2.play();
   
-  // animation.onfinish = () => {
-  //   console.log('DONE');
-  //   animation.commitStyles();
-  //   animation.cancel();
-  //   // animation.reverse();
-  //   animation.effect.setKeyframes([
-  //     {opacity: '1'}
-  //   ]);
-  //   animation.play();
-  // };
-  
-  
-  // animation.play();
-
 
   const goForward = async function() {
     return new Promise(async function(resolve) {

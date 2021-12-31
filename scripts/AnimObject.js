@@ -12,13 +12,14 @@ class AnimObject {
   static counterParts = {};
   static skipDuration = 25;
 
-  constructor(domElem, animClassName, offsetOptions) {
+  blocksNext = true;
+  blocksPrev = true;
+
+  constructor(domElem, animClassName, options) {
     this.domElem = domElem;
     this.animClassName = animClassName;
-    this.blocksNext = true;
-    this.blocksPrev = true;
 
-    if (offsetOptions) { this.applyOptions(offsetOptions); }
+    this.applyOptions(options);
   }
 
   stepForward() {
@@ -49,7 +50,6 @@ class AnimObject {
     
     animation.onfinish = () => {
       animation.commitStyles();
-      console.log('DONE');
       if (isExiting) { domElem.classList.add('hidden'); }
       animation.cancel();
     };
@@ -85,23 +85,27 @@ class AnimObject {
     this.shouldSkip = false;
   }
 
-  applyOptions(offsetOptions) {
+  applyOptions(options) {
+    if (!options) { return; }
+    
     const {
       verticalAlignBy = 'top',
       horizontalAlignBy = 'left',
       verticalOffset,
       horizontalOffset,
-      blocksNext = true,
-      blocksPrev = true,
-    } = offsetOptions;
+      blocksNext,
+      blocksPrev,
+    } = options;
+
     if ((verticalOffset !== null && verticalOffset !== undefined)) {
       this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
     }
     if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
       this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
     }
-    this.blocksNext = blocksNext;
-    this.blocksPrev = blocksPrev;
+
+    this.blocksNext = blocksNext ?? this.blocksNext;
+    this.blocksPrev = blocksPrev ?? this.blocksPrev;
   }
 }
 
