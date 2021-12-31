@@ -76,6 +76,10 @@ class AnimBlock {
 
     return Promise.resolve();
   }
+
+  fireSkipSignal() {
+    this.animObjects.forEach(animObject => animObject.handleSkipSignal());
+  }
 }
 
 export default AnimBlock;

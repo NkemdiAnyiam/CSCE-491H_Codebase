@@ -95,11 +95,25 @@ jobScheduler.print();
   const animBlock1 = new AnimBlock(...[
     new AnimObject(jobCardContent, 'fade-in'),
     new AnimObject(MAccess, 'fade-in'),
-    new AnimObject(MAccess, 'highlight'),
+    new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
+    new AnimLine(arrow_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimObject(text_MAccess, 'fade-in', {horizontalOffset: '10rem', blocksPrev: false}),
+  ]);
+
+  const animBlock2 = new AnimBlock(...[
+    new AnimObject(text_MAccess, 'fade-out', {blocksNext: false}),
+    new AnimObject(arrow_MAccess, 'fade-out', {blocksNext: false}),
+    new AnimObject(MAccess, 'un-highlight'),
+    new AnimObject(arrowContainer, 'enter-wipe-from-right'),
+    new AnimObject(formulaComputation, 'fade-in', {blocksPrev: false}),
+    new AnimObject(formulaComputation, 'highlight', {blocksNext: false}),
+    new AnimLine(arrow_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimObject(text_formulaComputation, 'fade-in', {horizontalOffset: '20rem', blocksPrev: false}),
   ]);
 
   const animSequence = new AnimTimeline(...[
     animBlock1,
+    animBlock2
   ]);
 
 
@@ -177,20 +191,33 @@ jobScheduler.print();
   backwardButton.addEventListener('click', goBackward);
   forwardButton.addEventListener('click', goForward);
 
+  const toggleSkipping = function(e) {
+    if (e.key.toLowerCase() === 's' && !e.repeat) {
+      window.removeEventListener('keyup', stopFastForward);
+      window.removeEventListener('keydown', fastForward);
+      if (animSequence.toggleSkipping()) {
+        document.getAnimations().forEach(animation => animation.playbackRate = Number.MAX_SAFE_INTEGER);
+      }
+      window.addEventListener('keyup', stopFastForward);
+      window.addEventListener('keydown', fastForward);
+    }
+  };
 
-  window.addEventListener('keydown', function(e) {
-    if (e.key.toLowerCase() === 'f' && !e.repeat) {
-      // document.styleSheets[1].insertRule('*:not(html):not(body),*::before,*::after { animation-duration: 0.0s!important }');
+  const fastForward = function(e) {
+    if (e.key.toLowerCase() === 'f') {
       document.getAnimations().forEach(animation => animation.playbackRate = 10);
     }
-  });
+  };
 
-  window.addEventListener('keyup', function(e) {
+  const stopFastForward = function(e) {
     if (e.key.toLowerCase() === 'f') {
-      // document.styleSheets[1].deleteRule(0);
       document.getAnimations().forEach(animation => animation.playbackRate = 1);
     }
-  });
+  };
+
+  window.addEventListener('keydown', toggleSkipping);
+  window.addEventListener('keydown', fastForward);
+  window.addEventListener('keyup', stopFastForward);
 
   // const card2 = document.querySelector('div[data-card-num="2"]');
   // console.log(card2);

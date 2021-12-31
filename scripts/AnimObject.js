@@ -1,9 +1,16 @@
+const wait = milliseconds => 
+    new Promise(resolve => 
+        setTimeout(resolve, milliseconds)
+    );
+;
+
 class AnimObject {
   static exitingList = ['fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left'];
   static enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
   static highlightingList = ['highlight', 'undo--un-highlight'];
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static counterParts = {};
+  static skipDuration = 25;
 
   constructor(domElem, animClassName, offsetOptions) {
     this.domElem = domElem;
@@ -30,27 +37,26 @@ class AnimObject {
   }
 
   animate(domElem, animClassAdd, isExiting, isEntering) {
-
     const animation = new Animation();
     animation.effect = new KeyframeEffect(
       domElem,
       AnimObject[animClassAdd],
       {
-        duration: 1000,
+        duration: 500,
         fill: 'forwards',
       }
     );
     
     animation.onfinish = () => {
       animation.commitStyles();
+      console.log('DONE');
+      if (isExiting) { domElem.classList.add('hidden'); }
       animation.cancel();
     };
 
-    if (isEntering) {
-      domElem.classList.remove('hidden');
-    }
+    if (isEntering) { domElem.classList.remove('hidden'); }
 
-    animation.play();
+    this.shouldSkip ? animation.finish() : animation.play();
     return animation.finished;
 
 
@@ -71,6 +77,12 @@ class AnimObject {
     //   domElem.addEventListener('animationend', func, {once: true});
     //   domElem.style.animationPlayState = 'running';
     // });
+  }
+  
+  async handleSkipSignal() {
+    this.shouldSkip = true;
+    await wait(50);
+    this.shouldSkip = false;
   }
 
   applyOptions(offsetOptions) {
@@ -103,6 +115,7 @@ AnimObject['fade-out'] = AnimObject['undo--fade-in'] = [
   {opacity: '0'}
 ];
 
+
 AnimObject['highlight'] = AnimObject['undo--un-highlight'] = [
     {backgroundPositionX: '100%'},
     {backgroundPositionX: '0%'},
@@ -112,6 +125,29 @@ AnimObject['un-highlight'] = AnimObject['undo--highlight'] = [
   {backgroundPositionX: '0%'},
   {backgroundPositionX: '100%'},
 ];
+
+
+AnimObject['enter-wipe-from-right'] = AnimObject['undo--exit-wipe-to-right'] = [
+  {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+]
+
+AnimObject['exit-wipe-to-right'] = AnimObject['undo--enter-wipe-from-right'] = [
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+  {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+];
+
+AnimObject['enter-wipe-from-left'] = AnimObject['undo--exit-wipe-to-left'] = [
+  {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+]
+
+AnimObject['exit-wipe-to-left'] = AnimObject['undo--enter-wipe-from-left'] = [
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+  {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+];
+
+
 
 
 AnimObject.exitingList.forEach((animName) => {
