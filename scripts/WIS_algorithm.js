@@ -40,50 +40,50 @@ jobScheduler.print();
   const jobCard = document.querySelector('.job-card');
   const jobCardContent = jobCard.querySelector('.job-card-content');
   const MAccess = jobCard.querySelector('.M-access');
-  const arrow_MAccess = jobCard.querySelector('.text-box-arrow-group--M-access .arrow')
-  const textbox_MAccess = jobCard.querySelector('.text-box-arrow-group--M-access .text-box');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line')
+  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
 
   const arrowContainer = jobCard.querySelector('.arrow-container');
   const formulaComputation = jobCard.querySelector('.formula-computation');
-  const arrow_formulaComputation = jobCard.querySelector('.text-box-arrow-group--formula-computation .arrow');
-  const textbox_formulaComputation = jobCard.querySelector('.text-box-arrow-group--formula-computation .text-box');
+  const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
+  const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
 
   const computationExpression1 = jobCard.querySelector('.computation-expression--1');
-  const arrow_computationExpression1 = jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .arrow');
-  const textbox_computationExpression1 = jobCard.querySelector('.text-box-arrow-group--computation-expression--1 .text-box');
+  const freeLine_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .free-line');
+  const textbox_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .text-box');
 
 
   const animBlock1 = new AnimBlock(...[
     new AnimObject(jobCardContent, 'fade-in'),
     new AnimObject(MAccess, 'fade-in'),
     new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
-    new AnimLine(arrow_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
     new AnimObject(textbox_MAccess, 'fade-in', {horizontalOffset: '10rem', blocksPrev: false}),
   ]);
 
   const animBlock2 = new AnimBlock(...[
     new AnimObject(textbox_MAccess, 'fade-out', {blocksNext: false}),
-    new AnimLine(arrow_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
+    new AnimLine(freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
     new AnimObject(MAccess, 'un-highlight'),
     new AnimObject(arrowContainer, 'enter-wipe-from-right'),
     new AnimObject(formulaComputation, 'fade-in', {blocksPrev: false}),
     new AnimObject(formulaComputation, 'highlight', {blocksNext: false}),
-    new AnimLine(arrow_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimLine(freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
     new AnimObject(textbox_formulaComputation, 'fade-in', {horizontalOffset: '20rem', blocksPrev: false}),
   ]);
 
   const animBlock3 = new AnimBlock(...[
     new AnimObject(textbox_formulaComputation, 'fade-out', {blocksNext: false}),
-    new AnimLine(arrow_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false}),
+    new AnimLine(freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false}),
     new AnimObject(formulaComputation, 'un-highlight', {blocksPrev: false}),
     new AnimObject(computationExpression1, 'highlight', {blocksNext: false}),
-    new AnimLine(arrow_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+    new AnimLine(freeLine_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
     new AnimObject(textbox_computationExpression1, 'fade-in', {horizontalOffset: '25rem', blocksPrev: false}),
   ]);
 
   const animBlock4 = new AnimBlock(...[
     new AnimObject(textbox_computationExpression1, 'fade-out', {blocksNext: false}),
-    new AnimLine(arrow_computationExpression1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
+    new AnimLine(freeLine_computationExpression1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
     new AnimObject(computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false}),
   ]);
 

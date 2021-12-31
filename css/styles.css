@@ -63,7 +63,7 @@ span {
   top: 0;
 }
 
-.text-box--arrow-group {
+.text-box-line-group {
   position: absolute;
   left: 0;
   top: 0;
@@ -95,7 +95,7 @@ span {
   left: 25rem;
 } */
 
-.arrow {
+.free-line {
   width: auto;
   height: auto;
   position: absolute;
@@ -105,7 +105,7 @@ span {
   overflow:visible;
 }
 
-.arrow-line {
+.free-line__line {
   stroke: currentColor;
   stroke-width:2; 
   marker-end:url(#markerArrow);

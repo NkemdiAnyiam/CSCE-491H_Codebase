@@ -23,7 +23,7 @@ class AnimLine extends AnimObject {
     const SVGLeftOffset = -rectParent.left - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderLeftWidth);
     const SVGTopOffset = -rectParent.top - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderTopWidth);
 
-    const line = this.domElem.querySelector('.arrow-line');
+    const line = this.domElem.querySelector('.free-line__line');
     line.x1.baseVal.value = (1 - this.left1) * rectStart.left + (this.left1) * rectStart.right + SVGLeftOffset;
     line.y1.baseVal.value = (1 - this.top1) * rectStart.top + (this.top1) * rectStart.bottom + SVGTopOffset;
     line.x2.baseVal.value = (1 - this.left2) * rectEnd.left + (this.left2) * rectEnd.right + SVGLeftOffset;
