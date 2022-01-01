@@ -1,58 +1,17 @@
-import AnimObject from './AnimObject.js';
-
-// class AnimBlock {
-//   animationsArray = [];
-
-//   constructor(...animations) {
-//     this.addAnimations(animations);
-//   }
-
-//   addAnimation(domElem, animClassName) {
-//     this.animationsArray.push([domElem, animClassName]);
-//   }
-
-//   addAnimations(animations) {
-//     animations.forEach(([domElem, animClassName]) => {
-//       this.addAnimation(domElem, animClassName);
-//     });
-//   }
-
-//   async play() {
-//     for (let i = 0; i < this.animationsArray.length; ++i) {
-//       await AnimObject.stepForward(...this.animationsArray[i]);
-//     }
-
-//     return Promise.resolve();
-//   }
-
-//   async rewind() {
-//     for (let i = this.animationsArray.length - 1; i >= 0; --i) {
-//       await AnimObject.stepBackward(...this.animationsArray[i]);
-//     }
-
-//     return Promise.resolve();
-//   }
-// }
-
-class AnimBlock {
-  animObjects = [];
+export class AnimBlock {
+  animObjects = []; // array of AnimObjects
 
   constructor(...animObjects) {
     this.addAnimObjects(animObjects);
   }
 
-  addAnimObject(animObject) {
-    this.animObjects.push(animObject);
-  }
+  addAnimObject(animObject) { this.animObjects.push(animObject); }
+  addAnimObjects(animObjects) { animObjects.forEach(animObject => this.addAnimObject(animObject)); }
 
-  addAnimObjects(animObjects) {
-    animObjects.forEach(animObject => {
-      this.addAnimObject(animObject);
-    });
-  }
-
+  // plays each AnimObject contained in this AnimBlock instance in sequential order
   async play() {
     for (let i = 0; i < this.animObjects.length; ++i) {
+      // if the current AnimObject blocks the next AnimObject, we need to await the completion (this is intuitive)
       if (this.animObjects[i].blocksNext) {
         await this.animObjects[i].stepForward();
       }
@@ -64,6 +23,7 @@ class AnimBlock {
     return Promise.resolve();
   }
 
+  // rewinds each AnimObject contained in this AnimBlock instance in reverse order
   async rewind() {
     for (let i = this.animObjects.length - 1; i >= 0; --i) {
       if (this.animObjects[i].blocksPrev) {
@@ -77,9 +37,8 @@ class AnimBlock {
     return Promise.resolve();
   }
 
+  // tells every AnimObject here to briefly allow instantaneous animation
   fireSkipSignal() {
     this.animObjects.forEach(animObject => animObject.handleSkipSignal());
   }
 }
-
-export default AnimBlock;

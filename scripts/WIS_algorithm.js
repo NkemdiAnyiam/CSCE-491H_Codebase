@@ -1,9 +1,9 @@
 import Job from './Job.js';
 import JobScheduler from './JobScheduler.js';
-import AnimObject from './AnimObject.js';
-import AnimLine from './AnimLine.js';
-import AnimBlock from './AnimBlock.js';
-import AnimTimeline from "./AnimTimeline.js";
+import { AnimObject } from './AnimObject.js';
+import { AnimLine } from './AnimLine.js';
+import { AnimBlock } from './AnimBlock.js';
+import { AnimTimeline } from "./AnimTimeline.js";
 
 // const jobs = [
 //   new Job(1, 5, 9, 7),
