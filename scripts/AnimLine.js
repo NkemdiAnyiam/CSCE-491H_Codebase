@@ -65,18 +65,18 @@ export class AnimLine extends AnimObject {
 
   updateEndPoints() {
     // to properly place the endpoints, we need the positions of their bounding boxes
-    // get the bounding rectangles for our <svg> element, starting reference element, and ending reference element
-    const rectSVG = this.domElem.getBoundingClientRect();
+    // get the bounding rectangles for starting reference element, ending reference element, and parent element
     const rectStart = this.startElem.getBoundingClientRect();
     const rectEnd = this.endElem.getBoundingClientRect();
+    const rectParent = this.domElem.parentElement.getBoundingClientRect();
 
     // The x and y coordinates of the line need to be with respect to the top left of document
-    // Thus, we must subtract the <svg> element's current top and left from the offset
-    // But because elements start in the Content box of their parent, which excludes the border,...
-    // ...instead of the Fill area—which include the border—,our element's top and left do not account for border widths of the parent, which...
-    // ... extend the bounding box of the parent. Does we need to subtract the parent's border thicknesses as well.
-    const SVGLeftOffset = -rectSVG.left - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderLeftWidth);
-    const SVGTopOffset = -rectSVG.top - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderTopWidth);
+    // Thus, we must subtract the parent element's current top and left from the offset
+    // But because elements start in their parent's Content box—which excludes the border—...
+    // ...instead of the Fill area—which includes the border—,our element's top and left are offset by the parent element's border width...
+    // ... with respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
+    const SVGLeftOffset = -rectParent.left - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderLeftWidth);
+    const SVGTopOffset = -rectParent.top - Number.parseFloat(getComputedStyle(this.domElem.parentElement).borderTopWidth);
 
     // change the x and y coordinates of our <svg>'s nested <line> based on the bounding boxes of the starting and ending reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
