@@ -38,10 +38,6 @@ span {
   display: none!important;
 }
 
-.text-box.hidden {
-  visibility: hidden;
-}
-
 .box {
   width: 8rem;
   height: 8rem;
@@ -55,6 +51,105 @@ span {
 
 .box--backward {
   background-color: red;
+}
+
+.text-box.hidden {
+  visibility: hidden;
+}
+
+.main {
+
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 250rem auto;
+  grid-template-areas:
+    "data cards";
+  gap: 10rem;
+}
+
+.data-display {
+  padding-top: 50rem;
+
+  grid-area: data;
+  border-right: solid 1px black;
+}
+
+.array-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8rem;
+}
+
+.array-group {
+  width: min-content;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.array {
+  width: min-content;
+
+  display: flex;
+}
+
+.array--j {
+  border: 1px solid red;
+}
+
+.array--c {
+  border: 1px solid green;
+}
+
+.array--M {
+  border: 1px solid purple;
+}
+
+.array-block {
+  width: 12rem;
+  height: 12rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.array--j .array-block {
+  border-left: 1px solid red;
+  background-color: rgb(245, 231, 234);
+}
+
+.array--c .array-block {
+  border-left: 1px solid green;
+  background-color: rgb(204, 255, 204);
+}
+
+.array--M .array-block {
+  border-left: 1px solid purple;
+  background-color: rgb(255 220 255);
+}
+
+.array-block--header {
+  border-left: none!important;
+}
+
+.array--j .array-block--header {
+  background-color: pink;
+}
+
+.array--c .array-block--header {
+  background-color: rgb(177 239 177);
+}
+
+.array--M .array-block--header {
+  background-color: rgb(255 181 255);
+}
+
+.job-cards {
+  grid-area: cards;
 }
 
 .text-boxes {
@@ -82,18 +177,6 @@ span {
 .text-box__paragraph {
   color: black;
 }
-
-/* .text-box--M-access {
-  left: 10rem;
-}
-
-.text-box--formula-computation {
-  left: 20rem;
-}
-
-.text-box--computation-expression--1 {
-  left: 25rem;
-} */
 
 .free-line {
   width: auto;
@@ -289,7 +372,7 @@ span {
 
 
 
-.highlight,
+/* .highlight,
 .undo--un-highlight {
   animation-name: highlighting;
   animation-fill-mode: forwards;
@@ -411,4 +494,4 @@ span {
   100% {
     clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
   }
-}
+} */

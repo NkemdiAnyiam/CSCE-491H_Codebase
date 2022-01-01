@@ -19,239 +19,250 @@
 </head>
 
 <body>
-  <div class="job-cards">
-    <template id="job-card-template">
-      <div class="job-card" data-cardnum="X">
+  <main class="main">
+    <div class="container">
+      
+      <div class="data-display">
+        <div class="array-groups">
+          <div class="array-group array-group--j-and-c">
+            <div class="array array--j">
+              <div class="array-block array-block--header">j</div>
+              <div class="array-block">0</div>
+              <div class="array-block">1</div>
+              <div class="array-block">2</div>
+              <div class="array-block">3</div>
+              <div class="array-block">4</div>
+              <div class="array-block">5</div>
+              <div class="array-block">6</div>
+              <div class="array-block">7</div>
+              <div class="array-block">8</div>
+            </div>
+  
+            <div class="array array--c">
+              <div class="array-block array-block--header">c[j]</div>
+              <div class="array-block">-</div>
+              <div class="array-block">0</div>
+              <div class="array-block">0</div>
+              <div class="array-block">0</div>
+              <div class="array-block">1</div>
+              <div class="array-block">0</div>
+              <div class="array-block">2</div>
+              <div class="array-block">3</div>
+              <div class="array-block">5</div>
+            </div>
+          </div>
 
-        <div class="job-card-content">
-          <div class="M-container highlightable">
-            <span class="M-access-container">
-              <span class="M-access">
-                M[<span class="SJ-num">X</span>]
-              </span>
-              <span class="M-entry hidden">X</span>
-            </span>
+          <div class="array-group array-group--j-and-M">
+            <div class="array array--j">
+              <div class="array-block array-block--header">j</div>
+              <div class="array-block">0</div>
+              <div class="array-block">1</div>
+              <div class="array-block">2</div>
+              <div class="array-block">3</div>
+              <div class="array-block">4</div>
+              <div class="array-block">5</div>
+              <div class="array-block">6</div>
+              <div class="array-block">7</div>
+              <div class="array-block">8</div>
+            </div>
+  
+            <div class="array array--M">
+              <div class="array-block array-block--header">M[j]</div>
+              <div class="array-block">0</div>
+              <div class="array-block">1</div>
+              <div class="array-block">6</div>
+              <div class="array-block">6</div>
+              <div class="array-block">6</div>
+              <div class="array-block">6</div>
+              <div class="array-block">13</div>
+              <div class="array-block">13</div>
+              <div class="array-block">13</div>
+            </div>
           </div>
+        </div>
+      </div>
       
-          <div class="arrow-container">
-            <div class="arrow-head"></div>
-            <div class="arrow-tail"></div>
+
+      <div class="job-cards">
+        <!-- <template id="job-card-template">
+          <div class="job-card" data-cardnum="X">
+
+            <div class="job-card-content">
+              <div class="M-container highlightable">
+                <span class="M-access-container">
+                  <span class="M-access">
+                    M[<span class="SJ-num">X</span>]
+                  </span>
+                  <span class="M-entry hidden">X</span>
+                </span>
+              </div>
+          
+              <div class="arrow-container">
+                <div class="arrow-head"></div>
+                <div class="arrow-tail"></div>
+              </div>
+          
+              <div class="formula-container">
+                <span class="formula-computation">
+                  <div class="max-container">
+                    <span class="max-text">max</span>
+                    <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
+                      <path
+                        d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
+                    </svg>
+                  </div>
+                  <div class="computations-container">
+                    <div class="computation computation--1">
+                      <span class="computation-expression">
+                        <span class="weight">X</span>
+                        <span class="plus-sign">+</span>
+                        <span class="OPT-expression-container">
+                          <span class="OPT-expression">
+                            OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry hidden">X</span></span>)
+                          </span>
+                          <span class="OPT-result hidden">X</span>
+                        </span>
+                      </span>
+                      <span class="computation-result hidden">X</span>
+                    </div>
+          
+                    <div class="computation computation--2">
+                      <span class="OPT-expression-container">
+                        <span class="OPT-expression">
+                          OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num hidden">X</span></span>)
+                        </span>
+                        <span class="OPT-result hidden">X</span>
+                        <span class="computation-result hidden">X</span>
+                      </span>
+                    </div>
+                  </div>
+                </span>
+                <span class="formula-result hidden">X</span>
+              </div>
+            </div>
+            
+            <div class="job-card-children"></div>
           </div>
-      
-          <div class="formula-container">
-            <span class="formula-computation">
-              <div class="max-container">
-                <span class="max-text">max</span>
-                <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
-                  <path
-                    d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
+        </template>
+
+        <template id="job-stub-template">
+          <div class="job-card" data-cardnum="X">
+
+            <div class="job-card-content">
+              <div class="M-container highlightable">
+                <span class="M-access-container">
+                  <span class="M-access">
+                    M[<span class="SJ-num">X</span>]
+                  </span>
+                  <span class="M-entry hidden">X</span>
+                </span>
+              </div>
+            </div>
+            
+          </div>
+        </template> -->
+
+        <div class="job-card" data-cardnum="X">
+
+          <div class="job-card-content hidden">
+            <div class="text-boxes">
+              <div class="text-box-line-group text-box-line-group--M-access M-related">
+                <div class="text-box hidden">
+                  <p class="text-box__paragraph">
+                    Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+                  </p>
+                </div>
+                <svg class="free-line hidden">
+                  <line class="free-line__line" />
                 </svg>
               </div>
-              <div class="computations-container">
-                <div class="computation computation--1">
-                  <span class="computation-expression">
-                    <span class="weight">X</span>
-                    <span class="plus-sign">+</span>
+              
+
+              <div class="text-box-line-group text-box-line-group--formula-computation">
+                <div class="text-box text-box hidden">
+                  <p class="text-box__paragraph">
+                    Entry doesn't exist, so start computing it.
+                  </p>
+                </div>
+                <svg class="free-line hidden">
+                  <line class="free-line__line" />
+                </svg>
+              </div>
+              
+              
+              <div class="text-box-line-group text-box-line-group--computation-expression--1">
+                <div class="text-box text-box hidden">
+                  <p class="text-box__paragraph">
+                    Describe that it will first assume that this job IS part of the optimal structure and compute that route
+                  </p>
+                </div>
+                <svg class="free-line hidden">
+                  <line class="free-line__line" />
+                </svg>
+              </div>
+            </div>
+
+            
+            <div class="M-container">
+
+              <span class="M-access-container">
+                <span class="M-access highlightable hidden">
+                  M[<span class="SJ-num">X</span>]
+                </span>
+                <span class="M-entry highlightable hidden">X</span>
+              </span>
+            </div>
+        
+            <div class="arrow-container hidden">
+              <div class="arrow-head"></div>
+              <div class="arrow-tail"></div>
+            </div>
+        
+            
+            <div class="formula-container">
+              <span class="formula-computation highlightable hidden">
+                <div class="max-container">
+                  <span class="max-text">max</span>
+                  <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
+                    <path
+                      d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
+                  </svg>
+                </div>
+                <div class="computations-container">
+                  <div class="computation computation--1">
+                    <span class="computation-expression computation-expression--1 highlightable">
+                      <span class="weight">X</span>
+                      <span class="plus-sign">+</span>
+                      <span class="OPT-expression-container">
+                        <span class="OPT-expression highlightable">
+                          OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry hidden">X</span></span>)
+                        </span>
+                        <span class="OPT-result hidden">X</span>
+                      </span>
+                    </span>
+                    <span class="computation-result highlightable hidden">X</span>
+                  </div>
+        
+                  <div class="computation computation--2">
                     <span class="OPT-expression-container">
                       <span class="OPT-expression">
-                        OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry hidden">X</span></span>)
+                        OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num hidden">X</span></span>)
                       </span>
                       <span class="OPT-result hidden">X</span>
+                      <span class="computation-result hidden">X</span>
                     </span>
-                  </span>
-                  <span class="computation-result hidden">X</span>
+                  </div>
                 </div>
-      
-                <div class="computation computation--2">
-                  <span class="OPT-expression-container">
-                    <span class="OPT-expression">
-                      OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num hidden">X</span></span>)
-                    </span>
-                    <span class="OPT-result hidden">X</span>
-                    <span class="computation-result hidden">X</span>
-                  </span>
-                </div>
-              </div>
-            </span>
-            <span class="formula-result hidden">X</span>
-          </div>
-        </div>
-        
-        <div class="job-card-children"></div>
-      </div>
-    </template>
-
-    <template id="job-stub-template">
-      <div class="job-card" data-cardnum="X">
-
-        <div class="job-card-content">
-          <div class="M-container highlightable">
-            <span class="M-access-container">
-              <span class="M-access">
-                M[<span class="SJ-num">X</span>]
               </span>
-              <span class="M-entry hidden">X</span>
-            </span>
-          </div>
-        </div>
-        
-      </div>
-    </template>
-
-    <div class="job-card" data-cardnum="X">
-
-      <div class="job-card-content hidden">
-        <div class="text-boxes">
-          <div class="text-box-line-group text-box-line-group--M-access M-related">
-            <div class="text-box hidden">
-              <p class="text-box__paragraph">
-                Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
-              </p>
+              <span class="formula-result highlightable hidden">X</span>
             </div>
-            <svg class="free-line hidden">
-              <line class="free-line__line" />
-            </svg>
           </div>
           
-
-          <div class="text-box-line-group text-box-line-group--formula-computation">
-            <div class="text-box text-box hidden">
-              <p class="text-box__paragraph">
-                Entry doesn't exist, so start computing it.
-              </p>
-            </div>
-            <svg class="free-line hidden">
-              <line class="free-line__line" />
-            </svg>
-          </div>
-          
-           
-          <div class="text-box-line-group text-box-line-group--computation-expression--1">
-            <div class="text-box text-box hidden">
-              <p class="text-box__paragraph">
-                Describe that it will first assume that this job IS part of the optimal structure and compute that route
-              </p>
-             </div>
-             <svg class="free-line hidden">
-               <line class="free-line__line" />
-             </svg>
-          </div>
+          <div class="job-card-children"></div>
         </div>
-
         
-        <div class="M-container">
+        <!--<div class="job-card">
 
-          <span class="M-access-container">
-            <span class="M-access highlightable hidden">
-              M[<span class="SJ-num">X</span>]
-            </span>
-            <span class="M-entry highlightable hidden">X</span>
-          </span>
-        </div>
-    
-        <div class="arrow-container hidden">
-          <div class="arrow-head"></div>
-          <div class="arrow-tail"></div>
-        </div>
-    
-        
-        <div class="formula-container">
-          <span class="formula-computation highlightable hidden">
-            <div class="max-container">
-              <span class="max-text">max</span>
-              <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
-                <path
-                  d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
-              </svg>
-            </div>
-            <div class="computations-container">
-              <div class="computation computation--1">
-                <span class="computation-expression computation-expression--1 highlightable">
-                  <span class="weight">X</span>
-                  <span class="plus-sign">+</span>
-                  <span class="OPT-expression-container">
-                    <span class="OPT-expression highlightable">
-                      OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry hidden">X</span></span>)
-                    </span>
-                    <span class="OPT-result hidden">X</span>
-                  </span>
-                </span>
-                <span class="computation-result highlightable hidden">X</span>
-              </div>
-    
-              <div class="computation computation--2">
-                <span class="OPT-expression-container">
-                  <span class="OPT-expression">
-                    OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num hidden">X</span></span>)
-                  </span>
-                  <span class="OPT-result hidden">X</span>
-                  <span class="computation-result hidden">X</span>
-                </span>
-              </div>
-            </div>
-          </span>
-          <span class="formula-result highlightable hidden">X</span>
-        </div>
-      </div>
-      
-      <div class="job-card-children"></div>
-    </div>
-    
-    <!--<div class="job-card">
-
-      <div class="job-card-content">
-        <div class="M-container highlightable">
-          <span class="M-entry">
-            M[<span class="SJ-num">8</span>]
-          </span>
-        </div>
-    
-        <div class="arrow-container">
-          <div class="arrow-head"></div>
-          <div class="arrow-tail"></div>
-        </div>
-    
-        <div class="formula-container">
-          <span class="formula-computation">
-            <div class="max-container">
-              <span class="max-text">max</span>
-              <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
-                <path
-                  d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
-              </svg>
-            </div>
-            <div class="computations-container">
-              <div class="computation computation--1">
-                <span class="computation-expression">
-                  <span class="weight">5</span>
-                  <span class="plus-sign">+</span>
-                  <span class="OPT-expression-container">
-                    <span class="OPT-expression">
-                      OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">8</span>]</span><span class="c-entry hidden">5</span></span>)
-                    </span>
-                    <span class="OPT-result hidden">0</span>
-                  </span>
-                </span>
-                <span class="computation-result hidden">5</span>
-              </div>
-    
-              <div class="computation computation--2">
-                <span class="OPT-expression-container">
-                  <span class="OPT-expression">
-                    OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">8</span>-1</span><span class="next-SJ-num hidden">7</span></span>)
-                  </span>
-                  <span class="OPT-result hidden">13</span>
-                </span>
-              </div>
-            </div>
-          </span>
-          <span class="formula-result hidden">13</span>
-        </div>
-      </div>
-      
-
-      <div class="job-card-children">
-        <div class="job-card" data-card-num="2">
           <div class="job-card-content">
             <div class="M-container highlightable">
               <span class="M-entry">
@@ -301,11 +312,10 @@
               <span class="formula-result hidden">13</span>
             </div>
           </div>
-
-         
+          
 
           <div class="job-card-children">
-            <div class="job-card" data-card-num="3">
+            <div class="job-card" data-card-num="2">
               <div class="job-card-content">
                 <div class="M-container highlightable">
                   <span class="M-entry">
@@ -356,85 +366,144 @@
                 </div>
               </div>
 
+            
+
+              <div class="job-card-children">
+                <div class="job-card" data-card-num="3">
+                  <div class="job-card-content">
+                    <div class="M-container highlightable">
+                      <span class="M-entry">
+                        M[<span class="SJ-num">8</span>]
+                      </span>
+                    </div>
+                
+                    <div class="arrow-container">
+                      <div class="arrow-head"></div>
+                      <div class="arrow-tail"></div>
+                    </div>
+                
+                    <div class="formula-container">
+                      <span class="formula-computation">
+                        <div class="max-container">
+                          <span class="max-text">max</span>
+                          <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
+                            <path
+                              d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
+                          </svg>
+                        </div>
+                        <div class="computations-container">
+                          <div class="computation computation--1">
+                            <span class="computation-expression">
+                              <span class="weight">5</span>
+                              <span class="plus-sign">+</span>
+                              <span class="OPT-expression-container">
+                                <span class="OPT-expression">
+                                  OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">8</span>]</span><span class="c-entry hidden">5</span></span>)
+                                </span>
+                                <span class="OPT-result hidden">0</span>
+                              </span>
+                            </span>
+                            <span class="computation-result hidden">5</span>
+                          </div>
+                
+                          <div class="computation computation--2">
+                            <span class="OPT-expression-container">
+                              <span class="OPT-expression">
+                                OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">8</span>-1</span><span class="next-SJ-num hidden">7</span></span>)
+                              </span>
+                              <span class="OPT-result hidden">13</span>
+                            </span>
+                          </div>
+                        </div>
+                      </span>
+                      <span class="formula-result hidden">13</span>
+                    </div>
+                  </div>
+
+                  
+              
+                </div>
+              </div>
+          
+            </div>
+
+            <div class="job-card" data-card-num="4">
+
+              <div class="job-card-content">
+                <div class="M-container highlightable">
+                  <span class="M-entry">
+                    M[<span class="SJ-num">8</span>]
+                  </span>
+                </div>
+            
+                <div class="arrow-container">
+                  <div class="arrow-head"></div>
+                  <div class="arrow-tail"></div>
+                </div>
+            
+                <div class="formula-container">
+                  <span class="formula-computation">
+                    <div class="max-container">
+                      <span class="max-text">max</span>
+                      <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
+                        <path
+                          d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
+                      </svg>
+                    </div>
+                    <div class="computations-container">
+                      <div class="computation computation--1">
+                        <span class="computation-expression">
+                          <span class="weight">5</span>
+                          <span class="plus-sign">+</span>
+                          <span class="OPT-expression-container">
+                            <span class="OPT-expression">
+                              OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">8</span>]</span><span class="c-entry hidden">5</span></span>)
+                            </span>
+                            <span class="OPT-result hidden">0</span>
+                          </span>
+                        </span>
+                        <span class="computation-result hidden">5</span>
+                      </div>
+            
+                      <div class="computation computation--2">
+                        <span class="OPT-expression-container">
+                          <span class="OPT-expression">
+                            OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">8</span>-1</span><span class="next-SJ-num hidden">7</span></span>)
+                          </span>
+                          <span class="OPT-result hidden">13</span>
+                        </span>
+                      </div>
+                    </div>
+                  </span>
+                  <span class="formula-result hidden">13</span>
+                </div>
+              </div>
               
           
             </div>
           </div>
       
-        </div>
+        </div> -->
 
-        <div class="job-card" data-card-num="4">
-
-          <div class="job-card-content">
-            <div class="M-container highlightable">
-              <span class="M-entry">
-                M[<span class="SJ-num">8</span>]
-              </span>
-            </div>
-        
-            <div class="arrow-container">
-              <div class="arrow-head"></div>
-              <div class="arrow-tail"></div>
-            </div>
-        
-            <div class="formula-container">
-              <span class="formula-computation">
-                <div class="max-container">
-                  <span class="max-text">max</span>
-                  <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
-                    <path
-                      d="M26.421,178.356c0-17.982,1.674-34.019,1.674-51.272C28.1,117.122,23.444,107.4,0,107.4V101.57c23.444,0,28.1-9.719,28.1-19.682,0-15.551-1.674-34.748-1.674-51.271C26.421,6.561,37.771,0,60.656,0h8.931V5.346H58.424C36.654,5.346,32,13.851,32,31.589c0,14.822,1.3,31.832,1.3,47.626,0,13.365-3.163,21.869-15.443,24.785v.972c12.28,2.916,15.443,11.421,15.443,24.785,0,17.981-1.3,31.346-1.3,47.627,0,17.738,4.651,26.243,26.421,26.243H69.587v5.345H60.656C37.771,208.972,26.421,202.412,26.421,178.356Z" />
-                  </svg>
-                </div>
-                <div class="computations-container">
-                  <div class="computation computation--1">
-                    <span class="computation-expression">
-                      <span class="weight">5</span>
-                      <span class="plus-sign">+</span>
-                      <span class="OPT-expression-container">
-                        <span class="OPT-expression">
-                          OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">8</span>]</span><span class="c-entry hidden">5</span></span>)
-                        </span>
-                        <span class="OPT-result hidden">0</span>
-                      </span>
-                    </span>
-                    <span class="computation-result hidden">5</span>
-                  </div>
-        
-                  <div class="computation computation--2">
-                    <span class="OPT-expression-container">
-                      <span class="OPT-expression">
-                        OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">8</span>-1</span><span class="next-SJ-num hidden">7</span></span>)
-                      </span>
-                      <span class="OPT-result hidden">13</span>
-                    </span>
-                  </div>
-                </div>
-              </span>
-              <span class="formula-result hidden">13</span>
-            </div>
-          </div>
-          
-      
-        </div>
       </div>
-  
-    </div> -->
+      
 
-  </div>
-  
+      <!-- <svg class="arrow">
+        <defs>
+          <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+            <path d="M0,0 L0,8 L6,4 L0,0" style="fill: #000000;" />
+          </marker>
+        </defs>
 
-  <!-- <svg class="arrow">
-    <defs>
-      <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-        <path d="M0,0 L0,8 L6,4 L0,0" style="fill: #000000;" />
-      </marker>
-    </defs>
+        <line x1="100" y1="300" x2="50" y2="100" class="arrow-line" />
+      </svg> -->
+      <div class="boxes">
+        <div class="box box--backward"></div>
+        <div class="box box--forward"></div>
+      </div>
 
-    <line x1="100" y1="300" x2="50" y2="100" class="arrow-line" />
-  </svg> -->
-  <div class="box box--backward"></div>
-  <div class="box box--forward"></div>
+    </div>
+  </main>
 </body>
 
 </html>
