@@ -1,4 +1,5 @@
 export class AnimBlock {
+  timelineID; // set to match the id of the AnimTimeline to which it belongs
   animObjects = []; // array of AnimObjects
 
   constructor(...animObjects) {
@@ -40,5 +41,10 @@ export class AnimBlock {
   // tells every AnimObject here to briefly allow instantaneous animation
   fireSkipSignal() {
     this.animObjects.forEach(animObject => animObject.handleSkipSignal());
+  }
+
+  setID(id) {
+    this.timelineID = id;
+    this.animObjects.forEach(animObject => animObject.setID(this.timelineID));
   }
 }

@@ -132,9 +132,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
     if (e.key.toLowerCase() === 's' && !e.repeat) {
       window.removeEventListener('keyup', stopFastForward);
       window.removeEventListener('keydown', fastForward);
-      if (animSequence.toggleSkipping()) {
-        document.getAnimations().forEach(animation => animation.playbackRate = Number.MAX_SAFE_INTEGER);
-      }
+      animSequence.toggleSkipping();
       window.addEventListener('keyup', stopFastForward);
       window.addEventListener('keydown', fastForward);
     }
@@ -142,13 +140,13 @@ import { AnimTimeline } from "./AnimTimeline.js";
 
   const fastForward = function(e) {
     if (e.key.toLowerCase() === 'f') {
-      document.getAnimations().forEach(animation => animation.playbackRate = 7);
+      animSequence.fireRateSignal(7);
     }
   };
 
   const stopFastForward = function(e) {
     if (e.key.toLowerCase() === 'f') {
-      document.getAnimations().forEach(animation => animation.playbackRate = 1);
+      animSequence.fireRateSignal(1);
     }
   };
 

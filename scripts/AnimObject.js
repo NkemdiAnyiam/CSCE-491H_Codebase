@@ -1,9 +1,5 @@
 //TODO: move wait() to a utility file
-const wait = milliseconds => 
-    new Promise(resolve => 
-        setTimeout(resolve, milliseconds)
-    );
-;
+const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 export class AnimObject {
   static exitingList = ['fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left'];
@@ -12,6 +8,7 @@ export class AnimObject {
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static skipDuration = 50; // see handleSkipSignal()
 
+  timelineID; // set to match the id of the AnimBlock to which it belongs, which matches the id of the parent timeline
   // Determines whether or not the upcoming animation should wait for this one to finish (can be changed in applyOptions())
   blocksNext = true;
   blocksPrev = true;
@@ -44,6 +41,7 @@ export class AnimObject {
   animate(domElem, animClassAdd, isExiting, isEntering) {
     // Create the Animation instance that we will use on our DOM element
     const animation = new Animation();
+    animation.id = this.timelineID;
     animation.effect = new KeyframeEffect(
       domElem,
       AnimObject[animClassAdd], // gets transformations from appropriate static property on AnimObject
@@ -97,6 +95,10 @@ export class AnimObject {
 
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
+  }
+
+  setID(id) {
+    this.timelineID = id;
   }
 }
 
