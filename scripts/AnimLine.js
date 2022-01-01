@@ -65,11 +65,10 @@ export class AnimLine extends AnimObject {
 
   updateEndPoints() {
     // to properly place the endpoints, we need the positions of their bounding boxes
-    // get the bounding rectangles for our <svg> element, starting reference element, ending reference element, our element's parent element
+    // get the bounding rectangles for our <svg> element, starting reference element, and ending reference element
     const rectSVG = this.domElem.getBoundingClientRect();
     const rectStart = this.startElem.getBoundingClientRect();
     const rectEnd = this.endElem.getBoundingClientRect();
-    const rectParent = this.domElem.parentElement.getBoundingClientRect();
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the <svg> element's current top and left from the offset
