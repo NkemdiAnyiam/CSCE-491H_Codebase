@@ -6,6 +6,7 @@ export class AnimObject {
   static enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
   static highlightingList = ['highlight', 'undo--un-highlight'];
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
+  static movingList = ['move-by', 'undo--move-by'];
   static skipDuration = 50; // see handleSkipSignal()
 
   timelineID; // set to match the id of the AnimBlock to which it belongs, which matches the id of the parent timeline
@@ -25,31 +26,51 @@ export class AnimObject {
 
   stepForward() {
     return new Promise(resolve => {
-      this.animate(this.domElem, this.animName, AnimObject.exitingList.includes(this.animName), AnimObject.enteringList.includes(this.animName))
+      this.animate(this.domElem, this.animName, AnimObject.isExiting(this.animName), AnimObject.isEntering(this.animName), AnimObject.isMoving(this.animName))
       .then(() => resolve());
     });
   }
 
   stepBackward() {
     return new Promise(resolve => {
-      const undoAnimation = `undo--${this.animName}`;
-      this.animate(this.domElem, undoAnimation, AnimObject.exitingList.includes(undoAnimation), AnimObject.enteringList.includes(undoAnimation))
+      const undoAnimName = `undo--${this.animName}`;
+      this.animate(this.domElem, undoAnimName, AnimObject.isExiting(undoAnimName), AnimObject.isEntering(undoAnimName), AnimObject.isMoving(undoAnimName))
       .then(() => resolve());
     });
   }
 
-  animate(domElem, animClassAdd, isExiting, isEntering) {
+  static isExiting(animName) { return AnimObject.exitingList.includes(animName); }
+  static isEntering(animName) { return AnimObject.enteringList.includes(animName); }
+  static isMoving(animName) { return AnimObject.movingList.includes(animName); }
+
+  animate(domElem, animClassAdd, isExiting, isEntering, isMoving) {
     // Create the Animation instance that we will use on our DOM element
     const animation = new Animation();
     animation.id = this.timelineID;
-    animation.effect = new KeyframeEffect(
-      domElem,
-      AnimObject[animClassAdd], // gets transformations from appropriate static property on AnimObject
-      {
-        duration: 500, // TODO: potentially allow variable duration values (both forwards and backwards)
-        fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
-      }
-    );
+
+    if (isMoving) {
+      animation.effect = new KeyframeEffect(
+        domElem,
+        { transform: `translate(${this.moveX}, ${this.moveY})` },
+        {
+          duration: 500,
+          fill: 'forwards',
+          composite: 'accumulate',
+        }
+      );
+      this.moveX = this.moveX[0] === '-' ? this.moveX.slice(1) : `-${this.moveX}`;
+      this.moveY = this.moveY[0] === '-' ? this.moveY.slice(1) : `-${this.moveY}`;
+    }
+    else {
+      animation.effect = new KeyframeEffect(
+        domElem,
+        AnimObject[animClassAdd], // gets transformations from appropriate static property on AnimObject
+        {
+          duration: 500, // TODO: potentially allow variable duration values (both forwards and backwards)
+          fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
+        }
+      );
+    }
     
     animation.onfinish = () => {
       animation.commitStyles(); // actually applies the styles to the element
@@ -84,6 +105,7 @@ export class AnimObject {
       horizontalOffset, // determines offset to apply to the respective positional property
       blocksNext,
       blocksPrev,
+      moveOptions,
     } = options;
 
     if ((verticalOffset !== null && verticalOffset !== undefined)) { // only modify if a value is passed in
@@ -95,6 +117,23 @@ export class AnimObject {
 
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
+
+    if (moveOptions) {
+      this.computeMoveXY(moveOptions);
+    }
+  }
+
+  computeMoveXY(moveOptions) {
+    const {
+      referenceElem,
+      moveX,
+      moveY,
+    } = moveOptions
+
+    if (!referenceElem) {
+      this.moveX = moveX;
+      this.moveY = moveY;
+    }
   }
 
   setID(id) {
