@@ -190,6 +190,18 @@ span {
   bottom: calc(100% + 5rem);
 }
 
+.text-box-line-group--M-access .text-box {
+  left: 10rem;
+}
+
+.text-box-line-group--formula-computation .text-box {
+  left: 20rem;
+}
+
+.text-box-line-group--computation-expression--1 .text-box {
+  left: 25rem;
+}
+
 .text-box__paragraph {
   color: black;
 }

@@ -49,36 +49,9 @@ export class AnimObject {
     const animation = new Animation();
     animation.id = this.timelineID;
 
+    // set the keyframes for the animation
     if (isTranslating) {
-      let translateX;
-      let translateY;
-      if (AnimObject.isBackward(animClassAdd)) {
-        translateX = this.undoTranslateX;
-        translateY = this.undoTranslateY;
-      }
-      else if (!this.targetElem) {
-        translateX = this.translateX;
-        translateY = this.translateY;
-      }
-      else {
-        const rectThis = this.domElem.getBoundingClientRect();
-        const rectTarget = this.targetElem.getBoundingClientRect();
-
-        translateX = rectTarget.left - rectThis.left;
-        translateY = rectTarget.top - rectThis.top;
-        this.undoTranslateX = -translateX;
-        this. undoTranslateY = -translateY;
-      }
-
-      animation.effect = new KeyframeEffect(
-        domElem,
-        { transform: `translate(${translateX}${this.unitsX}, ${translateY}${this.unitsY})` },
-        {
-          duration: 500,
-          fill: 'forwards',
-          composite: 'accumulate',
-        }
-      );
+      animation.effect = this.createTranslationKeyframes(animClassAdd);
     }
     else {
       animation.effect = new KeyframeEffect(
@@ -94,17 +67,58 @@ export class AnimObject {
     animation.onfinish = () => {
       animation.commitStyles(); // actually applies the styles to the element
       if (isExiting) { domElem.classList.add('hidden'); }
-      
       animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
     };
 
     if (isEntering) { domElem.classList.remove('hidden'); }
-
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
-    
     // return Promise that fulfills when the animation is completed
+
     return animation.finished;
+  }
+
+  createTranslationKeyframes(animClassAdd) {
+    let translateX;
+    let translateY;
+    let offsetX = this.offsetX;
+    let offsetY = this.offsetY;
+    
+    if (AnimObject.isBackward(animClassAdd)) {
+      translateX = this.undoTranslateX;
+      translateY = this.undoTranslateY;
+      offsetX *= -1;
+      offsetY *= -1;
+    }
+    else if (this.targetElem) {
+      // get the bounding boxes of our DOM element and the target element
+      const rectThis = this.domElem.getBoundingClientRect();
+      const rectTarget = this.targetElem.getBoundingClientRect();
+
+      // the displacement will be the difference between the target element's position and our element's position
+      translateX = rectTarget[this.alignmentX] - rectThis[this.alignmentX];
+      translateY = rectTarget[this.alignmentY] - rectThis[this.alignmentY];
+
+      // when the animation is rewinded, the negatives will be used to undo the translation
+      this.undoTranslateX = -translateX;
+      this.undoTranslateY = -translateY;
+    }
+    else {
+      translateX = this.translateX;
+      translateY = this.translateY;
+    }
+
+    return new KeyframeEffect(
+      this.domElem,
+      { transform: `translate(calc(${translateX}${this.unitsX} + ${offsetX}${this.offsetUnitsX}),
+                              calc(${translateY}${this.unitsY} + ${offsetY}${this.offsetUnitsY})`
+      },
+      {
+        duration: 500,
+        fill: 'forwards',
+        composite: 'accumulate',
+      }
+    );
   }
   
   // short burst of shouldSkip that, if done prior to the animation playing, allows the animation to be finished instantly
@@ -118,54 +132,61 @@ export class AnimObject {
     if (!options) { return; }
     
     const {
-      verticalAlignBy = 'top', // determines which vertical positional property to target on our DOM element
-      horizontalAlignBy = 'left', // determines which horizontal positional property to target on our DOM element
-      verticalOffset, // determines offset to apply to the respective positional property
-      horizontalOffset, // determines offset to apply to the respective positional property
       blocksNext,
       blocksPrev,
       translateOptions,
     } = options;
 
-    if ((verticalOffset !== null && verticalOffset !== undefined)) { // only modify if a value is passed in
-      this.domElem.style[verticalAlignBy] = `${verticalOffset}`;
-    }
-    if ((horizontalOffset !== null && horizontalOffset !== undefined)) {
-      this.domElem.style[horizontalAlignBy] = `${horizontalOffset}`;
-    }
-
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
 
     if (translateOptions) {
-      this.computeTranslateXY(translateOptions);
+      this.applyTranslateOptions(translateOptions);
     }
   }
 
-  computeTranslateXY(translateOptions) {
+  applyTranslateOptions(translateOptions) {
     const {
-      targetElem,
-      translateXY,
-      translateX,
-      translateY,
-      unitsXY = 'px',
+      translateX = 0,
+      translateY = 0,
+      translateXY, // overrides translateX and translateY
       unitsX = 'px',
       unitsY = 'px',
-    } = translateOptions
+      unitsXY, // overrides unitsX and unitsY
+      targetElem,
+      alignmentY = 'top', // determines vertical alignment with target element
+      alignmentX = 'left', // determines horizontal alignment with target element
+      offsetX = 0, // determines offset to apply to the respective positional property
+      offsetY = 0, // determines offset to apply to the respective positional property
+      offsetXY, // overrides offsetX and offsetY
+      offsetUnitsX = 'px',
+      offsetUnitsY = 'px',
+      offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
+    } = translateOptions;
 
-    if (!targetElem) {
+    if (targetElem) {
+      this.targetElem = targetElem;
+
+      this.alignmentX = alignmentX;
+      this.alignmentY = alignmentY;
+
+      this.unitsX = 'px';
+      this.unitsY = 'px';
+    }
+    else {
       this.translateX = translateXY ?? translateX;
       this.undoTranslateX = -this.translateX;
       this.translateY = translateXY ?? translateY;
       this.undoTranslateY = -this.translateY;
+
       this.unitsX = unitsXY ?? unitsX;
       this.unitsY = unitsXY ?? unitsY;
     }
-    else {
-      this.targetElem = targetElem;
-      this.unitsX = 'px';
-      this.unitsY = 'px';
-    }
+
+    this.offsetX = offsetXY ?? offsetX;
+    this.offsetY = offsetXY ?? offsetY;
+    this.offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
+    this.offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
   }
 
   setID(id) {

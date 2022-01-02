@@ -57,9 +57,18 @@ import { AnimTimeline } from "./AnimTimeline.js";
     new AnimObject(jobCardContent, 'fade-in'),
     new AnimObject(MAccess, 'fade-in'),
     new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
-    new AnimObject(MAccess, 'translate', {translateOptions: {targetElem: document.querySelector('.array--j'), translateX: '10rem', translateY: '-5rem'}}),
+    new AnimObject(MAccess, 'translate', {
+      translateOptions: {
+        targetElem: document.querySelector('.array--j'),
+        alignmentX: 'right',
+        alignmentY: 'bottom',
+        offsetX: 20,
+        offsetY: -30,
+        offsetUnitsXY: 'rem',
+      }
+    }),
     new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_MAccess, 'fade-in', {horizontalOffset: '10rem', blocksPrev: false}),
+    new AnimObject(textbox_MAccess, 'fade-in', {blocksPrev: false}),
     new AnimObject(MAccess, 'translate', {translateOptions: {translateX: 20, translateY: 20, unitsXY: 'rem'}}),
   ]);
 
@@ -71,7 +80,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
     new AnimObject(formulaComputation, 'fade-in', {blocksPrev: false}),
     new AnimObject(formulaComputation, 'highlight', {blocksNext: false}),
     new AnimLine(freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_formulaComputation, 'fade-in', {horizontalOffset: '20rem', blocksPrev: false}),
+    new AnimObject(textbox_formulaComputation, 'fade-in', {blocksPrev: false}),
   ]);
 
   const animBlock3 = new AnimBlock(...[
@@ -80,7 +89,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
     new AnimObject(formulaComputation, 'un-highlight', {blocksPrev: false}),
     new AnimObject(computationExpression1, 'highlight', {blocksNext: false}),
     new AnimLine(freeLine_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_computationExpression1, 'fade-in', {horizontalOffset: '25rem', blocksPrev: false}),
+    new AnimObject(textbox_computationExpression1, 'fade-in', {blocksPrev: false}),
   ]);
 
   const animBlock4 = new AnimBlock(...[
