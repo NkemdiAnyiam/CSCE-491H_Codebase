@@ -6,7 +6,7 @@ export class AnimObject {
   static enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
   static highlightingList = ['highlight', 'undo--un-highlight'];
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
-  static movingList = ['move-by', 'undo--move-by'];
+  static translatingList = ['translate', 'undo--translate'];
   static skipDuration = 50; // see handleSkipSignal()
 
   timelineID; // set to match the id of the AnimBlock to which it belongs, which matches the id of the parent timeline
@@ -26,7 +26,7 @@ export class AnimObject {
 
   stepForward() {
     return new Promise(resolve => {
-      this.animate(this.domElem, this.animName, AnimObject.isExiting(this.animName), AnimObject.isEntering(this.animName), AnimObject.isMoving(this.animName))
+      this.animate(this.domElem, this.animName, AnimObject.isExiting(this.animName), AnimObject.isEntering(this.animName), AnimObject.isTranslating(this.animName))
       .then(() => resolve());
     });
   }
@@ -34,32 +34,51 @@ export class AnimObject {
   stepBackward() {
     return new Promise(resolve => {
       const undoAnimName = `undo--${this.animName}`;
-      this.animate(this.domElem, undoAnimName, AnimObject.isExiting(undoAnimName), AnimObject.isEntering(undoAnimName), AnimObject.isMoving(undoAnimName))
+      this.animate(this.domElem, undoAnimName, AnimObject.isExiting(undoAnimName), AnimObject.isEntering(undoAnimName), AnimObject.isTranslating(undoAnimName))
       .then(() => resolve());
     });
   }
 
   static isExiting(animName) { return AnimObject.exitingList.includes(animName); }
   static isEntering(animName) { return AnimObject.enteringList.includes(animName); }
-  static isMoving(animName) { return AnimObject.movingList.includes(animName); }
+  static isTranslating(animName) { return AnimObject.translatingList.includes(animName); }
+  static isBackward(animName) { return animName.startsWith('undo--'); }
 
-  animate(domElem, animClassAdd, isExiting, isEntering, isMoving) {
+  animate(domElem, animClassAdd, isExiting, isEntering, isTranslating) {
     // Create the Animation instance that we will use on our DOM element
     const animation = new Animation();
     animation.id = this.timelineID;
 
-    if (isMoving) {
+    if (isTranslating) {
+      let translateX;
+      let translateY;
+      if (AnimObject.isBackward(animClassAdd)) {
+        translateX = this.undoTranslateX;
+        translateY = this.undoTranslateY;
+      }
+      else if (!this.targetElem) {
+        translateX = this.translateX;
+        translateY = this.translateY;
+      }
+      else {
+        const rectThis = this.domElem.getBoundingClientRect();
+        const rectTarget = this.targetElem.getBoundingClientRect();
+
+        translateX = rectTarget.left - rectThis.left;
+        translateY = rectTarget.top - rectThis.top;
+        this.undoTranslateX = -translateX;
+        this. undoTranslateY = -translateY;
+      }
+
       animation.effect = new KeyframeEffect(
         domElem,
-        { transform: `translate(${this.moveX}, ${this.moveY})` },
+        { transform: `translate(${translateX}${this.unitsX}, ${translateY}${this.unitsY})` },
         {
           duration: 500,
           fill: 'forwards',
           composite: 'accumulate',
         }
       );
-      this.moveX = this.moveX[0] === '-' ? this.moveX.slice(1) : `-${this.moveX}`;
-      this.moveY = this.moveY[0] === '-' ? this.moveY.slice(1) : `-${this.moveY}`;
     }
     else {
       animation.effect = new KeyframeEffect(
@@ -105,7 +124,7 @@ export class AnimObject {
       horizontalOffset, // determines offset to apply to the respective positional property
       blocksNext,
       blocksPrev,
-      moveOptions,
+      translateOptions,
     } = options;
 
     if ((verticalOffset !== null && verticalOffset !== undefined)) { // only modify if a value is passed in
@@ -118,21 +137,34 @@ export class AnimObject {
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
 
-    if (moveOptions) {
-      this.computeMoveXY(moveOptions);
+    if (translateOptions) {
+      this.computeTranslateXY(translateOptions);
     }
   }
 
-  computeMoveXY(moveOptions) {
+  computeTranslateXY(translateOptions) {
     const {
-      referenceElem,
-      moveX,
-      moveY,
-    } = moveOptions
+      targetElem,
+      translateXY,
+      translateX,
+      translateY,
+      unitsXY = 'px',
+      unitsX = 'px',
+      unitsY = 'px',
+    } = translateOptions
 
-    if (!referenceElem) {
-      this.moveX = moveX;
-      this.moveY = moveY;
+    if (!targetElem) {
+      this.translateX = translateXY ?? translateX;
+      this.undoTranslateX = -this.translateX;
+      this.translateY = translateXY ?? translateY;
+      this.undoTranslateY = -this.translateY;
+      this.unitsX = unitsXY ?? unitsX;
+      this.unitsY = unitsXY ?? unitsY;
+    }
+    else {
+      this.targetElem = targetElem;
+      this.unitsX = 'px';
+      this.unitsY = 'px';
     }
   }
 
