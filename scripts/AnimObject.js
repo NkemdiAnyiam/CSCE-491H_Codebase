@@ -7,6 +7,10 @@ export class AnimObject {
   static highlightingList = ['highlight', 'undo--un-highlight'];
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static translatingList = ['translate', 'undo--translate'];
+  static isExiting(animName) { return AnimObject.exitingList.includes(animName); }
+  static isEntering(animName) { return AnimObject.enteringList.includes(animName); }
+  static isTranslating(animName) { return AnimObject.translatingList.includes(animName); }
+  static isBackward(animName) { return animName.startsWith('undo--'); }
   static skipDuration = 50; // see handleSkipSignal()
 
   timelineID; // set to match the id of the AnimBlock to which it belongs, which matches the id of the parent timeline
@@ -17,60 +21,50 @@ export class AnimObject {
   constructor(domElem, animName, options) {
     this.domElem = domElem;
     this.animName = animName;
+    this.undoAnimName = `undo--${this.animName}`;
 
     this.applyOptions(options);
   }
 
-  getBlockNext() { return this.blocksNext; }
-  getBlockPrev() { return this.blocksPrev; }
+  getBlocksNext() { return this.blocksNext; }
+  getBlocksPrev() { return this.blocksPrev; }
+
+  setID(id) { this.timelineID = id; }
 
   stepForward() {
     return new Promise(resolve => {
-      this.animate(this.domElem, this.animName, AnimObject.isExiting(this.animName), AnimObject.isEntering(this.animName), AnimObject.isTranslating(this.animName))
+      this.animate(this.animName)
       .then(() => resolve());
     });
   }
 
   stepBackward() {
     return new Promise(resolve => {
-      const undoAnimName = `undo--${this.animName}`;
-      this.animate(this.domElem, undoAnimName, AnimObject.isExiting(undoAnimName), AnimObject.isEntering(undoAnimName), AnimObject.isTranslating(undoAnimName))
+      this.animate(this.undoAnimName)
       .then(() => resolve());
     });
   }
 
-  static isExiting(animName) { return AnimObject.exitingList.includes(animName); }
-  static isEntering(animName) { return AnimObject.enteringList.includes(animName); }
-  static isTranslating(animName) { return AnimObject.translatingList.includes(animName); }
-  static isBackward(animName) { return animName.startsWith('undo--'); }
+  animate(animName) {
+    const isExiting = AnimObject.isExiting(animName);
+    const isEntering = AnimObject.isEntering(animName);
+    const isTranslating = AnimObject.isTranslating(animName);
 
-  animate(domElem, animClassAdd, isExiting, isEntering, isTranslating) {
     // Create the Animation instance that we will use on our DOM element
     const animation = new Animation();
     animation.id = this.timelineID;
 
     // set the keyframes for the animation
-    if (isTranslating) {
-      animation.effect = this.createTranslationKeyframes(animClassAdd);
-    }
-    else {
-      animation.effect = new KeyframeEffect(
-        domElem,
-        AnimObject[animClassAdd], // gets transformations from appropriate static property on AnimObject
-        {
-          duration: 500, // TODO: potentially allow variable duration values (both forwards and backwards)
-          fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
-        }
-      );
-    }
+    if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
+    else { animation.effect = this.getPresetKeyframes(animName); }
     
     animation.onfinish = () => {
       animation.commitStyles(); // actually applies the styles to the element
-      if (isExiting) { domElem.classList.add('hidden'); }
+      if (isExiting) { this.domElem.classList.add('hidden'); }
       animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
     };
 
-    if (isEntering) { domElem.classList.remove('hidden'); }
+    if (isEntering) { this.domElem.classList.remove('hidden'); }
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
     // return Promise that fulfills when the animation is completed
@@ -78,13 +72,24 @@ export class AnimObject {
     return animation.finished;
   }
 
-  createTranslationKeyframes(animClassAdd) {
+  getPresetKeyframes(animName) {
+    return new KeyframeEffect(
+      this.domElem,
+      AnimObject[animName], // gets transformations from appropriate static property on AnimObject
+      {
+        duration: 500, // TODO: potentially allow variable duration values (both forwards and backwards)
+        fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
+      }
+    );
+  }
+
+  createTranslationKeyframes(animName) {
     let translateX;
     let translateY;
     let offsetX = this.offsetX;
     let offsetY = this.offsetY;
     
-    if (AnimObject.isBackward(animClassAdd)) {
+    if (AnimObject.isBackward(animName)) {
       translateX = this.undoTranslateX;
       translateY = this.undoTranslateY;
       offsetX *= -1;
@@ -187,10 +192,6 @@ export class AnimObject {
     this.offsetY = offsetXY ?? offsetY;
     this.offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
     this.offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
-  }
-
-  setID(id) {
-    this.timelineID = id;
   }
 }
 

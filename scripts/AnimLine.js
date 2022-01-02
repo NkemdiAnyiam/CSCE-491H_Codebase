@@ -2,9 +2,9 @@ import { AnimObject } from "./AnimObject.js";
 import { AnimLineUpdater } from "./AnimLineUpdater.js";
 
 export class AnimLine extends AnimObject {
-  // the defaults of both updateOnEntry and continuousUpdates can be replaced in applyOptions()
-  updateOnEntry = true; // determines whether or not to call updateEndPoints() upon using an entering animation
-  continuousUpdates = true; // determines whether or not to continuously periodically called updateEndPoints() while visible
+  // the defaults of both updateEndpointsOnEntry and trackEndpoints can be replaced in applyOptions()
+  updateEndpointsOnEntry = true; // determines whether or not to call updateEndpoints() upon using an entering animation
+  trackEndpoints = true; // determines whether or not to continuously periodically called updateEndpoints() while visible
 
   constructor(domElem, animName, startElem, [leftStart, topStart], endElem, [leftEnd, topEnd], options) {
     super(domElem, animName, options);
@@ -27,17 +27,7 @@ export class AnimLine extends AnimObject {
 
   stepForward() {
     return new Promise(resolve => {
-      if (this.updateOnEntry && AnimObject.enteringList.includes(this.animName)) {
-        this.updateEndPoints();
-
-        if (this.continuousUpdates) {
-          AnimLineUpdater.setInterval(this.domElem, this.updateEndPoints.bind(this));
-        }
-      }
-
-      if (AnimObject.exitingList.includes(this.animName)) {
-        AnimLineUpdater.clearInterval(this.domElem);
-      }
+      this.handleUpdateSettings(this.animName);
 
       super.stepForward()
       .then(() => resolve());
@@ -46,24 +36,26 @@ export class AnimLine extends AnimObject {
 
   stepBackward() {
     return new Promise(resolve => {
-      if (this.updateOnEntry && AnimObject.enteringList.includes(`undo--${this.animName}`)) {
-        this.updateEndPoints();
-
-        if (this.continuousUpdates) {
-          AnimLineUpdater.setInterval(this.domElem, this.updateEndPoints.bind(this));
-        }
-      }
-
-      if (AnimObject.exitingList.includes(`undo--${this.animName}`)) {
-        AnimLineUpdater.clearInterval(this.domElem);
-      }
+      this.handleUpdateSettings(this.undoAnimName);
 
       super.stepBackward()
       .then(() => resolve());
     });
   }
 
-  updateEndPoints() {
+  handleUpdateSettings(animName) {
+    if (this.updateEndpointsOnEntry && AnimObject.isEntering(animName)) {
+      this.updateEndpoints();
+
+      // if continuous tracking is enabled, tell AnimLineUpdater to set an interval for updateEndpoints()
+      if (this.trackEndpoints) { AnimLineUpdater.setInterval(this.domElem, this.updateEndpoints.bind(this)); }
+    }
+
+    // if we are exiting, turn off the interval for updateEndPoints()
+    if (AnimObject.isExiting(animName)) { AnimLineUpdater.clearInterval(this.domElem); }
+  }
+
+  updateEndpoints() {
     // to properly place the endpoints, we need the positions of their bounding boxes
     // get the bounding rectangles for starting reference element, ending reference element, and parent element
     const rectStart = this.startElem.getBoundingClientRect();
@@ -91,11 +83,17 @@ export class AnimLine extends AnimObject {
     if (!options) { return; }
 
     super.applyOptions();
+
+    const {lineOptions} = options;
+    if (lineOptions) { this.applyLineOptions(lineOptions); }
+  }
+
+  applyLineOptions(lineOptions) {
     const {
-      updateOnEntry,
-      continuousUpdates,
-    } = options;
-    this.updateOnEntry = updateOnEntry ?? this.updateOnEntry;
-    this.continuousUpdates = continuousUpdates ?? this.continuousUpdates;
+      updateEndpointsOnEntry,
+      trackEndpoints,
+    } = lineOptions;
+    this.updateEndpointsOnEntry = updateEndpointsOnEntry ?? this.updateEndpointsOnEntry;
+    this.trackEndpoints = trackEndpoints ?? this.trackEndpoints;
   }
 }

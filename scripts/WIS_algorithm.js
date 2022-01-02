@@ -57,19 +57,8 @@ import { AnimTimeline } from "./AnimTimeline.js";
     new AnimObject(jobCardContent, 'fade-in'),
     new AnimObject(MAccess, 'fade-in'),
     new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
-    new AnimObject(MAccess, 'translate', {
-      translateOptions: {
-        targetElem: document.querySelector('.array--j'),
-        alignmentX: 'right',
-        alignmentY: 'bottom',
-        offsetX: 20,
-        offsetY: -30,
-        offsetUnitsXY: 'rem',
-      }
-    }),
     new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
     new AnimObject(textbox_MAccess, 'fade-in', {blocksPrev: false}),
-    new AnimObject(MAccess, 'translate', {translateOptions: {translateX: 20, translateY: 20, unitsXY: 'rem'}}),
   ]);
 
   const animBlock2 = new AnimBlock(...[

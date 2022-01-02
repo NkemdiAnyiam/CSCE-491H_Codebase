@@ -103,7 +103,7 @@ class JobScheduler {
   }
 
   setCompatibleJobNums() {
-    this._c.push(null); // TODO potentially clear before starting
+    this._c.push(null); // TODO: potentially clear before starting
     this._jobs.forEach(job => {
       const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
       // job.setCompatibleJobNum(compatibleJobNum);

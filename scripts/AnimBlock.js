@@ -13,12 +13,8 @@ export class AnimBlock {
   async play() {
     for (let i = 0; i < this.animObjects.length; ++i) {
       // if the current AnimObject blocks the next AnimObject, we need to await the completion (this is intuitive)
-      if (this.animObjects[i].blocksNext) {
-        await this.animObjects[i].stepForward();
-      }
-      else {
-        this.animObjects[i].stepForward();
-      }
+      if (this.animObjects[i].getBlocksNext()) { await this.animObjects[i].stepForward(); }
+      else { this.animObjects[i].stepForward(); }
     }
 
     return Promise.resolve();
@@ -27,12 +23,8 @@ export class AnimBlock {
   // rewinds each AnimObject contained in this AnimBlock instance in reverse order
   async rewind() {
     for (let i = this.animObjects.length - 1; i >= 0; --i) {
-      if (this.animObjects[i].blocksPrev) {
-        await this.animObjects[i].stepBackward();
-      }
-      else {
-        this.animObjects[i].stepBackward();
-      }
+      if (this.animObjects[i].getBlocksPrev()) { await this.animObjects[i].stepBackward(); }
+      else { this.animObjects[i].stepBackward(); }
     }
 
     return Promise.resolve();

@@ -23,6 +23,7 @@ export class AnimTimeline {
 
   // plays current AnimBlock and increments stepNum
   async stepForward() {
+    if (this.isAnimating) { return Promise.reject('Cannot stepForward() while already animating'); }
     this.isAnimating = true;
     this.currDirection = 'forward';
     if (this.isSkipping) { this.fireSkipSignal(); }
@@ -34,6 +35,7 @@ export class AnimTimeline {
 
   // decrements stepNum and rewinds the AnimBlock
   async stepBackward() {
+    if (this.isAnimating) { return Promise.reject('Cannot stepBackward() while already animating'); }
     this.isAnimating = true;
     --this.stepNum;
     this.currDirection = 'backward';
@@ -57,18 +59,14 @@ export class AnimTimeline {
   }
 
     // tells the current AnimBlock to instantly finish its animations
-  fireSkipSignal() {
-    this.animBlocks[this.stepNum].fireSkipSignal();
-  }
+  fireSkipSignal() { this.animBlocks[this.stepNum].fireSkipSignal(); }
 
   // sets the playbacks of all currently running animations that belong to this timeline
   fireRateSignal(rate) {
     const allAnimations = document.getAnimations();
     for (let i = 0; i < allAnimations.length; ++i) {
       // an animation "belongs" to this timeline if its id matches
-      if (Number.parseInt(allAnimations[i].id) === this.id) {
-        allAnimations[i].playbackRate = rate;
-      }
+      if (Number.parseInt(allAnimations[i].id) === this.id) { allAnimations[i].playbackRate = rate; }
     }
   }
 }
