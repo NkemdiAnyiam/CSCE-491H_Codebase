@@ -1,0 +1,16 @@
+/*****************************************************************/
+/**************************** TIME GRAPH ****************************/
+/*****************************************************************/
+
+.time-graph {
+  background-color: var(--color-gray);
+  width: min-content;
+
+  display: grid;
+  grid-template-columns: repeat(12, 12rem);
+  grid-template-rows: repeat(9, 12rem);
+}
+
+.time-graph__graph-lines {
+
+}

@@ -1,0 +1,28 @@
+/*****************************************************************/
+/**************************** LAYOUT ****************************/
+/*****************************************************************/
+
+.main {
+
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 250rem auto;
+  grid-template-areas:
+    "data cards";
+  gap: 10rem;
+}
+
+.data-display {
+  grid-area: data;
+  padding-top: 10rem;
+  border-right: solid 1px var(--color-gray-darkest);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+.job-cards {
+  grid-area: cards;
+}

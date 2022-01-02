@@ -1,0 +1,39 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 20%;
+}
+
+body {
+  line-height: 1;
+  padding: 5rem;
+  /* background-color: #aaa; */
+
+  font-family: 'Roboto Mono', monospace;
+  font-size: 4rem;
+}
+
+span {
+  display: inline-block;
+}
+
+.hidden:not(.text-box) {
+  display: none!important;
+}
+
+.text-box.hidden {
+  visibility: hidden;
+}
+
+.highlightable {
+  background-image: linear-gradient(to right, var(--color-highlight) 50%, transparent 50%);
+  background-size: 200%;
+  background-position-x: 100%;
+}

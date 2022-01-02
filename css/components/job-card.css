@@ -1,0 +1,186 @@
+/*****************************************************************/
+/**************************** JOB CARD ****************************/
+/*****************************************************************/
+
+.job-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+  margin-top: 50rem;
+}
+
+.job-card {
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+}
+
+.job-card-content {
+  width: max-content;
+  height: 25rem;
+  padding: 4rem;
+  background-color: var(--color-gray-light);
+  position: relative;
+  /* z-index: 0; */
+
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.SJ-num {
+  color: var(--color-red);
+}
+
+.next-SJ-num-container {
+
+}
+
+.next-SJ-num-expression {
+  color: var(--color-gray-darkest);
+}
+
+.next-SJ-num {
+  color: var(--color-gray-darkest);
+}
+
+/* Text boxes */
+.text-boxes {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.text-box-line-group--M-access .text-box { left: 10rem; }
+.text-box-line-group--formula-computation .text-box { left: 20rem; }
+.text-box-line-group--computation-expression--1 .text-box { left: 25rem; }
+
+
+
+/* M container */
+.M-container {
+  display: flex;
+  align-items: center;
+}
+
+.M-access-container {
+
+}
+
+.M-related,
+.M-access,
+.M-entry,
+.M-access-text {
+  color: var(--color-purple);
+}
+
+
+
+/* Arrow */
+.arrow-container {
+  animation-fill-mode: forwards;
+
+  display: flex;
+  align-items: center;
+}
+
+.arrow-head {
+  width: 2rem;
+  height: 3.6rem;
+  background-color: var(--color-gray-darkest);
+  clip-path: polygon(0% 50%, 100% 0%, 100% 100%);
+}
+
+.arrow-tail {
+  width: 16rem;
+  height: 1rem;
+  background-color: var(--color-gray-darkest);
+}
+
+
+
+/* Formula */
+.formula-container {
+  display: flex;
+  align-items: center;
+}
+
+.formula-computation {
+  display: flex;
+  align-items: center;
+}
+
+.max-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.curly-brace {
+  height: 20rem;
+  width: auto;
+}
+
+.computations-container {
+  height: min-content;
+  margin-left: -1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.computation {
+  color: var(--color-gray-darkest);
+}
+
+.computation-1 {
+  
+}
+
+.computation-2 {
+
+}
+
+.computation-result {
+  color: var(--color-gray-darkest);
+}
+
+.weight-related,
+.weight {
+  color: var(--color-blue);
+}
+
+.plus-sign {
+
+}
+
+.OPT-expression-container {
+
+}
+
+.OPT-related,
+.OPT-expression {
+  color: var(--color-brown);
+}
+
+.OPT-result {
+  color: var(--color-gray-darkest);
+}
+
+.c-access-container {
+
+}
+
+.c-related,
+.c-access,
+.c-entry {
+  color: var(--color-green);
+}
+
+.job-card-children {
+  left: 30rem;
+  display: flex;
+  flex-direction: column;
+  gap: 25rem;
+}

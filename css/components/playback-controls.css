@@ -1,0 +1,18 @@
+/*****************************************************************/
+/**************************** PLAYBACK CONTROLS ****************************/
+/*****************************************************************/
+
+.box {
+  width: 8rem;
+  height: 8rem;
+  margin-top: 10rem;
+  display: inline-block;
+}
+
+.box--forward {
+  background-color: var(--color-blue);
+}
+
+.box--backward {
+  background-color: var(--color-red);
+}

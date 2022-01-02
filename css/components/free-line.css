@@ -1,0 +1,19 @@
+/*****************************************************************/
+/**************************** FREE LINE ****************************/
+/*****************************************************************/
+
+.free-line {
+  width: auto;
+  height: auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow:visible;
+}
+
+.free-line__line {
+  stroke: currentColor;
+  stroke-width:2; 
+  marker-end:url(#markerArrow);
+}

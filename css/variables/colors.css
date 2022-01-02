@@ -1,0 +1,29 @@
+/*****************************************************************/
+/**************************** COLORS ****************************/
+/*****************************************************************/
+
+:root {
+  --color-purple-dark: purple;
+  --color-purple: #B36CD8;
+  --color-purple-light: #ffb5ff;
+  --color-purple-lightest: #ffdcff;
+
+  --color-red: red;
+  --color-red-light: #ffc0c0;
+  --color-red-lightest: #f5e7ea;
+
+  --color-blue: blue;
+
+  --color-green-dark: green;
+  --color-green: #62B720;
+  --color-green-light: #b1efb1;
+  --color-green-lightest: #ccffcc;
+
+  --color-brown: #845C35;
+
+  --color-highlight: #F9F278;
+
+  --color-gray-darkest: black;
+  --color-gray: gray;
+  --color-gray-light: #EFEFEF;
+}
