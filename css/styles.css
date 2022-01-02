@@ -70,10 +70,26 @@ span {
 }
 
 .data-display {
-  padding-top: 50rem;
-
   grid-area: data;
+  padding-top: 10rem;
   border-right: solid 1px black;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+
+.time-chart {
+  background-color: gray;
+  width: min-content;
+
+  display: grid;
+  grid-template-columns: repeat(12, 12rem);
+  grid-template-rows: repeat(9, 12rem);
+}
+
+.graph-lines {
+
 }
 
 .array-groups {
