@@ -16,6 +16,7 @@
   padding: 1rem 1rem;
   border: 0.75rem solid currentColor;
   bottom: calc(100% + 5rem);
+  background-color: var(--color-yellow-lightest);
 }
 .text-box__paragraph {
   color: var(--color-gray-darkest);

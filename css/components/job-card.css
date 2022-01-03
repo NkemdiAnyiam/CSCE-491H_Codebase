@@ -19,17 +19,14 @@
   width: max-content;
   height: 25rem;
   padding: 4rem;
-  background-color: var(--color-gray-light);
+  background-color: var(--color-gray-lighter);
+  border: 1px solid var(--color-gray-darkest);
   position: relative;
   /* z-index: 0; */
 
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.SJ-num {
-  color: var(--color-red);
 }
 
 .next-SJ-num-container {
@@ -42,13 +39,6 @@
 
 .next-SJ-num {
   color: var(--color-gray-darkest);
-}
-
-/* Text boxes */
-.text-boxes {
-  position: absolute;
-  left: 0;
-  top: 0;
 }
 
 .text-box-line-group--M-access .text-box { left: 10rem; }

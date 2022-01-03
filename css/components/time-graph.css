@@ -3,14 +3,108 @@
 /*****************************************************************/
 
 .time-graph {
-  background-color: var(--color-gray);
   width: min-content;
-
-  display: grid;
-  grid-template-columns: repeat(12, 12rem);
-  grid-template-rows: repeat(9, 12rem);
+  position: relative;
+  border: 2px solid var(--color-gray-darkest);
 }
 
-.time-graph__graph-lines {
+.time-graph__job-bars {
+  
+}
 
+.time-graph__c-bar {
+  position: absolute;
+  height: 100%;
+  width: 1rem;
+  background-color: var(--color-green);
+  left: 72rem;
+  z-index: 2;
+}
+
+.time-graph__job-bar {
+  position: absolute;
+  height: calc(12rem + 1px);
+  padding: 1rem;
+  background-color: var(--color-blue-light);
+  border: 1px solid var(--color-blue);
+  z-index: 1;
+}
+
+.time-graph__job-bar--1 {
+  top: 0;
+  left: calc(18rem);
+  width: calc(54rem + 1px);
+}
+
+.time-graph__job-bar--2 {
+  top: 12rem;
+  left: 72rem;
+  width: calc(18rem + 1px);
+}
+
+.time-graph__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-graph__row {
+  display: flex;
+  height: 12rem;
+  background-color: var(--color-gray-lighter);
+}
+
+.time-graph__row--times {
+  height: 8rem;
+  background-color: var(--color-gray-lightest);
+}
+
+.time-graph__cell {
+  position: relative;
+  width: 18rem;
+  border: 1px dashed black;
+  border-right: none;
+  border-bottom: none;
+  padding: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.time-graph__cell:last-child { /* De-emphasizes the right-most column of cells, which won't be used for anything */
+  width: 5rem;
+  background-color: var(--color-gray-lightest);
+  border-top: none;
+}
+
+.time-graph__row--0 .time-graph__cell { /* Top row of cells won't have a border */
+  border-top: none;
+}
+
+.time-graph__row--times .time-graph__cell { /* Cells in the row of time values */
+  justify-content: end;
+  align-items: start;
+  border-left: none;
+  border-right: none;
+}
+
+.time-graph__cell--header {
+  align-items: start;
+  border-left: none;
+}
+
+:not(.time-graph__row--times)>.time-graph__cell--header { /* Give darker gray to all header cells except the one in the row of time values */
+  background-color: var(--color-gray-light);
+}
+
+.time-graph__row--times .time-graph__cell span { /* Shifts the time values to the left to align with vertical lines */
+  position: absolute;
+  left: -1rem;
+}
+
+.time-graph__SJ-num {
+  background-color: var(--color-gray-lighter);
+  width: 100%;
 }
