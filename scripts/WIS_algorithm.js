@@ -22,21 +22,19 @@ jobs.forEach(job => {
   jobScheduler.addJob(job);
 });
 jobScheduler.sortJobsByFinish();
+jobScheduler.setCompatibleJobNums();
+jobScheduler.initializeM();
 
-jobScheduler.setupTimeGraph();
+jobScheduler.setupDisplayData();
+console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
 jobScheduler.print();
 
 
 
 
-
-
 // jobScheduler.print();
-// jobScheduler.setCompatibleJobNums();
 // jobScheduler.print();
-// jobScheduler.initializeM();
 // jobScheduler.print();
-// console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
 // jobScheduler.print();
 
 

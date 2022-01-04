@@ -110,7 +110,7 @@ export class JobScheduler {
     });
   }
 
-  setupTimeGraph() {
+  setupDisplayData() {
     // Set up row template and time row to make sure they have proper number of cells
     const templateRowId = 'time-graph__row-template';
     const resultRowTemplateEl = document.getElementById(templateRowId);
@@ -118,25 +118,21 @@ export class JobScheduler {
     const timesRow = document.querySelector('.time-graph__row--times');
 
     for (let i = 0; i <= Math.ceil(this.getMaxTime()); ++i) {
-      const cell = document.createElement('div');
-      rowTemplateRow.append(cell);
-      cell.outerHTML = `<div class="time-graph__cell time-graph__cell--${i}"></div>`;
-
-      const timeCell = document.createElement('div');
-      timesRow.append(timeCell);
-      timeCell.outerHTML = `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`;
+      rowTemplateRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"></div>`);
+      timesRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`);
     }
 
-    
-
-    // Generate job bars
+    // Generate time graph rows, and job bars
     const jobBarsEl = document.querySelector('.time-graph__job-bars');
-    this._jobs.forEach((job, i) => {
-      const jobBar = job.generateJobBar();
-      jobBarsEl.append(jobBar);
 
+    this._jobs.forEach((job, i) => {
+      // job bar
+      jobBarsEl.append(job.generateJobBar());
+
+      // time graph row
       const cloneRow = document.importNode(resultRowTemplateEl.content, true);
       const timeGraphRow = cloneRow.querySelector('.time-graph__row');
+      // row header data
       const rowSJNum = cloneRow.querySelector('.time-graph__SJ-num');
       const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
       const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
@@ -146,8 +142,29 @@ export class JobScheduler {
       rowLetter_unsorted.textContent = `Job ${String.fromCharCode(i + 65)}`;
       rowLetter_sorted.textContent = `Job ${job.getJobLetter()}`;
 
-      timesRow.before(timeGraphRow);
+      timesRow.before(timeGraphRow); // inserting new rows above the times row
     });
+
+
+    // Insert array blocks
+    const array_J1 = document.querySelector('.array-group--j-and-c .array--j');
+    const array_J2 = document.querySelector('.array-group--j-and-M .array--j');
+    const array_c = document.querySelector('.array-group--j-and-c .array--c');
+    const array_M = document.querySelector('.array-group--j-and-M .array--M');
+
+    for (let i = 0; i <= this.getNumJobs(); ++i) {
+      array_J1.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
+      array_J2.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
+      array_c.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${this._c[i] ?? '_'}</div>`);
+      array_M.insertAdjacentHTML('beforeend', i == 0 ?
+        `<div class="array__array-block array__array-block--${i}">${0}</div>` :
+        `<div class="array__array-block array__array-block--${i}">
+          <span class="array__array-M-blank">_</span>
+          <span class="array__array-M-val hidden">X</span>
+        </div>
+        `
+      );
+    }
   }
 
   setCompatibleJobNums() {
@@ -194,6 +211,7 @@ export class JobScheduler {
       // setCardCompResults2(newCard, computation2Data);
 
       this._M[j] = Math.max(computationResult1, computationResult2);
+      document.querySelector(`.array--M .array__array-block--${j} .array__array-M-val`).textContent = `${this._M[j]}`;
       const formulaResultData = {
         formulaResult: this._M[j],
       }
