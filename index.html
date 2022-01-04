@@ -25,13 +25,29 @@
       <div class="data-display">
         <div class="time-graph">
           
+          <div class="time-graph__job-bars">
+            <div class="time-graph__c-bar"></div>
+            <template id="time-graph__job-bar-template">
+              <div class="time-graph__job-bar" data-jobletter="X">X</div>
+            </template>
+
+            <!-- <div class="time-graph__job-bar time-graph__job-bar--1">weight 12</div>
+            <div class="time-graph__job-bar time-graph__job-bar--2">weight 14</div> -->
+          </div>
+          
           <div class="time-graph__rows">
-            <div class="time-graph__job-bars">
-              <div class="time-graph__c-bar"></div>
-              <div class="time-graph__job-bar time-graph__job-bar--1">weight 12</div>
-              <div class="time-graph__job-bar time-graph__job-bar--2">weight 14</div>
-            </div>
-            <div class="time-graph__row time-graph__row--0">
+            <template id="time-graph__row-template">
+              <div class="time-graph__row">
+                <div class="time-graph__cell time-graph__cell--header">
+                  <span class="time-graph__SJ-num SJ-num">(j=X)</span>
+                  <span class="time-graph__job-letter time-graph__job-letter--unsorted hidden" >Job X</span>
+                  <span class="time-graph__job-letter time-graph__job-letter--sorted">Job X</span>
+                </div>
+              </div>
+            </template>
+            
+
+            <!-- <div class="time-graph__row time-graph__row--0">
               <div class="time-graph__cell time-graph__cell--header">
                 <span class="time-graph__SJ-num SJ-num hidden">(j=1)</span>
                 <span class="time-graph__job-letter time-graph__job-letter--unsorted">Job A</span>
@@ -69,39 +85,20 @@
               <div class="time-graph__cell time-graph__cell--9"></div>
               <div class="time-graph__cell time-graph__cell--10"></div>
               <div class="time-graph__cell time-graph__cell--11"></div>
-            </div>
+            </div> -->
             
             <div class="time-graph__row time-graph__row--times">
               <div class="time-graph__cell time-graph__cell--header">Time</div>
-              <div class="time-graph__cell time-graph__cell--0"><span>0</span></div>
-              <div class="time-graph__cell time-graph__cell--1"><span>1</span></div>
-              <div class="time-graph__cell time-graph__cell--2"><span>2</span></div>
-              <div class="time-graph__cell time-graph__cell--3"><span>3</span></div>
-              <div class="time-graph__cell time-graph__cell--4"><span>4</span></div>
-              <div class="time-graph__cell time-graph__cell--5"><span>5</span></div>
-              <div class="time-graph__cell time-graph__cell--6"><span>6</span></div>
-              <div class="time-graph__cell time-graph__cell--7"><span>7</span></div>
-              <div class="time-graph__cell time-graph__cell--8"><span>8</span></div>
-              <div class="time-graph__cell time-graph__cell--9"><span>9</span></div>
-              <div class="time-graph__cell time-graph__cell--10"><span>10</span></div>
-              <div class="time-graph__cell time-graph__cell--11"><span>11</span></div>
+              <!-- <div class="time-graph__cell time-graph__cell--0"><span>0</span></div> -->
             </div>
           </div>
+
         </div>
 
         <div class="array-groups">
           <div class="array-group array-group--j-and-c">
             <div class="array array--j">
               <div class="array__array-block array__array-block--header">j</div>
-              <div class="array__array-block">0</div>
-              <div class="array__array-block">1</div>
-              <div class="array__array-block">2</div>
-              <div class="array__array-block">3</div>
-              <div class="array__array-block">4</div>
-              <div class="array__array-block">5</div>
-              <div class="array__array-block">6</div>
-              <div class="array__array-block">7</div>
-              <div class="array__array-block">8</div>
             </div>
   
             <div class="array array--c">
@@ -121,15 +118,6 @@
           <div class="array-group array-group--j-and-M">
             <div class="array array--j">
               <div class="array__array-block array__array-block--header">j</div>
-              <div class="array__array-block">0</div>
-              <div class="array__array-block">1</div>
-              <div class="array__array-block">2</div>
-              <div class="array__array-block">3</div>
-              <div class="array__array-block">4</div>
-              <div class="array__array-block">5</div>
-              <div class="array__array-block">6</div>
-              <div class="array__array-block">7</div>
-              <div class="array__array-block">8</div>
             </div>
   
             <div class="array array--M">
@@ -150,26 +138,66 @@
       
 
       <div class="job-cards">
-        <!-- <template id="job-card-template">
+        <template id="job-card-template">
           <div class="job-card" data-cardnum="X">
 
-            <div class="job-card-content">
-              <div class="M-container highlightable">
+            <div class="job-card-content hidden">
+              <div class="text-boxes">
+                <div class="text-box-line-group text-box-line-group--M-access M-related">
+                  <div class="text-box hidden">
+                    <p class="text-box__paragraph">
+                      Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+                
+  
+                <div class="text-box-line-group text-box-line-group--formula-computation">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph">
+                      Entry doesn't exist, so start computing it.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+                
+                
+                <div class="text-box-line-group text-box-line-group--computation-expression--1">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph">
+                      Describe that it will first assume that this job IS part of the optimal structure and compute that route
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+              </div>
+  
+              
+              <div class="M-container">
+  
                 <span class="M-access-container">
-                  <span class="M-access">
+                  <span class="M-access highlightable hidden">
                     M[<span class="SJ-num">X</span>]
                   </span>
-                  <span class="M-entry hidden">X</span>
+                  <span class="M-entry highlightable hidden">X</span>
                 </span>
               </div>
           
-              <div class="arrow-container">
+              <div class="arrow-container hidden">
                 <div class="arrow-head"></div>
                 <div class="arrow-tail"></div>
               </div>
           
+              
               <div class="formula-container">
-                <span class="formula-computation">
+                <span class="formula-computation highlightable hidden">
                   <div class="max-container">
                     <span class="max-text">max</span>
                     <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
@@ -179,17 +207,17 @@
                   </div>
                   <div class="computations-container">
                     <div class="computation computation--1">
-                      <span class="computation-expression">
+                      <span class="computation-expression computation-expression--1 highlightable">
                         <span class="weight">X</span>
                         <span class="plus-sign">+</span>
                         <span class="OPT-expression-container">
-                          <span class="OPT-expression">
+                          <span class="OPT-expression highlightable">
                             OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry hidden">X</span></span>)
                           </span>
                           <span class="OPT-result hidden">X</span>
                         </span>
                       </span>
-                      <span class="computation-result hidden">X</span>
+                      <span class="computation-result highlightable hidden">X</span>
                     </div>
           
                     <div class="computation computation--2">
@@ -203,30 +231,13 @@
                     </div>
                   </div>
                 </span>
-                <span class="formula-result hidden">X</span>
+                <span class="formula-result highlightable hidden">X</span>
               </div>
             </div>
             
             <div class="job-card-children"></div>
           </div>
         </template>
-
-        <template id="job-stub-template">
-          <div class="job-card" data-cardnum="X">
-
-            <div class="job-card-content">
-              <div class="M-container highlightable">
-                <span class="M-access-container">
-                  <span class="M-access">
-                    M[<span class="SJ-num">X</span>]
-                  </span>
-                  <span class="M-entry hidden">X</span>
-                </span>
-              </div>
-            </div>
-            
-          </div>
-        </template> -->
 
         <div class="job-card" data-cardnum="X">
 

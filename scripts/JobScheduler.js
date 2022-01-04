@@ -73,7 +73,8 @@ const genNewJobStub = (cardData) => {
 };
 
 
-class JobScheduler {
+export class JobScheduler {
+  _maxTime = 0;
   _c = [];
   _M = [];
   static nextCardNum = 1;
@@ -84,10 +85,17 @@ class JobScheduler {
   }
 
   getNumJobs() { return this._n_jobs; }
+  getMaxTime() { return this._maxTime; }
+  getJobs() { return [...this._jobs]; }
 
   addJob(job) { 
     this._jobs.push(job);
     this._n_jobs++;
+    this._maxTime = Math.max(this._maxTime, job.getFinish());
+  }
+
+  addJobs(jobs) {
+    jobs.forEach(job => this.addJob(job));
   }
 
   jobFinishComparator(job1, job2) {
@@ -99,6 +107,46 @@ class JobScheduler {
     this._jobs.sort(this.jobFinishComparator);
     this._jobs.forEach((job, index) => {
       job.setSortedJobNum(index + 1);
+    });
+  }
+
+  setupTimeGraph() {
+    // Set up row template and time row to make sure they have proper number of cells
+    const templateRowId = 'time-graph__row-template';
+    const resultRowTemplateEl = document.getElementById(templateRowId);
+    const rowTemplateRow = resultRowTemplateEl.content.querySelector('.time-graph__row');
+    const timesRow = document.querySelector('.time-graph__row--times');
+
+    for (let i = 0; i <= Math.ceil(this.getMaxTime()); ++i) {
+      const cell = document.createElement('div');
+      rowTemplateRow.append(cell);
+      cell.outerHTML = `<div class="time-graph__cell time-graph__cell--${i}"></div>`;
+
+      const timeCell = document.createElement('div');
+      timesRow.append(timeCell);
+      timeCell.outerHTML = `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`;
+    }
+
+    
+
+    // Generate job bars
+    const jobBarsEl = document.querySelector('.time-graph__job-bars');
+    this._jobs.forEach((job, i) => {
+      const jobBar = job.generateJobBar();
+      jobBarsEl.append(jobBar);
+
+      const cloneRow = document.importNode(resultRowTemplateEl.content, true);
+      const timeGraphRow = cloneRow.querySelector('.time-graph__row');
+      const rowSJNum = cloneRow.querySelector('.time-graph__SJ-num');
+      const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
+      const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
+
+      timeGraphRow.classList.add(`time-graph__row--${i}`);
+      rowSJNum.textContent = `j=${i+1}`;
+      rowLetter_unsorted.textContent = `Job ${String.fromCharCode(i + 65)}`;
+      rowLetter_sorted.textContent = `Job ${job.getJobLetter()}`;
+
+      timesRow.before(timeGraphRow);
     });
   }
 
@@ -127,31 +175,31 @@ class JobScheduler {
         cEntry: this._c[j],
         nextSJNum: (j - 1),
       };
-      const newCard = genNewJobCard(cardData);
+      // const newCard = genNewJobCard(cardData);
       // parentContainer.append(newCard);
-      const childrenContainer = newCard.querySelector('.job-card-children');
+      const childrenContainer = null;
 
       const computationResult1 = this._jobs[j-1].getWeight() + this.computeOPT(this._c[j], childrenContainer); // assuming this job is part of optimal set
       const computation1Data = {
         OPTResult: computationResult1 - this._jobs[j-1].getWeight(),
         computationResult: computationResult1,
       };
-      setCardCompResults1(newCard, computation1Data);
+      // setCardCompResults1(newCard, computation1Data);
 
       const computationResult2 = this.computeOPT(j - 1, childrenContainer); // assuming this job is NOT part of optimal set
       const computation2Data = {
         OPTResult: computationResult2,
         computationResult: computationResult2,
       };
-      setCardCompResults2(newCard, computation2Data);
+      // setCardCompResults2(newCard, computation2Data);
 
       this._M[j] = Math.max(computationResult1, computationResult2);
       const formulaResultData = {
         formulaResult: this._M[j],
       }
-      setCardFormulaResults(newCard, formulaResultData);
-      console.log(newCard);
-      console.log(childrenContainer);
+      // setCardFormulaResults(newCard, formulaResultData);
+      // console.log(newCard);
+      // console.log(childrenContainer);
     }
     else {
       const cardData = {
@@ -159,8 +207,8 @@ class JobScheduler {
         SJNum: this._jobs[j-1]?.getSortedJobNum() || 0,
         MEntry: this._M[j],
       };
-      const newStub = genNewJobStub(cardData);
-      parentContainer.append(newStub);
+      // const newStub = genNewJobStub(cardData);
+      // parentContainer.append(newStub);
     }
     return this._M[j]
   }
@@ -180,5 +228,3 @@ class JobScheduler {
     console.log(this.toStr());
   }
 }
-
-export default JobScheduler;

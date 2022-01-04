@@ -15,7 +15,7 @@
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
-  width: 1rem;
+  width: 2rem;
   background-color: var(--color-green);
   left: 72rem;
   z-index: 2;
@@ -79,7 +79,7 @@
   border-top: none;
 }
 
-.time-graph__row--0 .time-graph__cell { /* Top row of cells won't have a border */
+.time-graph__row:first-child .time-graph__cell { /* Top row of cells won't have a top border */
   border-top: none;
 }
 
