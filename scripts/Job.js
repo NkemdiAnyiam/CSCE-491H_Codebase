@@ -16,7 +16,7 @@ export class Job {
   getWeight() { return this._weight; }
   getSortedJobNum() { return this._sortedJobNum; }
   // getCompatibleJobNum() { return this._compatibleJobNum; }
-  // getJobBar() { return this._jobBarEl; }
+  getJobBar() { return this._jobBarEl; }
 
   setSortedJobNum(sortedJobNum) { this._sortedJobNum = sortedJobNum; }
   // setCompatibleJobNum(compatibleJobNum) { this._compatibleJobNum = compatibleJobNum; }
@@ -38,7 +38,9 @@ export class Job {
     const jobBarEl = cloneBar.querySelector('.time-graph__job-bar');
     jobBarEl.textContent = `weight ${this._weight}`;
     jobBarEl.dataset.jobletter = this._jobLetter;
+    jobBarEl.dataset.start = this._start;
     jobBarEl.style.width = `calc(${18 * this.getDuration()}rem + 1px)`;
+    this._jobBarEl = jobBarEl;
     return jobBarEl;
   }
 

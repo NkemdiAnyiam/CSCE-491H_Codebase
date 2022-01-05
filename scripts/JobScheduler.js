@@ -80,7 +80,7 @@ export class JobScheduler {
   static nextCardNum = 1;
 
   constructor(jobs = []) {
-    this._jobs = jobs;
+    this._jobs = [...jobs];
     this._n_jobs = jobs.length;
   }
 
@@ -156,10 +156,15 @@ export class JobScheduler {
       const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
       const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
 
+      const sortedJobLetter = job.getJobLetter();
+      const unsortedJobLetter = String.fromCharCode(i + 65);
+
       timeGraphRow.classList.add(`time-graph__row--${i}`);
+      timeGraphRow.dataset.jobletterunsorted = unsortedJobLetter;
+      timeGraphRow.dataset.joblettersorted = sortedJobLetter;
       rowSJNum.textContent = `j=${i+1}`;
-      rowLetter_unsorted.textContent = `Job ${String.fromCharCode(i + 65)}`;
-      rowLetter_sorted.textContent = `Job ${job.getJobLetter()}`;
+      rowLetter_unsorted.textContent = `Job ${unsortedJobLetter}`;
+      rowLetter_sorted.textContent = `Job ${sortedJobLetter}`;
 
       timesRow.before(timeGraphRow); // inserting new rows above the times row
     });
