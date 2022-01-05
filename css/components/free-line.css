@@ -10,10 +10,15 @@
   left: 0;
   pointer-events: none;
   overflow:visible;
+  z-index: 1000;
 }
 
 .free-line__line {
   stroke: currentColor;
   stroke-width:2; 
   marker-end:url(#markerArrow);
+}
+
+.free-line marker path {
+  fill: currentColor;
 }
