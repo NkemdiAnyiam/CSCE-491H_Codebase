@@ -101,8 +101,8 @@ export class AnimObject {
       const rectTarget = this.targetElem.getBoundingClientRect();
 
       // the displacement will be the difference between the target element's position and our element's position
-      translateX = rectTarget[this.alignmentX] - rectThis[this.alignmentX];
-      translateY = rectTarget[this.alignmentY] - rectThis[this.alignmentY];
+      translateX = this.preserveX ? 0 : rectTarget[this.alignmentX] - rectThis[this.alignmentX];
+      translateY = this.preserveY ? 0 : rectTarget[this.alignmentY] - rectThis[this.alignmentY];
 
       // when the animation is rewinded, the negatives will be used to undo the translation
       this.undoTranslateX = -translateX;
@@ -167,6 +167,8 @@ export class AnimObject {
       offsetUnitsX = 'px',
       offsetUnitsY = 'px',
       offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
+      preserveX = false,
+      preserveY = false,
     } = translateOptions;
 
     if (targetElem) {
@@ -177,6 +179,9 @@ export class AnimObject {
 
       this.unitsX = 'px';
       this.unitsY = 'px';
+
+      this.preserveX = preserveX;
+      this.preserveY = preserveY;
     }
     else {
       this.translateX = translateXY ?? translateX;
