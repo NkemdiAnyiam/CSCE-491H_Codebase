@@ -25,9 +25,9 @@ jobScheduler.sortJobsByFinish();
 jobScheduler.setCompatibleJobNums();
 jobScheduler.initializeM();
 
-jobScheduler.setupDisplayData();
 console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
 jobScheduler.print();
+jobScheduler.setUpScene();
 
 
 

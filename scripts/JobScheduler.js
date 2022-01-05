@@ -110,7 +110,23 @@ export class JobScheduler {
     });
   }
 
-  setupDisplayData() {
+  setCompatibleJobNums() {
+    this._c.push(null); // TODO: potentially clear before starting
+    this._jobs.forEach(job => {
+      const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
+      // job.setCompatibleJobNum(compatibleJobNum);
+      this._c.push(compatibleJobNum);
+    });
+  }
+
+  initializeM() {
+    this._M[0] = 0;
+    for (let i = 1; i <= this._n_jobs; ++i) {
+      this._M[i] = null;
+    }
+  }
+
+  setUpScene() {
     // Set up row template and time row to make sure they have proper number of cells
     const templateRowId = 'time-graph__row-template';
     const resultRowTemplateEl = document.getElementById(templateRowId);
@@ -127,7 +143,10 @@ export class JobScheduler {
 
     this._jobs.forEach((job, i) => {
       // job bar
-      jobBarsEl.append(job.generateJobBar());
+      const jobEl = job.generateJobBar();
+      jobEl.style.left = `${i*10}rem`;
+      jobEl.style.top = `${i*10}rem`;
+      jobBarsEl.append(jobEl);
 
       // time graph row
       const cloneRow = document.importNode(resultRowTemplateEl.content, true);
@@ -144,9 +163,13 @@ export class JobScheduler {
 
       timesRow.before(timeGraphRow); // inserting new rows above the times row
     });
+    document.getElementById('time-graph__job-bar-template').remove();
+    resultRowTemplateEl.remove();
 
 
     // Insert array blocks
+    const templateArrayBlockID = 'array__array-block-template';
+    const resultBlockTemplate = document.getElementById(templateArrayBlockID);
     const array_J1 = document.querySelector('.array-group--j-and-c .array--j');
     const array_J2 = document.querySelector('.array-group--j-and-M .array--j');
     const array_c = document.querySelector('.array-group--j-and-c .array--c');
@@ -155,32 +178,22 @@ export class JobScheduler {
     for (let i = 0; i <= this.getNumJobs(); ++i) {
       array_J1.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
       array_J2.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
-      array_c.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${this._c[i] ?? '_'}</div>`);
-      array_M.insertAdjacentHTML('beforeend', i == 0 ?
-        `<div class="array__array-block array__array-block--${i}">${0}</div>` :
-        `<div class="array__array-block array__array-block--${i}">
-          <span class="array__array-M-blank">_</span>
-          <span class="array__array-M-val hidden">X</span>
-        </div>
-        `
-      );
-    }
-  }
+      
+      const cloneBlock_c = document.importNode(resultBlockTemplate.content, true);
+      const cloneBlock_M = document.importNode(resultBlockTemplate.content, true);
 
-  setCompatibleJobNums() {
-    this._c.push(null); // TODO: potentially clear before starting
-    this._jobs.forEach(job => {
-      const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
-      // job.setCompatibleJobNum(compatibleJobNum);
-      this._c.push(compatibleJobNum);
-    });
-  }
+      const arrayBlock_c = cloneBlock_c.querySelector('.array__array-block');
+      arrayBlock_c.classList.add(`array__array-block--${i}`);
+      arrayBlock_c.querySelector('.array__array-entry--value').textContent = this._c[i];
+      array_c.append(arrayBlock_c);
 
-  initializeM() {
-    this._M[0] = 0;
-    for (let i = 1; i <= this._n_jobs; ++i) {
-      this._M[i] = null;
+      const arrayBlock_M = cloneBlock_M.querySelector('.array__array-block');
+      arrayBlock_M.classList.add(`array__array-block--${i}`);
+      arrayBlock_M.querySelector('.array__array-entry--value').textContent = this._M[i];
+      array_M.append(arrayBlock_M);
     }
+
+    resultBlockTemplate.remove();
   }
 
   computeOPT(j, parentContainer) {
@@ -211,7 +224,6 @@ export class JobScheduler {
       // setCardCompResults2(newCard, computation2Data);
 
       this._M[j] = Math.max(computationResult1, computationResult2);
-      document.querySelector(`.array--M .array__array-block--${j} .array__array-M-val`).textContent = `${this._M[j]}`;
       const formulaResultData = {
         formulaResult: this._M[j],
       }
