@@ -31,7 +31,7 @@
   z-index: 1;
 }
 
-.time-graph__job-bar--1 {
+/* .time-graph__job-bar--1 {
   top: 0;
   left: calc(18rem);
   width: calc(54rem + 1px);
@@ -41,7 +41,7 @@
   top: 12rem;
   left: 72rem;
   width: calc(18rem + 1px);
-}
+} */
 
 .time-graph__rows {
   display: flex;
@@ -108,4 +108,5 @@
 .time-graph__SJ-num {
   background-color: var(--color-gray-lighter);
   width: 100%;
+  flex: 1;
 }
