@@ -35,43 +35,78 @@ const animTimeline = new AnimTimeline();
 const timeGraphEl = document.querySelector('.time-graph');
 const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
 const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
+const cArray = document.querySelector('.array--c');
 
-const animBlock1 = new AnimBlock();
+const animBlock0 = new AnimBlock();
 jobBarEls.forEach((jobBarEl) => {
   const jobLetter = jobBarEl.dataset.jobletter;
   const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"]  .time-graph__cell--${jobBarEl.dataset.start}`);
   const options = { translateOptions: { targetElem: startCell } };
+  animBlock0.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
+});
+animTimeline.addBlock(animBlock0);
+
+const animBlock1 = new AnimBlock();
+jobBarEls.forEach((jobBarEl, i) => {
+  const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
   animBlock1.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
 });
+animTimeline.addBlock(animBlock1);
 
 const animBlock2 = new AnimBlock();
-jobBarEls.forEach((jobBarEl) => {
-  const options = { translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
-  animBlock2.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
-});
-
-const animBlock3 = new AnimBlock();
 jobBarEls.forEach((jobBarEl) => {
   const jobLetter = jobBarEl.dataset.jobletter;
   const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`);
   const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`);
   const options = { blocksNext: false, translateOptions: { targetElem: startCell } };
-  animBlock3.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
-
+  
   const rowSJNum = row.querySelector('.time-graph__SJ-num');
   const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted');
   const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
+  
+  animBlock2.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
+  animBlock2.addAnimObject(new AnimObject(rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false}));
+  animBlock2.addAnimObject(new AnimObject(rowSJNum, 'enter-wipe-from-right', {blocksPrev: false, blocksNext: false}));
+  animBlock2.addAnimObject(new AnimObject(rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false}));
+});
+animTimeline.addBlock(animBlock2);
 
-  animBlock3.addAnimObject(new AnimObject(rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false}));
-  animBlock3.addAnimObject(new AnimObject(rowSJNum, 'enter-wipe-from-right', {blocksPrev: false, blocksNext: false}));
-  animBlock3.addAnimObject(new AnimObject(rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false}));
+const animBlock3 = new AnimBlock();
+const cBar = document.querySelector('.time-graph__c-bar');
+const timeGraphArrowEl = timeGraphEl.querySelector('.free-line');
+jobBarEls.slice().reverse().forEach((jobBarEl, i) => {
+  animTimeline.addBlock(new AnimBlock(...[
+    new AnimObject(cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }}),
+    new AnimObject(cBar, 'fade-in'),
+  ]));
+
+  const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`);
+  const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
+  const cEntryValue = cBlock.querySelector(`.array__array-entry--value`);
+  const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`);
+  const animBlock = new AnimBlock();
+  if (compatibleJobBarEl) {
+    animBlock.addAnimObject( new AnimObject(cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }}) );
+    animBlock.addAnimObject( new AnimLine(timeGraphArrowEl, 'fade-in', compatibleJobBarEl, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false}) );
+  }
+  else {
+    animBlock.addAnimObject( new AnimObject(cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }}) );
+    animBlock.addAnimObject( new AnimLine(timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false}) );
+  }
+
+  animBlock.addAnimObjects([
+    new AnimObject(cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false}),
+    new AnimObject(cEntryValue, 'enter-wipe-from-right', {blocksPrev: false}),
+  ]);
+
+  animTimeline.addBlock(animBlock);
+
+  animTimeline.addBlock(new AnimBlock(...[
+    new AnimObject(cBar, 'fade-out', {blocksNext: false}),
+    new AnimLine(timeGraphArrowEl, 'fade-out', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false}),
+  ]));
 });
 
-animTimeline.addBlocks([
-  animBlock1,
-  animBlock2,
-  animBlock3,
-]);
 
 
 const goForward = async function() {
