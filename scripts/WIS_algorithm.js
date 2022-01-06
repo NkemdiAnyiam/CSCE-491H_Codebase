@@ -37,8 +37,10 @@ const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
 const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
 const cArray = document.querySelector('.array--c');
 
+// Move job bars onto time graph in unsorted order
 const animBlock0 = new AnimBlock();
 jobBarEls.forEach((jobBarEl) => {
+  // set up options for moving job bars to correct location
   const jobLetter = jobBarEl.dataset.jobletter;
   const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"]  .time-graph__cell--${jobBarEl.dataset.start}`);
   const options = { translateOptions: { targetElem: startCell } };
@@ -46,6 +48,7 @@ jobBarEls.forEach((jobBarEl) => {
 });
 animTimeline.addBlock(animBlock0);
 
+// Move job bars back off of the time graph
 const animBlock1 = new AnimBlock();
 jobBarEls.forEach((jobBarEl, i) => {
   const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
@@ -53,13 +56,16 @@ jobBarEls.forEach((jobBarEl, i) => {
 });
 animTimeline.addBlock(animBlock1);
 
+// Move job bars back onto the time graph (sorted by finish time) and update time graph row headers
 const animBlock2 = new AnimBlock();
 jobBarEls.forEach((jobBarEl) => {
+  // set up options for moving job bars to correct location
   const jobLetter = jobBarEl.dataset.jobletter;
   const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`);
   const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`);
   const options = { blocksNext: false, translateOptions: { targetElem: startCell } };
   
+  // get row's header data to animate
   const rowSJNum = row.querySelector('.time-graph__SJ-num');
   const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted');
   const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
@@ -73,9 +79,10 @@ jobBarEls.forEach((jobBarEl) => {
 });
 animTimeline.addBlock(animBlock2);
 
-const cBar = document.querySelector('.time-graph__c-bar');
+// Demonstrate how to fill out the c array
+const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
 const timeGraphArrowEl = timeGraphEl.querySelector('.free-line');
-jobBarEls.slice().reverse().forEach((jobBarEl, i) => {
+jobBarEls.forEach((jobBarEl, i) => {
   animTimeline.addOneByParams([
     [ 'object', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
     [ 'object', cBar, 'fade-in' ],
@@ -94,7 +101,7 @@ jobBarEls.slice().reverse().forEach((jobBarEl, i) => {
   }
   else {
     animBlock.addManyByParams([
-      [ 'object', timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+      [ 'object', cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }} ],
       [ 'line', timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
     ]);
   }
