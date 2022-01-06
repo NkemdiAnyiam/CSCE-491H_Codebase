@@ -17,6 +17,7 @@ export class AnimObject {
   // Determines whether or not the upcoming animation should wait for this one to finish (can be changed in applyOptions())
   blocksNext = true;
   blocksPrev = true;
+  duration = 500;
 
   constructor(domElem, animName, options) {
     this.domElem = domElem;
@@ -77,7 +78,7 @@ export class AnimObject {
       this.domElem,
       AnimObject[animName], // gets transformations from appropriate static property on AnimObject
       {
-        duration: 500, // TODO: potentially allow variable duration values (both forwards and backwards)
+        duration: this.duration, // TODO: potentially allow variable duration values (both forwards and backwards)
         fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
       }
     );
@@ -119,7 +120,7 @@ export class AnimObject {
                               calc(${translateY}${this.unitsY} + ${offsetY}${this.offsetUnitsY})`
       },
       {
-        duration: 500,
+        duration: this.duration,
         fill: 'forwards',
         composite: 'accumulate',
       }
@@ -139,11 +140,13 @@ export class AnimObject {
     const {
       blocksNext,
       blocksPrev,
+      duration,
       translateOptions,
     } = options;
 
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
+    this.duration = duration ?? this.duration;
 
     if (translateOptions) {
       this.applyTranslateOptions(translateOptions);
