@@ -82,7 +82,7 @@ export class AnimLine extends AnimObject {
   applyOptions(options) {
     if (!options) { return; }
 
-    super.applyOptions();
+    super.applyOptions(options);
 
     const {lineOptions} = options;
     if (lineOptions) { this.applyLineOptions(lineOptions); }
