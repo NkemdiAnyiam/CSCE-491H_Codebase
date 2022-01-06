@@ -1,3 +1,5 @@
+import { AnimBlock } from "./AnimBlock.js";
+
 export class AnimTimeline {
   static id = 0;
 
@@ -20,6 +22,12 @@ export class AnimTimeline {
     this.animBlocks.push(animBlock);
   }
   addBlocks(animBlocks) { animBlocks.forEach(animBlock => this.addBlock(animBlock)); }
+  addOneByParams(animBlockParam) {
+    const animBlock = new AnimBlock();
+    animBlockParam[0] instanceof Array ? animBlock.addManyByParams(animBlockParam) : animBlock.addOneByParams(animBlockParam);
+    this.addBlock(animBlock);
+  }
+  addManyByParams(animBlocksParams) { animBlocksParams.forEach(animBlockParam => this.addOneByParams(animBlockParam)); }
 
   // plays current AnimBlock and increments stepNum
   async stepForward() {

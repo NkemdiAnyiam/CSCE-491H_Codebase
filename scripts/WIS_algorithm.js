@@ -64,21 +64,22 @@ jobBarEls.forEach((jobBarEl) => {
   const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted');
   const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
   
-  animBlock2.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
-  animBlock2.addAnimObject(new AnimObject(rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false}));
-  animBlock2.addAnimObject(new AnimObject(rowSJNum, 'enter-wipe-from-right', {blocksPrev: false, blocksNext: false}));
-  animBlock2.addAnimObject(new AnimObject(rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false}));
+  animBlock2.addManyByParams([
+    [ 'object', jobBarEl, 'translate', options ],
+    [ 'object', rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
+    [ 'object', rowSJNum, 'enter-wipe-from-right', {blocksPrev: false, blocksNext: false} ],
+    [ 'object', rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false} ],
+  ]);
 });
 animTimeline.addBlock(animBlock2);
 
-const animBlock3 = new AnimBlock();
 const cBar = document.querySelector('.time-graph__c-bar');
 const timeGraphArrowEl = timeGraphEl.querySelector('.free-line');
 jobBarEls.slice().reverse().forEach((jobBarEl, i) => {
-  animTimeline.addBlock(new AnimBlock(...[
-    new AnimObject(cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }}),
-    new AnimObject(cBar, 'fade-in'),
-  ]));
+  animTimeline.addOneByParams([
+    [ 'object', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
+    [ 'object', cBar, 'fade-in' ],
+  ]);
 
   const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`);
   const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
@@ -86,25 +87,29 @@ jobBarEls.slice().reverse().forEach((jobBarEl, i) => {
   const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`);
   const animBlock = new AnimBlock();
   if (compatibleJobBarEl) {
-    animBlock.addAnimObject( new AnimObject(cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }}) );
-    animBlock.addAnimObject( new AnimLine(timeGraphArrowEl, 'fade-in', compatibleJobBarEl, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false}) );
+    animBlock.addManyByParams([
+      [ 'object', cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }} ],
+      [ 'line', timeGraphArrowEl, 'fade-in', compatibleJobBarEl, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ]
+    ]);
   }
   else {
-    animBlock.addAnimObject( new AnimObject(cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }}) );
-    animBlock.addAnimObject( new AnimLine(timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false}) );
+    animBlock.addManyByParams([
+      [ 'object', timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+      [ 'line', timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+    ]);
   }
 
-  animBlock.addAnimObjects([
-    new AnimObject(cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false}),
-    new AnimObject(cEntryValue, 'enter-wipe-from-right', {blocksPrev: false}),
+  animBlock.addManyByParams([
+    [ 'object', cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
+    [ 'object', cEntryValue, 'enter-wipe-from-right', {blocksPrev: false} ],
   ]);
 
   animTimeline.addBlock(animBlock);
 
-  animTimeline.addBlock(new AnimBlock(...[
-    new AnimObject(cBar, 'fade-out', {blocksNext: false}),
-    new AnimLine(timeGraphArrowEl, 'fade-out', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false}),
-  ]));
+  animTimeline.addOneByParams([
+    [ 'object', cBar, 'fade-out', {blocksNext: false} ],
+    [ 'line', timeGraphArrowEl, 'fade-out', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+  ]);
 });
 
 

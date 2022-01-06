@@ -1,3 +1,6 @@
+import { AnimObject } from "./AnimObject.js";
+import { AnimLine } from "./AnimLine.js";
+
 export class AnimBlock {
   timelineID; // set to match the id of the AnimTimeline to which it belongs
   animObjects = []; // array of AnimObjects
@@ -8,6 +11,12 @@ export class AnimBlock {
 
   addAnimObject(animObject) { this.animObjects.push(animObject); }
   addAnimObjects(animObjects) { animObjects.forEach(animObject => this.addAnimObject(animObject)); }
+  addOneByParams([type, ...animObjectParams]) {
+    if (type === "object") { this.addAnimObject(new AnimObject(...animObjectParams)); return;}
+    if (type === 'line') { this.addAnimObject(new AnimLine(...animObjectParams)); return;}
+    console.error('AnimObject type not specified'); // TODO: throw error
+  }
+  addManyByParams(animObjectsParams) { animObjectsParams.forEach(entry => this.addOneByParams(entry)); }
 
   // plays each AnimObject contained in this AnimBlock instance in sequential order
   async play() {
