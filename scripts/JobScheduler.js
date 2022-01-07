@@ -181,8 +181,9 @@ export class JobScheduler {
     const array_M = document.querySelector('.array-group--j-and-M .array--M');
 
     for (let i = 0; i <= this.getNumJobs(); ++i) {
-      array_J1.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
-      array_J2.insertAdjacentHTML('beforeend', `<div class="array__array-block array__array-block--${i}">${i}</div>`);
+      const jBlockString = `<div class="array__array-block array__array-block--${i} highlightable">${i}</div>`
+      array_J1.insertAdjacentHTML('beforeend', jBlockString);
+      array_J2.insertAdjacentHTML('beforeend', jBlockString);
       
       const cloneBlock_c = document.importNode(resultBlockTemplate.content, true);
       const cloneBlock_M = document.importNode(resultBlockTemplate.content, true);

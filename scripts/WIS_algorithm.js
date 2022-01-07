@@ -83,29 +83,40 @@ animTimeline.addBlock(animBlock2);
 const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
 const timeGraphArrowEl = timeGraphEl.querySelector('.free-line');
 jobBarEls.forEach((jobBarEl, i) => {
+  const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
+  // Move cbar to current job bar, unhide it, and highlight current job bar
   animTimeline.addOneByParams([
     [ 'object', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
-    [ 'object', cBar, 'fade-in' ],
+    [ 'object', jobBarEl, 'highlight', {blocksNext: false} ],
+    [ 'object', jBlock, 'highlight', {blocksNext: false, blocksPrev: false} ],
+    [ 'object', cBar, 'fade-in', {blocksPrev: false} ],
   ]);
 
+  // Move cbar to compatible job bar and highlight it OR move cbar to left of time graph. Point arrow to current c-array entry
   const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`);
   const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
   const cEntryValue = cBlock.querySelector(`.array__array-entry--value`);
-  const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`);
+  const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`)
+  let row;
+  let rowSJNum;
   const animBlock = new AnimBlock();
   if (compatibleJobBarEl) {
+    row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`);
+    rowSJNum = row.querySelector('.time-graph__SJ-num');
     animBlock.addManyByParams([
       [ 'object', cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }} ],
-      [ 'line', timeGraphArrowEl, 'fade-in', compatibleJobBarEl, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ]
+      [ 'object', compatibleJobBarEl, 'highlight' ],
+      [ 'line', timeGraphArrowEl, 'fade-in', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
     ]);
   }
   else {
     animBlock.addManyByParams([
       [ 'object', cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }} ],
-      [ 'line', timeGraphArrowEl, 'fade-in', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+      [ 'line', timeGraphArrowEl, 'fade-in', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false} ],
     ]);
   }
 
+  // "Update" current c-array entry
   animBlock.addManyByParams([
     [ 'object', cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
     [ 'object', cEntryValue, 'enter-wipe-from-right', {blocksPrev: false} ],
@@ -113,10 +124,21 @@ jobBarEls.forEach((jobBarEl, i) => {
 
   animTimeline.addBlock(animBlock);
 
-  animTimeline.addOneByParams([
-    [ 'object', cBar, 'fade-out', {blocksNext: false} ],
-    [ 'line', timeGraphArrowEl, 'fade-out', cBar, [0, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
+  // Hide cbar and arrow; un-highlight compatible job bar if there was indeed one
+  const animBlock_ = new AnimBlock();
+  if (compatibleJobBarEl) {
+    animBlock_.addOneByParams([ 'object', compatibleJobBarEl, 'un-highlight', {blocksNext: false} ]);
+    animBlock_.addOneByParams([ 'line', timeGraphArrowEl, 'fade-out', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
+  }
+  else {
+    animBlock_.addOneByParams([ 'line', timeGraphArrowEl, 'fade-out', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
+  }
+  animBlock_.addManyByParams([
+    [ 'object', cBar, 'fade-out', {blocksNext: false, blocksPrev: false} ],
+    [ 'object', jobBarEl, 'un-highlight', {blocksPrev: false, blocksNext: false} ],
+    [ 'object', jBlock, 'un-highlight', {blocksPrev: false} ],
   ]);
+  animTimeline.addBlock(animBlock_);
 });
 
 
