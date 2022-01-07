@@ -8,12 +8,6 @@
   border: 2px solid var(--color-gray-darkest);
 }
 
-.time-graph__job-bars {
-  position: absolute;
-  left: calc(100% + 8rem);
-  height: 100%;
-}
-
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
@@ -23,12 +17,20 @@
   z-index: 2;
 }
 
+
+.time-graph__job-bars {
+  position: absolute;
+  left: calc(100% + 8rem);
+  height: 100%;
+}
+
 .time-graph__job-bar {
   position: absolute;
   height: calc(12rem + 1px);
   padding: 1rem 1.6rem;
   background-color: var(--color-blue-light);
   border: 1px solid var(--color-blue);
+  border-right-width: 5px;
   z-index: 1;
 }
 
