@@ -169,7 +169,8 @@
 }
 
 .job-card-children {
-  left: 30rem;
+  margin-left: 30rem;
+  
   display: flex;
   flex-direction: column;
   gap: 25rem;
