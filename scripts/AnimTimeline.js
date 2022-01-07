@@ -20,6 +20,7 @@ export class AnimTimeline {
   addBlock(animBlock) {
     animBlock.setID(this.id);
     this.animBlocks.push(animBlock);
+    ++this.numBlocks;
   }
   addBlocks(animBlocks) { animBlocks.forEach(animBlock => this.addBlock(animBlock)); }
   addOneByParams(animBlockParam) {
@@ -32,6 +33,8 @@ export class AnimTimeline {
   // plays current AnimBlock and increments stepNum
   async stepForward() {
     if (this.isAnimating) { return Promise.reject('Cannot stepForward() while already animating'); }
+    if (this.atEnd()) { return Promise.reject('Cannot stepForward() at end of timeline'); }
+
     this.isAnimating = true;
     this.currDirection = 'forward';
     if (this.isSkipping) { this.fireSkipSignal(); }
@@ -44,6 +47,8 @@ export class AnimTimeline {
   // decrements stepNum and rewinds the AnimBlock
   async stepBackward() {
     if (this.isAnimating) { return Promise.reject('Cannot stepBackward() while already animating'); }
+    if (this.atBeginning()) { return Promise.reject('Cannot stepBackward() at beginning of timeline'); }
+
     this.isAnimating = true;
     --this.stepNum;
     this.currDirection = 'backward';
@@ -77,4 +82,7 @@ export class AnimTimeline {
       if (Number.parseInt(allAnimations[i].id) === this.id) { allAnimations[i].playbackRate = rate; }
     }
   }
+
+  atBeginning() { return this.stepNum === 0; }
+  atEnd() { return this.stepNum === this.numBlocks; }
 }
