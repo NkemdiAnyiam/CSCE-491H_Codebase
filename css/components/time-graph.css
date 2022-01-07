@@ -17,7 +17,7 @@
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
-  width: 2rem;
+  width: 1.6rem;
   background-color: var(--color-green);
   left: 100%;
   z-index: 2;
@@ -26,23 +26,12 @@
 .time-graph__job-bar {
   position: absolute;
   height: calc(12rem + 1px);
-  padding: 1rem;
+  padding: 1rem 1.6rem;
   background-color: var(--color-blue-light);
   border: 1px solid var(--color-blue);
   z-index: 1;
 }
 
-/* .time-graph__job-bar--1 {
-  top: 0;
-  left: calc(18rem);
-  width: calc(54rem + 1px);
-}
-
-.time-graph__job-bar--2 {
-  top: 12rem;
-  left: 72rem;
-  width: calc(18rem + 1px);
-} */
 
 .time-graph__rows {
   display: flex;
