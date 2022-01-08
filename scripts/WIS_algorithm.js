@@ -72,9 +72,9 @@ jobBarEls.forEach((jobBarEl) => {
   
   animBlock2.addManyByParams([
     [ 'object', jobBarEl, 'translate', options ],
-    [ 'object', rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
-    [ 'object', rowSJNum, 'enter-wipe-from-right', {blocksPrev: false, blocksNext: false} ],
-    [ 'object', rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false} ],
+    [ 'object', rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, duration: 250} ],
+    [ 'object', rowSJNum, 'enter-wipe-from-right', {blocksNext: false, duration: 250} ],
+    [ 'object', rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false, duration: 250} ],
   ]);
 });
 animTimeline.addBlock(animBlock2);

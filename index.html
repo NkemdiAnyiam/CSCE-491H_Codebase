@@ -93,7 +93,7 @@
         <template id="job-card-template">
           <div class="job-card" data-cardnum="X">
 
-            <div class="job-card-content hidden">
+            <div class="job-card-content">
               <div class="text-boxes">
                 <div class="text-box-line-group text-box-line-group--M-access M-related">
                   <div class="text-box hidden">
@@ -135,21 +135,21 @@
               <div class="M-container">
   
                 <span class="M-access-container">
-                  <span class="M-access highlightable hidden">
+                  <span class="M-access highlightable">
                     M[<span class="SJ-num">X</span>]
                   </span>
                   <span class="M-entry highlightable hidden">X</span>
                 </span>
               </div>
           
-              <div class="arrow-container hidden">
+              <div class="arrow-container">
                 <div class="arrow-head"></div>
                 <div class="arrow-tail"></div>
               </div>
           
               
               <div class="formula-container">
-                <span class="formula-computation highlightable hidden">
+                <span class="formula-computation highlightable">
                   <div class="max-container">
                     <span class="max-text">max</span>
                     <svg class="curly-brace" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.587 208.972">
@@ -187,11 +187,41 @@
               </div>
             </div>
             
-            <div class="job-card-children"></div>
+            <div class="job-card-children">
+              
+            </div>
           </div>
         </template>
 
-        <div class="job-card" data-cardnum="X">
+        <template id="job-stub-template">
+          <div class="job-card" data-cardnum="X">
+
+            <div class="job-card-content">
+              <div class="text-boxes">
+                <div class="text-box-line-group text-box-line-group--M-access M-related">
+                  <div class="text-box hidden">
+                    <p class="text-box__paragraph">
+                      Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+              </div>
+  
+              <div class="M-container">
+                <span class="M-access-container">
+                  <span class="M-access highlightable">
+                    M[<span class="SJ-num">X</span>]
+                  </span>
+                  <span class="M-entry highlightable hidden">X</span>
+                </span>
+              </div>
+            </div>
+        </template>
+
+        <!-- <div class="job-card" data-cardnum="X">
 
           <div class="job-card-content hidden">
             <div class="text-boxes">
@@ -288,7 +318,7 @@
           </div>
           
           <div class="job-card-children"></div>
-        </div>
+        </div> -->
         
         <!--<div class="job-card">
 
@@ -517,15 +547,6 @@
       </div>
       
 
-      <!-- <svg class="arrow">
-        <defs>
-          <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-            <path d="M0,0 L0,8 L6,4 L0,0" style="fill: #000000;" />
-          </marker>
-        </defs>
-
-        <line x1="100" y1="300" x2="50" y2="100" class="arrow-line" />
-      </svg> -->
       <div class="boxes">
         <div class="box box--backward"></div>
         <div class="box box--forward"></div>

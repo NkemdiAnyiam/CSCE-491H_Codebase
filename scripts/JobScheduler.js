@@ -1,57 +1,3 @@
-const genNewJobCard = (cardData) => {
-  const {cardNum, SJNum, weight, cEntry, nextSJNum} = cardData;
-  const templateCardId = "job-card-template";
-  const resultCardTemplate = document.getElementById(templateCardId);
-  const cloneCard = document.importNode(resultCardTemplate.content, true);
-
-  const jobCardEl = cloneCard.querySelector('.job-card');
-  const SJNumEls = cloneCard.querySelectorAll('.SJ-num');
-  const weightEl = cloneCard.querySelector('.weight');
-  const cEntryEl = cloneCard.querySelector('.c-entry');
-
-  const nextSJNumEl = cloneCard.querySelector('.next-SJ-num');
-
-  jobCardEl.dataset.cardnum = `${cardNum}`;
-  SJNumEls.forEach((el) => {
-    el.textContent = SJNum;
-  });
-  weightEl.textContent = weight;
-  cEntryEl.textContent = cEntry;
-  nextSJNumEl.textContent = nextSJNum;
-
-  return jobCardEl;
-};
-
-const setCardCompResults1 = (card, cardData) => {
-  const {OPTResult, computationResult} = cardData;
-
-  const OPTResult1El = card.querySelector('.computation--1 .OPT-result');
-  const computationResult1El = card.querySelector('.computation--1 .computation-result');
-
-  OPTResult1El.textContent = OPTResult;
-  computationResult1El.textContent = computationResult;
-};
-
-const setCardCompResults2 = (card, cardData) => {
-  const {OPTResult, computationResult} = cardData;
-
-  const OPTResult2El = card.querySelector('.computation--2 .OPT-result');
-  const computationResult2El = card.querySelector('.computation--2 .computation-result');
-
-  OPTResult2El.textContent = OPTResult;
-  computationResult2El.textContent = computationResult;
-};
-
-const setCardFormulaResults = (card, cardData) => {
-  const {formulaResult} = cardData;
-
-  const formulaResultEl = card.querySelector('.formula-result');
-  const MEntryEl = card.querySelector('.M-entry');
-  formulaResultEl.textContent = formulaResult;
-  MEntryEl.textContent = formulaResult;
-};
-
-
 const genNewJobStub = (cardData) => {
   const {cardNum, SJNum, MEntry} = cardData;
 
@@ -71,6 +17,77 @@ const genNewJobStub = (cardData) => {
 
   return jobCardEl;
 };
+
+
+
+const genNewJobCard = () => {
+  const templateCardId = "job-card-template";
+  const resultCardTemplate = document.getElementById(templateCardId);
+  const cloneCard = document.importNode(resultCardTemplate.content, true);
+
+  const jobCardEl = cloneCard.querySelector('.job-card');
+  return jobCardEl;
+}
+
+const setJobCardData = (jobCardEl, cardData) => {
+  const {
+    cardNum,
+    SJNum,
+    weight,
+    cEntry,
+    nextSJNum,
+  } = cardData;
+
+  const {
+    OPTResult1,
+    computationResult1,
+  } = cardData;
+
+  const {
+    OPTResult2,
+    computationResult2,
+  } = cardData;
+
+  const {
+    formulaResult,
+  } = cardData;
+
+  const jobCardContentEl = jobCardEl.querySelector('.job-card-content');
+
+  const SJNumEls = jobCardContentEl.querySelectorAll('.SJ-num');
+  const weightEl = jobCardContentEl.querySelector('.weight');
+  const cEntryEl = jobCardContentEl.querySelector('.c-entry');
+
+  const nextSJNumEl = jobCardContentEl.querySelector('.next-SJ-num');
+
+  jobCardContentEl.dataset.cardnum = `${cardNum}`;
+  SJNumEls.forEach((el) => {
+    el.textContent = SJNum;
+  });
+  weightEl.textContent = weight;
+  cEntryEl.textContent = cEntry;
+  nextSJNumEl.textContent = nextSJNum;
+
+
+  const OPTResult1El = jobCardContentEl.querySelector('.computation--1 .OPT-result');
+  const computationResult1El = jobCardContentEl.querySelector('.computation--1 .computation-result');
+
+  OPTResult1El.textContent = OPTResult1;
+  computationResult1El.textContent = computationResult1;
+
+
+  const OPTResult2El = jobCardContentEl.querySelector('.computation--2 .OPT-result');
+  const computationResult2El = jobCardContentEl.querySelector('.computation--2 .computation-result');
+
+  OPTResult2El.textContent = OPTResult2;
+  computationResult2El.textContent = computationResult2;
+
+
+  const formulaResultEl = jobCardContentEl.querySelector('.formula-result');
+  const MEntryEl = jobCardContentEl.querySelector('.M-entry');
+  formulaResultEl.textContent = formulaResult;
+  MEntryEl.textContent = formulaResult;
+}
 
 
 export class JobScheduler {
@@ -204,38 +221,31 @@ export class JobScheduler {
 
   computeOPT(j, parentContainer) {
     if (this._M[j] === null) {
+      const cardNum = JobScheduler.nextCardNum++;
+
+      const newCard = genNewJobCard();
+      parentContainer.append(newCard);
+      const childrenContainer = newCard.querySelector('.job-card-children');
+
+      const computationResult1 = this._jobs[j-1].getWeight() + this.computeOPT(this._c[j], childrenContainer); // assuming this job is part of optimal set
+      const computationResult2 = this.computeOPT(j - 1, childrenContainer); // assuming this job is NOT part of optimal set
+
+      this._M[j] = Math.max(computationResult1, computationResult2); // choosing the best option between the 2 possibilities
+
       const cardData = {
-        cardNum: JobScheduler.nextCardNum++,
+        cardNum: cardNum,
         SJNum: this._jobs[j-1].getSortedJobNum(),
         weight: this._jobs[j-1].getWeight(),
         cEntry: this._c[j],
         nextSJNum: (j - 1),
-      };
-      // const newCard = genNewJobCard(cardData);
-      // parentContainer.append(newCard);
-      const childrenContainer = null;
-
-      const computationResult1 = this._jobs[j-1].getWeight() + this.computeOPT(this._c[j], childrenContainer); // assuming this job is part of optimal set
-      const computation1Data = {
-        OPTResult: computationResult1 - this._jobs[j-1].getWeight(),
-        computationResult: computationResult1,
-      };
-      // setCardCompResults1(newCard, computation1Data);
-
-      const computationResult2 = this.computeOPT(j - 1, childrenContainer); // assuming this job is NOT part of optimal set
-      const computation2Data = {
-        OPTResult: computationResult2,
-        computationResult: computationResult2,
-      };
-      // setCardCompResults2(newCard, computation2Data);
-
-      this._M[j] = Math.max(computationResult1, computationResult2);
-      const formulaResultData = {
+        OPTResult1: computationResult1 - this._jobs[j-1].getWeight(),
+        computationResult1: computationResult1,
+        OPTResult2: computationResult2,
+        computationResult2: computationResult2,
         formulaResult: this._M[j],
-      }
-      // setCardFormulaResults(newCard, formulaResultData);
-      // console.log(newCard);
-      // console.log(childrenContainer);
+      };
+
+      setJobCardData(newCard, cardData);
     }
     else {
       const cardData = {
@@ -243,10 +253,10 @@ export class JobScheduler {
         SJNum: this._jobs[j-1]?.getSortedJobNum() || 0,
         MEntry: this._M[j],
       };
-      // const newStub = genNewJobStub(cardData);
-      // parentContainer.append(newStub);
+      const newStub = genNewJobStub(cardData);
+      parentContainer.append(newStub);
     }
-    return this._M[j]
+    return this._M[j];
   }
 
   toStr() {
