@@ -81,10 +81,11 @@ animTimeline.addBlock(animBlock2);
 
 // Demonstrate how to fill out the c array
 const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
-const timeGraphArrowEl = timeGraphEl.querySelector('.free-line');
+const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
 jobBarEls.forEach((jobBarEl, i) => {
+  // get j array block corresponding to current job bar
   const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
-  // Move cbar to current job bar, unhide it, and highlight current job bar
+  // Move cbar to current job bar, unhide it, and highlight current job bar and j array block
   animTimeline.addOneByParams([
     [ 'object', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
     [ 'object', jobBarEl, 'highlight', {blocksNext: false} ],
@@ -92,14 +93,17 @@ jobBarEls.forEach((jobBarEl, i) => {
     [ 'object', cBar, 'fade-in', {blocksPrev: false} ],
   ]);
 
-  // Move cbar to compatible job bar and highlight it OR move cbar to left of time graph. Point arrow to current c-array entry
+  // Find job bar corresponding to the job that's compatible with the current job (if it exists)
   const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`);
+  // get the c array entry corresponding to the current job
   const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
   const cEntryValue = cBlock.querySelector(`.array__array-entry--value`);
   const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`)
   let row;
   let rowSJNum;
   const animBlock = new AnimBlock();
+  // If the compatible job exists, Move cbar to compatible job bar and highlight it
+  // Then point arrow from compatible row header to current c-array entry
   if (compatibleJobBarEl) {
     row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`);
     rowSJNum = row.querySelector('.time-graph__SJ-num');
@@ -109,6 +113,8 @@ jobBarEls.forEach((jobBarEl, i) => {
       [ 'line', timeGraphArrowEl, 'fade-in', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
     ]);
   }
+  // If not compatible job exists, move cbar to left of time graph
+  // Then point arrow from bottom of cbar to current c-array entry
   else {
     animBlock.addManyByParams([
       [ 'object', cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }} ],
@@ -124,7 +130,7 @@ jobBarEls.forEach((jobBarEl, i) => {
 
   animTimeline.addBlock(animBlock);
 
-  // Hide cbar and arrow; un-highlight compatible job bar if there was indeed one
+  // Hide cbar and arrow and un-highlight everything
   const animBlock_ = new AnimBlock();
   if (compatibleJobBarEl) {
     animBlock_.addOneByParams([ 'object', compatibleJobBarEl, 'un-highlight', {blocksNext: false} ]);
@@ -140,6 +146,134 @@ jobBarEls.forEach((jobBarEl, i) => {
   ]);
   animTimeline.addBlock(animBlock_);
 });
+
+
+
+/*
+if (main job card)
+Fade in main job card
+point from M access to M array block
+fade arrow
+...
+Highlight computation
+
+Call recursion; pass in something from self
+
+Un-highlight computation
+Replace computation
+Highlight next computation
+
+Call recursion; pass in something from self
+
+Un-highlight computation
+Replace computation
+hide max stuff and show answer
+replace M array stuff with answer
+point from answer to block in M array
+update M array visual
+*/
+
+/*
+if main card type
+  do same stuff
+  recurse
+  do same stuff
+  recurse
+if stub
+  point from M access to M array block
+  replace M array stuff with answer
+  point to passed in element to point to
+*/
+
+
+
+
+const jobCard = document.querySelector('.job-cards .job-card');
+const SJNum = Number.parseInt(jobCard.dataset.sjnum);
+const jobCardContent = jobCard.querySelector('.job-card-content');
+const MAccessContainer = jobCard.querySelector('.M-access-container');
+const MAccess = jobCard.querySelector('.M-access');
+const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
+const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
+const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
+
+const arrowContainer = jobCard.querySelector('.arrow-container');
+const formulaComputation = jobCard.querySelector('.formula-computation');
+const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
+const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
+
+const computationExpression1 = jobCard.querySelector('.computation-expression--1');
+const freeLine_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .free-line');
+const textbox_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .text-box');
+
+
+const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
+
+
+
+const animBlock3 = new AnimBlock(...[
+  new AnimObject(jobCardContent, 'fade-in'),
+  new AnimObject(MAccess, 'fade-in'),
+  new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
+  new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+  new AnimObject(textbox_MAccess, 'fade-in', {blocksPrev: false}),
+]);
+
+const animBlock4 = new AnimBlock();
+animBlock4.addOneByParams([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
+console.log(MBlock);
+
+const animBlock5 = new AnimBlock();
+animBlock5.addManyByParams([
+  [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
+  [ 'object', textbox_MAccess, 'fade-out', {blocksNext: false} ],
+  [ 'line', freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+  [ 'object', MAccess, 'un-highlight' ],
+  [ 'object', arrowContainer, 'enter-wipe-from-right' ],
+  [ 'object', formulaComputation, 'fade-in', {blocksPrev: false} ],
+  [ 'object', formulaComputation, 'highlight', {blocksNext: false} ],
+  [ 'line', freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false} ],
+  [ 'object', textbox_formulaComputation, 'fade-in', {blocksPrev: false} ],
+]);
+
+// Recurse
+
+const animBlock6 = new AnimBlock();
+animBlock6.addManyByParams([
+  [ 'object', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
+  [ 'line', freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
+  [ 'object', formulaComputation, 'un-highlight', {blocksPrev: false} ],
+  [ 'object', computationExpression1, 'highlight', {blocksNext: false} ],
+  [ 'line', freeLine_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+  [ 'object', textbox_computationExpression1, 'fade-in', {blocksPrev: false} ],
+])
+
+const animBlock7 = new AnimBlock()
+animBlock7.addManyByParams([
+  [ 'object', textbox_computationExpression1, 'fade-out', {blocksNext: false} ],
+  [ 'line', freeLine_computationExpression1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+  [ 'object', computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
+]);
+
+animTimeline.addBlocks([
+  animBlock3,
+  animBlock4,
+  animBlock5,
+  animBlock6,
+  animBlock7,
+]);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -203,126 +337,126 @@ window.addEventListener('keyup', stopFastForward);
 
 
 
-(function() {
-  const jobCard = document.querySelector('.job-card');
-  const jobCardContent = jobCard.querySelector('.job-card-content');
-  const MAccess = jobCard.querySelector('.M-access');
-  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line')
-  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
+// (function() {
+//   const jobCard = document.querySelector('.job-card');
+//   const jobCardContent = jobCard.querySelector('.job-card-content');
+//   const MAccess = jobCard.querySelector('.M-access');
+//   const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line')
+//   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
 
-  const arrowContainer = jobCard.querySelector('.arrow-container');
-  const formulaComputation = jobCard.querySelector('.formula-computation');
-  const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
-  const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
+//   const arrowContainer = jobCard.querySelector('.arrow-container');
+//   const formulaComputation = jobCard.querySelector('.formula-computation');
+//   const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
+//   const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
 
-  const computationExpression1 = jobCard.querySelector('.computation-expression--1');
-  const freeLine_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .free-line');
-  const textbox_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .text-box');
-
-
-  const animBlock1 = new AnimBlock(...[
-    new AnimObject(jobCardContent, 'fade-in'),
-    new AnimObject(MAccess, 'fade-in'),
-    new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
-    new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_MAccess, 'fade-in', {blocksPrev: false}),
-  ]);
-
-  const animBlock2 = new AnimBlock(...[
-    new AnimObject(textbox_MAccess, 'fade-out', {blocksNext: false}),
-    new AnimLine(freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
-    new AnimObject(MAccess, 'un-highlight'),
-    new AnimObject(arrowContainer, 'enter-wipe-from-right'),
-    new AnimObject(formulaComputation, 'fade-in', {blocksPrev: false}),
-    new AnimObject(formulaComputation, 'highlight', {blocksNext: false}),
-    new AnimLine(freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_formulaComputation, 'fade-in', {blocksPrev: false}),
-  ]);
-
-  const animBlock3 = new AnimBlock(...[
-    new AnimObject(textbox_formulaComputation, 'fade-out', {blocksNext: false}),
-    new AnimLine(freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false}),
-    new AnimObject(formulaComputation, 'un-highlight', {blocksPrev: false}),
-    new AnimObject(computationExpression1, 'highlight', {blocksNext: false}),
-    new AnimLine(freeLine_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
-    new AnimObject(textbox_computationExpression1, 'fade-in', {blocksPrev: false}),
-    new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], computationExpression1, [0.5, 1], {blocksPrev: false}),
-  ]);
-
-  const animBlock4 = new AnimBlock(...[
-    new AnimObject(textbox_computationExpression1, 'fade-out', {blocksNext: false}),
-    new AnimLine(freeLine_computationExpression1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
-    new AnimObject(computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false}),
-  ]);
-
-  const animSequence = new AnimTimeline(...[
-    animBlock1,
-    animBlock2,
-    animBlock3,
-    animBlock4,
-  ]);
+//   const computationExpression1 = jobCard.querySelector('.computation-expression--1');
+//   const freeLine_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .free-line');
+//   const textbox_computationExpression1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .text-box');
 
 
+//   const animBlock1 = new AnimBlock(...[
+//     new AnimObject(jobCardContent, 'fade-in'),
+//     new AnimObject(MAccess, 'fade-in'),
+//     new AnimObject(MAccess, 'highlight', {blocksNext: false, blocksPrev: false}),
+//     new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+//     new AnimObject(textbox_MAccess, 'fade-in', {blocksPrev: false}),
+//   ]);
 
-  
+//   const animBlock2 = new AnimBlock(...[
+//     new AnimObject(textbox_MAccess, 'fade-out', {blocksNext: false}),
+//     new AnimLine(freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
+//     new AnimObject(MAccess, 'un-highlight'),
+//     new AnimObject(arrowContainer, 'enter-wipe-from-right'),
+//     new AnimObject(formulaComputation, 'fade-in', {blocksPrev: false}),
+//     new AnimObject(formulaComputation, 'highlight', {blocksNext: false}),
+//     new AnimLine(freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false}),
+//     new AnimObject(textbox_formulaComputation, 'fade-in', {blocksPrev: false}),
+//   ]);
 
-  const goForward = async function() {
-    return new Promise(async function(resolve) {
-      backwardButton.removeEventListener('click', goBackward);
-      forwardButton.removeEventListener('click', goForward);
-      await animSequence.stepForward();
-      backwardButton.addEventListener('click', goBackward);
-      forwardButton.addEventListener('click', goForward);
+//   const animBlock3 = new AnimBlock(...[
+//     new AnimObject(textbox_formulaComputation, 'fade-out', {blocksNext: false}),
+//     new AnimLine(freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false}),
+//     new AnimObject(formulaComputation, 'un-highlight', {blocksPrev: false}),
+//     new AnimObject(computationExpression1, 'highlight', {blocksNext: false}),
+//     new AnimLine(freeLine_computationExpression1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false}),
+//     new AnimObject(textbox_computationExpression1, 'fade-in', {blocksPrev: false}),
+//     new AnimLine(freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], computationExpression1, [0.5, 1], {blocksPrev: false}),
+//   ]);
 
-      resolve();
-    });
-  };
+//   const animBlock4 = new AnimBlock(...[
+//     new AnimObject(textbox_computationExpression1, 'fade-out', {blocksNext: false}),
+//     new AnimLine(freeLine_computationExpression1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false}),
+//     new AnimObject(computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false}),
+//   ]);
 
-  const goBackward = async function() {
-    return new Promise(async function(resolve) {
-      backwardButton.removeEventListener('click', goBackward);
-      forwardButton.removeEventListener('click', goForward);
-      await animSequence.stepBackward();
-      backwardButton.addEventListener('click', goBackward);
-      forwardButton.addEventListener('click', goForward);
+//   const animSequence = new AnimTimeline(...[
+//     animBlock1,
+//     animBlock2,
+//     animBlock3,
+//     animBlock4,
+//   ]);
 
-      resolve();
-    });
-  };
+
 
   
-  const backwardButton = document.querySelector('.box--backward');
-  const forwardButton = document.querySelector('.box--forward');
-  backwardButton.addEventListener('click', goBackward);
-  forwardButton.addEventListener('click', goForward);
 
-  const toggleSkipping = function(e) {
-    if (e.key.toLowerCase() === 's' && !e.repeat) {
-      window.removeEventListener('keyup', stopFastForward);
-      window.removeEventListener('keydown', fastForward);
-      animSequence.toggleSkipping();
-      window.addEventListener('keyup', stopFastForward);
-      window.addEventListener('keydown', fastForward);
-    }
-  };
+//   const goForward = async function() {
+//     return new Promise(async function(resolve) {
+//       backwardButton.removeEventListener('click', goBackward);
+//       forwardButton.removeEventListener('click', goForward);
+//       await animSequence.stepForward();
+//       backwardButton.addEventListener('click', goBackward);
+//       forwardButton.addEventListener('click', goForward);
 
-  const fastForward = function(e) {
-    if (e.key.toLowerCase() === 'f') {
-      animSequence.fireRateSignal(7);
-    }
-  };
+//       resolve();
+//     });
+//   };
 
-  const stopFastForward = function(e) {
-    if (e.key.toLowerCase() === 'f') {
-      animSequence.fireRateSignal(1);
-    }
-  };
+//   const goBackward = async function() {
+//     return new Promise(async function(resolve) {
+//       backwardButton.removeEventListener('click', goBackward);
+//       forwardButton.removeEventListener('click', goForward);
+//       await animSequence.stepBackward();
+//       backwardButton.addEventListener('click', goBackward);
+//       forwardButton.addEventListener('click', goForward);
 
-  window.addEventListener('keydown', toggleSkipping);
-  window.addEventListener('keydown', fastForward);
-  window.addEventListener('keyup', stopFastForward);
+//       resolve();
+//     });
+//   };
 
-  // const card2 = document.querySelector('div[data-card-num="2"]');
-  // console.log(card2);
-  // card2.style.left = '30rem';
-});
+  
+//   const backwardButton = document.querySelector('.box--backward');
+//   const forwardButton = document.querySelector('.box--forward');
+//   backwardButton.addEventListener('click', goBackward);
+//   forwardButton.addEventListener('click', goForward);
+
+//   const toggleSkipping = function(e) {
+//     if (e.key.toLowerCase() === 's' && !e.repeat) {
+//       window.removeEventListener('keyup', stopFastForward);
+//       window.removeEventListener('keydown', fastForward);
+//       animSequence.toggleSkipping();
+//       window.addEventListener('keyup', stopFastForward);
+//       window.addEventListener('keydown', fastForward);
+//     }
+//   };
+
+//   const fastForward = function(e) {
+//     if (e.key.toLowerCase() === 'f') {
+//       animSequence.fireRateSignal(7);
+//     }
+//   };
+
+//   const stopFastForward = function(e) {
+//     if (e.key.toLowerCase() === 'f') {
+//       animSequence.fireRateSignal(1);
+//     }
+//   };
+
+//   window.addEventListener('keydown', toggleSkipping);
+//   window.addEventListener('keydown', fastForward);
+//   window.addEventListener('keyup', stopFastForward);
+
+//   // const card2 = document.querySelector('div[data-card-num="2"]');
+//   // console.log(card2);
+//   // card2.style.left = '30rem';
+// });
