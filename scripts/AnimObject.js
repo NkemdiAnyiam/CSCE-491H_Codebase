@@ -59,14 +59,14 @@ export class AnimObject {
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
 
-    if (isEntering) { this.domElem.classList.remove('hidden'); console.log('Entering', this.domElem);}
+    if (isEntering) { this.domElem.classList.remove('hidden'); }
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
-    
+
     // return Promise that fulfills when the animation is completed
     return animation.finished.then(() => {
       animation.commitStyles(); // actually applies the styles to the element
-      if (isExiting) { this.domElem.classList.add('hidden'); console.log('Hiding', this.domElem);}
+      if (isExiting) { this.domElem.classList.add('hidden'); }
       animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
     });
   }
