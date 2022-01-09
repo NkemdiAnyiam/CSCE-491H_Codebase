@@ -29,6 +29,18 @@ console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySel
 jobScheduler.print();
 jobScheduler.setUpScene();
 
+(function() {
+  const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
+  freeLineArrows.forEach((freeLine, i) => {
+    const line = freeLine.querySelector('.free-line__line');
+    const marker = freeLine.querySelector('marker');
+
+    const id = `markerArrow--${i}`
+    marker.id = id;
+    line.style.markerEnd = `url(#${id})`;
+  });
+})();
+
 
 const animTimeline = new AnimTimeline();
 
