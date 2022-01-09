@@ -10,6 +10,7 @@ const genNewJobStub = (cardData) => {
   const MEntryEl = cloneCard.querySelector('.M-entry');
 
   jobCardEl.dataset.cardnum = `${cardNum}`;
+  jobCardEl.dataset.sjnum = `${SJNum}`;
   SJNumEls.forEach((el) => {
     el.textContent = SJNum;
   });
@@ -61,6 +62,7 @@ const setJobCardData = (jobCardEl, cardData) => {
   const nextSJNumEl = jobCardContentEl.querySelector('.next-SJ-num');
 
   jobCardContentEl.dataset.cardnum = `${cardNum}`;
+  jobCardEl.dataset.sjnum = `${SJNum}`;
   SJNumEls.forEach((el) => {
     el.textContent = SJNum;
   });
@@ -255,6 +257,10 @@ export class JobScheduler {
       };
       const newStub = genNewJobStub(cardData);
       parentContainer.append(newStub);
+    }
+    if (j === this._n_jobs) {
+      document.getElementById('job-card-template').remove();
+      document.getElementById('job-stub-template').remove();
     }
     return this._M[j];
   }
