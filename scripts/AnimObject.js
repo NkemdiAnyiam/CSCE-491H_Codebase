@@ -35,6 +35,11 @@ export class AnimObject {
   stepForward() {
     return new Promise(resolve => {
       this.animate(this.animName)
+      // .then(([animation, isExiting]) => { // this has been moved out here to prevent out-of-order operations due to the lower priority of callbacks
+      //   animation.commitStyles(); // actually applies the styles to the element
+      //   if (isExiting) { this.domElem.classList.add('hidden'); console.log('Hiding', this.domElem);}
+      //   animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
+      // })
       .then(() => resolve());
     });
   }
@@ -42,6 +47,11 @@ export class AnimObject {
   stepBackward() {
     return new Promise(resolve => {
       this.animate(this.undoAnimName)
+      // .then(([animation, isExiting]) => {
+      //   animation.commitStyles(); // actually applies the styles to the element
+      //   if (isExiting) { this.domElem.classList.add('hidden'); console.log('Hiding', this.domElem);}
+      //   animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
+      // })
       .then(() => resolve());
     });
   }
@@ -59,18 +69,22 @@ export class AnimObject {
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
     
-    animation.onfinish = () => {
-      animation.commitStyles(); // actually applies the styles to the element
-      if (isExiting) { this.domElem.classList.add('hidden'); }
-      animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
-    };
+    // animation.onfinish = () => {
+    //   animation.commitStyles(); // actually applies the styles to the element
+    //   if (isExiting) { this.domElem.classList.add('hidden'); console.log('Hiding', this.domElem);}
+    //   animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
+    // };
 
-    if (isEntering) { this.domElem.classList.remove('hidden'); }
+    if (isEntering) { this.domElem.classList.remove('hidden'); console.log('Entering', this.domElem);}
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
     // return Promise that fulfills when the animation is completed
 
-    return animation.finished;
+    return animation.finished.then(() => {
+      animation.commitStyles(); // actually applies the styles to the element
+      if (isExiting) { this.domElem.classList.add('hidden'); console.log('Hiding', this.domElem);}
+      animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
+    });
   }
 
   getPresetKeyframes(animName) {
