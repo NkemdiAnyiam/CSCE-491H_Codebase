@@ -2,10 +2,16 @@
 /**************************** PLAYBACK CONTROLS ****************************/
 /*****************************************************************/
 
+.boxes {
+  position: fixed;
+  bottom: 0;
+  padding: 2rem;
+  background-color: var(--color-gray-lighter);
+}
+
 .box {
   width: 8rem;
   height: 8rem;
-  margin-top: 10rem;
   display: inline-block;
 }
 

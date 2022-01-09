@@ -15,8 +15,12 @@
 }
 
 .data-display {
+  position: fixed;
+
   grid-area: data;
   padding-top: 10rem;
+  padding-right: 10rem;
+  height: 100%;
   border-right: solid 1px var(--color-gray-darkest);
 
   display: flex;
