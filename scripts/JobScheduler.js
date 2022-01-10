@@ -8,6 +8,24 @@ const genNewJobStub = (cardData) => {
   const jobCardEl = cloneCard.querySelector('.job-card');
   const SJNumEls = cloneCard.querySelectorAll('.SJ-num');
   const MEntryEl = cloneCard.querySelector('.M-entry');
+  const textParagraph2 = jobCardEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--2');
+
+  if (SJNum > 0) {
+    textParagraph2.innerHTML =
+    `
+      The entry already exists, so we already know that the optimal weight from
+      the beginning through <span class="SJ-related">job ${SJNum}</span> is ${MEntry}.
+      Let's pass this back up the tree.
+    `;
+  }
+  else {
+    textParagraph2.innerHTML =
+    `
+      The entry already exists. Of course, there is no "<span class="SJ-related">job 0</span>";
+      this is the base case for <span class="SJ-related">j = 0</span>. 0 jobs means 0 weight.
+      Let's pass this back up the tree.
+    `;
+  }
 
   jobCardEl.dataset.cardnum = `${cardNum}`;
   jobCardEl.dataset.sjnum = `${SJNum}`;
@@ -37,25 +55,19 @@ const setJobCardData = (jobCardEl, cardData) => {
     weight,
     cEntry,
     nextSJNum,
-  } = cardData;
 
-  const {
     OPTResult1,
     computationResult1,
-  } = cardData;
 
-  const {
     OPTResult2,
     computationResult2,
-  } = cardData;
 
-  const {
     formulaResult,
   } = cardData;
 
+
   const jobCardContentEl = jobCardEl.querySelector('.job-card-content');
 
-  const SJNumEls = jobCardContentEl.querySelectorAll('.SJ-num');
   const weightEl = jobCardContentEl.querySelector('.weight');
   const cEntryEl = jobCardContentEl.querySelector('.c-entry');
 
@@ -63,9 +75,6 @@ const setJobCardData = (jobCardEl, cardData) => {
 
   jobCardContentEl.dataset.cardnum = `${cardNum}`;
   jobCardEl.dataset.sjnum = `${SJNum}`;
-  SJNumEls.forEach((el) => {
-    el.textContent = SJNum;
-  });
   weightEl.textContent = weight;
   cEntryEl.textContent = cEntry;
   nextSJNumEl.textContent = nextSJNum;
@@ -89,6 +98,31 @@ const setJobCardData = (jobCardEl, cardData) => {
   const MEntryEl = jobCardContentEl.querySelector('.M-entry');
   formulaResultEl.textContent = formulaResult;
   MEntryEl.textContent = formulaResult;
+
+
+  const textP_MAccess = jobCardContentEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--solved');
+  if (cardNum === 1) {
+    textP_MAccess.innerHTML =
+    `
+      Excellent, this is the last finishing job, so we are finished.
+      The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
+    `;
+  }
+  else {
+    textP_MAccess.innerHTML =
+    `
+      Excellent. Now let's pass this result back up the tree.
+    `;
+  }
+
+  
+  jobCardContentEl.querySelectorAll('.SJ-num').forEach((el) => el.textContent = SJNum);
+  jobCardContentEl.querySelectorAll('.fill--c-entry').forEach((el) => el.textContent = cEntry);
+  jobCardContentEl.querySelectorAll('.fill--OPT-1').forEach((el) => el.textContent = OPTResult1);
+  jobCardContentEl.querySelectorAll('.fill--OPT-2').forEach((el) => el.textContent = OPTResult2);
+  jobCardContentEl.querySelectorAll('.fill--comp-1').forEach((el) => el.textContent = computationResult1);
+  jobCardContentEl.querySelectorAll('.fill--comp-2').forEach((el) => el.textContent = computationResult2);
+  jobCardContentEl.querySelectorAll('.fill--comp-final').forEach((el) => el.textContent = formulaResult);
 }
 
 

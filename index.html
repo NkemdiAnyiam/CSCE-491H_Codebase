@@ -97,8 +97,13 @@
               <div class="text-boxes">
                 <div class="text-box-line-group text-box-line-group--M-access M-related">
                   <div class="text-box hidden">
-                    <p class="text-box__paragraph">
-                      Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+                    <p class="text-box__paragraph text-box__paragraph--intro">
+                      We need to know the optimal weight from time 0 through <span class="SJ-related">job <span class="SJ-num">X</span></span>.
+                      First, let's check the <span class="M-related">M array</span> to see if it has already been computed.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--solved hidden">
+                      Excellent, this is the last finishing job, so we are finished.
+                      The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
                     </p>
                   </div>
                   <svg class="free-line hidden">
@@ -109,8 +114,13 @@
   
                 <div class="text-box-line-group text-box-line-group--formula-computation">
                   <div class="text-box text-box hidden">
-                    <p class="text-box__paragraph">
-                      Entry doesn't exist, so start computing it.
+                    <p class="text-box__paragraph text-box__paragraph--find">
+                      The entry is blank, so we need to compute the optimal weight ourselves using this equation.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--found hidden">
+                      The greater result was <span class="fill--comp-final">X</span>. Thus, the optimal weight from the beginning through
+                      <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-final">X</span>.
+                      Let's fill in the entry in the <span class="M-related">M array</span>.
                     </p>
                   </div>
                   <svg class="free-line hidden">
@@ -121,8 +131,43 @@
                 
                 <div class="text-box-line-group text-box-line-group--computation-expression--1">
                   <div class="text-box text-box hidden">
-                    <p class="text-box__paragraph">
-                      Describe that it will first assume that this job IS part of the optimal structure and compute that route
+                    <p class="text-box__paragraph text-box__paragraph--intro">
+                      This first expression assumes that this job IS part of the optimal chain of jobs.
+                      It adds this job's weight and then computes from the <span class="c-related">compatible job</span>.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--summary hidden">
+                      Let's summarize: If this job is part of the optimal solution, then the maximum weight from
+                      the beginning through <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-1">X</span>.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+
+
+                <div class="text-box-line-group text-box-line-group--c-access c-related">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph text-box__paragraph">
+                      We need to find the optimal substructure starting from this job's compatible job.
+                      Let's look at the <span class="c-related">c array</span> to get the job number.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+
+                <div class="text-box-line-group text-box-line-group--OPT-expression-1 OPT-related">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph text-box__paragraph--find">
+                      The <span class="c-related">compatible job</span> was <span class="c-related">job <span class="fill--c-entry">X</span></span>,
+                      so we will compute the optimal substructure starting at <span class="c-related">job <span class="fill--c-entry">X</span></span>.
+                      Let's do that now.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--found hidden">
+                      The optimal weight from the beginning through <span class="c-related">job <span class="fill--c-entry">X</span></span> was <span class="fill--OPT-1">X</span>.
+                      Let's add this to this job's weight.
                     </p>
                   </div>
                   <svg class="free-line hidden">
@@ -133,8 +178,25 @@
 
                 <div class="text-box-line-group text-box-line-group--computation--2">
                   <div class="text-box text-box hidden">
-                    <p class="text-box__paragraph">
-                      Describe that it will now assume that this job is NOT part of the optimal structure and compute that route
+                    <p class="text-box__paragraph--intro">
+                      This second expression assumes that this job is NOT part of the optimal sequence.
+                      It computes from the job right behind this one since it doesn't need to worry about overlap.
+                    </p>
+                    <p class="text-box__paragraph--summary hidden">
+                      Let's summarize: If this job is NOT part of the optimal solution,then the maximum weight from
+                      the beginning to job <span class="SJ-num">X</span> is <span class="fill--comp-2">X</span>.
+                    </p>
+                  </div>
+                  <svg class="free-line hidden">
+                    <line class="free-line__line" />
+                  </svg>
+                </div>
+
+                <div class="text-box-line-group text-box-line-group--OPT-expression-2 OPT-related">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph--find">
+                      <span class="SJ-num">X</span>-1 is 6. So we need to compute the weight from the optimal substructure starting at job 6.
+                      Let's do that now.
                     </p>
                   </div>
                   <svg class="free-line hidden">
@@ -160,6 +222,10 @@
                 </defs>
                 <line class="free-line__line" />
               </svg>
+
+              <div class="job-card-SJ-num-label">
+                <span class="SJ-num">X</span>
+              </div>
   
               
               <div class="M-container">
@@ -231,10 +297,12 @@
                 <div class="text-box-line-group text-box-line-group--M-access M-related">
                   <div class="text-box hidden">
                     <p class="text-box__paragraph text-box__paragraph--1">
-                      Placeholder text. Highlights the fact that <span class="M-access-text">M[<span class="SJ-num">X</span>]</span> is the first thing that we will compute.
+                      We need to know the optimal weight ending through <span class="SJ-related">job <span class="SJ-num">X</span></span>.
+                      First, let's check the <span class="M-related">M array</span> to see if it has already been computed.
                     </p>
                     <p class="text-box__paragraph text-box__paragraph--2 hidden">
-                      The entry exists, so we are done here.
+                      The entry already exists. Of course, this is the base case for <span class="SJ-related">j = 0</span>. 0 jobs means 0 weight.
+                      Let's pass this back up the tree.
                     </p>
                   </div>
                   <svg class="free-line hidden">
@@ -252,6 +320,10 @@
                 <line class="free-line__line" />
               </svg>
 
+
+              <div class="job-card-SJ-num-label">
+                <span class="SJ-num">X</span>
+              </div>
 
   
               <div class="M-container">

@@ -39,6 +39,7 @@ span {
   background-position-x: 100%;
 }
 
-.SJ-num {
+.SJ-num,
+.SJ-related {
   color: var(--color-red);
 }
