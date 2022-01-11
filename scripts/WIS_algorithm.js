@@ -6,14 +6,14 @@ import { AnimBlock } from './AnimBlock.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 
 const jobsUnsorted = [
-  // new Job('A', 5, 9, 7),
-  new Job('A', 8, 11, 5),
-  // new Job('C', 0, 6, 2),
-  // new Job('D', 1, 4, 1),
-  // new Job('E', 3, 8, 5),
-  // new Job('F', 4, 7, 4),
-  // new Job('G', 6, 10, 3),
-  new Job('B', 3, 5, 6),
+  // new Job(5, 9, 7),
+  new Job(8, 11, 5),
+  // new Job(0, 6, 2),
+  // new Job(1, 4, 1),
+  // new Job(3, 8, 5),
+  // new Job(4, 7, 4),
+  // new Job(6, 10, 3),
+  new Job(3, 5, 6),
 ];
 
 const jobScheduler = new JobScheduler();

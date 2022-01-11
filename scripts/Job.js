@@ -1,9 +1,12 @@
 export class Job {
+  static _currJobLetter = 'A';
+
   _sortedJobNum = -1;
   _compatibleJobNum = -1;
 
-  constructor(jobLetter, start, finish, weight) {
-    this._jobLetter = jobLetter;
+  constructor(start, finish, weight) {
+    this._jobLetter = Job._currJobLetter;
+    Job._currJobLetter = String.fromCharCode( Job._currJobLetter.charCodeAt(0) + 1 );
     this._start = start;
     this._finish = finish;
     this._weight = weight;
