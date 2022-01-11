@@ -117,6 +117,7 @@ const setJobCardData = (jobCardEl, cardData) => {
 
   
   jobCardContentEl.querySelectorAll('.SJ-num').forEach((el) => el.textContent = SJNum);
+  jobCardContentEl.querySelectorAll('.fill--next-SJ-num').forEach((el) => el.textContent = nextSJNum);
   jobCardContentEl.querySelectorAll('.fill--c-entry').forEach((el) => el.textContent = cEntry);
   jobCardContentEl.querySelectorAll('.fill--OPT-1').forEach((el) => el.textContent = OPTResult1);
   jobCardContentEl.querySelectorAll('.fill--OPT-2').forEach((el) => el.textContent = OPTResult2);
