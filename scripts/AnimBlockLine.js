@@ -1,7 +1,7 @@
-import { AnimObject } from "./AnimObject.js";
-import { AnimLineUpdater } from "./AnimLineUpdater.js";
+import { AnimBlock } from "./AnimBlock.js";
+import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
 
-export class AnimLine extends AnimObject {
+export class AnimBlockLine extends AnimBlock {
   // the defaults of both updateEndpointsOnEntry and trackEndpoints can be replaced in applyOptions()
   updateEndpointsOnEntry = true; // determines whether or not to call updateEndpoints() upon using an entering animation
   trackEndpoints = true; // determines whether or not to continuously periodically called updateEndpoints() while visible
@@ -9,7 +9,7 @@ export class AnimLine extends AnimObject {
   constructor(domElem, animName, startElem, [leftStart, topStart], endElem, [leftEnd, topEnd], options) {
     super(domElem, animName, options);
 
-    AnimLineUpdater.registerDomElem(this.domElem); // enables any AnimLines using the same DOM element as us to effectively toggle the continuous updates
+    AnimBlockLineUpdater.registerDomElem(this.domElem); // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
 
     // set the reference points for the start and end of the line (our <svg> element's nested <line>).
     // Defaults to the sibling DOM element above our DOM element
@@ -44,15 +44,15 @@ export class AnimLine extends AnimObject {
   }
 
   handleUpdateSettings(animName) {
-    if (this.updateEndpointsOnEntry && AnimObject.isEntering(animName)) {
+    if (this.updateEndpointsOnEntry && AnimBlock.isEntering(animName)) {
       this.updateEndpoints();
 
-      // if continuous tracking is enabled, tell AnimLineUpdater to set an interval for updateEndpoints()
-      if (this.trackEndpoints) { AnimLineUpdater.setInterval(this.domElem, this.updateEndpoints.bind(this)); }
+      // if continuous tracking is enabled, tell AnimBlockLineUpdater to set an interval for updateEndpoints()
+      if (this.trackEndpoints) { AnimBlockLineUpdater.setInterval(this.domElem, this.updateEndpoints.bind(this)); }
     }
 
     // if we are exiting, turn off the interval for updateEndPoints()
-    if (AnimObject.isExiting(animName)) { AnimLineUpdater.clearInterval(this.domElem); }
+    if (AnimBlock.isExiting(animName)) { AnimBlockLineUpdater.clearInterval(this.domElem); }
   }
 
   updateEndpoints() {
