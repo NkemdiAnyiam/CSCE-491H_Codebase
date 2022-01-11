@@ -56,17 +56,17 @@ jobBarEls.forEach((jobBarEl) => {
   const jobLetter = jobBarEl.dataset.jobletter;
   const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"]  .time-graph__cell--${jobBarEl.dataset.start}`);
   const options = { translateOptions: { targetElem: startCell } };
-  animBlock0.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
+  animBlock0.addOneObject(new AnimObject(jobBarEl, 'translate', options));
 });
-animTimeline.addBlock(animBlock0);
+animTimeline.addOneBlock(animBlock0);
 
 // Move job bars back off of the time graph
 const animBlock1 = new AnimBlock();
 jobBarEls.forEach((jobBarEl, i) => {
   const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
-  animBlock1.addAnimObject(new AnimObject(jobBarEl, 'translate', options));
+  animBlock1.addOneObject(new AnimObject(jobBarEl, 'translate', options));
 });
-animTimeline.addBlock(animBlock1);
+animTimeline.addOneBlock(animBlock1);
 
 // Move job bars back onto the time graph (sorted by finish time) and update time graph row headers
 const animBlock2 = new AnimBlock();
@@ -82,14 +82,14 @@ jobBarEls.forEach((jobBarEl) => {
   const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted');
   const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
   
-  animBlock2.addManyByParams([
+  animBlock2.addManyObjects([
     [ 'object', jobBarEl, 'translate', options ],
     [ 'object', rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, duration: 250} ],
     [ 'object', rowSJNum, 'enter-wipe-from-right', {blocksNext: false, duration: 250} ],
     [ 'object', rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false, duration: 250} ],
   ]);
 });
-animTimeline.addBlock(animBlock2);
+animTimeline.addOneBlock(animBlock2);
 
 // Demonstrate how to fill out the c array
 const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
@@ -98,7 +98,7 @@ jobBarEls.forEach((jobBarEl, i) => {
   // get j array block corresponding to current job bar
   const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
   // Move cbar to current job bar, unhide it, and highlight current job bar and j array block
-  animTimeline.addOneByParams([
+  animTimeline.addOneBlock([
     [ 'object', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
     [ 'object', jobBarEl, 'highlight', {blocksNext: false} ],
     [ 'object', jBlock, 'highlight', {blocksNext: false, blocksPrev: false} ],
@@ -110,7 +110,7 @@ jobBarEls.forEach((jobBarEl, i) => {
   // get the c array entry corresponding to the current job
   const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
   const cEntryValue = cBlock.querySelector(`.array__array-entry--value`);
-  const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`)
+  const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`);
   let row;
   let rowSJNum;
   const animBlock = new AnimBlock();
@@ -119,7 +119,7 @@ jobBarEls.forEach((jobBarEl, i) => {
   if (compatibleJobBarEl) {
     row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`);
     rowSJNum = row.querySelector('.time-graph__SJ-num');
-    animBlock.addManyByParams([
+    animBlock.addManyObjects([
       [ 'object', cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }} ],
       [ 'object', compatibleJobBarEl, 'highlight' ],
       [ 'line', timeGraphArrowEl, 'fade-in', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
@@ -128,230 +128,40 @@ jobBarEls.forEach((jobBarEl, i) => {
   // If not compatible job exists, move cbar to left of time graph
   // Then point arrow from bottom of cbar to current c-array entry
   else {
-    animBlock.addManyByParams([
+    animBlock.addManyObjects([
       [ 'object', cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }} ],
       [ 'line', timeGraphArrowEl, 'fade-in', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false} ],
     ]);
   }
 
   // "Update" current c-array entry
-  animBlock.addManyByParams([
+  animBlock.addManyObjects([
     [ 'object', cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
     [ 'object', cEntryValue, 'enter-wipe-from-right', {blocksPrev: false} ],
   ]);
 
-  animTimeline.addBlock(animBlock);
+  animTimeline.addOneBlock(animBlock);
 
   // Hide cbar and arrow and un-highlight everything
   const animBlock_ = new AnimBlock();
   if (compatibleJobBarEl) {
-    animBlock_.addOneByParams([ 'object', compatibleJobBarEl, 'un-highlight', {blocksNext: false} ]);
-    animBlock_.addOneByParams([ 'line', timeGraphArrowEl, 'fade-out', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
+    animBlock_.addOneObject([ 'object', compatibleJobBarEl, 'un-highlight', {blocksNext: false} ]);
+    animBlock_.addOneObject([ 'line', timeGraphArrowEl, 'fade-out', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
   }
   else {
-    animBlock_.addOneByParams([ 'line', timeGraphArrowEl, 'fade-out', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
+    animBlock_.addOneObject([ 'line', timeGraphArrowEl, 'fade-out', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
   }
-  animBlock_.addManyByParams([
+  animBlock_.addManyObjects([
     [ 'object', cBar, 'fade-out', {blocksNext: false, blocksPrev: false} ],
     [ 'object', jobBarEl, 'un-highlight', {blocksPrev: false, blocksNext: false} ],
     [ 'object', jBlock, 'un-highlight', {blocksPrev: false} ],
   ]);
-  animTimeline.addBlock(animBlock_);
+  animTimeline.addOneBlock(animBlock_);
 });
 
 
 
-/*
-if (main job card)
-Fade in main job card
-point from M access to M array block
-fade arrow
-...
-Highlight computation
 
-Call recursion; pass in something from self
-
-Un-highlight computation
-Replace computation
-Highlight next computation
-
-Call recursion; pass in something from self
-
-Un-highlight computation
-Replace computation
-hide max stuff and show answer
-replace M array stuff with answer
-point from answer to block in M array
-update M array visual
-*/
-
-/*
-if main card type
-  do same stuff
-  recurse
-  do same stuff
-  recurse
-if stub
-  point from M access to M array block
-  replace M array stuff with answer
-  point to passed in element to point to
-*/
-
-
-
-
-
-// const jobCard = document.querySelector('.job-cards .job-card');
-// const SJNum = Number.parseInt(jobCard.dataset.sjnum);
-// const jobCardContent = jobCard.querySelector('.job-card-content');
-// const MAccessContainer = jobCard.querySelector('.M-access-container');
-// const MAccess = jobCard.querySelector('.M-access');
-// const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
-// const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
-// const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
-
-
-// const arrowContainer = jobCard.querySelector('.arrow-container');
-// const formulaComputation = jobCard.querySelector('.formula-computation');
-// const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
-// const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
-
-
-// const computationExpression1 = jobCard.querySelector('.computation-expression--1');
-// const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .free-line');
-// const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation-expression--1 .text-box');
-// const cAccessContainer = jobCard.querySelector('.c-access-container');
-// const cAccess = jobCard.querySelector('.c-access');
-// const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block');
-// const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
-// const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
-
-
-// const computation2 = jobCard.querySelector('.computation--2');
-// const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .free-line');
-// const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box');
-
-
-// const jobCardChild1 = [...jobCard.querySelector('.job-card-children').children][0];
-// const jobCardChild2 = [...jobCard.querySelector('.job-card-children').children][1];
-
-
-// const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
-// const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
-
-
-
-// // fade in job card and M access
-// const animBlock3 = new AnimBlock();
-//  animBlock3.addManyByParams([
-//   [ 'object', jobCardContent, 'fade-in' ],
-//   [ 'object', MAccess, 'fade-in' ],
-//   [ 'object', MAccess, 'highlight', {blocksNext: false, blocksPrev: false} ],
-//   [ 'line', freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-//   [ 'object', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
-// ]);
-
-// // point to M block array entry
-// const animBlock4 = new AnimBlock();
-// animBlock4.addOneByParams([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
-
-// // focus on arrow container
-// const animBlock5 = new AnimBlock();
-// animBlock5.addManyByParams([
-//   [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
-//   [ 'object', textbox_MAccess, 'fade-out', {blocksNext: false} ],
-//   [ 'line', freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-//   [ 'object', MAccess, 'un-highlight' ],
-
-//   [ 'object', arrowContainer, 'enter-wipe-from-right' ],
-//   [ 'object', formulaComputation, 'fade-in', {blocksPrev: false} ],
-//   [ 'object', formulaComputation, 'highlight', {blocksNext: false} ],
-//   [ 'line', freeLine_formulaComputation, 'fade-in', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false} ],
-//   [ 'object', textbox_formulaComputation, 'fade-in', {blocksPrev: false} ],
-// ]);
-
-// // focus on computation 1
-// const animBlock6 = new AnimBlock();
-// animBlock6.addManyByParams([
-//   [ 'object', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
-//   [ 'line', freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
-//   [ 'object', formulaComputation, 'un-highlight', {blocksPrev: false} ],
-
-//   [ 'object', computationExpression1, 'highlight', {blocksNext: false} ],
-//   [ 'line', freeLine_computation1, 'fade-in', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-//   [ 'object', textbox_computation1, 'fade-in', {blocksPrev: false} ],
-// ]);
-
-
-// // focus on c access and point to c array entry
-// const animBlock7 = new AnimBlock();
-// animBlock7.addManyByParams([
-//   [ 'object', textbox_computation1, 'fade-out', {blocksNext: false} ],
-//   [ 'line', freeLine_computation1, 'fade-out', computationExpression1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-//   [ 'object', computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
-
-//   [ 'object', cAccess, 'highlight', {blocksPrev: false} ],
-
-//   [ 'line', freeLine_toCBlock, 'fade-in', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false} ],
-// ]);
-
-// // focus on first OPT expression as whole
-// const animBlock8 = new AnimBlock();
-// animBlock8.addManyByParams([
-//   [ 'object', cAccess, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
-//   [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false} ],
-
-//   [ 'object', OPTExpression1, 'highlight', {blocksPrev: false} ],
-// ]);
-
-
-// animTimeline.addBlocks([
-//   animBlock3,
-//   animBlock4,
-//   animBlock5,
-//   animBlock6,
-//   animBlock7,
-//   animBlock8,
-// ]);
-
-// // RECURSE
-// jobCardChild1.classList.contains('job-card--stub') ? animateJobStub(jobCardChild1, jobCard) : animateJobCard_R(jobCardChild1, jobCard);
-
-// // focus on computation 2
-// const animBlock9 = new AnimBlock();
-// animBlock9.addManyByParams([
-//   [ 'object', OPTExpression1, 'un-highlight' ],
-
-//   [ 'object', computation2, 'highlight', {blocksNext: false, blocksPrev: false} ],
-//   [ 'line', freeLine_computation2, 'fade-in', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-//   [ 'object', textbox_computation2, 'fade-in', {blocksPrev: false} ],
-// ]);
-
-// animTimeline.addBlocks([
-//   animBlock9,
-// ]);
-
-
-//  // RECURSE
-//  jobCardChild2.classList.contains('job-card--stub') ? animateJobStub(jobCardChild2, jobCard) : animateJobCard_R(jobCardChild2, jobCard);
-
-// const animBlock10 = new AnimBlock();
-// animBlock10.addManyByParams([
-//   [ 'object', textbox_computation2, 'fade-out', {blocksNext: false} ],
-//   [ 'line', freeLine_computation2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-//   [ 'object', computation2, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
-// ]);
-
-
-// animTimeline.addBlocks([
-//   animBlock10,
-// ]);
-
-
-
-// function animateJobCard(jobCard) {
-  
-// }
 
 animateJobCard_R(document.querySelector('.job-card'), null);
 
@@ -430,8 +240,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
 
   // fade in job card and M access
-  const animBlock3 = new AnimBlock();
-  animBlock3.addManyByParams([
+  const animBlock3 = new AnimBlock([
     [ 'object', jobCardContent, 'fade-in' ],
     [ 'object', MAccess, 'fade-in' ],
     [ 'object', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
@@ -441,11 +250,11 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // point to M block array entry
   const animBlock4 = new AnimBlock();
-  animBlock4.addOneByParams([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
+  animBlock4.addOneObject([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
 
   // focus on formula container
   const animBlock5 = new AnimBlock();
-  animBlock5.addManyByParams([
+  animBlock5.addManyObjects([
     [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
     [ 'object', textbox_MAccess, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -460,7 +269,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on computation 1
   const animBlock6 = new AnimBlock();
-  animBlock6.addManyByParams([
+  animBlock6.addManyObjects([
     [ 'object', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
     [ 'object', formulaComputation, 'un-highlight', {blocksPrev: false} ],
@@ -473,7 +282,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on c access and point to c array entry
   const animBlock7 = new AnimBlock();
-  animBlock7.addManyByParams([
+  animBlock7.addManyObjects([
     [ 'object', textbox_computation1, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation1, 'fade-out', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
     [ 'object', computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
@@ -487,7 +296,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // point from c array entry back to job card and replace c access. Then focus on OPT exprssion 1 as a whole
   const animBlock8 = new AnimBlock();
-  animBlock8.addManyByParams([
+  animBlock8.addManyObjects([
     // replace c entry
     [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5] ],
     [ 'line', freeLine_toCBlock, 'fade-in', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5] ],
@@ -506,7 +315,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     [ 'object', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
   ]);
 
-  animTimeline.addBlocks([
+  animTimeline.addManyBlocks([
     animBlock3,
     animBlock4,
     animBlock5,
@@ -520,7 +329,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     animateJobStub(jobCardChild1, jobCard) :
     animateJobCard_R(jobCardChild1, jobCard);
   // replace OPT1 expression with answer, change text box text
-  animBlock9.addManyByParams([
+  animBlock9.addManyObjects([
     [ 'line', freeLine_fromSourceEl1, 'fade-in', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1] ],
     [ 'object', OPTExpression1, 'exit-wipe-to-left' ],
     [ 'object', OPTResult1, 'enter-wipe-from-right' ],
@@ -530,7 +339,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // remove arrow coming from child, hide current text; replace computation expression with answer; and focus on whole computation1 (swap text as well)
   const animBlock10 = new AnimBlock();
-  animBlock10.addManyByParams([
+  animBlock10.addManyObjects([
     [ 'line', freeLine_fromSourceEl1, 'fade-out', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1], {blocksNext: false} ],
     [ 'object', textbox_OPTExpression1, 'fade-out', {blocksPrev: false, blocksNext: false} ],
     [ 'line', freeLine_OPTExpression1, 'fade-out', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -547,7 +356,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on computation 2
   const animBlock11 = new AnimBlock();
-  animBlock11.addManyByParams([
+  animBlock11.addManyObjects([
     [ 'object', textbox_computation1, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation1, 'fade-out', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
     [ 'object', computation1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
@@ -559,7 +368,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // replace subtraction with result; then focus on OPT expression 2
   const animBlock12 = new AnimBlock();
-  animBlock12.addManyByParams([
+  animBlock12.addManyObjects([
     [ 'object', textbox_computation2, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
 
@@ -571,7 +380,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
   ]);
 
 
-  animTimeline.addBlocks([
+  animTimeline.addManyBlocks([
     animBlock9,
     animBlock10,
     animBlock11,
@@ -583,7 +392,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     animateJobStub(jobCardChild2, jobCard) :
     animateJobCard_R(jobCardChild2, jobCard);
   // replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text
-  animBlock13.addManyByParams([
+  animBlock13.addManyObjects([
     [ 'line', freeLine_fromSourceEl2, 'fade-in', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1] ],
 
     [ 'object', textbox_OPTExpression2, 'fade-out', {blocksNext: false} ],
@@ -601,7 +410,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on whole formula container
   const animBlock14 = new AnimBlock();
-  animBlock14.addManyByParams([
+  animBlock14.addManyObjects([
     [ 'line', freeLine_fromSourceEl2, 'fade-out', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1], {blocksNext: false} ],
     [ 'object', textbox_computation2, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -617,7 +426,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // replace formula container contents with final answer
   const animBlock15 = new AnimBlock();
-  animBlock15.addManyByParams([
+  animBlock15.addManyObjects([
     [ 'object', formulaComputation, 'exit-wipe-to-left' ],
     [ 'object', formulaResult, 'enter-wipe-from-right' ],
 
@@ -627,7 +436,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // show only M container, replace M access with final computed optimal value, and update M array block
   const animBlock16 = new AnimBlock();
-  animBlock16.addManyByParams([
+  animBlock16.addManyObjects([
     // hide formula container
     [ 'object', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_formulaComputation, 'fade-out', formulaContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -647,7 +456,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // show only M container and replace M access with final computed optimal value
   const animBlock17 = new AnimBlock();
-  animBlock17.addManyByParams([
+  animBlock17.addManyObjects([
     // Add last text box
     [ 'object', textP_MAccess_intro, 'fade-out', {duration: 0, blocksNext: false} ],
     [ 'object', textP_MAccess_solved, 'fade-in', {duration: 0, blocksPrev: false} ],
@@ -656,7 +465,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     [ 'object', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
   ]);
 
-  animTimeline.addBlocks([
+  animTimeline.addManyBlocks([
     animBlock13,
     animBlock14,
     animBlock15,
@@ -667,7 +476,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
   if (parentJobCard) {
     // just for hiding the last text box before moving back up the tree
     const animBlock18 = new AnimBlock();
-    animBlock18.addManyByParams([
+    animBlock18.addManyObjects([
       [ 'object', textbox_MAccess, 'fade-out', {blocksNext: false} ],
       [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.1, 0.2], null, [0.5, 1] ],
     ]);
@@ -695,7 +504,7 @@ function animateJobStub(jobCard, parentJobCard) {
 
 
   const animBlock3 = new AnimBlock();
-  animBlock3.addManyByParams([
+  animBlock3.addManyObjects([
     [ 'object', jobCardContent, 'fade-in' ],
     [ 'object', MAccess, 'fade-in' ],
     [ 'object', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
@@ -705,11 +514,11 @@ function animateJobStub(jobCard, parentJobCard) {
 
   // point to M block array entry
   const animBlock4 = new AnimBlock();
-  animBlock4.addOneByParams([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
+  animBlock4.addOneObject([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
 
   // point back to M access from M block
   const animBlock5 = new AnimBlock();
-  animBlock5.addManyByParams([
+  animBlock5.addManyObjects([
     [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
     [ 'line', freeLine_toMBlock, 'fade-in', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5] ],
     [ 'object', MAccess, 'exit-wipe-to-left' ],
@@ -718,14 +527,14 @@ function animateJobStub(jobCard, parentJobCard) {
     [ 'object', textbox_MAccess_p2, 'fade-in', {duration: 250, blocksNext: false} ],
   ]);
 
-  animTimeline.addBlocks([
+  animTimeline.addManyBlocks([
     animBlock3,
     animBlock4,
     animBlock5,
   ]);
 
   const animBlock6 = new AnimBlock();
-  animBlock6.addManyByParams([
+  animBlock6.addManyObjects([
     [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],
     [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
     [ 'object', textbox_MAccess, 'fade-out', {blocksPrev: false} ],

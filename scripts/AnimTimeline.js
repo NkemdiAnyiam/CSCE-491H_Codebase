@@ -5,30 +5,45 @@ export class AnimTimeline {
 
   id; // used to uniquely identify this specific timeline
   animBlocks = []; // array of every AnimBlock in this timeline
+  numBlocks = 0;
   stepNum = 0; // index into animBlocks
   isSkipping = false; // used to determine whether or not all animations should be instantaneous
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
 
-  constructor(...animBlocks) {
+  constructor(animBlocks = null, options = null) {
     this.id = AnimTimeline.id++;
-    
-    this.addBlocks(animBlocks);
-    this.numBlocks = this.animBlocks.length;
+
+    if (animBlocks) {
+      if (animBlocks instanceof Array && (animBlocks[0] instanceof AnimBlock || animBlocks[0] instanceof Array)) {
+        this.addBlocks(animBlocks);
+        this.numBlocks = this.animBlocks.length;
+      }
+      else {
+        this.addBlock(animBlocks);
+        this.numBlocks = 1;
+      }
+    }
   }
 
-  addBlock(animBlock) {
-    animBlock.setID(this.id);
-    this.animBlocks.push(animBlock);
+  addOneBlock(animBlockOrData) {
+    if (animBlockOrData instanceof AnimBlock) {
+      animBlockOrData.setID(this.id);
+      this.animBlocks.push(animBlockOrData);
+    }
+    else {
+      const newAnimBlock = new AnimBlock();
+      if (animBlockOrData[0] instanceof Array) { newAnimBlock.addManyObjects(animBlockOrData); }
+      else { newAnimBlock.addOneObject(animBlockOrData); }
+      newAnimBlock.setID(this.id);
+      this.animBlocks.push(newAnimBlock);
+    }
     ++this.numBlocks;
   }
-  addBlocks(animBlocks) { animBlocks.forEach(animBlock => this.addBlock(animBlock)); }
-  addOneByParams(animBlockParam) {
-    const animBlock = new AnimBlock();
-    animBlockParam[0] instanceof Array ? animBlock.addManyByParams(animBlockParam) : animBlock.addOneByParams(animBlockParam);
-    this.addBlock(animBlock);
+
+  addManyBlocks(animBlocks) {
+    animBlocks.forEach(animBlock => this.addOneBlock(animBlock));
   }
-  addManyByParams(animBlocksParams) { animBlocksParams.forEach(animBlockParam => this.addOneByParams(animBlockParam)); }
 
   // plays current AnimBlock and increments stepNum
   async stepForward() {

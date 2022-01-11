@@ -5,18 +5,27 @@ export class AnimBlock {
   timelineID; // set to match the id of the AnimTimeline to which it belongs
   animObjects = []; // array of AnimObjects
 
-  constructor(...animObjects) {
-    this.addAnimObjects(animObjects);
+  constructor(animObjects = null, options = null) {
+    if (animObjects) {
+      if (animObjects instanceof Array
+        && (animObjects[0] instanceof Array || animObjects[0] instanceof Array)) { this.addManyObjects(animObjects); }
+      else { this.addOneObject(animObjects); }
+    }
   }
 
-  addAnimObject(animObject) { this.animObjects.push(animObject); }
-  addAnimObjects(animObjects) { animObjects.forEach(animObject => this.addAnimObject(animObject)); }
-  addOneByParams([type, ...animObjectParams]) {
-    if (type === "object") { this.addAnimObject(new AnimObject(...animObjectParams)); return;}
-    if (type === 'line') { this.addAnimObject(new AnimLine(...animObjectParams)); return;}
-    console.error('AnimObject type not specified'); // TODO: throw error
+  addOneObject(animObject) {
+    if (animObject instanceof AnimObject) { this.animObjects.push(animObject); }
+    else {
+      const [type, ...animObjectParams] = animObject;
+      if (type === "object") { this.addOneObject(new AnimObject(...animObjectParams)); return; }
+      if (type === 'line') { this.addOneObject(new AnimLine(...animObjectParams)); return; }
+      console.error('AnimObject type not specified'); // TODO: throw error
+    }
   }
-  addManyByParams(animObjectsParams) { animObjectsParams.forEach(entry => this.addOneByParams(entry)); }
+
+  addManyObjects(animObjects) {
+    animObjects.forEach(animObject => this.addOneObject(animObject));
+  }
 
   // plays each AnimObject contained in this AnimBlock instance in sequential order
   async play() {
