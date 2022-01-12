@@ -42,7 +42,7 @@ jobScheduler.setUpScene();
 })();
 
 
-const animTimeline = new AnimTimeline();
+const animTimeline = new AnimTimeline(null, {debugMode: true});
 
 const timeGraphEl = document.querySelector('.time-graph');
 const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
@@ -50,7 +50,7 @@ const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
 const cArray = document.querySelector('.array--c');
 
 // Move job bars onto time graph in unsorted order
-const animSequence0 = new AnimSequence();
+const animSequence0 = new AnimSequence(null, {description: 'Move job bars onto time graph in unsorted order'});
 jobBarEls.forEach((jobBarEl) => {
   // set up options for moving job bars to correct location
   const jobLetter = jobBarEl.dataset.jobletter;
@@ -240,7 +240,9 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
 
   // fade in job card and M access
-  const animSequence3 = new AnimSequence([
+  const animSequence3 = new AnimSequence()
+  animSequence3.setDescription('Fade in job card and M access');
+  animSequence3.addManyBlocks([
     [ 'std', jobCardContent, 'fade-in' ],
     [ 'std', MAccess, 'fade-in' ],
     [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
@@ -250,10 +252,12 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // point to M block array entry
   const animSequence4 = new AnimSequence();
+  animSequence4.setDescription('Point to M block array entry');
   animSequence4.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
 
   // focus on formula container
   const animSequence5 = new AnimSequence();
+  animSequence5.setDescription('Focus on formula container');
   animSequence5.addManyBlocks([
     [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
     [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
@@ -269,6 +273,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on computation 1
   const animSequence6 = new AnimSequence();
+  animSequence6.setDescription('Focus on computation 1');
   animSequence6.addManyBlocks([
     [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_formulaComputation, 'fade-out', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -282,6 +287,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on c access and point to c array entry
   const animSequence7 = new AnimSequence();
+  animSequence7.setDescription('Focus on c access and point to c array entry');
   animSequence7.addManyBlocks([
     [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation1, 'fade-out', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -296,6 +302,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // point from c array entry back to job card and replace c access. Then focus on OPT exprssion 1 as a whole
   const animSequence8 = new AnimSequence();
+  animSequence8.setDescription('Point from c array entry back to job card and replace c access. Then focus on OPT exprssion 1 as a whole');
   animSequence8.addManyBlocks([
     // replace c entry
     [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5] ],
@@ -329,6 +336,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     animateJobStub(jobCardChild1, jobCard) :
     animateJobCard_R(jobCardChild1, jobCard);
   // replace OPT1 expression with answer, change text box text
+  animSequence9.setDescription('Replace OPT1 expression with answer, change text box text');
   animSequence9.addManyBlocks([
     [ 'line', freeLine_fromSourceEl1, 'fade-in', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1] ],
     [ 'std', OPTExpression1, 'exit-wipe-to-left' ],
@@ -339,6 +347,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // remove arrow coming from child, hide current text; replace computation expression with answer; and focus on whole computation1 (swap text as well)
   const animSequence10 = new AnimSequence();
+  animSequence10.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
   animSequence10.addManyBlocks([
     [ 'line', freeLine_fromSourceEl1, 'fade-out', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1], {blocksNext: false} ],
     [ 'std', textbox_OPTExpression1, 'fade-out', {blocksPrev: false, blocksNext: false} ],
@@ -356,6 +365,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on computation 2
   const animSequence11 = new AnimSequence();
+  animSequence11.setDescription('Focus on computation 2');
   animSequence11.addManyBlocks([
     [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation1, 'fade-out', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -368,6 +378,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // replace subtraction with result; then focus on OPT expression 2
   const animSequence12 = new AnimSequence();
+  animSequence12.setDescription('Replace subtraction with result; then focus on OPT expression 2');
   animSequence12.addManyBlocks([
     [ 'std', textbox_computation2, 'fade-out', {blocksNext: false} ],
     [ 'line', freeLine_computation2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -392,6 +403,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
     animateJobStub(jobCardChild2, jobCard) :
     animateJobCard_R(jobCardChild2, jobCard);
   // replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text
+  animSequence13.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
   animSequence13.addManyBlocks([
     [ 'line', freeLine_fromSourceEl2, 'fade-in', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1] ],
 
@@ -410,6 +422,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // focus on whole formula container
   const animSequence14 = new AnimSequence();
+  animSequence14.setDescription('Focus on whole formula container');
   animSequence14.addManyBlocks([
     [ 'line', freeLine_fromSourceEl2, 'fade-out', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1], {blocksNext: false} ],
     [ 'std', textbox_computation2, 'fade-out', {blocksNext: false} ],
@@ -426,6 +439,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // replace formula container contents with final answer
   const animSequence15 = new AnimSequence();
+  animSequence15.setDescription('Replace formula container contents with final answer');
   animSequence15.addManyBlocks([
     [ 'std', formulaComputation, 'exit-wipe-to-left' ],
     [ 'std', formulaResult, 'enter-wipe-from-right' ],
@@ -436,6 +450,7 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // show only M container, replace M access with final computed optimal value, and update M array block
   const animSequence16 = new AnimSequence();
+  animSequence16.setDescription('Show only M container, replace M access with final computed optimal value, and update M array block');
   animSequence16.addManyBlocks([
     // hide formula container
     [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
@@ -454,8 +469,9 @@ function animateJobCard_R(jobCard, parentJobCard) {
     [ 'std', MBlock_value, 'fade-in' ],
   ]);
 
-  // show only M container and replace M access with final computed optimal value
+  // remove arrow pointing from M block and show final text box
   const animSequence17 = new AnimSequence();
+  animSequence17.setDescription('Remove arrow pointing from M block and show final text box');
   animSequence17.addManyBlocks([
     // Add last text box
     [ 'std', textP_MAccess_intro, 'fade-out', {duration: 0, blocksNext: false} ],
@@ -503,7 +519,9 @@ function animateJobStub(jobCard, parentJobCard) {
   const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
 
 
+  // fade in job stub and M access
   const animSequence3 = new AnimSequence();
+  animSequence3.setDescription('Fade in job stub and M access');
   animSequence3.addManyBlocks([
     [ 'std', jobCardContent, 'fade-in' ],
     [ 'std', MAccess, 'fade-in' ],
@@ -514,10 +532,12 @@ function animateJobStub(jobCard, parentJobCard) {
 
   // point to M block array entry
   const animSequence4 = new AnimSequence();
+  animSequence4.setDescription('Point to M block array entry');
   animSequence4.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
 
   // point back to M access from M block
   const animSequence5 = new AnimSequence();
+  animSequence5.setDescription('Point back to M access from M block');
   animSequence5.addManyBlocks([
     [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
     [ 'line', freeLine_toMBlock, 'fade-in', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5] ],
@@ -533,6 +553,7 @@ function animateJobStub(jobCard, parentJobCard) {
     animSequence5,
   ]);
 
+  // return block that initially hides remaining stuff and points to parent
   const animSequence6 = new AnimSequence();
   animSequence6.addManyBlocks([
     [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],

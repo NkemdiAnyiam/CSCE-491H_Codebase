@@ -24,6 +24,8 @@ export class AnimTimeline {
         this.numSequences = 1;
       }
     }
+
+    this.debugMode = options ? (options?.debugMode ?? false) : false;
   }
 
   addOneSequence(animSequenceOrData) {
@@ -52,6 +54,9 @@ export class AnimTimeline {
 
     this.isAnimating = true;
     this.currDirection = 'forward';
+
+    if (this.debugMode) { console.log(`-->> ${this.animSequences[this.stepNum].getDescription()}`); }
+
     if (this.isSkipping) { this.fireSkipSignal(); }
     await this.animSequences[this.stepNum].play(); // wait for the current AnimSequence to finish all of its animations
     ++this.stepNum;
@@ -67,6 +72,9 @@ export class AnimTimeline {
     this.isAnimating = true;
     --this.stepNum;
     this.currDirection = 'backward';
+
+    if (this.debugMode) { console.log(`<<-- ${this.animSequences[this.stepNum].getDescription()}`); }
+
     if (this.isSkipping) { this.fireSkipSignal(); }
     await this.animSequences[this.stepNum].rewind();
     this.isAnimating = false;

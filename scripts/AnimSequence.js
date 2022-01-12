@@ -11,7 +11,12 @@ export class AnimSequence {
         && (animBlocks[0] instanceof Array || animBlocks[0] instanceof Array)) { this.addManyBlocks(animBlocks); }
       else { this.addOneBlock(animBlocks); }
     }
+    this.description = options ? (options?.description ?? '<blank sequence description>') : '<blank sequence description>';
   }
+
+  getDescription() { return this.description; }
+  
+  setDescription(description) { this.description = description; }
 
   addOneBlock(animBlock) {
     if (animBlock instanceof AnimBlock) { this.animBlocks.push(animBlock); }
@@ -56,5 +61,9 @@ export class AnimSequence {
   setID(id) {
     this.timelineID = id;
     this.animBlocks.forEach(animBlock => animBlock.setID(this.timelineID));
+  }
+
+  printDesc() {
+    console.log(this.description);
   }
 }
