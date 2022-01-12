@@ -17,6 +17,7 @@
   border: 0.75rem solid currentColor;
   bottom: calc(100% + 5rem);
   background-color: var(--color-yellow-lightest);
+  z-index: 1001;
 }
 .text-box__paragraph {
   color: var(--color-gray-darkest);
