@@ -165,9 +165,10 @@ jobBarEls.forEach((jobBarEl, i) => {
 
 animateJobCard_R(document.querySelector('.job-card'), null);
 
-function animateJobCard_R(jobCard, parentJobCard) {
+function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   const SJNum = Number.parseInt(jobCard.dataset.sjnum);
   const jobCardContent = jobCard.querySelector('.job-card-content');
+  const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
@@ -237,18 +238,26 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
 
   const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
+  const freeLine_downTree = jobCard.querySelector('.free-line--down-tree');
 
 
   // fade in job card and M access
   const animSequence3 = new AnimSequence()
   animSequence3.setDescription('Fade in job card and M access');
   animSequence3.addManyBlocks([
-    [ 'std', jobCardContent, 'fade-in' ],
+    [ 'std', jobCardContent, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
+  ]);
+  if (parentArrowDown) {
+    animSequence3.addManyBlocks([
+      [ 'line', parentArrowDown, 'fade-in', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false, duration: 1000} ],
+    ]);
+  }
+  animSequence3.addManyBlocks([
     [ 'std', MAccess, 'fade-in' ],
     [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
     [ 'line', freeLine_MAccess, 'fade-in', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
     [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
-  ]);
+  ])
 
   // point to M block array entry
   const animSequence4 = new AnimSequence();
@@ -333,8 +342,8 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // RECURSE 1
   const [animSequence9, sourceEl_OPT1, freeLine_fromSourceEl1] = jobCardChild1.classList.contains('job-card--stub') ?
-    animateJobStub(jobCardChild1, jobCard) :
-    animateJobCard_R(jobCardChild1, jobCard);
+    animateJobStub(jobCardChild1, freeLine_downTree, OPTExpressionContainer1) :
+    animateJobCard_R(jobCardChild1, freeLine_downTree, OPTExpressionContainer1);
   // replace OPT1 expression with answer, change text box text
   animSequence9.setDescription('Replace OPT1 expression with answer, change text box text');
   animSequence9.addManyBlocks([
@@ -400,8 +409,8 @@ function animateJobCard_R(jobCard, parentJobCard) {
 
   // RECURSE 2
   const [animSequence13, sourceEl_OPT2, freeLine_fromSourceEl2] = jobCardChild2.classList.contains('job-card--stub') ?
-    animateJobStub(jobCardChild2, jobCard) :
-    animateJobCard_R(jobCardChild2, jobCard);
+    animateJobStub(jobCardChild2, freeLine_downTree, OPTExpression2) :
+    animateJobCard_R(jobCardChild2, freeLine_downTree, OPTExpression2);
   // replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text
   animSequence13.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
   animSequence13.addManyBlocks([
@@ -489,21 +498,23 @@ function animateJobCard_R(jobCard, parentJobCard) {
     animSequence17,
   ]);
 
-  if (parentJobCard) {
+  if (parentArrowDown) {
     // just for hiding the last text box before moving back up the tree
     const animSequence18 = new AnimSequence();
     animSequence18.addManyBlocks([
       [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
       [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.1, 0.2], null, [0.5, 1] ],
+      [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2] ],
     ]);
 
     return [animSequence18, MAccessContainer, freeLine_upTree];
   }
 }
 
-function animateJobStub(jobCard, parentJobCard) {
+function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
   const SJNum = Number.parseInt(jobCard.dataset.sjnum);
   const jobCardContent = jobCard.querySelector('.job-card-content');
+  const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
@@ -523,7 +534,8 @@ function animateJobStub(jobCard, parentJobCard) {
   const animSequence3 = new AnimSequence();
   animSequence3.setDescription('Fade in job stub and M access');
   animSequence3.addManyBlocks([
-    [ 'std', jobCardContent, 'fade-in' ],
+    [ 'std', jobCardContent, 'fade-in', {blocksNext: false} ],
+    [ 'line', parentArrowDown, 'fade-in', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
     [ 'std', MAccess, 'fade-in' ],
     [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
     [ 'line', freeLine_MAccess, 'fade-in', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
@@ -559,6 +571,7 @@ function animateJobStub(jobCard, parentJobCard) {
     [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],
     [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
     [ 'std', textbox_MAccess, 'fade-out', {blocksPrev: false} ],
+    [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0, -0.1] ],
   ]);
 
   return [animSequence6, MAccessContainer, freeLine_upTree];
