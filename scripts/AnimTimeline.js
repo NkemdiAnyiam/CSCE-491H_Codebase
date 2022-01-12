@@ -48,8 +48,8 @@ export class AnimTimeline {
   }
 
   // plays current AnimSequence and increments stepNum
-  async stepForward() {
-    if (this.isAnimating) { return Promise.reject('Cannot stepForward() while already animating'); }
+  stepForward() {
+    // if (this.isAnimating) { return Promise.reject('Cannot stepForward() while already animating'); }
     if (this.atEnd()) { return Promise.reject('Cannot stepForward() at end of timeline'); }
 
     this.isAnimating = true;
@@ -58,15 +58,20 @@ export class AnimTimeline {
     if (this.debugMode) { console.log(`-->> ${this.animSequences[this.stepNum].getDescription()}`); }
 
     if (this.isSkipping) { this.fireSkipSignal(); }
-    await this.animSequences[this.stepNum].play(); // wait for the current AnimSequence to finish all of its animations
-    ++this.stepNum;
-    this.isAnimating = false;
-    return Promise.resolve();
+
+    return new Promise(resolve => {
+      this.animSequences[this.stepNum].play() // wait for the current AnimSequence to finish all of its animations
+      .then(() => resolve());
+    })
+    .then(() => {
+      ++this.stepNum;
+      this.isAnimating = false;
+    });
   }
 
   // decrements stepNum and rewinds the AnimSequence
-  async stepBackward() {
-    if (this.isAnimating) { return Promise.reject('Cannot stepBackward() while already animating'); }
+  stepBackward() {
+    // if (this.isAnimating) { return Promise.reject('Cannot stepBackward() while already animating'); }
     if (this.atBeginning()) { return Promise.reject('Cannot stepBackward() at beginning of timeline'); }
 
     this.isAnimating = true;
@@ -76,9 +81,15 @@ export class AnimTimeline {
     if (this.debugMode) { console.log(`<<-- ${this.animSequences[this.stepNum].getDescription()}`); }
 
     if (this.isSkipping) { this.fireSkipSignal(); }
-    await this.animSequences[this.stepNum].rewind();
-    this.isAnimating = false;
-    return Promise.resolve();
+
+    return new Promise(resolve => {
+      this.animSequences[this.stepNum].rewind()
+      .then(() => resolve());
+    })
+    .then(() => {
+      this.isAnimating = false;
+      return Promise.resolve();
+    });
   }
 
   toggleSkipping(isSkipping) {

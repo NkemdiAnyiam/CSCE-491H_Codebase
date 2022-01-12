@@ -126,10 +126,10 @@ export class AnimBlock {
   }
   
   // short burst of shouldSkip that, if done prior to the animation playing, allows the animation to be finished instantly
-  async handleSkipSignal() {
+  handleSkipSignal() {
     this.shouldSkip = true;
-    await wait(AnimBlock.skipDuration);
-    this.shouldSkip = false;
+    wait(AnimBlock.skipDuration)
+    .then(() => this.shouldSkip = false);
   }
 
   applyOptions(options) {
