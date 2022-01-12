@@ -24,7 +24,7 @@
   --color-brown: #8E6339;
 
   --color-yellow: #F9F278;
-  --color-yellow-lightest: #f5f5e7;
+  --color-yellow-lightest: rgba(245, 245, 231, 0.904);
 
   --color-gray-darkest: black;
   --color-gray: gray;
