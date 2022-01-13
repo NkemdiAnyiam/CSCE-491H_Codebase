@@ -568,7 +568,6 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
 
   // return block that initially hides remaining stuff and points to parent
   const animSequence6 = new AnimSequence();
-  animSequence6.setTag('boo');
   animSequence6.addManyBlocks([
     [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],
     [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
@@ -584,7 +583,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
 
 
 
-
+// TODO: Move playback functionality into AnimTimeline
 const goForward = async function() {
   return new Promise(async function(resolve) {
     backwardButton.removeEventListener('click', goBackward);
@@ -619,20 +618,27 @@ const toggleSkipping = function(e) {
   if (e.key.toLowerCase() === 's' && !e.repeat) {
     window.removeEventListener('keyup', stopFastForward);
     window.removeEventListener('keydown', fastForward);
+    clearInterval(intervalID);
     animTimeline.toggleSkipping();
     window.addEventListener('keyup', stopFastForward);
     window.addEventListener('keydown', fastForward);
   }
 };
 
+let intervalID = null;
+
 const fastForward = function(e) {
-  if (e.key.toLowerCase() === 'f') {
+  if (e.key.toLowerCase() === 'f' && !e.repeat) {
     animTimeline.fireRateSignal(7);
+    intervalID  = setInterval(() => {
+      animTimeline.fireRateSignal(7);
+    }, 30);
   }
 };
 
 const stopFastForward = function(e) {
   if (e.key.toLowerCase() === 'f') {
+    clearInterval(intervalID);
     animTimeline.fireRateSignal(1);
   }
 };
@@ -640,7 +646,3 @@ const stopFastForward = function(e) {
 window.addEventListener('keydown', toggleSkipping);
 window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
-
-
-animTimeline.skipTo('skip here')
-.then(() => animTimeline.skipTo('boo'));
