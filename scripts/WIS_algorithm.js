@@ -233,6 +233,8 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   const cEntry = jobCard.querySelector('.c-entry');
   const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access .free-line');
   const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box');
+  const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
+  const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
   const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block');
   const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
@@ -343,10 +345,11 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   }
 
 
-  // focus on c access and point to c array entry
+  // focus on c access
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on c access and point to c array entry');
+    animSequence.setTag('skip to');
     animSequence.addManyBlocks([
       [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
       [ 'line', freeLine_computation1, 'fade-out', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
@@ -355,7 +358,17 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
       [ 'std', cAccessContainer, 'highlight', {blocksPrev: false} ],
       [ 'line', freeLine_cAccess, 'fade-in', cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
       [ 'std', textbox_cAccess, 'fade-in', {blocksPrev: false} ],
-  
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+
+
+  // point to c array entry
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Point to c array entry');
+    animSequence.addManyBlocks([
       [ 'line', freeLine_toCBlock, 'fade-in', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false} ],
     ]);
 
@@ -363,16 +376,29 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   }
 
 
-  // point from c array entry back to job card and replace c access. Then focus on OPT exprssion 1 as a whole
+  // Reverse arrow and replace c access with value
   {
     const animSequence = new AnimSequence();
-    animSequence.setDescription('Point from c array entry back to job card and replace c access. Then focus on OPT exprssion 1 as a whole');
+    animSequence.setDescription('Reverse arrow and replace c access with value');
     animSequence.addManyBlocks([
-      // replace c entry
       [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5] ],
       [ 'line', freeLine_toCBlock, 'fade-in', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5] ],
       [ 'std', cAccess, 'exit-wipe-to-left' ],
       [ 'std', cEntry, 'enter-wipe-from-right' ],
+      [ 'std', textP_cAccess_find, 'fade-out', { duration: 250 } ],
+      [ 'std', textP_cAccess_found, 'fade-in', { duration: 250 } ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+
+
+  // Focus on OPT expression 1 as a whole
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on OPT expression 1 as a whole');
+    animSequence.addManyBlocks([
+      // hide arrow for c block
       [ 'line', freeLine_toCBlock, 'fade-out', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5] ],
   
       // remove c access text
@@ -579,7 +605,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     animTimeline.addOneSequence(animSequence);
   }
 
-  
+
   if (parentArrowDown) {
     // just for hiding the last text box before moving back up the tree
     const animSequence = new AnimSequence();
@@ -739,4 +765,4 @@ window.addEventListener('keydown', toggleSkipping);
 window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
 
-// animTimeline.skipTo('skip here');
+animTimeline.skipTo('skip to');
