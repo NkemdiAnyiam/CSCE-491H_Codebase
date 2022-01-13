@@ -116,6 +116,7 @@
 .formula-computation {
   display: flex;
   align-items: center;
+  padding: 0 1rem;
 }
 
 .max-container {
@@ -168,12 +169,9 @@
 }
 
 .OPT-related,
-.OPT-expression {
-  color: var(--color-brown);
-}
-
+.OPT-expression,
 .OPT-result {
-  color: var(--color-gray-darkest);
+  color: var(--color-brown);
 }
 
 .c-access-container {
