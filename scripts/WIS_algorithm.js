@@ -278,7 +278,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence()
     animSequence.setDescription('Fade in job card and M access');
     animSequence.addManyBlocks([
-      [ 'std', jobCardContent, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
+      [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
     ]);
     if (parentArrowDown) {
       animSequence.addManyBlocks([
@@ -648,7 +648,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Fade in job stub and M access');
     animSequence.addManyBlocks([
-      [ 'std', jobCardContent, 'fade-in', {blocksNext: false} ],
+      [ 'std', jobCard, 'fade-in', {blocksNext: false} ],
       [ 'line', parentArrowDown, 'fade-in', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
       [ 'std', MAccess, 'fade-in' ],
       [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
