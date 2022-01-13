@@ -101,6 +101,7 @@ export class AnimTimeline {
 
     // get stepNum corresponding to matching AnimSequence
     const stepNumTo = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag);
+    if (stepNumTo === -1) { return Promise.reject('Tag name not found'); }
 
     // keep skipping forwards or backwards depending on direction of stepNum
     if (this.stepNum < stepNumTo) {
