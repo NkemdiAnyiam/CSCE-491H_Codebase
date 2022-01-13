@@ -16,10 +16,13 @@
 
 .data-display {
   position: fixed;
-
+  top: 0;
+  left: 0;
+  
   grid-area: data;
   padding-top: 10rem;
   padding-right: 10rem;
+  padding-left: 5rem;
   height: 100%;
   border-right: solid 1px var(--color-gray-darkest);
 

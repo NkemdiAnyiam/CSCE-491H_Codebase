@@ -5,6 +5,12 @@ import { AnimBlockLine } from './AnimBlockLine.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 
+// TODO: Move this somewhere else
+const dataDisplay = document.querySelector('.data-display');
+document.addEventListener('scroll', function(e) {
+  dataDisplay.style.left = `${-window.scrollX}px`;
+});
+
 const jobsUnsorted = [
   // new Job(5, 9, 7),
   new Job(8, 11, 5),
