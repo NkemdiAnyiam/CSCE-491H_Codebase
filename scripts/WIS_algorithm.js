@@ -306,7 +306,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
-    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {trackEndponts: true} ]);
 
     animTimeline.addOneSequence(animSequence);
   }
@@ -317,7 +317,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on formula container');
     animSequence.addManyBlocks([
-      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
+      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
       [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
       [ 'line', freeLine_MAccess, 'fade-out', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
       [ 'std', MAccessContainer, 'un-highlight' ],
@@ -375,7 +375,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to c array entry');
     animSequence.addManyBlocks([
-      [ 'line', freeLine_toCBlock, 'fade-in', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false} ],
+      [ 'line', freeLine_toCBlock, 'fade-in', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
     ]);
 
     animTimeline.addOneSequence(animSequence);
@@ -387,8 +387,8 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Reverse arrow and replace c access with value');
     animSequence.addManyBlocks([
-      [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5] ],
-      [ 'line', freeLine_toCBlock, 'fade-in', cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5] ],
+      [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_toCBlock, 'fade-in', cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5], {lineOptions: {trackEndpoints: true}} ],
       [ 'std', cAccess, 'exit-wipe-to-left' ],
       [ 'std', cEntry, 'enter-wipe-from-right' ],
       [ 'std', textP_cAccess_find, 'fade-out', { duration: 250 } ],
@@ -405,7 +405,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
     animSequence.setDescription('Focus on OPT expression 1 as a whole');
     animSequence.addManyBlocks([
       // hide arrow for c block
-      [ 'line', freeLine_toCBlock, 'fade-out', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5] ],
+      [ 'line', freeLine_toCBlock, 'fade-out', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
   
       // remove c access text
       [ 'std', textbox_cAccess, 'fade-out', {blocksNext: false} ],
@@ -591,7 +591,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
       [ 'std', MAccessContainer, 'highlight' ],
   
       // Visually update M array entry
-      [ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
+      [ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
       [ 'std', MBlock_blank, 'fade-out' ],
       [ 'std', MBlock_value, 'fade-in' ],
     ]);
@@ -608,8 +608,8 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
       // Add last text box
       [ 'std', textP_MAccess_intro, 'fade-out', {duration: 0, blocksNext: false} ],
       [ 'std', textP_MAccess_solved, 'fade-in', {duration: 0, blocksPrev: false} ],
-      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
-      [ 'line', freeLine_MAccess, 'fade-in', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_MAccess, 'fade-in', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
       [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
     ]);
 
@@ -670,7 +670,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
-    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
 
     animTimeline.addOneSequence(animSequence);
   }
@@ -681,8 +681,8 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point back to M access from M block');
     animSequence.addManyBlocks([
-      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ],
-      [ 'line', freeLine_toMBlock, 'fade-in', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5] ],
+      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_toMBlock, 'fade-in', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
       [ 'std', MAccess, 'exit-wipe-to-left' ],
       [ 'std', MEntry, 'enter-wipe-from-right' ],
       [ 'std', textbox_MAccess_p1, 'fade-out', {duration: 250, blocksNext: false} ],
@@ -697,7 +697,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
   {
     const animSequence = new AnimSequence();
     animSequence.addManyBlocks([
-      [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],
+      [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false, lineOptions: {trackEndpoints: true}} ],
       [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
       [ 'std', textbox_MAccess, 'fade-out', {blocksPrev: false} ],
       [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2] ],
@@ -777,5 +777,5 @@ window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
 
 // animTimeline.skipTo('skip to');
-animTimeline.skipTo('focus comp 2');
+// animTimeline.skipTo('focus comp 2');
 // animTimeline.skipTo('found max');

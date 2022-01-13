@@ -4,7 +4,7 @@ import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
 export class AnimBlockLine extends AnimBlock {
   // the defaults of both updateEndpointsOnEntry and trackEndpoints can be replaced in applyOptions()
   updateEndpointsOnEntry = true; // determines whether or not to call updateEndpoints() upon using an entering animation
-  trackEndpoints = true; // determines whether or not to continuously periodically called updateEndpoints() while visible
+  trackEndpoints = false; // determines whether or not to continuously periodically called updateEndpoints() while visible
 
   constructor(domElem, animName, startElem, [leftStart, topStart], endElem, [leftEnd, topEnd], options) {
     super(domElem, animName, options);
@@ -44,8 +44,8 @@ export class AnimBlockLine extends AnimBlock {
   }
 
   handleUpdateSettings(animName) {
-    if (this.updateEndpointsOnEntry && AnimBlock.isEntering(animName)) {
-      this.updateEndpoints();
+    if (AnimBlock.isEntering(animName)) {
+      if (this.updateEndpointsOnEntry) { this.updateEndpoints(); }
 
       // if continuous tracking is enabled, tell AnimBlockLineUpdater to set an interval for updateEndpoints()
       if (this.trackEndpoints) { AnimBlockLineUpdater.setInterval(this.domElem, this.updateEndpoints.bind(this)); }
