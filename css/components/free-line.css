@@ -17,6 +17,7 @@
   stroke: currentColor;
   stroke-width:2; 
   marker-end:url(#markerArrow);
+  stroke-linecap: round;
 }
 
 .free-line marker path {
