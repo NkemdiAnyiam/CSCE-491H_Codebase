@@ -10,6 +10,7 @@ export class AnimTimeline {
   isSkipping = false; // used to determine whether or not all animations should be instantaneous
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
+  usingSkipTo = false; // true if currently using skipTo()
 
   constructor(animSequences = null, options = null) {
     this.id = AnimTimeline.id++;
@@ -90,6 +91,33 @@ export class AnimTimeline {
       this.isAnimating = false;
       return Promise.resolve();
     });
+  }
+
+  // immediately skips to first AnimSequence in animSequences with matching tag field
+  async skipTo(tag) {
+    // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
+    if (this.usingSkipTo) { return Promise.reject('Do not perform simultaneous calls to skipTo() in timeline'); }
+    this.usingSkipTo = true;
+
+    // get stepNum corresponding to matching AnimSequence
+    const stepNumTo = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag);
+
+    // keep skipping forwards or backwards depending on direction of stepNum
+    if (this.stepNum < stepNumTo) {
+      while (this.stepNum < stepNumTo) {
+        this.fireSkipSignal();
+        await this.stepForward();
+      }
+    }
+    else {
+      while (this.stepNum > stepNumTo) {
+        this.fireSkipSignal();
+        await this.stepBackward();
+      }
+    }
+
+    this.usingSkipTo = false;
+    return Promise.resolve(tag);
   }
 
   toggleSkipping(isSkipping) {

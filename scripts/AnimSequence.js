@@ -3,6 +3,8 @@ import { AnimBlockLine } from "./AnimBlockLine.js";
 
 export class AnimSequence {
   timelineID; // set to match the id of the AnimTimeline to which it belongs
+  description = '<blank sequence description>';
+  tag = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   animBlocks = []; // array of animBlocks
 
   constructor(animBlocks = null, options = null) {
@@ -11,12 +13,18 @@ export class AnimSequence {
         && (animBlocks[0] instanceof Array || animBlocks[0] instanceof Array)) { this.addManyBlocks(animBlocks); }
       else { this.addOneBlock(animBlocks); }
     }
-    this.description = options ? (options?.description ?? '<blank sequence description>') : '<blank sequence description>';
+
+    if (options) {
+      this.description = options.description ?? this.description;
+      this.tag = options.tag ?? this.tag;
+    }
   }
 
   getDescription() { return this.description; }
+  getTag() { return this.tag; }
   
   setDescription(description) { this.description = description; }
+  setTag(tag) { this.tag = tag; }
 
   addOneBlock(animBlock) {
     if (animBlock instanceof AnimBlock) { this.animBlocks.push(animBlock); }

@@ -262,6 +262,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   // point to M block array entry
   const animSequence4 = new AnimSequence();
   animSequence4.setDescription('Point to M block array entry');
+  animSequence4.setTag('skip here');
   animSequence4.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5] ]);
 
   // focus on formula container
@@ -567,6 +568,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
 
   // return block that initially hides remaining stuff and points to parent
   const animSequence6 = new AnimSequence();
+  animSequence6.setTag('boo');
   animSequence6.addManyBlocks([
     [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false} ],
     [ 'line', freeLine_MAccess, 'fade-out', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
@@ -639,3 +641,6 @@ window.addEventListener('keydown', toggleSkipping);
 window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
 
+
+animTimeline.skipTo('skip here')
+.then(() => animTimeline.skipTo('boo'));
