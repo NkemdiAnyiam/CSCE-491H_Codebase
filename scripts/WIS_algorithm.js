@@ -201,7 +201,7 @@ jobBarEls.forEach((jobBarEl, i) => {
 
 animateJobCard_R(document.querySelector('.job-card'));
 
-function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
+function animateJobCard_R(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource) {
   const SJNum = Number.parseInt(jobCard.dataset.sjnum);
   const jobCardContent = jobCard.querySelector('.job-card-content');
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
@@ -281,8 +281,9 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
 
   // fade in job card and M access
   {
-    const animSequence = new AnimSequence()
+    const animSequence = parentAnimSequence ?? new AnimSequence();
     animSequence.setDescription('Fade in job card and M access');
+    animSequence.setTag('start');
     animSequence.addManyBlocks([
       [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
     ]);
@@ -413,7 +414,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
       [ 'std', cAccessContainer, 'un-highlight', {blocksPrev: false} ],
   
       // enter OPT expression 1 text
-      [ 'std', OPTExpressionContainer1, 'highlight', {blocksPrev: false} ],
+      [ 'std', OPTExpressionContainer1, 'highlight', {blocksPrev: false, blocksNext: false} ],
       [ 'line', freeLine_OPTExpression1, 'fade-in', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
       [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
     ]);
@@ -424,22 +425,27 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   
   let sourceEl_OPT1, freeLine_fromSourceEl1;
   {
+    const animSeqPassDown = new AnimSequence();
+    animSeqPassDown.addManyBlocks([
+      [ 'std', textbox_OPTExpression1, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression1, 'fade-out', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+    ]);
     let animSequence;
     // RECURSE 1
     [animSequence, sourceEl_OPT1, freeLine_fromSourceEl1] = jobCardChild1.classList.contains('job-card--stub') ?
-      animateJobStub(jobCardChild1, freeLine_downTree, OPTExpressionContainer1) :
-      animateJobCard_R(jobCardChild1, freeLine_downTree, OPTExpressionContainer1);
+      animateJobStub(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1) :
+      animateJobCard_R(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1);
     // replace OPT1 expression with answer, change text box text
     animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
     animSequence.setTag('OPT point 1');
     animSequence.addManyBlocks([
       [ 'line', freeLine_fromSourceEl1, 'fade-in', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1.1] ],
-      [ 'line', freeLine_OPTExpression1, 'updateEndpoints', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1] ],
       [ 'std', OPTExpression1, 'exit-wipe-to-left', {blocksPrev: false} ],
       [ 'std', OPTResult1, 'enter-wipe-from-right', {blocksNext: false} ],
-      [ 'line', freeLine_OPTExpression1, 'updateEndpoints', OPTResult1, [0.5, -0.2], null, [0.5, 1] ],
       [ 'std', textP_OPTExpression1_find, 'fade-out', { duration: 250 } ],
       [ 'std', textP_OPTExpression1_found, 'fade-in', { duration: 250 } ],
+      [ 'line', freeLine_OPTExpression1, 'fade-in', OPTResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
     ]);
 
     animTimeline.addOneSequence(animSequence);
@@ -508,18 +514,20 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
 
   let sourceEl_OPT2, freeLine_fromSourceEl2
   {
+    const animSeqPassDown = new AnimSequence();
+    animSeqPassDown.addManyBlocks([
+      [ 'std', textbox_OPTExpression2, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1] ],
+    ]);
     let animSequence;
     // RECURSE 2
     [animSequence, sourceEl_OPT2, freeLine_fromSourceEl2] = jobCardChild2.classList.contains('job-card--stub') ?
-      animateJobStub(jobCardChild2, freeLine_downTree, OPTExpression2) :
-      animateJobCard_R(jobCardChild2, freeLine_downTree, OPTExpression2);
+      animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2) :
+      animateJobCard_R(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2);
     // replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text
     animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
     animSequence.addManyBlocks([
       [ 'line', freeLine_fromSourceEl2, 'fade-in', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1.1] ],
-
-      [ 'std', textbox_OPTExpression2, 'fade-out', {blocksNext: false} ],
-      [ 'line', freeLine_OPTExpression2, 'fade-out', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
 
       [ 'std', textP_computation2_intro, 'fade-out', {duration: 0, blocksNext: false} ],
       [ 'std', textP_computation2_summary, 'fade-in', {duration: 0, blocksPrev: false} ],
@@ -562,10 +570,13 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   // replace formula container contents with final answer
   {
     const animSequence = new AnimSequence();
+    animSequence.setTag('replace formula container contents');
     animSequence.setDescription('Replace formula container contents with final answer');
     animSequence.addManyBlocks([
       [ 'std', formulaComputation, 'exit-wipe-to-left', {blocksPrev: false} ],
-      [ 'std', formulaResult, 'enter-wipe-from-right' ],
+      [ 'std', formulaResult, 'enter-wipe-from-right', {blocksNext: false} ],
+
+      [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
   
       [ 'std', textP_formulaComputation_max, 'fade-out', { duration: 250 } ],
       [ 'std', textP_formulaComputation_found, 'fade-in', { duration: 250 } ],
@@ -633,7 +644,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   }
 }
 
-function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
+function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource) {
   const SJNum = Number.parseInt(jobCard.dataset.sjnum);
   const jobCardContent = jobCard.querySelector('.job-card-content');
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
@@ -654,7 +665,7 @@ function animateJobStub(jobCard, parentArrowDown, parentArrowSource) {
 
   // fade in job stub and M access
   {
-    const animSequence = new AnimSequence();
+    const animSequence = parentAnimSequence ?? new AnimSequence();
     animSequence.setDescription('Fade in job stub and M access');
     animSequence.addManyBlocks([
       [ 'std', jobCard, 'fade-in', {blocksNext: false} ],
@@ -782,4 +793,6 @@ window.addEventListener('keyup', stopFastForward);
 // animTimeline.skipTo('skip to');
 // animTimeline.skipTo('focus comp 2');
 // animTimeline.skipTo('found max');
-animTimeline.skipTo('OPT point 1');
+// animTimeline.skipTo('OPT point 1');
+// animTimeline.skipTo('start');
+animTimeline.skipTo('replace formula container contents');
