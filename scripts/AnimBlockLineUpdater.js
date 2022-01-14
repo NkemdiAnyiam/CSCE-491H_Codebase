@@ -26,7 +26,7 @@ class IntervalController {
   intervalID = null;
 
   setIntervalID(func, time) {
-    clearInterval(this.intervalID);
+    this.clearIntervalID();
     this.intervalID = setInterval(func, time);
   }
 

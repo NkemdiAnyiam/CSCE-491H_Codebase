@@ -12,13 +12,13 @@ document.addEventListener('scroll', function(e) {
 });
 
 const jobsUnsorted = [
-  // new Job(5, 9, 7),
+  new Job(5, 9, 7),
   new Job(8, 11, 5),
-  // new Job(0, 6, 2),
-  // new Job(1, 4, 1),
-  // new Job(3, 8, 5),
-  // new Job(4, 7, 4),
-  // new Job(6, 10, 3),
+  new Job(0, 6, 2),
+  new Job(1, 4, 1),
+  new Job(3, 8, 5),
+  new Job(4, 7, 4),
+  new Job(6, 10, 3),
   new Job(3, 5, 6),
 ];
 
@@ -306,7 +306,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
-    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {trackEndpoints: true} ]);
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
 
     animTimeline.addOneSequence(animSequence);
   }
@@ -431,10 +431,13 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
       animateJobCard_R(jobCardChild1, freeLine_downTree, OPTExpressionContainer1);
     // replace OPT1 expression with answer, change text box text
     animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
+    animSequence.setTag('OPT point 1');
     animSequence.addManyBlocks([
       [ 'line', freeLine_fromSourceEl1, 'fade-in', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1.1] ],
-      [ 'std', OPTExpression1, 'exit-wipe-to-left' ],
-      [ 'std', OPTResult1, 'enter-wipe-from-right' ],
+      [ 'line', freeLine_OPTExpression1, 'updateEndpoints', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1] ],
+      [ 'std', OPTExpression1, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', OPTResult1, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression1, 'updateEndpoints', OPTResult1, [0.5, -0.2], null, [0.5, 1] ],
       [ 'std', textP_OPTExpression1_find, 'fade-out', { duration: 250 } ],
       [ 'std', textP_OPTExpression1_found, 'fade-in', { duration: 250 } ],
     ]);
@@ -779,3 +782,4 @@ window.addEventListener('keyup', stopFastForward);
 // animTimeline.skipTo('skip to');
 // animTimeline.skipTo('focus comp 2');
 // animTimeline.skipTo('found max');
+animTimeline.skipTo('OPT point 1');

@@ -27,6 +27,11 @@ export class AnimBlockLine extends AnimBlock {
 
   stepForward() {
     return new Promise(resolve => {
+      if (this.animName === 'updateEndpoints') {
+        this.updateEndpoints();
+        resolve();
+        return;
+      }
       this.handleUpdateSettings(this.animName);
 
       super.stepForward()
@@ -36,6 +41,11 @@ export class AnimBlockLine extends AnimBlock {
 
   stepBackward() {
     return new Promise(resolve => {
+      if (this.animName === 'updateEndpoints') {
+        this.updateEndpoints();
+        resolve();
+        return;
+      }
       this.handleUpdateSettings(this.undoAnimName);
 
       super.stepBackward()
