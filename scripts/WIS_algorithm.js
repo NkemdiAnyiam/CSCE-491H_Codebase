@@ -306,7 +306,7 @@ function animateJobCard_R(jobCard, parentArrowDown, parentArrowSource) {
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
-    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {trackEndponts: true} ]);
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'fade-in', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {trackEndpoints: true} ]);
 
     animTimeline.addOneSequence(animSequence);
   }
