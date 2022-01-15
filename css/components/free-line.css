@@ -20,6 +20,15 @@
   stroke-linecap: round;
 }
 
+.free-line--bullet-connector .free-line__line {
+  stroke: var(--color-red);
+}
+
+.free-line--dotted .free-line__line {
+  stroke-width:1;
+  stroke-dasharray: 4;
+}
+
 .free-line marker path {
   fill: currentColor;
 }

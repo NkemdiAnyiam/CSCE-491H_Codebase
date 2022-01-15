@@ -29,6 +29,18 @@
   gap: 1rem;
 }
 
+.job-card-bullet {
+  position: absolute;
+  top: 50%;
+  left: -8rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: var(--color-gray-darkest);
+
+  transform: translate(-50%, -50%);
+}
+
 .job-card-SJ-num-label {
   width: 7rem;
   height: 7rem;
