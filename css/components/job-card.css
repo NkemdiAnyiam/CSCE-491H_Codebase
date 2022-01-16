@@ -112,7 +112,7 @@
 }
 
 .arrow-tail {
-  width: 16rem;
+  width: 8rem;
   height: 1rem;
   background-color: var(--color-gray-darkest);
 }
@@ -197,7 +197,7 @@
 }
 
 .job-card-children {
-  margin-left: 30rem;
+  margin-left: 25rem;
   
   display: flex;
   flex-direction: column;
