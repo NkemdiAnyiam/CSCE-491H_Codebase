@@ -35,7 +35,7 @@ span {
 
 .highlightable {
   background-image: linear-gradient(to right, var(--color-yellow) 50%, transparent 50%);
-  background-size: 200%;
+  background-size: 202%;
   background-position-x: 100%;
 }
 
