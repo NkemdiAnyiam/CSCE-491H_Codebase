@@ -272,11 +272,11 @@ AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
 
 // To/From Bottom
 AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
-  {clipPath: 'polygon(0 100%, 0 100%, 100% 100%, 100% 100%)'},
+  {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
 ]
 
 AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(0 100%, 0 100%, 100% 100%, 100% 100%)'},
+  {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
 ];
