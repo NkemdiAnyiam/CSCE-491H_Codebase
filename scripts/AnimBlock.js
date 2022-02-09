@@ -2,8 +2,14 @@
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 export class AnimBlock {
-  static exitingList = ['fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left'];
-  static enteringList = ['fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left'];
+  static exitingList = [
+    'fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left',
+    'exit-wipe-to-top', 'undo--enter-wipe-from-top', 'exit-wipe-to-bottom', 'undo--enter-wipe-from-bottom',
+  ];
+  static enteringList = [
+    'fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left',
+    'enter-wipe-from-top', 'undo--exit-wipe-to-top', 'enter-wipe-from-bottom', 'undo--exit-wipe-to-bottom',
+  ];
   static highlightingList = ['highlight', 'undo--un-highlight'];
   static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static translatingList = ['translate', 'undo--translate'];
@@ -59,7 +65,12 @@ export class AnimBlock {
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
 
-    if (isEntering) { this.domElem.classList.remove('hidden'); }
+    if (isEntering) {
+      this.domElem.classList.remove('hidden'); 
+      if (animName !== 'opacity') {
+        this.domElem.style.opacity = '1';
+      }
+    }
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
 
@@ -246,4 +257,26 @@ AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
 AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+];
+
+// To/From Top
+AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
+  {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+]
+
+AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+  {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+];
+
+// To/From Bottom
+AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
+  {clipPath: 'polygon(0 100%, 0 100%, 100% 100%, 100% 100%)'},
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+]
+
+AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
+  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+  {clipPath: 'polygon(0 100%, 0 100%, 100% 100%, 100% 100%)'},
 ];
