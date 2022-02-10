@@ -44,7 +44,7 @@ export class AnimSequence {
   async play() {
     for (let i = 0; i < this.animBlocks.length; ++i) {
       // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      if (this.animBlocks[i].getBlocksNext()) { await this.animBlocks[i].stepForward(); }
+      if (i === this.animBlocks.length - 1 || this.animBlocks[i].getBlocksNext()) { await this.animBlocks[i].stepForward(); }
       else { this.animBlocks[i].stepForward(); }
     }
 
@@ -54,7 +54,7 @@ export class AnimSequence {
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
   async rewind() {
     for (let i = this.animBlocks.length - 1; i >= 0; --i) {
-      if (this.animBlocks[i].getBlocksPrev()) { await this.animBlocks[i].stepBackward(); }
+      if (i === 0 || this.animBlocks[i].getBlocksPrev()) { await this.animBlocks[i].stepBackward(); }
       else { this.animBlocks[i].stepBackward(); }
     }
 
