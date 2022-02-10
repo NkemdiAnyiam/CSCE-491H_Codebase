@@ -2,6 +2,8 @@
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 export class AnimBlock {
+  static id = 0;
+
   static exitingList = [
     'fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left',
     'exit-wipe-to-top', 'undo--enter-wipe-from-top', 'exit-wipe-to-bottom', 'undo--enter-wipe-from-bottom',
@@ -19,13 +21,17 @@ export class AnimBlock {
   static isBackward(animName) { return animName.startsWith('undo--'); }
   static skipDuration = 50; // see handleSkipSignal()
 
-  timelineID; // set to match the id of the AnimSequence to which it belongs, which matches the id of the parent timeline
+  sequenceID; // set to match the id of the parent AnimSequence
+  timelineID; // set to match the id of the parent AnimTimeline
+  
   // Determines whether or not the upcoming animation should wait for this one to finish (can be changed in applyOptions())
   blocksNext = true;
   blocksPrev = true;
   duration = 500;
 
   constructor(domElem, animName, options) {
+    this.id = AnimBlock.id++;
+
     this.domElem = domElem;
     this.animName = animName;
     this.undoAnimName = `undo--${this.animName}`;
@@ -36,7 +42,7 @@ export class AnimBlock {
   getBlocksNext() { return this.blocksNext; }
   getBlocksPrev() { return this.blocksPrev; }
 
-  setID(id) { this.timelineID = id; }
+  setID(idSeq, idTimeline) { this.sequenceID = idSeq; this.timelineID = idTimeline; }
 
   stepForward() {
     return new Promise(resolve => {
@@ -59,7 +65,8 @@ export class AnimBlock {
 
     // Create the Animation instance that we will use on our DOM element
     const animation = new Animation();
-    animation.id = this.timelineID;
+    animation.timelineID = this.timelineID;
+    animation.sequenceID = this.sequenceID;
 
     // set the keyframes for the animation
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }

@@ -93,6 +93,9 @@ export class AnimTimeline {
     });
   }
 
+  atBeginning() { return this.stepNum === 0; }
+  atEnd() { return this.stepNum === this.numSequences; }
+
   // immediately skips to first AnimSequence in animSequences with matching tag field
   async skipTo(tag) {
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
@@ -123,14 +126,8 @@ export class AnimTimeline {
 
   toggleSkipping(isSkipping) {
     this.isSkipping = isSkipping ?? !this.isSkipping;
-    if (this.isSkipping) {
-      // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-      if (this.isAnimating) {
-        this.fireSkipSignal();
-        // the animation(s) actually running right now won't handle the skip signal, so maximize playback rate to force near instant completion instead
-        this.fireRateSignal(Number.MAX_SAFE_INTEGER);
-      }
-    }
+    // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
+    if (this.isSkipping && this.isAnimating) { this.fireSkipSignal(); }
     return this.isSkipping;
   }
 
@@ -139,13 +136,11 @@ export class AnimTimeline {
 
   // sets the playbacks of all currently running animations that belong to this timeline
   fireRateSignal(rate) {
+    // get all currently running animations
     const allAnimations = document.getAnimations();
+    // an animation "belongs" to this timeline if its timeline id matches
     for (let i = 0; i < allAnimations.length; ++i) {
-      // an animation "belongs" to this timeline if its id matches
-      if (Number.parseInt(allAnimations[i].id) === this.id) { allAnimations[i].playbackRate = rate; }
+      if (Number.parseInt(allAnimations[i].timelineID) === this.id) { allAnimations[i].playbackRate = rate; }
     }
   }
-
-  atBeginning() { return this.stepNum === 0; }
-  atEnd() { return this.stepNum === this.numSequences; }
 }

@@ -2,12 +2,16 @@ import { AnimBlock } from "./AnimBlock.js";
 import { AnimBlockLine } from "./AnimBlockLine.js";
 
 export class AnimSequence {
+  static id = 0;
+
   timelineID; // set to match the id of the AnimTimeline to which it belongs
   description = '<blank sequence description>';
   tag = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   animBlocks = []; // array of animBlocks
 
   constructor(animBlocks = null, options = null) {
+    this.id = AnimSequence.id++;
+
     if (animBlocks) {
       if (animBlocks instanceof Array
         && (animBlocks[0] instanceof Array || animBlocks[0] instanceof Array)) { this.addManyBlocks(animBlocks); }
@@ -25,6 +29,11 @@ export class AnimSequence {
   
   setDescription(description) { this.description = description; }
   setTag(tag) { this.tag = tag; }
+  setID(id) {
+    this.timelineID = id;
+    this.animBlocks.forEach(animBlock => animBlock.setID(this.id, this.timelineID));
+  }
+
 
   addOneBlock(animBlock) {
     if (animBlock instanceof AnimBlock) { this.animBlocks.push(animBlock); }
@@ -64,11 +73,14 @@ export class AnimSequence {
   // tells every animBlock here to briefly allow instantaneous animation
   fireSkipSignal() {
     this.animBlocks.forEach(animBlock => animBlock.handleSkipSignal());
-  }
 
-  setID(id) {
-    this.timelineID = id;
-    this.animBlocks.forEach(animBlock => animBlock.setID(this.timelineID));
+    // get all currently running animations (if animations are curretnly running, we need to force them to finish)
+    const allAnimations = document.getAnimations();
+    // an animation "belongs" to this sequence if its sequence id matches
+    for (let i = 0; i < allAnimations.length; ++i) {
+      // an animation "belongs" to this sequence if its ids match
+      if (Number.parseInt(allAnimations[i].timelineID) === this.timelineID && Number.parseInt(allAnimations[i].sequenceID) === this.id) { allAnimations[i].finish(); }
+    }
   }
 
   printDesc() {
