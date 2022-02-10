@@ -67,9 +67,8 @@ export class AnimBlock {
 
     if (isEntering) {
       this.domElem.classList.remove('hidden'); 
-      if (animName !== 'opacity') {
-        this.domElem.style.opacity = '1';
-      }
+      this.domElem.style.opacity = 'unset';
+      this.domElem.style.clipPath = 'unset';
     }
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
@@ -83,6 +82,8 @@ export class AnimBlock {
   }
 
   getPresetKeyframes(animName) {
+    if (!AnimBlock[animName]) { throw `Error: Invalid animation name "${animName}"`; }
+    
     return new KeyframeEffect(
       this.domElem,
       AnimBlock[animName], // gets transformations from appropriate static property on AnimBlock
@@ -236,47 +237,93 @@ AnimBlock['un-highlight'] = AnimBlock['undo--highlight'] = [
   {backgroundPositionX: '100%'},
 ];
 
+// //*** Wipe
+// // To/From Right
+// AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
+//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+// ];
+
+// // To/From Left
+// AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
+//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+// ];
+
+// // To/From Top
+// AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+// ];
+
+// // To/From Bottom
+// AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
+//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+// ];
+
+
 //*** Wipe
 // To/From Right
 AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
-  {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-]
+  {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+];
 
 AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
 ];
 
 // To/From Left
 AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
-  {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-]
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+];
 
 AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
 ];
 
 // To/From Top
 AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
-  {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-]
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+];
 
 AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
 ];
 
 // To/From Bottom
 AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
-  {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-]
+  {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+];
 
 AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
-  {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-  {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
 ];
