@@ -397,8 +397,10 @@ function animateJobCard_R(jobCard, parentAnimSequence, parentArrowDown, parentAr
     animSequence.addManyBlocks([
       [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
       [ 'line', freeLine_toCBlock, 'enter-wipe-from-left', cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      [ 'std', cAccess, 'exit-wipe-to-left' ],
-      [ 'std', cEntry, 'enter-wipe-from-right' ],
+      [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+      [ 'std', cAccess, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', cEntry, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
       [ 'std', textP_cAccess_find, 'fade-out', { duration: 250 } ],
       [ 'std', textP_cAccess_found, 'fade-in', { duration: 250 } ],
     ]);
@@ -580,6 +582,8 @@ function animateJobCard_R(jobCard, parentAnimSequence, parentArrowDown, parentAr
     animSequence.setTag('replace formula container contents');
     animSequence.setDescription('Replace formula container contents with final answer');
     animSequence.addManyBlocks([
+      [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
+
       [ 'std', formulaComputation, 'exit-wipe-to-left', {blocksPrev: false} ],
       [ 'std', formulaResult, 'enter-wipe-from-right', {blocksNext: false} ],
 
