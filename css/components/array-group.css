@@ -18,6 +18,7 @@
 
 .array {
   width: min-content;
+  position: relative;
 
   display: flex;
 }
