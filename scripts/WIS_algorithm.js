@@ -15,11 +15,11 @@ const jobsUnsorted = [
   new Job(5, 9, 7),
   new Job(8, 11, 5),
   new Job(0, 6, 2),
-  new Job(1, 4, 1),
-  new Job(3, 8, 5),
-  new Job(4, 7, 4),
-  new Job(6, 10, 3),
-  new Job(3, 5, 6),
+  // new Job(1, 4, 1),
+  // new Job(3, 8, 5),
+  // new Job(4, 7, 4),
+  // new Job(6, 10, 3),
+  // new Job(3, 5, 6),
 ];
 
 const jobScheduler = new JobScheduler();
@@ -53,12 +53,31 @@ const animTimeline = new AnimTimeline(null, {debugMode: true});
 const timeGraphEl = document.querySelector('.time-graph');
 const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
 const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
-const cArray = document.querySelector('.array--c');
+
+
+const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box');
+const freeLine_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .free-line');
+const textP_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
+const textP_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
+const textP_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
+const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__paragraph--ordered');
+// Describe that we're about to move bars onto graph
+{
+  
+  const animSequence = new AnimSequence();
+  animSequence.setDescription(`Describe that we're about to move bars onto graph`);
+  animSequence.addManyBlocks([
+    [ 'line', freeLine_placeBars, 'enter-wipe-from-bottom', null, [0.5, 1], jobBarEls[0], [0.5, 0] ],
+    [ 'std', textbox_placeBars, 'fade-in', {blocksPrev: false} ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
 
 // Move job bars onto time graph in unsorted order
 {
-  const animSequence = new AnimSequence()
+  const animSequence = new AnimSequence();
   animSequence.setDescription('Move job bars onto time graph in unsorted order');
+  animSequence.addOneBlock(new AnimBlockLine(freeLine_placeBars, 'exit-wipe-to-top', null, [0.5, 1], jobBarEls[0], [0.5, 0], {blocksNext: false}));
   jobBarEls.forEach((jobBarEl) => {
     // set up options for moving job bars to correct location
     const jobLetter = jobBarEl.dataset.jobletter;
@@ -66,6 +85,10 @@ const cArray = document.querySelector('.array--c');
     const options = { translateOptions: { targetElem: startCell } };
     animSequence.addOneBlock(new AnimBlock(jobBarEl, 'translate', options));
   });
+  animSequence.addManyBlocks([
+    [ 'std', textP_placeBars_unorder, 'fade-out', {duration: 250} ],
+    [ 'std', textP_placeBars_unorder2, 'fade-in', {duration: 250} ],
+  ]);
   animTimeline.addOneSequence(animSequence);
 }
 
@@ -74,6 +97,10 @@ const cArray = document.querySelector('.array--c');
 {
   const animSequence = new AnimSequence();
   animSequence.setDescription('Move job bars back off of the time graph');
+  animSequence.addManyBlocks([
+    [ 'std', textP_placeBars_unorder2, 'fade-out', {duration: 250} ],
+    [ 'std', textP_placeBars_order, 'fade-in', {duration: 250} ],
+  ]);
   jobBarEls.forEach((jobBarEl, i) => {
     const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
     animSequence.addOneBlock(new AnimBlock(jobBarEl, 'translate', options));
@@ -107,6 +134,44 @@ const cArray = document.querySelector('.array--c');
     ]);
   });
 
+  animSequence.addManyBlocks([
+    [ 'std', textP_placeBars_order, 'fade-out', {duration: 250} ],
+    [ 'std', textP_placeBars_ordered, 'fade-in', {duration: 250} ],
+  ]);
+
+  animTimeline.addOneSequence(animSequence);
+}
+
+
+const arrayGroup_j_c = dataDisplay.querySelector('.array-group--j-and-c');
+const cArray = arrayGroup_j_c.querySelector('.array--c');
+const jArray1 = arrayGroup_j_c.querySelector('.array--j');
+const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box');
+const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .free-line');
+const textP_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
+const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
+// Explain what a compatible job is
+{
+  const animSequence = new AnimSequence();
+  animSequence.setDescription('Explain what a compatible job is');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_placeBars, 'fade-out' ],
+    [ 'std', jArray1, 'enter-wipe-from-left' ],
+    [ 'std', cArray, 'enter-wipe-from-left', {blocksPrev: false} ],
+    [ 'std', textbox_cArray, 'fade-in', {blocksPrev: false} ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+// Explain what c array will be used for
+{
+  const animSequence = new AnimSequence();
+  animSequence.setDescription('Explain what c array will be used for');
+  animSequence.addManyBlocks([
+    [ 'line', freeLine_cArray, 'enter-wipe-from-left', null, [0, 0.5], cArray, [1, 0.5] ],
+    [ 'std',  textP_cArray_explain, 'fade-out', {duration: 250} ],
+    [ 'std',  textP_cArray_refArray, 'fade-in', {duration: 250} ],
+  ]);
   animTimeline.addOneSequence(animSequence);
 }
 

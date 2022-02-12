@@ -23,7 +23,38 @@
     <div class="container">
       
       <div class="data-display">
+        <div class="text-boxes">
+          <!-- Text box: Place-bars -->
+          <div class="text-box-line-group text-box-line-group--place-bars">
+            <div class="text-box text-box hidden">
+              <p class="text-box__paragraph text-box__paragraph--unorder">
+                These blue bars represent jobs A&mdash;<span class="fill--last-job-letter"></span>.
+                Let's place them on the time graph from top to bottom.
+              </p>
+              <p class="text-box__paragraph text-box__paragraph--unorder-2 hidden">
+                Done. We just placed them on the graph in the order you initially defined the jobs, right?
+              </p>
+              <p class="text-box__paragraph text-box__paragraph--order hidden">
+                Let's take them back off for a moment. The first step in the process is to sort them in order of finish time, so let's visualize that.
+                <br />
+                (The sorting method is irrelevant; let's assume that it uses Merge Sort)
+              </p>
+              <p class="text-box__paragraph text-box__paragraph--ordered hidden">
+                Perfect; this will make it easier to visually understand which jobs are compatible with each other.
+                <br />
+                We can refer to each job by their <span class="SJ-related">sorted index</span>.
+                <span class="SJ-related">job 0</span> will be reserved as a non-existent job.
+              </p>
+            </div>
+            <svg class="free-line">
+              <line class="free-line__line hidden" />
+            </svg>
+          </div>
+        </div>
+
         <div class="time-graph">
+
+
           <svg class="free-line free-line--arrow c-related">
             <defs>
               <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
@@ -67,11 +98,41 @@
             </div>
           </template>
           <div class="array-group array-group--j-and-c">
-            <div class="array array--j">
+            <div class="array array--j hidden">
               <div class="array__array-block array__array-block--header">j</div>
             </div>
   
-            <div class="array array--c">
+            <div class="array array--c hidden">
+              <div class="text-boxes">
+                <!-- Text box: c-array -->
+                <div class="text-box-line-group text-box-line-group--c-array c-related">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph text-box__paragraph--explain">
+                      Next, we will find each job's nearest <span class="c-related">"compatible"</span> job.
+                      <!-- <br /> -->
+                      For a job <span class="SJ-related">J<sub>x</sub></span>, another job <span class="c-related">J<sub>y</sub></span> is
+                      <span class="c-related">compatible</span> with <span class="SJ-related">J<sub>x</sub></span> if
+                      <span class="c-related">J<sub>y</sub>.finish</span> &leq; <span class="SJ-related">J<sub>x</sub>.start</span>.
+                      That is to say, <span class="c-related">J<sub>y</sub></span> ends before or as soon as
+                      <span class="SJ-related">J<sub>x</sub></span> begins.
+                      <br /> Thus, <span class="SJ-related">J<sub>x</sub></span>'s NEAREST compatible job will be
+                      <span class="c-related">J<sub>y</sub></span> such that <span class="c-related">y</span> is maximized.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--ref-array hidden">
+                      This green <span class="c-related">c array</span> to the left will be used to store the index of
+                      each job's <span class="c-related">compatible job</span>.
+                      If a job does not have a <span class="c-related">compatible job</span>,
+                      we will give its <span class="c-related">c array</span> entry the value 0.
+                      <br />
+                      Now, let's begin.
+                    </p>
+                  </div>
+                  <svg class="free-line">
+                    <line class="free-line__line hidden" />
+                  </svg>
+                </div>
+              </div>
+
               <div class="array__array-block array__array-block--header">c[j]</div>
             </div>
           </div>

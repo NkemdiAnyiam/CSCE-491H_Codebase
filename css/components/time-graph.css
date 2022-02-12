@@ -8,6 +8,16 @@
   border: 2px solid var(--color-gray-darkest);
 }
 
+.text-box-line-group--place-bars { left: 100%; }
+.text-box-line-group--place-bars .text-box { top: 20rem; }
+
+.text-box-line-group--c-array { left: calc(100% + 20rem); top: 50%; }
+.text-box-line-group--c-array .text-box {
+  top: 0;
+  transform: translateY(-50%);
+  width: 90rem;
+}
+
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
@@ -20,6 +30,7 @@
 
 .time-graph__job-bars {
   position: absolute;
+  top: 40rem;
   left: calc(100% + 8rem);
   height: 100%;
 }

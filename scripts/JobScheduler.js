@@ -255,6 +255,10 @@ export class JobScheduler {
     }
 
     resultBlockTemplate.remove();
+
+
+    // Set up text boxes
+    document.querySelectorAll('.fill--last-job-letter').forEach((el) => el.textContent = String.fromCharCode( (this._n_jobs - 1) + 65 ));
   }
 
   computeOPT(j, parentContainer) {
