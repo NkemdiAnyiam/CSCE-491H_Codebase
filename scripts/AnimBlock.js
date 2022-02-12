@@ -73,9 +73,9 @@ export class AnimBlock {
     else { animation.effect = this.getPresetKeyframes(animName); }
 
     if (isEntering) {
-      this.domElem.classList.remove('hidden'); 
-      this.domElem.style.opacity = 'unset';
-      this.domElem.style.clipPath = 'unset';
+      this.domElem.classList.remove('hidden');
+      this.domElem.style.removeProperty('opacity');
+      this.domElem.style.removeProperty('clip-path');
     }
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.shouldSkip ? animation.finish() : animation.play();
@@ -85,6 +85,7 @@ export class AnimBlock {
       animation.commitStyles(); // actually applies the styles to the element
       if (isExiting) { this.domElem.classList.add('hidden'); }
       animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
+      if (isEntering) { this.domElem.style.removeProperty('clip-path'); } // prevents clipping out nested absolutely-positioned elements outside the bounding box
     });
   }
 
