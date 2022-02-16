@@ -18,6 +18,13 @@
   width: 90rem;
 }
 
+.text-box-line-group--fill-c-array { left: calc(100% + 20rem); top: 50%; }
+.text-box-line-group--fill-c-array .text-box {
+  top: 0;
+  transform: translateY(-50%);
+  width: 90rem;
+}
+
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
