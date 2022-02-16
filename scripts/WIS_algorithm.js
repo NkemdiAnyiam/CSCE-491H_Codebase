@@ -175,6 +175,17 @@ const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph
   animTimeline.addOneSequence(animSequence);
 }
 
+// Hide explanation of c array's purpose and continue into next phase
+{
+  const animSequence = new AnimSequence(null, {continueNext: true}); // after hiding, immediately continue into next phase
+  animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
+  animSequence.addManyBlocks([
+    [ 'std', textbox_cArray, 'fade-out', {blocksNext: false} ],
+    [ 'line', freeLine_cArray, 'exit-wipe-to-left', null, [0, 0.5], cArray, [1, 0.5] ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
 
 // Demonstrate how to fill out the c array
 const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
@@ -194,16 +205,8 @@ jobBarEls.forEach((jobBarEl, i) => {
 
   // Move cbar to current job bar, unhide it, and highlight current job bar and j array block
   {
-    const animSequence = new AnimSequence();
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Move cbar to current job bar, unhide it, and highlight current job bar and j array block');
-    // before proceeding to describe analyzing current job, remove the text block to signify this transition
-    // if just exiting the part describing the c array, hide the block from the phase that explained the c array's purpose
-    if (i === 0) {
-      animSequence.addManyBlocks([
-        [ 'std', textbox_cArray, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_cArray, 'exit-wipe-to-left', null, [0, 0.5], cArray, [1, 0.5] ],
-      ]);
-    }
     animSequence.addManyBlocks([
       [ 'std', cBar, 'translate', {duration: 0, translateOptions: { targetElem: jobBarEl, preserveY: true }} ],
       [ 'std', jobBarEl, 'highlight', {blocksNext: false} ],
@@ -256,7 +259,7 @@ jobBarEls.forEach((jobBarEl, i) => {
 
   // Hide cbar and arrow and un-highlight everything
   {
-    const animSequence = new AnimSequence();
+    const animSequence = new AnimSequence(null, {continueNext: true});
     animSequence.setDescription('Hide cbar and arrow and un-highlight everything');
     if (compatibleJobBarEl) {
       animSequence.addManyBlocks([
@@ -835,7 +838,10 @@ const goForward = async function() {
   return new Promise(async function(resolve) {
     backwardButton.removeEventListener('click', goBackward);
     forwardButton.removeEventListener('click', goForward);
-    await animTimeline.stepForward();
+    let stepAgain = true;
+    while(stepAgain) {
+     stepAgain = await animTimeline.stepForward();
+    }
     backwardButton.addEventListener('click', goBackward);
     forwardButton.addEventListener('click', goForward);
 
@@ -847,7 +853,10 @@ const goBackward = async function() {
   return new Promise(async function(resolve) {
     backwardButton.removeEventListener('click', goBackward);
     forwardButton.removeEventListener('click', goForward);
-    await animTimeline.stepBackward();
+    let stepAgain = true;
+    while(stepAgain) {
+      stepAgain = await animTimeline.stepBackward();
+    }
     backwardButton.addEventListener('click', goBackward);
     forwardButton.addEventListener('click', goForward);
 

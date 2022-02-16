@@ -62,11 +62,11 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].play() // wait for the current AnimSequence to finish all of its animations
-      .then(() => resolve());
-    })
-    .then(() => {
-      ++this.stepNum;
-      this.isAnimating = false;
+      .then((continueNext) => {
+        ++this.stepNum;
+        this.isAnimating = false;
+        resolve(continueNext);
+      });
     });
   }
 
@@ -85,11 +85,10 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].rewind()
-      .then(() => resolve());
-    })
-    .then(() => {
-      this.isAnimating = false;
-      return Promise.resolve();
+      .then((continuePrev) => {
+        this.isAnimating = false;
+        resolve(continuePrev);
+      });
     });
   }
 
