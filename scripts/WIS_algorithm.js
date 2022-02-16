@@ -191,7 +191,7 @@ const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph
 const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
 const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
 const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
-jobBarEls.forEach((jobBarEl, i) => {
+jobBarEls.forEach((jobBarEl) => {
   // get j array block corresponding to current job bar
   const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
   // Find job bar corresponding to the job that's compatible with the current job (if it exists)
@@ -203,6 +203,10 @@ jobBarEls.forEach((jobBarEl, i) => {
   let row;
   let rowSJNum;
 
+  const textP_fillCArray_forJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--for-job-${jobBarEl.dataset.sjnum}`);
+  const textP_fillCArray_resultJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--result-job-${jobBarEl.dataset.sjnum}`);
+  const textP_fillCArray_continueOn = textbox_fillCArray.querySelector(`.text-box__paragraph--continue-on`);
+
   // Move cbar to current job bar, unhide it, and highlight current job bar and j array block
   {
     const animSequence = new AnimSequence(null, {continuePrev: true});
@@ -212,7 +216,8 @@ jobBarEls.forEach((jobBarEl, i) => {
       [ 'std', jobBarEl, 'highlight', {blocksNext: false} ],
       [ 'std', jBlock, 'highlight', {blocksNext: false, blocksPrev: false} ],
       [ 'std', cBar, 'enter-wipe-from-top', {blocksPrev: false} ],
-      [ 'std', textbox_fillCArray, 'fade-in', {blocksPrev: false} ],
+      [ 'std', textP_fillCArray_forJobX, 'fade-in', {duration: 0} ],
+      [ 'std', textbox_fillCArray, 'fade-in' ],
     ]);
 
     animTimeline.addOneSequence(animSequence);
@@ -223,7 +228,8 @@ jobBarEls.forEach((jobBarEl, i) => {
   {
     const animSequence = new AnimSequence();
     const animSequence2 = new AnimSequence();
-    animSequence.setDescription('Move cbar, highlight compatible job if exists, and point to c array')
+    animSequence.setDescription('Move cbar and highlight compatible job if it exists');
+    animSequence2.setDescription('Point to c array and fill entry');
     // If the compatible job exists, Move cbar to compatible job bar and highlight it
     // Then point arrow from compatible row header to current c-array entry
     if (compatibleJobBarEl) {
@@ -232,7 +238,6 @@ jobBarEls.forEach((jobBarEl, i) => {
       animSequence.addManyBlocks([
         [ 'std', cBar, 'translate', {translateOptions: { targetElem: compatibleJobBarEl, alignmentX: 'right', preserveY: true }} ],
         [ 'std', compatibleJobBarEl, 'highlight' ],
-        // [ 'line', timeGraphArrowEl, 'enter-wipe-from-top', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false} ],
       ]);
       animSequence2.addOneBlock(new AnimBlockLine(timeGraphArrowEl, 'enter-wipe-from-top', rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false}));
     }
@@ -241,15 +246,21 @@ jobBarEls.forEach((jobBarEl, i) => {
     else {
       animSequence.addManyBlocks([
         [ 'std', cBar, 'translate', {translateOptions: { targetElem: timeGraphEl, alignmentX: 'left', preserveY: true }} ],
-        // [ 'line', timeGraphArrowEl, 'enter-wipe-from-top', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false} ],
       ]);
       animSequence2.addOneBlock(new AnimBlockLine(timeGraphArrowEl, 'enter-wipe-from-top', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false}));
     }
+
+    animSequence.addManyBlocks([
+      [ 'std', textP_fillCArray_forJobX, 'fade-out', {duration: 250} ],
+      [ 'std', textP_fillCArray_resultJobX, 'fade-in', {duration: 250} ],
+    ])
   
     // "Update" current c-array entry
     animSequence2.addManyBlocks([
       [ 'std', cEntryBlank, 'exit-wipe-to-left', {blocksPrev: false, blocksNext: false} ],
       [ 'std', cEntryValue, 'enter-wipe-from-right', {blocksPrev: false} ],
+      [ 'std', textP_fillCArray_resultJobX, 'fade-out', {duration: 250, blocksPrev: false} ],
+      [ 'std', textP_fillCArray_continueOn, 'fade-in', {duration: 250} ],
     ]);
   
     animTimeline.addOneSequence(animSequence);
@@ -271,7 +282,8 @@ jobBarEls.forEach((jobBarEl, i) => {
       animSequence.addOneBlock([ 'line', timeGraphArrowEl, 'exit-wipe-to-top', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
     }
     animSequence.addManyBlocks([
-      [ 'std', textbox_fillCArray, 'fade-out', {blocksNext: false, blocksPrev: false} ],
+      [ 'std', textbox_fillCArray, 'fade-out', {blocksPrev: false} ],
+      [ 'std', textP_fillCArray_continueOn, 'fade-out', {duration: 0}],
       [ 'std', cBar, 'fade-out', {blocksNext: false, blocksPrev: false} ],
       [ 'std', jobBarEl, 'un-highlight', {blocksPrev: false, blocksNext: false} ],
       [ 'std', jBlock, 'un-highlight', {blocksPrev: false} ],

@@ -259,6 +259,46 @@ export class JobScheduler {
 
     // Set up text boxes
     document.querySelectorAll('.fill--last-job-letter').forEach((el) => el.textContent = String.fromCharCode( (this._n_jobs - 1) + 65 ));
+    
+    const templateFillCArrayParagraphsID = 'fill-c-array-paragraphs-template';
+    const resultParagraphGroupTemplate = document.getElementById(templateFillCArrayParagraphsID);
+    const textbox_fillCArray = document.querySelector('.text-box-line-group--fill-c-array .text-box');
+    this._jobs.forEach(job => {
+      const cloneParagraphGroup = document.importNode(resultParagraphGroupTemplate.content, true);
+      const currSJNum = job.getSortedJobNum();
+      const currCEntry = job.getCompatibleJobNum();
+      const currStartTime = job.getStart();
+
+      const textP_fillCArray_forJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--for-job-X');
+      textP_fillCArray_forJobX.classList.replace('text-box__paragraph--for-job-X', `text-box__paragraph--for-job-${currSJNum}`);
+      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
+      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-start-time').forEach(toFill => toFill.textContent = `${currStartTime}`);
+
+
+      const textP_fillCArray_resultJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--result-job-X');
+      textP_fillCArray_resultJobX.classList.replace('text-box__paragraph--result-job-X', `text-box__paragraph--result-job-${currSJNum}`);
+      const resultCompatibleText = textP_fillCArray_resultJobX.querySelector('.fill--result-compatible-job-text');
+      if (currCEntry === 0) {
+        resultCompatibleText.innerHTML =
+        `
+          <span class="SJ-related">job ${currSJNum}</span> does not have a <span class="c-related">compatible job</span> before it.
+        `;
+      }
+      else {
+        resultCompatibleText.innerHTML =
+        `
+          <span class="SJ-related">job ${currSJNum}</span>'s nearest <span class="c-related">compatible job</span> is
+          <span class="c-related">job ${currCEntry}</span>, which ends at time ${this._jobs[currCEntry - 1].getFinish()}.
+        `;
+      }
+      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
+      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-c-entry').forEach(toFill => toFill.textContent = `${currCEntry}`);
+
+      textbox_fillCArray.append(textP_fillCArray_forJobX);
+      textbox_fillCArray.append(textP_fillCArray_resultJobX);
+    });
+
+    resultParagraphGroupTemplate.remove();
   }
 
   computeOPT(j, parentContainer) {

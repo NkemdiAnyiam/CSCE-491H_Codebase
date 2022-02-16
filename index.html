@@ -135,8 +135,28 @@
                 <!-- Text box: fill c-array -->
                 <div class="text-box-line-group text-box-line-group--fill-c-array c-related">
                   <div class="text-box text-box hidden">
-                    <p class="text-box__paragraph text-box__paragraph--job-x">
-                      Baba booey
+                    <template id="fill-c-array-paragraphs-template">
+                      <p class="text-box__paragraph text-box__paragraph--for-job-X hidden">
+                        Let's find the nearest <span class="c-related">compatible job</span>
+                        for <span class="SJ-related">job <span class="fill--curr-SJ-num">X</span></span>,
+                        which starts at time <span class="fill--curr-start-time">X</span>.
+                       </p>
+                       <p class="text-box__paragraph text-box__paragraph--result-job-X hidden">
+                         After scanning the list, we see that <span class="fill--result-compatible-job-text"></span>
+                         Therefore, <span class="c-related">c[<span class="SJ-related fill--curr-SJ-num">X</span>]</span> =
+                         <span class="c-related fill--curr-c-entry"></span>.
+                         Let's fill in <span class="c-related">c[<span class="SJ-related fill--curr-SJ-num">X</span>]</span>.
+                       </p>
+                    </template>
+                    <!-- <p class="text-box__paragraph text-box__paragraph--for-job-1 hidden">
+                     Let's find the nearest <span class="c-related">compatible job</span> for <span class="SJ-related">job <span>X</span></span>.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--result-job-1 hidden">
+                      <span></span>.
+                      Therefore, <span class="c-related">c[<span class="SJ-related">X</span>]</span> = <span class="c-related"></span>.
+                    </p> -->
+                    <p class="text-box__paragraph text-box__paragraph--continue-on hidden">
+                      Perfect; let's continue.
                     </p>
                   </div>
                   <svg class="free-line">
