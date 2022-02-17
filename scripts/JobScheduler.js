@@ -259,6 +259,7 @@ export class JobScheduler {
 
     // Set up text boxes
     document.querySelectorAll('.fill--last-job-letter').forEach((el) => el.textContent = String.fromCharCode( (this._n_jobs - 1) + 65 ));
+    document.querySelectorAll('.fill--last-SJ-num').forEach((el) => el.textContent = this._n_jobs);
     
     const templateFillCArrayParagraphsID = 'fill-c-array-paragraphs-template';
     const resultParagraphGroupTemplate = document.getElementById(templateFillCArrayParagraphsID);

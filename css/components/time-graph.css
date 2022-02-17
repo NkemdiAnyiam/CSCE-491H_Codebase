@@ -25,6 +25,16 @@
   width: 90rem;
 }
 
+.text-box-line-group--finished-c-array { left: 100%; }
+.text-box-line-group--finished-c-array .text-box {
+  top: 20rem;
+  width: 95rem;
+}
+
+.text-box-line-group--show-naive .text-box {
+  width: 95rem;
+}
+
 .time-graph__c-bar {
   position: absolute;
   height: 100%;

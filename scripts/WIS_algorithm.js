@@ -293,7 +293,32 @@ jobBarEls.forEach((jobBarEl) => {
 });
 
 
+const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
+const freeLine_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .free-line');
+const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box');
+// State that now we need to find the maximum weight
+{
+  const animSequence = new AnimSequence(null, {continuePrev: true});
+  animSequence.setDescription('State that now we need to find the maximum weight');
+  animSequence.setTag('finished c array');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_finishedCArray, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
 
+// Explain naive approach to finding max weight
+{
+  const animSequence = new AnimSequence(null);
+  animSequence.setDescription('Explain naive approach to finding max weight');
+  animSequence.setTag('explain naive');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_showNaive, 'translate', {duration: 0, translateOptions: {targetElem: textbox_finishedCArray, offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}} ],
+    [ 'line', freeLine_showNaive, 'enter-wipe-from-top', textbox_finishedCArray, [0.5, 1], null, [0.5, 0] ],
+    [ 'std', textbox_showNaive, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
 
 
 animateJobCard_R(document.querySelector('.job-card'));
@@ -922,3 +947,4 @@ window.addEventListener('keyup', stopFastForward);
 // animTimeline.skipTo('start');
 // animTimeline.skipTo('finish a main card');
 // animTimeline.skipTo('replace formula container contents');
+animTimeline.skipTo('explain naive');

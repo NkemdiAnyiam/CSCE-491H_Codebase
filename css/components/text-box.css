@@ -21,6 +21,19 @@
 
   box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
 }
+
 .text-box__paragraph {
   color: var(--color-gray-darkest);
+  line-height: 1.2;
+}
+
+.text-box .algorithm {
+  background-color: var(--color-gray-lighter);
+  border-top: dotted 1px var(--color-gray-darkest);
+  border-bottom: dotted 1px var(--color-gray-darkest);
+  width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
