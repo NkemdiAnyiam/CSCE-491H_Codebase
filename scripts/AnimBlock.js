@@ -119,9 +119,12 @@ export class AnimBlock {
       const rectThis = this.domElem.getBoundingClientRect();
       const rectTarget = this.targetElem.getBoundingClientRect();
 
-      // the displacement will be the difference between the target element's position and our element's position
+      // the displacement will start as the difference between the target element's position and our element's position...
+      // plus any offset within the target itself
       translateX = this.preserveX ? 0 : rectTarget[this.alignmentX] - rectThis[this.alignmentX];
+      translateX += this.offsetTargetX ? this.offsetTargetX * rectTarget.width : 0;
       translateY = this.preserveY ? 0 : rectTarget[this.alignmentY] - rectThis[this.alignmentY];
+      translateY += this.offsetTargetY ? this.offsetTargetY * rectTarget.height : 0;
 
       // when the animation is rewinded, the negatives will be used to undo the translation
       this.undoTranslateX = -translateX;
@@ -134,13 +137,14 @@ export class AnimBlock {
 
     return new KeyframeEffect(
       this.domElem,
+      // added to the translations are the offet (with respect to our moving element) if specified
       { transform: `translate(calc(${translateX}${this.unitsX} + ${offsetX}${this.offsetUnitsX}),
                               calc(${translateY}${this.unitsY} + ${offsetY}${this.offsetUnitsY})`
       },
       {
         duration: this.duration,
         fill: 'forwards',
-        composite: 'accumulate',
+        composite: 'accumulate', // this is so that translations can stack
       }
     );
   }
@@ -188,6 +192,9 @@ export class AnimBlock {
       offsetUnitsX = 'px',
       offsetUnitsY = 'px',
       offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
+      offsetTargetX = 0, // determines offset with respect to width of target (e.g. 0.5 pushes us 50% of the target element's width to the right)
+      offsetTargetY = 0, // determines offset with respect to height of target (e.g. 0.5 pushes us 50% of the target element's height downward)
+      offsetTargetXY, // overrides offsetTargetX and offsetTargetY
       preserveX = false,
       preserveY = false,
     } = translateOptions;
@@ -200,6 +207,9 @@ export class AnimBlock {
 
       this.unitsX = 'px';
       this.unitsY = 'px';
+
+      this.offsetTargetX = offsetTargetXY ?? offsetTargetX;
+      this.offsetTargetY = offsetTargetXY ?? offsetTargetY;
 
       this.preserveX = preserveX;
       this.preserveY = preserveY;
