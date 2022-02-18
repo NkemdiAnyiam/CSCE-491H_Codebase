@@ -8,6 +8,10 @@
   top: 0;
 }
 
+.text-box-line-group.line-front .free-line {
+  z-index: 1002;
+}
+
 .text-box {
   font-size: 3.6rem;
   position: absolute;

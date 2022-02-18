@@ -51,53 +51,99 @@
             </svg>
           </div>
 
+          <div class="naive-algorithm-text">
+            
           <!-- Text box: finished c-array -->
-          <div class="text-box-line-group text-box-line-group--finished-c-array">
-            <div class="text-box text-box hidden">
-              <p class="text-box__paragraph text-box__paragraph">
-                Excellent, we've found every job's nearest <span class="c-related">compatible job</span>.
-                Our next step is to figure out the optimal (maximum) weight we can obtain from these jobs without having any of them overlap.
-              </p>
+            <div class="text-box-line-group text-box-line-group--finished-c-array">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  Excellent, we've found every job's nearest <span class="c-related">compatible job</span>.
+                  Our next step is to figure out the optimal (maximum) weight we can obtain from these jobs without having any of them overlap.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
             </div>
-            <svg class="free-line">
-              <line class="free-line__line hidden" />
-            </svg>
-          </div>
 
-          <!-- Text box: explain naive -->
-          <div class="text-box-line-group text-box-line-group--show-naive">
-            <div class="text-box text-box hidden">
-              <p class="text-box__paragraph text-box__paragraph">
-                The naive or brute force approach would be to test every single combination of jobs, which could be done using this algorithm:
-                <br />
-                <span class="algorithm">
-                  <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span> {
-                    <br />
-                    &emsp;if (<span class="SJ-related">j</span> = 0)
+            <!-- Text box: show naive -->
+            <div class="text-box-line-group text-box-line-group--show-naive">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  The naive or brute force approach would be to test every single combination of jobs, which could be done using this recursive algorithm:
+                  <br />
+                  <span class="algorithm">
+                    <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span> {
                       <br />
-                        &emsp;&emsp;return 0;
+                      &emsp;if (<span class="SJ-related">j</span> = 0)
+                        <br />
+                          &emsp;&emsp;return 0;
+                        <br />
+                      &emsp;else
+                        <br />
+                        &emsp;&emsp;return max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
+                        + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
+                        <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
                       <br />
-                    &emsp;else
-                      <br />
-                      &emsp;&emsp;return max(<span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
-                      + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span>,
-                      <span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span>);
-                    <br />
-                  }
-                </span>
-                <br />
-                (where <span class="weight-related">w</span> is <span class="weight-related">weight</span>)
-                and calling <span class="OPT-related">OPT(<span class="fill--last-SJ-num SJ-related">X</span>)</span>.
-              </p>
+                    }
+                  </span>
+                  <br />
+                  (where <span class="weight-related">w</span> is <span class="weight-related">weight</span>)
+                  and calling <span class="OPT-related">OPT(<span class="fill--last-SJ-num SJ-related">X</span>)</span>.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
             </div>
-            <svg class="free-line">
-              <line class="free-line__line hidden" />
-            </svg>
+
+            <!-- Text box: explain naive 1 -->
+            <div class="text-box-line-group text-box-line-group--explain-naive-1 line-front">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  This first term represents the possibility that the current <span class="SJ-related">job j</span> is indeed part of the optimal sequence of jobs.
+                  Thus, it adds <span class="SJ-related">job j</span>'s <span class="weight-related">weight</span>,
+                  and then it adds whatever the optimal weight is from the chain starting at job <span class="c-related">c[<span class="SJ-related">j</span>]</span>.
+                  <br />
+                  Why? Because if <span class="SJ-related">job j</span> is part of the optimal chain, then the latest preceding job that could
+                  possibly also be in the chain is one that doesn't overlap, i.e. <span class="SJ-related">job j</span>'s nearest <span class="c-related">compatible job</span>.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
+            </div>
+
+            <!-- Text box: explain naive 2 -->
+            <div class="text-box-line-group text-box-line-group--explain-naive-2 line-front">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  This second term represents the possibility that <span class="SJ-related">job j</span> is NOT part of the optimal sequence of jobs. Thus, of course,
+                  <span class="SJ-related">job j</span>'s <span class="weight-related">weight</span> is NOT added, and it then computes the optimal weight starting from
+                  the job behind it, <span class="SJ-related">job j</span> - 1.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
+            </div>
+
+            <!-- Text box: explain naive bad -->
+            <div class="text-box-line-group text-box-line-group--explain-naive-bad">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  The problem with the naive approach is that it may recompute many overlapping subproblems.
+                  In other words, we might solve the same <span class="OPT-related">OPT(X)</span> multiple times, which is incredibly inefficient.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
+            </div>
           </div>
         </div>
 
         <div class="time-graph">
-
 
           <svg class="free-line free-line--arrow c-related">
             <defs>
@@ -207,11 +253,62 @@
           </div>
 
           <div class="array-group array-group--j-and-M">
-            <div class="array array--j">
+            <div class="array array--j hidden">
               <div class="array__array-block array__array-block--header">j</div>
             </div>
   
-            <div class="array array--M">
+            <div class="array array--M hidden">
+              <div class="text-boxes">
+                <!-- Text box: M-array -->
+                <div class="text-box-line-group text-box-line-group--M-array M-related">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph text-box__paragraph--explain">
+                      The solution is actually simple: Every time we find the optimal weight for a sequence from time 0 to some job, let's store it in an array.
+                      Then, every time we call <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span>
+                      for some job <span class="SJ-related">j</span>, we first check if it has already been solved by looking in the array.
+                      <br />
+                      This act of storing results in a table to prevent needless recalculations is called <span class="M-related">memoization</span>.
+                    </p>
+                    <p class="text-box__paragraph text-box__paragraph--ref-array hidden">
+                      This purple <span class="M-related">M array</span> to the left will be used as our memoization table; it will store the result of
+                      each job's <span class="OPT-related">OPT()</span> computation.
+                      If we have 0 jobs, of course the optimal weight would be 0, so our base case is that <span class="M-related">M[0]</span> = 0.
+                    </p>
+                  </div>
+                  <svg class="free-line">
+                    <line class="free-line__line hidden" />
+                  </svg>
+                </div>
+
+                <!-- Text box: show memoized algorithm -->
+            <div class="text-box-line-group text-box-line-group--show-memoized">
+              <div class="text-box text-box hidden">
+                <p class="text-box__paragraph text-box__paragraph">
+                  Our new <span class="M-related">memoized</span> weighted interval scheduling algorithm looks like this:
+                  <br />
+                  <span class="algorithm">
+                    <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span> {
+                      <br />
+                      &emsp;if (<span class="M-related">M[<span class="SJ-related">j</span>]</span> = empty)
+                        <br />
+                          &emsp;&emsp;<span class="M-related">M[<span class="SJ-related">j</span>]</span> = max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
+                          + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
+                          <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
+                        <br />
+                      &emsp;return <span class="M-related">M[<span class="SJ-related">j</span>]</span>
+                      <br />
+                    }
+                  </span>
+                  <br />
+                  Let's go ahead and call <span class="OPT-related">OPT(<span class="SJ-related fill--last-SJ-num">X</span>)</span>
+                  and find the maximum weight we can achieve from jobs A&mdash;<span class="fill--last-job-letter">X</span>.
+                </p>
+              </div>
+              <svg class="free-line">
+                <line class="free-line__line hidden" />
+              </svg>
+            </div>
+              </div>
               <div class="array__array-block array__array-block--header">M[j]</div>
             </div>
           </div>

@@ -15,11 +15,11 @@ const jobsUnsorted = [
   new Job(5, 9, 7),
   new Job(8, 11, 5),
   new Job(0, 6, 2),
-  // new Job(1, 4, 1),
-  // new Job(3, 8, 5),
-  // new Job(4, 7, 4),
-  // new Job(6, 10, 3),
-  // new Job(3, 5, 6),
+  new Job(1, 4, 1),
+  new Job(3, 8, 5),
+  new Job(4, 7, 4),
+  new Job(6, 10, 3),
+  new Job(3, 5, 6),
 ];
 
 const jobScheduler = new JobScheduler();
@@ -296,6 +296,8 @@ jobBarEls.forEach((jobBarEl) => {
 const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
 const freeLine_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .free-line');
 const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box');
+const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
+const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
 // State that now we need to find the maximum weight
 {
   const animSequence = new AnimSequence(null, {continuePrev: true});
@@ -307,11 +309,12 @@ const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-
   animTimeline.addOneSequence(animSequence);
 }
 
-// Explain naive approach to finding max weight
+
+// Show naive approach to finding max weight
 {
   const animSequence = new AnimSequence(null);
   animSequence.setDescription('Explain naive approach to finding max weight');
-  animSequence.setTag('explain naive');
+  animSequence.setTag('show naive');
   animSequence.addManyBlocks([
     [ 'std', textbox_showNaive, 'translate', {duration: 0, translateOptions: {targetElem: textbox_finishedCArray, offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}} ],
     [ 'line', freeLine_showNaive, 'enter-wipe-from-top', textbox_finishedCArray, [0.5, 1], null, [0.5, 0] ],
@@ -319,6 +322,146 @@ const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-
   ]);
   animTimeline.addOneSequence(animSequence);
 }
+
+const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
+const freeLine_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .free-line');
+// Explain possibility that job is part of optimal sequence
+{
+  const animSequence = new AnimSequence(null);
+  animSequence.setDescription('Explain possibility that job is part of optimal sequence');
+  animSequence.setTag('explain naive');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_explainNaive1, 'translate', {duration: 0, translateOptions: {targetElem: textbox_showNaive, offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: -1.0, offsetX: 10, offsetUnitsX: 'rem'}} ],
+    [ 'std', algorithm_term1, 'highlight' ],
+    [ 'line', freeLine_explainNaive1, 'enter-wipe-from-top', algorithm_term1, [0.5, 1], null, [0.5, 0] ],
+    [ 'std', textbox_explainNaive1, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
+const freeLine_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .free-line');
+// Explain possibility that job is NOT part of optimal sequence
+{
+  const animSequence = new AnimSequence(null);
+  animSequence.setDescription('Explain possibility that job is NOT part of optimal sequence');
+  animSequence.setTag('explain naive');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_explainNaive2, 'translate', {duration: 0, translateOptions: {targetElem: textbox_showNaive, offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: 1.0, offsetX: -10, offsetUnitsX: 'rem', alignmentX: 'right'}} ],
+    [ 'std', algorithm_term2, 'highlight' ],
+    [ 'line', freeLine_explainNaive2, 'enter-wipe-from-top', algorithm_term2, [0.5, 1], null, [0.5, 0] ],
+    [ 'std', textbox_explainNaive2, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+// Hide naive approach explanations
+{
+  const animSequence = new AnimSequence(null, {continueNext: true});
+  animSequence.setDescription('Hide naive approach explanations');
+  animSequence.setTag('explain naive bad');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_explainNaive1, 'fade-out', {blocksNext: false} ],
+    [ 'std', textbox_explainNaive2, 'fade-out', {blocksNext: false, blocksPrev: false} ],
+    [ 'line', freeLine_explainNaive1, 'exit-wipe-to-top', algorithm_term1, [0.5, 1], null, [0.5, 0], {blocksNext: false} ],
+    [ 'line', freeLine_explainNaive2, 'exit-wipe-to-top', algorithm_term2, [0.5, 1], null, [0.5, 0], {blocksNext: false, blocksPrev: false} ],
+    [ 'std', algorithm_term1, 'un-highlight', {blocksNext: false} ],
+    [ 'std', algorithm_term2, 'un-highlight', {blocksPrev: false} ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+
+const textbox_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .text-box');
+const freeLine_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .free-line');
+// Explain why naive approach is bad
+{
+  const animSequence = new AnimSequence(null, {continuePrev: true});
+  animSequence.setDescription('Explain why naive approach is bad');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_explainNaiveBad, 'translate', {duration: 0, translateOptions: {targetElem: textbox_showNaive, offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}} ],
+    [ 'line', freeLine_explainNaiveBad, 'enter-wipe-from-top', textbox_showNaive, [0.5, 1], null, [0.5, 0] ],
+    [ 'std', textbox_explainNaiveBad, 'fade-in', {blocksPrev: false} ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+
+const naiveAlgorithmText = dataDisplay.querySelector('.naive-algorithm-text');
+// Collapse text boxes about the naive approach
+{
+  const animSequence = new AnimSequence(null, {continueNext: true});
+  animSequence.setDescription('Collapse text boxes about the naive approach');
+  animSequence.addManyBlocks([
+    [ 'std', naiveAlgorithmText, 'fade-out' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+const arrayGroup_j_M = dataDisplay.querySelector('.array-group--j-and-M');
+const MArray = arrayGroup_j_M.querySelector('.array--M');
+const jArray2 = arrayGroup_j_M.querySelector('.array--j');
+const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box');
+const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .free-line');
+const textP_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
+const textP_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
+// Explain memoization
+{
+  const animSequence = new AnimSequence(null, {continuePrev: true});
+  animSequence.setDescription('Explain memoization');
+  animSequence.setTag('introduce memoization');
+  animSequence.addManyBlocks([
+    [ 'std', jArray2, 'enter-wipe-from-left' ],
+    [ 'std', MArray, 'enter-wipe-from-left', {blocksPrev: false} ],
+    [ 'std', textbox_MArray, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+const arrayBlock_M_0 = MArray.querySelector('.array__array-block--0');
+const arrayBlank_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--blank');
+const arrayValue_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--value');
+// Explain what M array will be used for
+{
+  const animSequence = new AnimSequence(null, {continuePrev: true});
+  animSequence.setDescription('Explain what M array will be used for');
+  animSequence.addManyBlocks([
+    [ 'line', freeLine_MArray, 'enter-wipe-from-left', null, [0, 0.5], MArray, [1, 0.5] ],
+    [ 'std',  textP_MArray_explain, 'fade-out', {duration: 250} ],
+    [ 'std',  textP_MArray_refArray, 'fade-in', {duration: 250} ],
+    [ 'std', arrayBlank_M_0, 'fade-out' ],
+    [ 'std', arrayValue_M_0, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+
+const textbox_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .text-box');
+const freeLine_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .free-line');
+// Show memoized algorithm
+{
+  const animSequence = new AnimSequence();
+  animSequence.setDescription('Show memoized algorithm');
+  animSequence.addManyBlocks([
+    [ 'std', textbox_showMemoized, 'translate', {duration: 0, translateOptions: {targetElem: textbox_MArray, offsetTargetX: 1, offsetX: 20, offsetXUnits: 'rem', preserveY: true}} ],
+    [ 'line', freeLine_showMemoized, 'enter-wipe-from-left', textbox_MArray, [1, 0.5], null, [0, 0.5] ],
+    [ 'std',  textbox_showMemoized, 'fade-in' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
+
+const MArrayTextBoxes = MArray.querySelector('.text-boxes');
+// Hide M array text explanation boxes
+{
+  const animSequence = new AnimSequence(null, {continueNext: true});
+  animSequence.setDescription('Show memoized algorithm');
+  animSequence.addManyBlocks([
+    [ 'std', MArrayTextBoxes, 'fade-out' ],
+  ]);
+  animTimeline.addOneSequence(animSequence);
+}
+
 
 
 animateJobCard_R(document.querySelector('.job-card'));
@@ -947,4 +1090,5 @@ window.addEventListener('keyup', stopFastForward);
 // animTimeline.skipTo('start');
 // animTimeline.skipTo('finish a main card');
 // animTimeline.skipTo('replace formula container contents');
-animTimeline.skipTo('explain naive');
+// animTimeline.skipTo('explain naive');
+// animTimeline.skipTo('introduce memoization');

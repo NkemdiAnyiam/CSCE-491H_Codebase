@@ -35,6 +35,26 @@
   width: 95rem;
 }
 
+.text-box-line-group--explain-naive-1 .text-box,
+.text-box-line-group--explain-naive-2 .text-box,
+.text-box-line-group--explain-naive-bad .text-box {
+  width: 95rem;
+}
+
+.text-box-line-group--M-array { left: calc(100% + 20rem); top: 50%; }
+.text-box-line-group--M-array .text-box {
+  top: 0;
+  transform: translateY(-50%);
+  width: 90rem;
+}
+
+.text-box-line-group--show-memoized { left: calc(100% + 20rem); top: 50%; }
+.text-box-line-group--show-memoized .text-box {
+  top: 0;
+  transform: translateY(-50%);
+  width: 95rem;
+}
+
 .time-graph__c-bar {
   position: absolute;
   height: 100%;
