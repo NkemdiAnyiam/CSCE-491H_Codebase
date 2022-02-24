@@ -43,19 +43,19 @@ export class AnimTimeline {
 
     let continueOn;
     if (direction === 'forward') {
+      // reject promise if trying to step forward at the end of the timeline
       if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
       // if using skip to, ignore an AnimSequence request to automatically play the upcoming sequence
       if (this.usingSkipTo) { await this.stepForward(); }
       else { do {continueOn = await this.stepForward();} while(continueOn); }
     }
     else if (direction === 'backward') {
+      // reject promise if trying to step backward at the beginning of the timeline
       if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
       if (this.usingSkipTo) { await this.stepBackward(); }
       else { do {continueOn = await this.stepBackward();} while(continueOn); }
     }
     else { return Promise.reject(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`); }
-
-    this.isStepping = false;
 
     return new Promise(resolve => {
       this.isStepping = false;
