@@ -16,6 +16,7 @@ export class AnimTimeline {
     this.id = AnimTimeline.id++;
 
     if (animSequences) {
+      // [AnimSequence] OR [[]]
       if (animSequences instanceof Array && (animSequences[0] instanceof AnimSequence || animSequences[0] instanceof Array)) {
         this.addSequences(animSequences);
         this.numSequences = this.animSequences.length;
@@ -27,6 +28,39 @@ export class AnimTimeline {
     }
 
     this.debugMode = options ? (options?.debugMode ?? false) : false;
+
+    this.step = this.step.bind(this);
+    this.getForwardStepper = this.getForwardStepper.bind(this);
+    this.getBackwardStepper = this.getBackwardStepper.bind(this);
+  }
+
+  getForwardStepper() { return () => this.step('forward'); }
+  getBackwardStepper() { return () => this.step('backward'); }
+
+  async step(direction) {
+    if (this.isStepping) { return Promise.reject('Cannot step while already animating'); }
+    this.isStepping = true;
+
+    let continueOn;
+    if (direction === 'forward') {
+      if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
+      // if using skip to, ignore an AnimSequence request to automatically play the upcoming sequence
+      if (this.usingSkipTo) { await this.stepForward(); }
+      else { do {continueOn = await this.stepForward();} while(continueOn); }
+    }
+    else if (direction === 'backward') {
+      if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
+      if (this.usingSkipTo) { await this.stepBackward(); }
+      else { do {continueOn = await this.stepBackward();} while(continueOn); }
+    }
+    else { return Promise.reject(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`); }
+
+    this.isStepping = false;
+
+    return new Promise(resolve => {
+      this.isStepping = false;
+      resolve(direction);
+    });
   }
 
   addOneSequence(animSequenceOrData) {
@@ -50,44 +84,34 @@ export class AnimTimeline {
 
   // plays current AnimSequence and increments stepNum
   stepForward() {
-    // if (this.isAnimating) { return Promise.reject('Cannot stepForward() while already animating'); }
-    if (this.atEnd()) { return Promise.reject('Cannot stepForward() at end of timeline'); }
-
-    this.isAnimating = true;
     this.currDirection = 'forward';
 
     if (this.debugMode) { console.log(`-->> ${this.animSequences[this.stepNum].getDescription()}`); }
 
-    if (this.isSkipping) { this.fireSkipSignal(); }
+    if (this.isSkipping || this.usingSkipTo) { this.fireSkipSignal(); }
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].play() // wait for the current AnimSequence to finish all of its animations
       .then((continueNext) => {
         ++this.stepNum;
-        this.isAnimating = false;
-        resolve(continueNext);
+        resolve(continueNext && !this.atEnd());
       });
     });
   }
 
   // decrements stepNum and rewinds the AnimSequence
   stepBackward() {
-    // if (this.isAnimating) { return Promise.reject('Cannot stepBackward() while already animating'); }
-    if (this.atBeginning()) { return Promise.reject('Cannot stepBackward() at beginning of timeline'); }
-
-    this.isAnimating = true;
     --this.stepNum;
     this.currDirection = 'backward';
 
     if (this.debugMode) { console.log(`<<-- ${this.animSequences[this.stepNum].getDescription()}`); }
 
-    if (this.isSkipping) { this.fireSkipSignal(); }
+    if (this.isSkipping || this.usingSkipTo) { this.fireSkipSignal(); }
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].rewind()
       .then((continuePrev) => {
-        this.isAnimating = false;
-        resolve(continuePrev);
+        resolve(continuePrev && !this.atBeginning());
       });
     });
   }
@@ -107,30 +131,28 @@ export class AnimTimeline {
 
     // keep skipping forwards or backwards depending on direction of stepNum
     if (this.stepNum < stepNumTo) {
-      while (this.stepNum < stepNumTo) {
-        this.fireSkipSignal();
-        await this.stepForward();
-      }
+      while (this.stepNum < stepNumTo)
+        { await this.step('forward'); }
     }
     else {
-      while (this.stepNum > stepNumTo) {
-        this.fireSkipSignal();
-        await this.stepBackward();
-      }
+      while (this.stepNum > stepNumTo)
+        { await this.step('backward'); }
     }
 
-    this.usingSkipTo = false;
-    return Promise.resolve(tag);
+    return new Promise(resolve => {
+      this.usingSkipTo = false;
+      resolve(tag);
+    });
   }
 
   toggleSkipping(isSkipping) {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isAnimating) { this.fireSkipSignal(); }
+    if (this.isSkipping && this.isStepping) { this.fireSkipSignal(); }
     return this.isSkipping;
   }
 
-    // tells the current AnimSequence to instantly finish its animations
+  // tells the current AnimSequence to instantly finish its animations
   fireSkipSignal() { this.animSequences[this.stepNum].fireSkipSignal(); }
 
   // sets the playbacks of all currently running animations that belong to this timeline

@@ -31,8 +31,8 @@ jobScheduler.sortJobsByFinish();
 jobScheduler.setCompatibleJobNums();
 jobScheduler.initializeM();
 
-console.log(jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards')));
-jobScheduler.print();
+jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards'));
+// jobScheduler.print();
 jobScheduler.setUpScene();
 
 (function() {
@@ -455,7 +455,7 @@ const MArrayTextBoxes = MArray.querySelector('.text-boxes');
 // Hide M array text explanation boxes
 {
   const animSequence = new AnimSequence(null, {continueNext: true});
-  animSequence.setDescription('Show memoized algorithm');
+  animSequence.setDescription('Hide memoized algorithm');
   animSequence.addManyBlocks([
     [ 'std', MArrayTextBoxes, 'fade-out' ],
   ]);
@@ -547,7 +547,7 @@ function animateJobCard_R(jobCard, parentAnimSequence, parentArrowDown, parentAr
 
   // fade in job card and M access
   {
-    const animSequence = parentAnimSequence ?? new AnimSequence();
+    const animSequence = parentAnimSequence ?? new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Fade in job card and M access');
     animSequence.setTag('start');
     animSequence.addManyBlocks([
@@ -1013,42 +1013,10 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
 
 
 
-// TODO: Move playback functionality into AnimTimeline
-const goForward = async function() {
-  return new Promise(async function(resolve) {
-    backwardButton.removeEventListener('click', goBackward);
-    forwardButton.removeEventListener('click', goForward);
-    let stepAgain = true;
-    while(stepAgain) {
-     stepAgain = await animTimeline.stepForward();
-    }
-    backwardButton.addEventListener('click', goBackward);
-    forwardButton.addEventListener('click', goForward);
-
-    resolve();
-  });
-};
-
-const goBackward = async function() {
-  return new Promise(async function(resolve) {
-    backwardButton.removeEventListener('click', goBackward);
-    forwardButton.removeEventListener('click', goForward);
-    let stepAgain = true;
-    while(stepAgain) {
-      stepAgain = await animTimeline.stepBackward();
-    }
-    backwardButton.addEventListener('click', goBackward);
-    forwardButton.addEventListener('click', goForward);
-
-    resolve();
-  });
-};
-
-
-const backwardButton = document.querySelector('.box--backward');
 const forwardButton = document.querySelector('.box--forward');
-backwardButton.addEventListener('click', goBackward);
-forwardButton.addEventListener('click', goForward);
+const backwardButton = document.querySelector('.box--backward');
+forwardButton.addEventListener('click', () => animTimeline.step('forward'));
+backwardButton.addEventListener('click', () => animTimeline.step('backward'));
 
 const toggleSkipping = function(e) {
   if (e.key.toLowerCase() === 's' && !e.repeat) {
@@ -1082,12 +1050,14 @@ const stopFastForward = function(e) {
 window.addEventListener('keydown', toggleSkipping);
 window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
+window.addEventListener('keydown', e => e.key === 'ArrowRight' && animTimeline.step('forward') );
+window.addEventListener('keydown', e => e.key === 'ArrowLeft' && animTimeline.step('backward') );
 
 // animTimeline.skipTo('skip to');
 // animTimeline.skipTo('focus comp 2');
 // animTimeline.skipTo('found max');
 // animTimeline.skipTo('OPT point 1');
-// animTimeline.skipTo('start');
+animTimeline.skipTo('start');
 // animTimeline.skipTo('finish a main card');
 // animTimeline.skipTo('replace formula container contents');
 // animTimeline.skipTo('explain naive');
