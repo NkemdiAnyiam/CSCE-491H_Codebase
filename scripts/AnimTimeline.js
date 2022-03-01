@@ -34,9 +34,29 @@ export class AnimTimeline {
     this.getBackwardStepper = this.getBackwardStepper.bind(this);
   }
 
+  addOneSequence(animSequenceOrData) {
+    if (animSequenceOrData instanceof AnimSequence) {
+      animSequenceOrData.setID(this.id);
+      this.animSequences.push(animSequenceOrData);
+    }
+    else {
+      const newAnimSequence = new AnimSequence();
+      if (animSequenceOrData[0] instanceof Array) { newAnimSequence.addManyBlocks(animSequenceOrData); }
+      else { newAnimSequence.addOneBlock(animSequenceOrData); }
+      newAnimSequence.setID(this.id);
+      this.animSequences.push(newAnimSequence);
+    }
+    ++this.numSequences;
+  }
+
+  addManySequences(animSequences) {
+    animSequences.forEach(animSequence => this.addOneSequence(animSequence));
+  }
+
   getForwardStepper() { return () => this.step('forward'); }
   getBackwardStepper() { return () => this.step('backward'); }
 
+  // steps forward or backward and does error-checking
   async step(direction) {
     if (this.isStepping) { return Promise.reject('Cannot step while already animating'); }
     this.isStepping = true;
@@ -63,24 +83,8 @@ export class AnimTimeline {
     });
   }
 
-  addOneSequence(animSequenceOrData) {
-    if (animSequenceOrData instanceof AnimSequence) {
-      animSequenceOrData.setID(this.id);
-      this.animSequences.push(animSequenceOrData);
-    }
-    else {
-      const newAnimSequence = new AnimSequence();
-      if (animSequenceOrData[0] instanceof Array) { newAnimSequence.addManyBlocks(animSequenceOrData); }
-      else { newAnimSequence.addOneBlock(animSequenceOrData); }
-      newAnimSequence.setID(this.id);
-      this.animSequences.push(newAnimSequence);
-    }
-    ++this.numSequences;
-  }
-
-  addManySequences(animSequences) {
-    animSequences.forEach(animSequence => this.addOneSequence(animSequence));
-  }
+  atBeginning() { return this.stepNum === 0; }
+  atEnd() { return this.stepNum === this.numSequences; }
 
   // plays current AnimSequence and increments stepNum
   stepForward() {
@@ -115,9 +119,6 @@ export class AnimTimeline {
       });
     });
   }
-
-  atBeginning() { return this.stepNum === 0; }
-  atEnd() { return this.stepNum === this.numSequences; }
 
   // immediately skips to first AnimSequence in animSequences with matching tag field
   async skipTo(tag) {
