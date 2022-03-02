@@ -35,7 +35,10 @@ export class AnimSequence {
   setTag(tag) { this.tag = tag; }
   setID(id) {
     this.timelineID = id;
-    this.animBlocks.forEach(animBlock => animBlock.setID(this.id, this.timelineID));
+    this.animBlocks.forEach(animBlock => {
+      animBlock.setID(this.id, this.timelineID);
+      animBlock.playbackRate = this.playbackRate;
+    });
   }
 
 

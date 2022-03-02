@@ -1020,30 +1020,35 @@ backwardButton.addEventListener('click', () => animTimeline.step('backward'));
 
 const toggleSkipping = function(e) {
   if (e.key.toLowerCase() === 's' && !e.repeat) {
-    window.removeEventListener('keyup', stopFastForward);
-    window.removeEventListener('keydown', fastForward);
-    clearInterval(intervalID);
     animTimeline.toggleSkipping();
-    window.addEventListener('keyup', stopFastForward);
-    window.addEventListener('keydown', fastForward);
   }
 };
 
-let intervalID = null;
+// const fastForward = function(e) {
+//   if (e.key.toLowerCase() === 'f' && !e.repeat) {
+//     animTimeline.fireRateSignal(7);
+//     intervalID  = setInterval(() => {
+//       animTimeline.fireRateSignal(7);
+//     }, 30);
+//   }
+// };
 
 const fastForward = function(e) {
   if (e.key.toLowerCase() === 'f' && !e.repeat) {
-    animTimeline.fireRateSignal(7);
-    intervalID  = setInterval(() => {
-      animTimeline.fireRateSignal(7);
-    }, 30);
+    animTimeline.setPlaybackRate(7);
   }
-};
+}
+
+// const stopFastForward = function(e) {
+//   if (e.key.toLowerCase() === 'f') {
+//     clearInterval(intervalID);
+//     animTimeline.fireRateSignal(1);
+//   }
+// };
 
 const stopFastForward = function(e) {
   if (e.key.toLowerCase() === 'f') {
-    clearInterval(intervalID);
-    animTimeline.fireRateSignal(1);
+    animTimeline.setPlaybackRate(1);
   }
 };
 
@@ -1057,7 +1062,7 @@ window.addEventListener('keydown', e => e.key === 'ArrowLeft' && animTimeline.st
 // animTimeline.skipTo('focus comp 2');
 // animTimeline.skipTo('found max');
 // animTimeline.skipTo('OPT point 1');
-animTimeline.skipTo('start');
+// animTimeline.skipTo('start');
 // animTimeline.skipTo('finish a main card');
 // animTimeline.skipTo('replace formula container contents');
 // animTimeline.skipTo('explain naive');

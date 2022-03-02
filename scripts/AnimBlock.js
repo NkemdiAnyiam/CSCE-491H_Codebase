@@ -71,6 +71,7 @@ export class AnimBlock {
     // set the keyframes for the animation
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
+    animation.updatePlaybackRate(this.playbackRate.value);
 
     if (isEntering) {
       this.domElem.classList.remove('hidden');

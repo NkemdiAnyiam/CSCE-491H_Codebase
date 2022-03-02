@@ -11,6 +11,7 @@ export class AnimTimeline {
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
+  playbackRate = {value: 1};
 
   constructor(animSequences = null, options = null) {
     this.id = AnimTimeline.id++;
@@ -36,6 +37,7 @@ export class AnimTimeline {
 
   addOneSequence(animSequenceOrData) {
     if (animSequenceOrData instanceof AnimSequence) {
+      animSequenceOrData.playbackRate = this.playbackRate;
       animSequenceOrData.setID(this.id);
       this.animSequences.push(animSequenceOrData);
     }
@@ -43,6 +45,7 @@ export class AnimTimeline {
       const newAnimSequence = new AnimSequence();
       if (animSequenceOrData[0] instanceof Array) { newAnimSequence.addManyBlocks(animSequenceOrData); }
       else { newAnimSequence.addOneBlock(animSequenceOrData); }
+      newAnimSequence.playbackRate = this.playbackRate;
       newAnimSequence.setID(this.id);
       this.animSequences.push(newAnimSequence);
     }
@@ -52,6 +55,12 @@ export class AnimTimeline {
   addManySequences(animSequences) {
     animSequences.forEach(animSequence => this.addOneSequence(animSequence));
   }
+
+  setPlaybackRate(rate) {
+    this.playbackRate.value = rate;
+    this.fireRateSignal(rate);
+  }
+  getPlaybackRate() { return this.playbackRate.value; }
 
   getForwardStepper() { return () => this.step('forward'); }
   getBackwardStepper() { return () => this.step('backward'); }
