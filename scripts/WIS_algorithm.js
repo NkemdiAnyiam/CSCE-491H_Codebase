@@ -1017,31 +1017,17 @@ const forwardButton = document.querySelector('.box--forward');
 const backwardButton = document.querySelector('.box--backward');
 forwardButton.addEventListener('click', () => animTimeline.step('forward'));
 backwardButton.addEventListener('click', () => animTimeline.step('backward'));
-window.addEventListener('keydown', e => e.key === 'ArrowRight' && animTimeline.step('forward') );
-window.addEventListener('keydown', e => e.key === 'ArrowLeft' && animTimeline.step('backward') );
 
+window.addEventListener('keydown', function(e) {
+  e.key === 'ArrowRight' && animTimeline.step('forward'); // right arrow key steps forward
+  e.key === 'ArrowLeft' && animTimeline.step('backward'); // left arrow key steps backward
+  (e.key.toLowerCase() === 'f' && !e.repeat) && animTimeline.setPlaybackRate(7); // hold 'f' to increase playback rate (fast-forward)
+  (e.key.toLowerCase() === 's' && !e.repeat) && animTimeline.toggleSkipping(); // 's' to toggle skipping
+});
 
-const fastForward = function(e) {
-  if (e.key.toLowerCase() === 'f' && !e.repeat) {
-    animTimeline.setPlaybackRate(7);
-  }
-}
-
-const stopFastForward = function(e) {
-  if (e.key.toLowerCase() === 'f') {
-    animTimeline.setPlaybackRate(1);
-  }
-};
-
-const toggleSkipping = function(e) {
-  if (e.key.toLowerCase() === 's' && !e.repeat) {
-    animTimeline.toggleSkipping();
-  }
-};
-
-window.addEventListener('keydown', fastForward);
-window.addEventListener('keyup', stopFastForward);
-window.addEventListener('keydown', toggleSkipping);
+window.addEventListener('keyup', function(e) {
+  e.key === 'f' && animTimeline.setPlaybackRate(1); // release 'f' to set playback rate back to 1 (stop fast-forwrding)
+});
 
 // animTimeline.skipTo('skip to');
 // animTimeline.skipTo('focus comp 2');
