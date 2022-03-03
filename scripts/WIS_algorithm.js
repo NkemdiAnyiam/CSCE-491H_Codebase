@@ -101,8 +101,9 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
     [ 'std', textP_placeBars_unorder2, 'fade-out', {duration: 250} ],
     [ 'std', textP_placeBars_order, 'fade-in', {duration: 250} ],
   ]);
+  const jobBarsInitialArea = document.querySelector('.time-graph__job-bars');
   jobBarEls.forEach((jobBarEl, i) => {
-    const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: document.querySelector('.time-graph__job-bars') } };
+    const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: jobBarsInitialArea } };
     animSequence.addOneBlock(new AnimBlock(jobBarEl, 'translate', options));
   });
 
@@ -119,7 +120,6 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
     const jobLetter = jobBarEl.dataset.jobletter;
     const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`);
     const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`);
-    const options = { blocksNext: false, translateOptions: { targetElem: startCell } };
     
     // get row's header data to animate
     const rowSJNum = row.querySelector('.time-graph__SJ-num');
@@ -127,9 +127,9 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
     const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
     
     animSequence.addManyBlocks([
-      [ 'std', jobBarEl, 'translate', options ],
+      [ 'std', jobBarEl, 'translate', { blocksNext: false, translateOptions: { targetElem: startCell } } ],
       [ 'std', rowUnsortedLetter, 'exit-wipe-to-left', {blocksPrev: false, duration: 250} ],
-      [ 'std', rowSJNum, 'enter-wipe-from-right', {blocksNext: false, duration: 250} ],
+      [ 'std', rowSJNum, 'enter-wipe-from-right', {blocksNext: false, blocksPrev: false, duration: 250} ],
       [ 'std', rowSortedLetter, 'enter-wipe-from-right', {blocksPrev: false, duration: 250} ],
     ]);
   });
