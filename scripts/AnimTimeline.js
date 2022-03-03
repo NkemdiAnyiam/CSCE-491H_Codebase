@@ -68,8 +68,8 @@ export class AnimTimeline {
 
   // steps forward or backward and does error-checking
   async step(direction) {
+    if (this.isPaused) { return Promise.reject('Cannot step while playback is paused'); }
     if (this.isStepping) { return Promise.reject('Cannot step while already animating'); }
-    if (this.isPaused) { return Promise.reject('Cannot step while isPaused'); }
     this.isStepping = true;
 
     let continueOn;
