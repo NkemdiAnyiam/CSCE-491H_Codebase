@@ -8,6 +8,7 @@ export class AnimTimeline {
   numSequences = 0;
   stepNum = 0; // index into animSequences
   isSkipping = false; // used to determine whether or not all animations should be instantaneous
+  isPaused = false;
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
@@ -68,13 +69,14 @@ export class AnimTimeline {
   // steps forward or backward and does error-checking
   async step(direction) {
     if (this.isStepping) { return Promise.reject('Cannot step while already animating'); }
+    if (this.isPaused) { return Promise.reject('Cannot step while isPaused'); }
     this.isStepping = true;
 
     let continueOn;
     if (direction === 'forward') {
       // reject promise if trying to step forward at the end of the timeline
       if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
-      // if using skip to, ignore an AnimSequence request to automatically play the upcoming sequence
+      // if using skipTo(), ignore an AnimSequence request to automatically play the upcoming sequence
       if (this.usingSkipTo) { await this.stepForward(); }
       else { do {continueOn = await this.stepForward();} while(continueOn); }
     }
@@ -140,14 +142,10 @@ export class AnimTimeline {
     if (stepNumTo === -1) { return Promise.reject('Tag name not found'); }
 
     // keep skipping forwards or backwards depending on direction of stepNum
-    if (this.stepNum < stepNumTo) {
-      while (this.stepNum < stepNumTo)
-        { await this.step('forward'); }
-    }
-    else {
-      while (this.stepNum > stepNumTo)
-        { await this.step('backward'); }
-    }
+    if (this.stepNum < stepNumTo)
+      { while (this.stepNum < stepNumTo) { await this.step('forward'); } }
+    else
+      { while (this.stepNum > stepNumTo) { await this.step('backward'); } }
 
     return new Promise(resolve => {
       this.usingSkipTo = false;
@@ -158,7 +156,7 @@ export class AnimTimeline {
   toggleSkipping(isSkipping) {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping) { this.skipCurrentAnimations(); }
+    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipCurrentAnimations(); }
     return this.isSkipping;
   }
 
@@ -167,11 +165,30 @@ export class AnimTimeline {
 
   // used to set playback rate of currently running animations so that they don't unintuitively run at regular speed
   updateCurrentAnimationsRates(rate) {
+    this.doForCurrentAnimations((animation) => animation.playbackRate = rate);
+  }
+
+  // pauses or unpauses playback
+  togglePause(isPaused) {
+    this.isPaused = isPaused ?? !this.isPaused;
+    if (this.isPaused) {
+      this.doForCurrentAnimations((animation) => animation.pause());
+      this.isPaused = true;
+    }
+    else {
+      this.doForCurrentAnimations((animation) => animation.play());
+      this.isPaused = false;
+    }
+    return this.isPaused;
+  }
+
+  // get all currently running animations that belong to this timeline and perform operation() with them
+  doForCurrentAnimations(operation) {
     // get all currently running animations
     const allAnimations = document.getAnimations();
     // an animation "belongs" to this timeline if its timeline id matches
     for (let i = 0; i < allAnimations.length; ++i) {
-      if (Number.parseInt(allAnimations[i].timelineID) === this.id) { allAnimations[i].playbackRate = rate; }
+      if (Number.parseInt(allAnimations[i].timelineID) === this.id) { operation(allAnimations[i]); }
     }
   }
 }

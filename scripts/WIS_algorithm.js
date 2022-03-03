@@ -1023,10 +1023,11 @@ window.addEventListener('keydown', function(e) {
   e.key === 'ArrowLeft' && animTimeline.step('backward'); // left arrow key steps backward
   (e.key.toLowerCase() === 'f' && !e.repeat) && animTimeline.setPlaybackRate(7); // hold 'f' to increase playback rate (fast-forward)
   (e.key.toLowerCase() === 's' && !e.repeat) && animTimeline.toggleSkipping(); // 's' to toggle skipping
+  (e.key.toLowerCase() === ' ' && !e.repeat) && animTimeline.togglePause(); // ' ' (Space) to pause or unpause
 });
 
 window.addEventListener('keyup', function(e) {
-  e.key === 'f' && animTimeline.setPlaybackRate(1); // release 'f' to set playback rate back to 1 (stop fast-forwrding)
+  e.key === 'f' && animTimeline.setPlaybackRate(1); // release 'f' to set playback rate back to 1 (stop fast-forwarding)
 });
 
 // animTimeline.skipTo('skip to');
