@@ -29,8 +29,6 @@ export class AnimSequence {
 
   getDescription() { return this.description; }
   getTag() { return this.tag; }
-  shouldContinueF() { return this.continueNext; }
-  shouldContinueB() { return this.continuePrev; }
   
   setDescription(description) { this.description = description; }
   setTag(tag) { this.tag = tag; }
@@ -88,9 +86,5 @@ export class AnimSequence {
       // an animation "belongs" to this sequence if its ids match
       if (Number.parseInt(allAnimations[i].timelineID) === this.timelineID && Number.parseInt(allAnimations[i].sequenceID) === this.id) { allAnimations[i].finish(); }
     }
-  }
-
-  printDesc() {
-    console.log(this.description);
   }
 }
