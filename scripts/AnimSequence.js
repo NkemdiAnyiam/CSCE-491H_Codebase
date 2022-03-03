@@ -5,6 +5,7 @@ export class AnimSequence {
   static id = 0;
 
   timelineID; // set to match the id of the AnimTimeline to which it belongs
+  parentTimeline; // pointer to parent AnimTimeline
   description = '<blank sequence description>';
   tag = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   animBlocks = []; // array of animBlocks
@@ -37,7 +38,8 @@ export class AnimSequence {
     this.timelineID = id;
     this.animBlocks.forEach(animBlock => {
       animBlock.setID(this.id, this.timelineID);
-      animBlock.playbackRate = this.playbackRate;
+      animBlock.parentTimeline = this.parentTimeline;
+      animBlock.parentSequence = this;
     });
   }
 
@@ -77,10 +79,8 @@ export class AnimSequence {
     return Promise.resolve(this.continuePrev);
   }
 
-  // tells every animBlock here to briefly allow instantaneous animation
-  fireSkipSignal() {
-    this.animBlocks.forEach(animBlock => animBlock.handleSkipSignal());
-
+  // used to skip currently running animation so that they don't run at regular speed while using skipping
+  skipCurrentAnimations() {
     // get all currently running animations (if animations are curretnly running, we need to force them to finish)
     const allAnimations = document.getAnimations();
     // an animation "belongs" to this sequence if its sequence id matches

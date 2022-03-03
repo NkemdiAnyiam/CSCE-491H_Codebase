@@ -37,7 +37,7 @@ export class AnimTimeline {
 
   addOneSequence(animSequenceOrData) {
     if (animSequenceOrData instanceof AnimSequence) {
-      animSequenceOrData.playbackRate = this.playbackRate;
+      animSequenceOrData.parentTimeline = this;
       animSequenceOrData.setID(this.id);
       this.animSequences.push(animSequenceOrData);
     }
@@ -45,7 +45,7 @@ export class AnimTimeline {
       const newAnimSequence = new AnimSequence();
       if (animSequenceOrData[0] instanceof Array) { newAnimSequence.addManyBlocks(animSequenceOrData); }
       else { newAnimSequence.addOneBlock(animSequenceOrData); }
-      newAnimSequence.playbackRate = this.playbackRate;
+      newAnimSequence.parentTimeline = this;
       newAnimSequence.setID(this.id);
       this.animSequences.push(newAnimSequence);
     }
@@ -58,7 +58,7 @@ export class AnimTimeline {
 
   setPlaybackRate(rate) {
     this.playbackRate.value = rate;
-    this.fireRateSignal(rate);
+    this.updateCurrentAnimationsRates(rate);
   }
   getPlaybackRate() { return this.playbackRate.value; }
 
@@ -101,7 +101,7 @@ export class AnimTimeline {
 
     if (this.debugMode) { console.log(`-->> ${this.animSequences[this.stepNum].getDescription()}`); }
 
-    if (this.isSkipping || this.usingSkipTo) { this.fireSkipSignal(); }
+    if (this.isSkipping || this.usingSkipTo) { this.skipCurrentAnimations(); }
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].play() // wait for the current AnimSequence to finish all of its animations
@@ -119,7 +119,7 @@ export class AnimTimeline {
 
     if (this.debugMode) { console.log(`<<-- ${this.animSequences[this.stepNum].getDescription()}`); }
 
-    if (this.isSkipping || this.usingSkipTo) { this.fireSkipSignal(); }
+    if (this.isSkipping || this.usingSkipTo) { this.skipCurrentAnimations(); }
 
     return new Promise(resolve => {
       this.animSequences[this.stepNum].rewind()
@@ -158,15 +158,15 @@ export class AnimTimeline {
   toggleSkipping(isSkipping) {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping) { this.fireSkipSignal(); }
+    if (this.isSkipping && this.isStepping) { this.skipCurrentAnimations(); }
     return this.isSkipping;
   }
 
   // tells the current AnimSequence to instantly finish its animations
-  fireSkipSignal() { this.animSequences[this.stepNum].fireSkipSignal(); }
+  skipCurrentAnimations() { this.animSequences[this.stepNum].skipCurrentAnimations(); }
 
-  // sets the playbacks of all currently running animations that belong to this timeline
-  fireRateSignal(rate) {
+  // used to set playback rate of currently running animations so that they don't unintuitively run at regular speed
+  updateCurrentAnimationsRates(rate) {
     // get all currently running animations
     const allAnimations = document.getAnimations();
     // an animation "belongs" to this timeline if its timeline id matches

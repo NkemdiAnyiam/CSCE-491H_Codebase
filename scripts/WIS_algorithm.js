@@ -1017,21 +1017,9 @@ const forwardButton = document.querySelector('.box--forward');
 const backwardButton = document.querySelector('.box--backward');
 forwardButton.addEventListener('click', () => animTimeline.step('forward'));
 backwardButton.addEventListener('click', () => animTimeline.step('backward'));
+window.addEventListener('keydown', e => e.key === 'ArrowRight' && animTimeline.step('forward') );
+window.addEventListener('keydown', e => e.key === 'ArrowLeft' && animTimeline.step('backward') );
 
-const toggleSkipping = function(e) {
-  if (e.key.toLowerCase() === 's' && !e.repeat) {
-    animTimeline.toggleSkipping();
-  }
-};
-
-// const fastForward = function(e) {
-//   if (e.key.toLowerCase() === 'f' && !e.repeat) {
-//     animTimeline.fireRateSignal(7);
-//     intervalID  = setInterval(() => {
-//       animTimeline.fireRateSignal(7);
-//     }, 30);
-//   }
-// };
 
 const fastForward = function(e) {
   if (e.key.toLowerCase() === 'f' && !e.repeat) {
@@ -1039,24 +1027,21 @@ const fastForward = function(e) {
   }
 }
 
-// const stopFastForward = function(e) {
-//   if (e.key.toLowerCase() === 'f') {
-//     clearInterval(intervalID);
-//     animTimeline.fireRateSignal(1);
-//   }
-// };
-
 const stopFastForward = function(e) {
   if (e.key.toLowerCase() === 'f') {
     animTimeline.setPlaybackRate(1);
   }
 };
 
-window.addEventListener('keydown', toggleSkipping);
+const toggleSkipping = function(e) {
+  if (e.key.toLowerCase() === 's' && !e.repeat) {
+    animTimeline.toggleSkipping();
+  }
+};
+
 window.addEventListener('keydown', fastForward);
 window.addEventListener('keyup', stopFastForward);
-window.addEventListener('keydown', e => e.key === 'ArrowRight' && animTimeline.step('forward') );
-window.addEventListener('keydown', e => e.key === 'ArrowLeft' && animTimeline.step('backward') );
+window.addEventListener('keydown', toggleSkipping);
 
 // animTimeline.skipTo('skip to');
 // animTimeline.skipTo('focus comp 2');

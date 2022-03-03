@@ -19,7 +19,6 @@ export class AnimBlock {
   static isEntering(animName) { return AnimBlock.enteringList.includes(animName); }
   static isTranslating(animName) { return AnimBlock.translatingList.includes(animName); }
   static isBackward(animName) { return animName.startsWith('undo--'); }
-  static skipDuration = 50; // see handleSkipSignal()
 
   sequenceID; // set to match the id of the parent AnimSequence
   timelineID; // set to match the id of the parent AnimTimeline
@@ -71,15 +70,17 @@ export class AnimBlock {
     // set the keyframes for the animation
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
-    animation.updatePlaybackRate(this.playbackRate.value);
+    // set playback rate
+    animation.updatePlaybackRate(this.parentTimeline.playbackRate.value);
 
     if (isEntering) {
       this.domElem.classList.remove('hidden');
       this.domElem.style.removeProperty('opacity');
       this.domElem.style.removeProperty('clip-path');
     }
+    
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
-    this.shouldSkip ? animation.finish() : animation.play();
+    this.parentTimeline.isSkipping ? animation.finish() : animation.play();
 
     // return Promise that fulfills when the animation is completed
     return animation.finished.then(() => {
@@ -148,13 +149,6 @@ export class AnimBlock {
         composite: 'accumulate', // this is so that translations can stack
       }
     );
-  }
-  
-  // short burst of shouldSkip that, if done prior to the animation playing, allows the animation to be finished instantly
-  handleSkipSignal() {
-    this.shouldSkip = true;
-    wait(AnimBlock.skipDuration)
-    .then(() => this.shouldSkip = false);
   }
 
   applyOptions(options) {
@@ -245,6 +239,7 @@ AnimBlock['fade-out'] = AnimBlock['undo--fade-in'] = [
   {opacity: '0'}
 ];
 
+
 //*** Highlight
 AnimBlock['highlight'] = AnimBlock['undo--un-highlight'] = [
     {backgroundPositionX: '100%'},
@@ -255,51 +250,6 @@ AnimBlock['un-highlight'] = AnimBlock['undo--highlight'] = [
   {backgroundPositionX: '0%'},
   {backgroundPositionX: '100%'},
 ];
-
-// //*** Wipe
-// // To/From Right
-// AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
-//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-// ];
-
-// // To/From Left
-// AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
-//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
-// ];
-
-// // To/From Top
-// AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-// ];
-
-// // To/From Bottom
-// AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
-//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
-// ];
 
 
 //*** Wipe
@@ -346,3 +296,50 @@ AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
   {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
 ];
+
+
+// //*** Wipe
+// // To/From Right
+// AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
+//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+// ];
+
+// // To/From Left
+// AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
+//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+// ];
+
+// // To/From Top
+// AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+// ];
+
+// // To/From Bottom
+// AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
+//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+// ];
+
+// AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
+//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+// ];
+
