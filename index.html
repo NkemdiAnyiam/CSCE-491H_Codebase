@@ -281,33 +281,33 @@
                 </div>
 
                 <!-- Text box: show memoized algorithm -->
-            <div class="text-box-line-group text-box-line-group--show-memoized">
-              <div class="text-box text-box hidden">
-                <p class="text-box__paragraph text-box__paragraph">
-                  Our new <span class="M-related">memoized</span> weighted interval scheduling algorithm looks like this:
-                  <br />
-                  <span class="algorithm">
-                    <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span> {
+                <div class="text-box-line-group text-box-line-group--show-memoized">
+                  <div class="text-box text-box hidden">
+                    <p class="text-box__paragraph text-box__paragraph">
+                      Our new <span class="M-related">memoized</span> weighted interval scheduling algorithm looks like this:
                       <br />
-                      &emsp;if (<span class="M-related">M[<span class="SJ-related">j</span>]</span> = empty)
-                        <br />
-                          &emsp;&emsp;<span class="M-related">M[<span class="SJ-related">j</span>]</span> = max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
-                          + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
-                          <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
-                        <br />
-                      &emsp;return <span class="M-related">M[<span class="SJ-related">j</span>]</span>
+                      <span class="algorithm">
+                        <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span> {
+                          <br />
+                          &emsp;if (<span class="M-related">M[<span class="SJ-related">j</span>]</span> = empty)
+                            <br />
+                              &emsp;&emsp;<span class="M-related">M[<span class="SJ-related">j</span>]</span> = max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
+                              + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
+                              <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
+                            <br />
+                          &emsp;return <span class="M-related">M[<span class="SJ-related">j</span>]</span>
+                          <br />
+                        }
+                      </span>
                       <br />
-                    }
-                  </span>
-                  <br />
-                  Let's go ahead and call <span class="OPT-related">OPT(<span class="SJ-related fill--last-SJ-num">X</span>)</span>
-                  and find the maximum weight we can achieve from jobs A&mdash;<span class="fill--last-job-letter">X</span>.
-                </p>
-              </div>
-              <svg class="free-line">
-                <line class="free-line__line hidden" />
-              </svg>
-            </div>
+                      Let's go ahead and call <span class="OPT-related">OPT(<span class="SJ-related fill--last-SJ-num">X</span>)</span>
+                      and find the maximum weight we can achieve from jobs A&mdash;<span class="fill--last-job-letter">X</span>.
+                    </p>
+                  </div>
+                  <svg class="free-line">
+                    <line class="free-line__line hidden" />
+                  </svg>
+                </div>
               </div>
               <div class="array__array-block array__array-block--header">M[j]</div>
             </div>
@@ -654,8 +654,33 @@
     </div>
 
     <div class="boxes">
-      <div class="box box--backward"></div>
-      <div class="box box--forward"></div>
+      <div class="box box--backward pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+          <rect width="81.83" height="81.83" transform="translate(81.83 81.83) rotate(-180)" fill="none"/>
+          <polygon points="59.362 81.83 14.426 40.915 59.362 0 59.362 81.83"/>
+        </svg>
+      </div>
+
+      <div class="box box--pause pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+          <rect width="81.83" height="81.83" fill="none"/>
+          <path d="M13.753,0h17.43V81.83H13.753ZM49.974,81.83H67.4V0H49.974Z"/>
+        </svg>
+      </div>
+
+      <div class="box box--forward pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+          <rect width="81.83" height="81.83" fill="none"/>
+          <polygon points="22.468 81.83 67.404 40.915 22.468 0 22.468 81.83"/>
+        </svg>
+      </div>
+
+      <div class="box box--enable-skipping pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+          <rect width="81.83" height="81.83" transform="translate(81.83 81.83) rotate(-180)" fill="none"/>
+          <path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>
+        </svg>
+      </div>
     </div>
   </main>
 </body>

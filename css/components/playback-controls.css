@@ -13,12 +13,41 @@
   width: 8rem;
   height: 8rem;
   display: inline-block;
+  background-color: var(--color-gray-darker);
+  padding: 0.5rem;
+  box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
+  transform: scale(1);
+  transition: all 0.02s;
+}
+
+.box.pressed {
+  transform: scale(0.90);
+  box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
+  background-color: var(--color-red);
 }
 
 .box--forward {
-  background-color: var(--color-blue);
+  /* background-color: var(--color-yellow); */
+}
+
+.box--pause {
+  /* background-color: var(--color-green); */
 }
 
 .box--backward {
-  background-color: var(--color-red);
+  /* background-color: var(--color-red); */
+}
+
+.box--enable-skipping {
+  
+}
+
+.box svg {
+  width: 100%;
+  height: auto;
+  fill: var(--color-gray-lightest);
+}
+
+.box.pointer {
+  cursor: pointer;
 }
