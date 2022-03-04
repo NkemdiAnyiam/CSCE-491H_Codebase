@@ -65,6 +65,9 @@ export class AnimTimeline {
 
   getForwardStepper() { return () => this.step('forward'); }
   getBackwardStepper() { return () => this.step('backward'); }
+  getCurrDirection() { return this.currDirection; }
+  getIsStepping() { return this.isStepping; }
+  getIsPaused() { return this.isPaused; }
 
   // steps forward or backward and does error-checking
   async step(direction) {
