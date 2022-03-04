@@ -1064,7 +1064,7 @@ backwardButton.addEventListener('mousedown', (e) => {
     forwardButton.classList.remove('pointer');
     backwardButton.classList.remove('pointer');
     backwardButton.classList.add('pressed');
-    animTimeline.step('forward')
+    animTimeline.step('backward')
     .then(() => {
       forwardButton.classList.remove('pressed');
       forwardButton.classList.add('pointer');
