@@ -27,6 +27,7 @@
   --color-yellow-lightest: rgba(245, 245, 231, 0.904);
 
   --color-gray-darkest: black;
+  --color-gray-darker: #444;
   --color-gray: gray;
   --color-gray-light: #d5d5d5;
   --color-gray-lighter: #EFEFEF;
