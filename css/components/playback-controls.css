@@ -2,14 +2,17 @@
 /**************************** PLAYBACK CONTROLS ****************************/
 /*****************************************************************/
 
-.boxes {
+.playback-buttons {
   position: fixed;
   bottom: 0;
   padding: 2rem;
   background-color: var(--color-gray-lighter);
+
+  display: flex;
+  gap: 6rem;
 }
 
-.box {
+.playback-button {
   width: 8rem;
   height: 8rem;
   display: inline-block;
@@ -18,36 +21,45 @@
   box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
   transform: scale(1);
   transition: all 0.02s;
+
+  cursor: pointer;
 }
 
-.box.pressed {
+.playback-button--disabledPointerFromPause,
+.playback-button--disabledPointerFromStepping {
+  cursor: not-allowed;
+}
+
+.playback-button--pressed {
   transform: scale(0.90);
   box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
-  background-color: var(--color-red);
+  background-color: var(--color-red)!important;
 }
 
-.box--forward {
+.playback-button--disabledFromTimelineEdge,
+.playback-button--disabledFromPause {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.playback-button--forward {
   /* background-color: var(--color-yellow); */
 }
 
-.box--pause {
+.playback-button--pause {
   /* background-color: var(--color-green); */
 }
 
-.box--backward {
+.playback-button--backward {
   /* background-color: var(--color-red); */
 }
 
-.box--enable-skipping {
+.playback-button--enable-skipping {
   
 }
 
-.box svg {
+.playback-button__symbol {
   width: 100%;
   height: auto;
   fill: var(--color-gray-lightest);
-}
-
-.box.pointer {
-  cursor: pointer;
 }

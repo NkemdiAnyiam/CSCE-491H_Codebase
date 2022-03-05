@@ -1010,105 +1010,114 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
 
 
 
+// playback buttons
+const forwardButton = document.querySelector('.playback-button--forward');
+const backwardButton = document.querySelector('.playback-button--backward');
+const pauseButton = document.querySelector('.playback-button--pause');
+const skipButton = document.querySelector('.playback-button--enable-skipping');
+
+// playback button class constants
+const PRESSED = 'playback-button--pressed';
+const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
+const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge';
+const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
+
 // detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
 const isLeftClickOrKey = (event) => event.which === 1 || event.which === undefined;
 
 
-const forwardButton = document.querySelector('.box--forward');
-const backwardButton = document.querySelector('.box--backward');
-const pauseButton = document.querySelector('.box--pause');
-const skipButton = document.querySelector('.box--enable-skipping');
-// forwardButton.addEventListener('mousedown', (e) => isLeftClickOrKey(e) && animTimeline.step('forward'));
-forwardButton.addEventListener('mousedown', (e) => {
+forwardButton.addEventListener('mousedown', e => {
   if (isLeftClickOrKey(e)) {
-    if (animTimeline.getIsStepping() || animTimeline.getIsPaused()) { return; }
+    if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atEnd()) { return; }
+    
+    forwardButton.classList.add(PRESSED);
+    backwardButton.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
+    backwardButton.classList.add(DISABLED_FROM_STEPPING);
+    forwardButton.classList.add(DISABLED_FROM_STEPPING);
 
-    forwardButton.classList.remove('pointer');
-    backwardButton.classList.remove('pointer');
-    forwardButton.classList.add('pressed');
     animTimeline.step('forward')
     .then(() => {
-      forwardButton.classList.remove('pressed');
-      forwardButton.classList.add('pointer');
-      backwardButton.classList.remove('pressed');
-      backwardButton.classList.add('pointer');
+      forwardButton.classList.remove(PRESSED);
+      forwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      backwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
     });
-    // forwardButton.classList.remove('pointer');
-    // forwardButton.classList.add('pressed');
-    // animTimeline.step('forward')
-    // .then(() => {
-    //   forwardButton.classList.remove('pressed');
-    //   forwardButton.classList.add('pointer');
-    // })
-    // .catch((err) => {
-    //   if (err === 'Cannot step while playback is paused') {
-    //     if (!animTimeline.getIsStepping()) {
-    //       forwardButton.classList.remove('pressed');
-    //       // forwardButton.classList.add('pointer');
-    //     }
-    //   }
-    //   else if (err === 'Cannot step while already animating') {
-    //     if (animTimeline.currDirection === 'backward') {
-    //       forwardButton.classList.remove('pressed');
-    //     }
-    //   }
-    //   console.error(err);
-    // });
   }
 });
-// backwardButton.addEventListener('mousedown', (e) => isLeftClickOrKey(e) && animTimeline.step('backward'));
-backwardButton.addEventListener('mousedown', (e) => {
-  if (animTimeline.getIsStepping() || animTimeline.getIsPaused()) { return; }
 
+backwardButton.addEventListener('mousedown', e => {
   if (isLeftClickOrKey(e)) {
-    forwardButton.classList.remove('pointer');
-    backwardButton.classList.remove('pointer');
-    backwardButton.classList.add('pressed');
+    if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atBeginning()) { return; }
+
+    backwardButton.classList.add(PRESSED);
+    forwardButton.classList.remove(DISABLED_FROM_EDGE);
+    forwardButton.classList.add(DISABLED_FROM_STEPPING);
+    backwardButton.classList.add(DISABLED_FROM_STEPPING);
+
     animTimeline.step('backward')
     .then(() => {
-      forwardButton.classList.remove('pressed');
-      forwardButton.classList.add('pointer');
-      backwardButton.classList.remove('pressed');
-      backwardButton.classList.add('pointer');
+      backwardButton.classList.remove(PRESSED);
+      forwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      backwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
     });
   }
 });
-// pauseButton.addEventListener('mousedown', (e) => isLeftClickOrKey(e) && animTimeline.togglePause());
-pauseButton.addEventListener('mousedown', (e) => {
+
+pauseButton.addEventListener('mousedown', e => {
   if (isLeftClickOrKey(e)) {
-    if (animTimeline.togglePause() === true) {
-      pauseButton.classList.add('pressed');
-      forwardButton.classList.remove('pointer');
-      backwardButton.classList.remove('pointer');
+    if (animTimeline.togglePause()) {
+      pauseButton.classList.add(PRESSED);
+      forwardButton.classList.add(DISABLED_FROM_PAUSE);
+      backwardButton.classList.add(DISABLED_FROM_PAUSE);
     }
     else {
-      !animTimeline.getIsStepping() && forwardButton.classList.add('pointer');
-      !animTimeline.getIsStepping() && backwardButton.classList.add('pointer');
-      pauseButton.classList.remove('pressed');
-    }
-  }
-});
-skipButton.addEventListener('mousedown', (e) => {
-  if (isLeftClickOrKey(e)) {
-    if (animTimeline.toggleSkipping() === true) {
-      skipButton.classList.add('pressed');
-    }
-    else {
-      skipButton.classList.remove('pressed');
+      pauseButton.classList.remove(PRESSED);
+      forwardButton.classList.remove(DISABLED_FROM_PAUSE);
+      backwardButton.classList.remove(DISABLED_FROM_PAUSE);
     }
   }
 });
 
-window.addEventListener('keydown', function(e) {
-  e.key === 'ArrowRight' && forwardButton.dispatchEvent(new Event('mousedown')); // right arrow key steps forward
-  e.key === 'ArrowLeft' && backwardButton.dispatchEvent(new Event('mousedown')); // left arrow key steps backward
-  (e.key.toLowerCase() === 'f' && !e.repeat) && animTimeline.setPlaybackRate(7); // hold 'f' to increase playback rate (fast-forward)
-  (e.key.toLowerCase() === 's' && !e.repeat) && skipButton.dispatchEvent(new Event('mousedown')); // 's' to toggle skipping
-  (e.key.toLowerCase() === ' ' && !e.repeat) && pauseButton.dispatchEvent(new Event('mousedown')); // ' ' (Space) to pause or unpause
+skipButton.addEventListener('mousedown', e => {
+  if (isLeftClickOrKey(e)) {
+    if (animTimeline.toggleSkipping())
+      { skipButton.classList.add(PRESSED); }
+    else
+      { skipButton.classList.remove(PRESSED); }
+  }
 });
 
-window.addEventListener('keyup', function(e) {
-  e.key === 'f' && animTimeline.setPlaybackRate(1); // release 'f' to set playback rate back to 1 (stop fast-forwarding)
+// map keys to playback controls
+window.addEventListener('keydown', e => {
+  // right arrow key steps forward
+  if (e.key === 'ArrowRight') {
+    e.preventDefault(); // prevent from moving page right
+    forwardButton.dispatchEvent(new Event('mousedown'));
+  }
+
+  // left arrow key steps backward
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault(); // prevent from moving page left
+    backwardButton.dispatchEvent(new Event('mousedown'));
+  }
+
+  // hold 'f' to increase playback rate (fast-forward)
+  if (e.key.toLowerCase() === 'f' && !e.repeat) { animTimeline.setPlaybackRate(7); }
+
+  // 's' to toggle skipping
+  if (e.key.toLowerCase() === 's' && !e.repeat) { skipButton.dispatchEvent(new Event('mousedown')); }
+
+  // ' ' (Space) to pause or unpause
+  if (e.key.toLowerCase() === ' ' && !e.repeat) {
+    e.preventDefault(); // prevent from moving page down
+    pauseButton.dispatchEvent(new Event('mousedown'));
+  }
+});
+
+window.addEventListener('keyup', e => {
+  // release 'f' to set playback rate back to 1 (stop fast-forwarding)
+  e.key === 'f' && animTimeline.setPlaybackRate(1);
 });
 
 // animTimeline.skipTo('skip to');
@@ -1120,3 +1129,17 @@ window.addEventListener('keyup', function(e) {
 // animTimeline.skipTo('replace formula container contents');
 // animTimeline.skipTo('explain naive');
 // animTimeline.skipTo('introduce memoization');
+
+const skipTo = (tag) => {
+  animTimeline.skipTo(tag)
+  .then(() => {
+    if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+    else { backwardButton.classList.remove(DISABLED_FROM_EDGE); }
+
+    if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+    else { forwardButton.classList.remove(DISABLED_FROM_EDGE); }
+  })
+};
+
+
+skipTo('start');
