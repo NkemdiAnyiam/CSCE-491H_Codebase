@@ -180,6 +180,7 @@ export class AnimTimeline {
     }
     else {
       this.doForCurrentAnimations((animation) => animation.play());
+      if (this.isSkipping) { this.skipCurrentAnimations(); }
       this.isPaused = false;
     }
     return this.isPaused;
