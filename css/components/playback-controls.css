@@ -37,7 +37,8 @@
 }
 
 .playback-button--disabledFromTimelineEdge,
-.playback-button--disabledFromPause {
+.playback-button--disabledFromPause,
+.playback-button--disabledFromStepping {
   background-color: var(--color-gray);
   cursor: not-allowed;
 }

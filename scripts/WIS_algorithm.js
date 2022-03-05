@@ -1019,7 +1019,8 @@ const skipButton = document.querySelector('.playback-button--enable-skipping');
 // playback button class constants
 const PRESSED = 'playback-button--pressed';
 const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
-const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge';
+const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStepping'; // disables pointer
+const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
 const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 
 // detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
@@ -1033,12 +1034,12 @@ forwardButton.addEventListener('mousedown', e => {
     forwardButton.classList.add(PRESSED);
     backwardButton.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
     backwardButton.classList.add(DISABLED_FROM_STEPPING);
-    forwardButton.classList.add(DISABLED_FROM_STEPPING);
+    forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
 
     animTimeline.step('forward')
     .then(() => {
       forwardButton.classList.remove(PRESSED);
-      forwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
       backwardButton.classList.remove(DISABLED_FROM_STEPPING);
       if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
     });
@@ -1052,13 +1053,13 @@ backwardButton.addEventListener('mousedown', e => {
     backwardButton.classList.add(PRESSED);
     forwardButton.classList.remove(DISABLED_FROM_EDGE);
     forwardButton.classList.add(DISABLED_FROM_STEPPING);
-    backwardButton.classList.add(DISABLED_FROM_STEPPING);
+    backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
 
     animTimeline.step('backward')
     .then(() => {
       backwardButton.classList.remove(PRESSED);
       forwardButton.classList.remove(DISABLED_FROM_STEPPING);
-      backwardButton.classList.remove(DISABLED_FROM_STEPPING);
+      backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
       if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
     });
   }
@@ -1130,6 +1131,7 @@ window.addEventListener('keyup', e => {
 // animTimeline.skipTo('explain naive');
 // animTimeline.skipTo('introduce memoization');
 
+// skips to tag and checks to see if DISABLED_FROM_EDGE should be added or removed from forward/backward buttons
 const skipTo = (tag) => {
   animTimeline.skipTo(tag)
   .then(() => {
@@ -1141,5 +1143,4 @@ const skipTo = (tag) => {
   })
 };
 
-
-skipTo('start');
+// skipTo('start');
