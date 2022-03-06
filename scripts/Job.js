@@ -47,6 +47,12 @@ export class Job {
     jobBarEl.dataset.sjnum = `${this._sortedJobNum}`;
     jobBarEl.dataset.compatiblejobnum = `${this._compatibleJobNum}`;
     jobBarEl.dataset.start = this._start;
+    jobBarEl.title = `Job ${this._jobLetter}:
+      start = ${this._start}
+      finish = ${this._finish}
+      weight = ${this._weight}
+      j = ${this._sortedJobNum}
+      cj = ${this._compatibleJobNum}`;
     jobBarEl.style.width = `calc(${18 * this.getDuration()}rem + 1px)`;
     this._jobBarEl = jobBarEl;
     return jobBarEl;
