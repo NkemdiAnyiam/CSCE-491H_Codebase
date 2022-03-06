@@ -1014,10 +1014,12 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
 const forwardButton = document.querySelector('.playback-button--forward');
 const backwardButton = document.querySelector('.playback-button--backward');
 const pauseButton = document.querySelector('.playback-button--pause');
+const fastForwardButton = document.querySelector('.playback-button--fast-forward');
 const skipButton = document.querySelector('.playback-button--enable-skipping');
 
 // playback button class constants
 const PRESSED = 'playback-button--pressed';
+const PRESSED2 = 'playback-button--pressed--alt-color';
 const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
 const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStepping'; // disables pointer
 const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
@@ -1025,6 +1027,9 @@ const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 
 // detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
 const isLeftClickOrKey = (event) => event.which === 1 || event.which === undefined;
+
+let holdingFastKey = false;
+let holdingFastButton = false;
 
 
 forwardButton.addEventListener('mousedown', e => {
@@ -1089,6 +1094,21 @@ skipButton.addEventListener('mousedown', e => {
   }
 });
 
+fastForwardButton.addEventListener('mousedown', e => {
+  if (isLeftClickOrKey(e)) {
+    e.which === 1 && (holdingFastButton = true);
+    fastForwardButton.classList.add(PRESSED2);
+    animTimeline.setPlaybackRate(7);
+    document.addEventListener('mouseup', () => {
+      holdingFastButton = false;
+      if (!(holdingFastButton || holdingFastKey)) {
+        fastForwardButton.classList.remove(PRESSED2);
+        animTimeline.setPlaybackRate(1);
+      }
+    }, {once: true});
+  }
+})
+
 // map keys to playback controls
 window.addEventListener('keydown', e => {
   // right arrow key steps forward
@@ -1104,7 +1124,10 @@ window.addEventListener('keydown', e => {
   }
 
   // hold 'f' to increase playback rate (fast-forward)
-  if (e.key.toLowerCase() === 'f' && !e.repeat) { animTimeline.setPlaybackRate(7); }
+  if (e.key.toLowerCase() === 'f' && !e.repeat) {
+    holdingFastKey = true;
+    fastForwardButton.dispatchEvent(new Event('mousedown'));
+  }
 
   // 's' to toggle skipping
   if (e.key.toLowerCase() === 's' && !e.repeat) { skipButton.dispatchEvent(new Event('mousedown')); }
@@ -1118,7 +1141,14 @@ window.addEventListener('keydown', e => {
 
 window.addEventListener('keyup', e => {
   // release 'f' to set playback rate back to 1 (stop fast-forwarding)
-  e.key === 'f' && animTimeline.setPlaybackRate(1);
+  if (e.key === 'f') {
+    holdingFastKey = false;
+    if (!(holdingFastButton || holdingFastKey))
+    {
+      fastForwardButton.classList.remove(PRESSED2);
+      animTimeline.setPlaybackRate(1);
+    }
+  }
 });
 
 // animTimeline.skipTo('skip to');
