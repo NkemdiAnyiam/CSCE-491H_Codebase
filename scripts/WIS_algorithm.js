@@ -33,7 +33,8 @@ jobScheduler.initializeM();
 
 jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards'));
 // jobScheduler.print();
-jobScheduler.setUpScene();
+jobScheduler.setUpScene(jobsUnsorted);
+const jobsSorted = jobScheduler.getJobs();
 
 (function() {
   const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
@@ -52,7 +53,7 @@ const animTimeline = new AnimTimeline(null, {debugMode: true});
 
 const timeGraphEl = document.querySelector('.time-graph');
 const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
-const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
+// const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
 
 
 const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box');
@@ -67,7 +68,7 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
   const animSequence = new AnimSequence();
   animSequence.setDescription(`Describe that we're about to move bars onto graph`);
   animSequence.addManyBlocks([
-    [ 'line', freeLine_placeBars, 'enter-wipe-from-bottom', null, [0.5, 1], jobBarEls[0], [0.5, 0] ],
+    [ 'line', freeLine_placeBars, 'enter-wipe-from-bottom', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0] ],
     [ 'std', textbox_placeBars, 'fade-in', {blocksPrev: false} ],
   ]);
   animTimeline.addOneSequence(animSequence);
@@ -77,8 +78,9 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
 {
   const animSequence = new AnimSequence();
   animSequence.setDescription('Move job bars onto time graph in unsorted order');
-  animSequence.addOneBlock(new AnimBlockLine(freeLine_placeBars, 'exit-wipe-to-top', null, [0.5, 1], jobBarEls[0], [0.5, 0], {blocksNext: false}));
-  jobBarEls.forEach((jobBarEl) => {
+  animSequence.addOneBlock(new AnimBlockLine(freeLine_placeBars, 'exit-wipe-to-top', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0], {blocksNext: false}));
+  jobsUnsorted.forEach((job) => {
+    const jobBarEl = job.getJobBar();
     // set up options for moving job bars to correct location
     const jobLetter = jobBarEl.dataset.jobletter;
     const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"]  .time-graph__cell--${jobBarEl.dataset.start}`);
@@ -102,7 +104,8 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
     [ 'std', textP_placeBars_order, 'fade-in', {duration: 250} ],
   ]);
   const jobBarsInitialArea = document.querySelector('.time-graph__job-bars');
-  jobBarEls.forEach((jobBarEl, i) => {
+  jobsUnsorted.forEach((job) => {
+    const jobBarEl = job.getJobBar();
     const options = {blocksPrev: false, blocksNext: false, translateOptions: { targetElem: jobBarsInitialArea } };
     animSequence.addOneBlock(new AnimBlock(jobBarEl, 'translate', options));
   });
@@ -115,7 +118,8 @@ const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__para
 {
   const animSequence = new AnimSequence();
   animSequence.setDescription('Move job bars back onto the time graph (sorted by finish time) and update time graph row headers');
-  jobBarEls.forEach((jobBarEl) => {
+  jobsSorted.forEach((job) => {
+    const jobBarEl = job.getJobBar();
     // set up options for moving job bars to correct location
     const jobLetter = jobBarEl.dataset.jobletter;
     const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`);
@@ -191,7 +195,8 @@ const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph
 const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
 const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
 const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
-jobBarEls.forEach((jobBarEl) => {
+jobsSorted.forEach((job) => {
+  const jobBarEl = job.getJobBar();
   // get j array block corresponding to current job bar
   const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
   // Find job bar corresponding to the job that's compatible with the current job (if it exists)

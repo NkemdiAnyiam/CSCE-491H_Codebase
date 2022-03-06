@@ -181,7 +181,7 @@ export class JobScheduler {
     }
   }
 
-  setUpScene() {
+  setUpScene(jobsUnsorted) {
     // Set up row template and time row to make sure they have proper number of cells
     const templateRowId = 'time-graph__row-template';
     const resultRowTemplateEl = document.getElementById(templateRowId);
@@ -196,7 +196,7 @@ export class JobScheduler {
     // Generate time graph rows, and job bars
     const jobBarsEl = document.querySelector('.time-graph__job-bars');
 
-    this._jobs.forEach((job, i) => {
+    jobsUnsorted.forEach((job, i) => {
       // job bar
       const jobEl = job.generateJobBar();
       jobEl.style.left = `${i*10}rem`;
@@ -211,15 +211,15 @@ export class JobScheduler {
       const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
       const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
 
-      const sortedJobLetter = job.getJobLetter();
-      const unsortedJobLetter = String.fromCharCode(i + 65);
+      const sortedJobLetter = this._jobs[i].getJobLetter(); // letters but ordered with respect to sorted job numbers
+      const unsortedJobLetter = String.fromCharCode(i + 65); // in order of A, B, C, D, etc.
 
       timeGraphRow.classList.add(`time-graph__row--${i}`);
       timeGraphRow.dataset.jobletterunsorted = unsortedJobLetter;
-      timeGraphRow.dataset.joblettersorted = sortedJobLetter;
-      rowSJNum.textContent = `j=${i+1}`;
       rowLetter_unsorted.textContent = `Job ${unsortedJobLetter}`;
+      timeGraphRow.dataset.joblettersorted = sortedJobLetter;
       rowLetter_sorted.textContent = `Job ${sortedJobLetter}`;
+      rowSJNum.textContent = `j=${i+1}`;
 
       timesRow.before(timeGraphRow); // inserting new rows above the times row
     });
