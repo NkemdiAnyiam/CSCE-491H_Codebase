@@ -178,7 +178,7 @@ export class AnimBlock {
       unitsX = 'px',
       unitsY = 'px',
       unitsXY, // overrides unitsX and unitsY
-      targetElem,
+      targetElem, // if specified, translations will be with respect to this target element
       alignmentY = 'top', // determines vertical alignment with target element
       alignmentX = 'left', // determines horizontal alignment with target element
       offsetX = 0, // determines offset to apply to the respective positional property
