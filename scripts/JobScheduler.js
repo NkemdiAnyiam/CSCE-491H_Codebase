@@ -129,7 +129,8 @@ const setJobCardData = (jobCardEl, cardData) => {
 
 
 export class JobScheduler {
-  _maxTime = 0;
+  _maxTime = 11;
+  _greatestTime = 0;
   _c = [];
   _M = [];
   static nextCardNum = 1;
@@ -140,13 +141,14 @@ export class JobScheduler {
   }
 
   getNumJobs() { return this._n_jobs; }
-  getMaxTime() { return this._maxTime; }
+  getGreatestTime() { return this._greatestTime; }
   getJobs() { return [...this._jobs]; }
 
   addJob(job) { 
+    if (job.getFinish() > this._maxTime) { throw new Error(`Error: Invalid job finish time "${job.getFinish()}". Finish time must be < ${this._maxTime}`); }
     this._jobs.push(job);
     this._n_jobs++;
-    this._maxTime = Math.max(this._maxTime, job.getFinish());
+    this._greatestTime = Math.max(this._greatestTime, job.getFinish());
   }
 
   addJobs(jobs) {
@@ -188,7 +190,7 @@ export class JobScheduler {
     const rowTemplateRow = resultRowTemplateEl.content.querySelector('.time-graph__row');
     const timesRow = document.querySelector('.time-graph__row--times');
 
-    for (let i = 0; i <= Math.ceil(this.getMaxTime()); ++i) {
+    for (let i = 0; i <= Math.ceil(this._maxTime); ++i) {
       rowTemplateRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"></div>`);
       timesRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`);
     }
