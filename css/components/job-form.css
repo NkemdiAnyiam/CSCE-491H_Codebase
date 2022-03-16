@@ -14,7 +14,7 @@
 }
 
 .job-form__field {
-  width: 70rem;
+  width: 65rem;
   height: 20rem;
 
   display: flex;
@@ -23,21 +23,24 @@
   gap: 2rem;
 }
 
-.job-form__field .job-form__label {
+.job-form__label {
   width: 100%;
 
   display: flex;
   align-items: center;
-  gap: 10rem;
+  
+  padding: 1rem 3rem;
+  background-color: var(--color-blue-lightest);
 }
 
 .job-form__label .job-form__input {
   display: inline-block;
   font-family: inherit;
   margin-left: auto;
+  background-color: var(--color-blue-light);
 }
 
-input[type=number]::-webkit-inner-spin-button {
+.job-form__input[type=number]::-webkit-inner-spin-button {
   opacity: 1;
 }
 
@@ -45,6 +48,8 @@ input[type=number]::-webkit-inner-spin-button {
   color: var(--color-gray-lightest);
   background-color: var(--color-red-dark);
   padding: 1rem 3rem;
+  font-size: 3.6rem;
+  line-height: 1.2;
 }
 
 .job-form__error:empty {

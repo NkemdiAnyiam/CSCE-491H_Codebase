@@ -25,28 +25,33 @@
       <div class="main-menu">
         <form action="#" method="post" class="job-form" novalidate>
           <div class="job-form__jobs-inputs">
+
             <fieldset class="job-form__inputs-group">
               <div class="job-form__field">
                 <label class="job-form__label">
-                  Enter Start Time: <input type="number"class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
+                  <span class="job-form__label-text">Enter Start Time:</span>
+                  <input type="number"class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
                 </label>
                 <span class="job-form__error job-form__error--startTime"></span>
               </div>
 
               <div class="job-form__field">
                 <label class="job-form__label">
-                  Enter Finish Time: <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
+                  <span class="job-form__label-text">Enter Finish Time:</span>
+                  <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
                 </label>
                 <span class="job-form__error job-form__error--finishTime"></span>
               </div>
 
               <div class="job-form__field">
                 <label class="job-form__label">
-                  Enter Weight: <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
+                  <span class="job-form__label-text">Enter Weight:</span>
+                  <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
                 </label>
                 <span class="job-form__error job-form__error--weight"></span>
               </div>
             </fieldset>
+            
           </div>
           <button class="job-form__submit">Generate</button>
         </form>
