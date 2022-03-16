@@ -6,7 +6,18 @@
 
 }
 
+.main-menu {
+  margin-top: 10rem;
+
+  display: flex;
+  justify-content: center;
+}
+
 .container {
+  padding: 5rem;
+}
+
+.visualization {
   display: grid;
   grid-template-columns: 250rem auto;
   grid-template-areas:

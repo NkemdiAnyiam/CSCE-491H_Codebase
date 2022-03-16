@@ -1,0 +1,57 @@
+/*****************************************************************/
+/**************************** JOB FORM ****************************/
+/*****************************************************************/
+
+.job-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+
+.job-form__inputs-group {
+  display: flex;
+  gap: 10rem;
+}
+
+.job-form__field {
+  width: 70rem;
+  height: 20rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2rem;
+}
+
+.job-form__field .job-form__label {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 10rem;
+}
+
+.job-form__label .job-form__input {
+  display: inline-block;
+  font-family: inherit;
+  margin-left: auto;
+}
+
+input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
+.job-form__error {
+  color: var(--color-gray-lightest);
+  background-color: var(--color-red-dark);
+  padding: 1rem 3rem;
+}
+
+.job-form__error:empty {
+  display: none;
+}
+
+.job-form__submit {
+  width: min-content;
+}
+

@@ -1,6 +1,3 @@
-//TODO: move wait() to a utility file
-const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
-
 export class AnimBlock {
   static id = 0;
 
