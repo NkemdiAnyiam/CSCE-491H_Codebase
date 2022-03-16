@@ -6,15 +6,15 @@
 
 }
 
+.container {
+  padding: 5rem;
+}
+
 .main-menu {
   margin-top: 10rem;
 
   display: flex;
   justify-content: center;
-}
-
-.container {
-  padding: 5rem;
 }
 
 .visualization {
