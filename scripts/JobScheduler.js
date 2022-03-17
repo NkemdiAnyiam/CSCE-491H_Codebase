@@ -9,7 +9,7 @@ export class TreeNode {
 
 export class JobScheduler {
   _maxTime = 11;
-  _greatestTime = 0;
+  _greatestTime = -1;
   _c = [];
   _M = [];
   _treeRootNode = new TreeNode();
@@ -26,6 +26,7 @@ export class JobScheduler {
   getMaxTime() { return this._maxTime; }
   getGreatestTime() { return this._greatestTime; }
   getJobs() { return [...this._jobs]; }
+  getJobsUnsorted() { return [...this._jobsUnsorted]; }
   getC(index) { return this._c[index]; }
   getM(index) { return this._M[index]; }
 
@@ -41,41 +42,48 @@ export class JobScheduler {
     jobs.forEach(job => this.addJob(job));
   }
 
+  performWISAlgorithm() {
+    this._jobsUnsorted = this._jobs;
+    this._sortJobsByFinish();
+    this._setCompatibleJobNums();
+    this._initializeM();
+
+    this._computeOPT(this.getNumJobs(), null);
+  }
+
   jobFinishComparator(job1, job2) {
     if (job1.getFinish() < job2.getFinish()) { return -1; }
     else { return 1; }
   }
 
-  sortJobsByFinish() {
+  _sortJobsByFinish() {
     this._jobs.sort(this.jobFinishComparator);
-    this._jobs.forEach((job, index) => {
-      job.setSortedJobNum(index + 1);
-    });
+    this._jobs.forEach((job, index) => job.setSortedJobNum(index + 1));
   }
 
-  setCompatibleJobNums() {
-    this._c.push(null); // TODO: potentially clear before starting
+  _setCompatibleJobNums() {
+    this._c.push(null);
     this._jobs.forEach(job => {
       const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
       this._c.push(compatibleJobNum);
     });
   }
 
-  initializeM() {
+  _initializeM() {
     this._M[0] = 0;
     for (let i = 1; i <= this._n_jobs; ++i) {
       this._M[i] = null;
     }
   }
 
-  computeOPT(j, parentNode) {
+  _computeOPT(j, parentNode) {
     const treeNode = parentNode ? new TreeNode() : this._treeRootNode;
     parentNode?.addChild(treeNode);
 
     if (this._M[j] === null) {
 
-      const computationResult1 = this._jobs[j-1].getWeight() + this.computeOPT(this._c[j], treeNode); // assuming this job is part of optimal set
-      const computationResult2 = this.computeOPT(j - 1, treeNode); // assuming this job is NOT part of optimal set
+      const computationResult1 = this._jobs[j-1].getWeight() + this._computeOPT(this._c[j], treeNode); // assuming this job is part of optimal set
+      const computationResult2 = this._computeOPT(j - 1, treeNode); // assuming this job is NOT part of optimal set
 
       this._M[j] = Math.max(computationResult1, computationResult2); // choosing the best option between the 2 possibilities
 

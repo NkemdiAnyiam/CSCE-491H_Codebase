@@ -3,7 +3,7 @@ import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
 
 
-export const createForm = () => {
+export function createForm(maxNumJobs) {
   const jobFormEl = document.querySelector('.job-form');
   const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-inputs');
   const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
@@ -22,7 +22,7 @@ export const createForm = () => {
 
     ++numJobRows;
     
-    if (numJobRows === 8) { disableButton(addButton); }
+    if (numJobRows === maxNumJobs) { disableButton(addButton); }
 
     if (numJobRows === 2) {
       const disabledRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove.button-disabled');
@@ -109,11 +109,13 @@ export const createForm = () => {
     if (jobFormEl.checkValidity()) {
       const jobsUnsorted = [];
       jobFormRowTemplateEl.remove();
+      
       for (let i = 0; i < numJobRows; ++i) {
         const jobFormRowEl = jobFormRowsEl.children[i];
         const input_start = jobFormRowEl.querySelector('[name="startTime"]');
         const input_finish = jobFormRowEl.querySelector('[name="finishTime"]');
         const input_weight = jobFormRowEl.querySelector('[name="weight"]');
+
         jobsUnsorted.push(new Job(
           stoi(input_start.value),
           stoi(input_finish.value),
@@ -125,8 +127,8 @@ export const createForm = () => {
       jobFormEl.removeEventListener('click', removeJobRow);
       jobFormEl.removeEventListener('input', checkValidity);
       jobFormEl.removeEventListener('submit', submit);
-
       document.querySelector('.main-menu').remove();
+
       generateVisualization(jobsUnsorted);
     }
   };

@@ -1,357 +1,18 @@
-import { Job } from './Job.js';
-import { TreeNode, JobScheduler } from './JobScheduler.js';
+import { setupPlaybackControls } from './playbackControls.js';
+import { JobScheduler } from './JobScheduler.js';
+import { SceneCreator } from './SceneCreator.js';
 import { AnimBlock } from './AnimBlock.js';
 import { AnimBlockLine } from './AnimBlockLine.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 
-class SceneCreator {
-  nextCardNum = 1;
 
-  constructor(jobScheduler) {
-    this.jobScheduler = jobScheduler;
-  }
-
-  initialize() {
-    this.generateCardTree();
-  }
-
-  generateJobBar(job) {
-    const templateBarId = "time-graph__job-bar-template";
-    const resultBarTemplateEl = document.getElementById(templateBarId);
-    const cloneBar = document.importNode(resultBarTemplateEl.content, true);
-
-    const jobBarEl = cloneBar.querySelector('.time-graph__job-bar');
-    jobBarEl.textContent = `weight ${job.getWeight()}`;
-    jobBarEl.dataset.jobletter = job.getJobLetter();
-    jobBarEl.dataset.sjnum = `${job.getSortedJobNum()}`;
-    jobBarEl.dataset.compatiblejobnum = `${job.getCompatibleJobNum()}`;
-    jobBarEl.dataset.start = job.getStart();
-    jobBarEl.title = `Job ${job.getJobLetter()}:
-      start = ${job.getStart()}
-      finish = ${job.getFinish()}
-      weight = ${job.getWeight()}
-      j = ${job.getSortedJobNum()}
-      cj = ${job.getCompatibleJobNum()}`;
-    jobBarEl.style.width = `calc(${18 * job.getDuration()}rem + 1px)`;
-
-    job.setJobBar(jobBarEl);
-
-    return jobBarEl;
-  }
-
-  genNewJobStub(data) {
-    const {job, MEntry} = data;
-
-    const cardNum = this.nextCardNum++;
-    const SJNum = job?.getSortedJobNum() ?? 0;
-  
-    const templateCardId = "job-stub-template";
-    const resultCardTemplate = document.getElementById(templateCardId);
-    const cloneCard = document.importNode(resultCardTemplate.content, true);
-  
-    const jobCardEl = cloneCard.querySelector('.job-card');
-    const SJNumEls = cloneCard.querySelectorAll('.SJ-num');
-    const MEntryEl = cloneCard.querySelector('.M-entry');
-    const textParagraph2 = jobCardEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--2');
-  
-    if (SJNum > 0) {
-      textParagraph2.innerHTML =
-      `
-        The entry already exists, so we already know that the optimal weight from
-        the beginning through <span class="SJ-related">job ${SJNum}</span> is ${MEntry}.
-        Let's pass this back up the tree.
-      `;
-    }
-    else {
-      textParagraph2.innerHTML =
-      `
-        The entry already exists. Of course, there is no "<span class="SJ-related">job 0</span>";
-        this is the base case for <span class="SJ-related">j = 0</span>. 0 jobs means 0 weight.
-        Let's pass this back up the tree.
-      `;
-    }
-  
-    jobCardEl.dataset.cardnum = `${cardNum}`;
-    jobCardEl.dataset.sjnum = `${SJNum}`;
-    SJNumEls.forEach((el) => {
-      el.textContent = SJNum;
-    });
-    MEntryEl.textContent = MEntry;
-  
-    return jobCardEl;
-  }
-  
-  genNewJobCard(data) {
-    const templateCardId = "job-card-template";
-    const resultCardTemplate = document.getElementById(templateCardId);
-    const cloneCard = document.importNode(resultCardTemplate.content, true);
-  
-    const jobCardEl = cloneCard.querySelector('.job-card');
-
-    this.setJobCardData(jobCardEl, data);
-
-    return jobCardEl;
-  }
-  
-  setJobCardData(jobCardEl, data) {
-    const {
-      job,
-      computationResult1,
-      computationResult2,
-      MEntry: formulaResult,
-    } = data;
-
-    const SJNum = job.getSortedJobNum();
-    const weight = job.getWeight();
-    const cEntry = job.getCompatibleJobNum();
-    const nextSJNum = SJNum - 1;
-
-    const OPTResult1 = computationResult1 - weight;
-    const OPTResult2 = computationResult2 - weight;
-  
-    const cardNum = this.nextCardNum++;
-  
-    const jobCardContentEl = jobCardEl.querySelector('.job-card-content');
-  
-    const weightEl = jobCardContentEl.querySelector('.weight');
-    const cEntryEl = jobCardContentEl.querySelector('.c-entry');
-  
-    const nextSJNumEl = jobCardContentEl.querySelector('.next-SJ-num');
-  
-    jobCardContentEl.dataset.cardnum = `${cardNum}`;
-    jobCardEl.dataset.sjnum = `${SJNum}`;
-    weightEl.textContent = weight;
-    cEntryEl.textContent = cEntry;
-    nextSJNumEl.textContent = nextSJNum;
-  
-  
-    const OPTResult1El = jobCardContentEl.querySelector('.computation--1 .OPT-result');
-    const computationResult1El = jobCardContentEl.querySelector('.computation--1 .computation-result');
-  
-    OPTResult1El.textContent = OPTResult1;
-    computationResult1El.textContent = computationResult1;
-  
-  
-    const OPTResult2El = jobCardContentEl.querySelector('.computation--2 .OPT-result');
-    const computationResult2El = jobCardContentEl.querySelector('.computation--2 .computation-result');
-  
-    OPTResult2El.textContent = OPTResult2;
-    computationResult2El.textContent = computationResult2;
-  
-  
-    const formulaResultEl = jobCardContentEl.querySelector('.formula-result');
-    const MEntryEl = jobCardContentEl.querySelector('.M-entry');
-    formulaResultEl.textContent = formulaResult;
-    MEntryEl.textContent = formulaResult;
-  
-  
-    const textP_MAccess = jobCardContentEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--solved');
-    if (cardNum === 1) {
-      textP_MAccess.innerHTML =
-      `
-        Excellent, this is the last finishing job, so we are finished.
-        The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
-      `;
-    }
-    else {
-      textP_MAccess.innerHTML =
-      `
-        Excellent. Now let's pass this result back up the tree.
-      `;
-    }
-  
-    
-    jobCardContentEl.querySelectorAll('.SJ-num').forEach((el) => el.textContent = SJNum);
-    jobCardContentEl.querySelectorAll('.fill--next-SJ-num').forEach((el) => el.textContent = nextSJNum);
-    jobCardContentEl.querySelectorAll('.fill--c-entry').forEach((el) => el.textContent = cEntry);
-    jobCardContentEl.querySelectorAll('.fill--weight').forEach((el) => el.textContent = weight);
-    jobCardContentEl.querySelectorAll('.fill--OPT-1').forEach((el) => el.textContent = OPTResult1);
-    jobCardContentEl.querySelectorAll('.fill--OPT-2').forEach((el) => el.textContent = OPTResult2);
-    jobCardContentEl.querySelectorAll('.fill--comp-1').forEach((el) => el.textContent = computationResult1);
-    jobCardContentEl.querySelectorAll('.fill--comp-2').forEach((el) => el.textContent = computationResult2);
-    jobCardContentEl.querySelectorAll('.fill--comp-final').forEach((el) => el.textContent = formulaResult);
-  }
-
-  generateCardTree() {
-    const jobTreeRootNode = this.jobScheduler.getRootNode();
-    const newCardEl = this.genNewJobCard(jobTreeRootNode.data);
-
-    const rootContainerEl = document.querySelector('.job-cards');
-    rootContainerEl.append(newCardEl);
-
-    const childrenContainerEl = newCardEl.querySelector('.job-card-children');
-    jobTreeRootNode.children.forEach((childNode) => { this.generateCardTreeR(childNode, childrenContainerEl); });
-    
-    document.getElementById('job-card-template').remove();
-    document.getElementById('job-stub-template').remove();
-  }
-
-  generateCardTreeR(treeNode, parentContainerEl) {
-    if (!treeNode.isLeaf) {
-      const newCardEl = this.genNewJobCard(treeNode.data);
-      parentContainerEl.append(newCardEl);
-
-      const childrenContainerEl = newCardEl.querySelector('.job-card-children');
-      treeNode.children.forEach((childNode) => { this.generateCardTreeR(childNode, childrenContainerEl); });
-    }
-    else {
-      const newStubEl = this.genNewJobStub(treeNode.data);
-      parentContainerEl.append(newStubEl);
-    }
-  }
-
-  setUpScene(jobsUnsorted) {
-    // Set up row template and time row to make sure they have proper number of cells
-    const templateRowId = 'time-graph__row-template';
-    const resultRowTemplateEl = document.getElementById(templateRowId);
-    const rowTemplateRow = resultRowTemplateEl.content.querySelector('.time-graph__row');
-    const timesRow = document.querySelector('.time-graph__row--times');
-
-    for (let i = 0; i <= Math.ceil(this.jobScheduler.getMaxTime()); ++i) {
-      rowTemplateRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"></div>`);
-      timesRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`);
-    }
-
-    // Generate time graph rows, and job bars
-    const jobBarsEl = document.querySelector('.time-graph__job-bars');
-
-    jobsUnsorted.forEach((job, i) => {
-      // job bar
-      const jobEl = this.generateJobBar(job);
-      jobEl.style.left = `${i*10}rem`;
-      jobEl.style.top = `${i*10}rem`;
-      jobBarsEl.append(jobEl);
-
-      // time graph row
-      const cloneRow = document.importNode(resultRowTemplateEl.content, true);
-      const timeGraphRow = cloneRow.querySelector('.time-graph__row');
-      // row header data
-      const rowSJNum = cloneRow.querySelector('.time-graph__SJ-num');
-      const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
-      const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
-
-      const sortedJobLetter = this.jobScheduler.getJobs()[i].getJobLetter(); // letters but ordered with respect to sorted job numbers
-      const unsortedJobLetter = String.fromCharCode(i + 65); // in order of A, B, C, D, etc.
-
-      timeGraphRow.classList.add(`time-graph__row--${i}`);
-      timeGraphRow.dataset.jobletterunsorted = unsortedJobLetter;
-      rowLetter_unsorted.textContent = `Job ${unsortedJobLetter}`;
-      timeGraphRow.dataset.joblettersorted = sortedJobLetter;
-      rowLetter_sorted.textContent = `Job ${sortedJobLetter}`;
-      rowSJNum.textContent = `j=${i+1}`;
-
-      timesRow.before(timeGraphRow); // inserting new rows above the times row
-    });
-    document.getElementById('time-graph__job-bar-template').remove();
-    resultRowTemplateEl.remove();
+const dataDisplay = document.querySelector('.data-display');
+const animTimeline = new AnimTimeline(null, {debugMode: true});
 
 
-    // Insert array blocks
-    const templateArrayBlockID = 'array__array-block-template';
-    const resultBlockTemplate = document.getElementById(templateArrayBlockID);
-    const array_J1 = document.querySelector('.array-group--j-and-c .array--j');
-    const array_J2 = document.querySelector('.array-group--j-and-M .array--j');
-    const array_c = document.querySelector('.array-group--j-and-c .array--c');
-    const array_M = document.querySelector('.array-group--j-and-M .array--M');
-
-    const numJobs = this.jobScheduler.getNumJobs();
-
-    for (let i = 0; i <= numJobs; ++i) {
-      const jBlockString = `<div class="array__array-block array__array-block--${i} highlightable">${i}</div>`
-      array_J1.insertAdjacentHTML('beforeend', jBlockString);
-      array_J2.insertAdjacentHTML('beforeend', jBlockString);
-      
-      const cloneBlock_c = document.importNode(resultBlockTemplate.content, true);
-      const cloneBlock_M = document.importNode(resultBlockTemplate.content, true);
-
-      const arrayBlock_c = cloneBlock_c.querySelector('.array__array-block');
-      arrayBlock_c.classList.add(`array__array-block--${i}`);
-      arrayBlock_c.querySelector('.array__array-entry--value').textContent = this.jobScheduler.getC(i);
-      array_c.append(arrayBlock_c);
-
-      const arrayBlock_M = cloneBlock_M.querySelector('.array__array-block');
-      arrayBlock_M.classList.add(`array__array-block--${i}`);
-      arrayBlock_M.querySelector('.array__array-entry--value').textContent = this.jobScheduler.getM(i);
-      array_M.append(arrayBlock_M);
-    }
-
-    resultBlockTemplate.remove();
-
-
-    // Set up text boxes
-    document.querySelectorAll('.fill--last-job-letter').forEach((el) => el.textContent = String.fromCharCode( (numJobs - 1) + 65 ));
-    document.querySelectorAll('.fill--last-SJ-num').forEach((el) => el.textContent = numJobs);
-    
-    const templateFillCArrayParagraphsID = 'fill-c-array-paragraphs-template';
-    const resultParagraphGroupTemplate = document.getElementById(templateFillCArrayParagraphsID);
-    const textbox_fillCArray = document.querySelector('.text-box-line-group--fill-c-array .text-box');
-    this.jobScheduler.getJobs().forEach(job => {
-      const cloneParagraphGroup = document.importNode(resultParagraphGroupTemplate.content, true);
-      const currSJNum = job.getSortedJobNum();
-      const currCEntry = job.getCompatibleJobNum();
-      const currStartTime = job.getStart();
-
-      const textP_fillCArray_forJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--for-job-X');
-      textP_fillCArray_forJobX.classList.replace('text-box__paragraph--for-job-X', `text-box__paragraph--for-job-${currSJNum}`);
-      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
-      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-start-time').forEach(toFill => toFill.textContent = `${currStartTime}`);
-
-
-      const textP_fillCArray_resultJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--result-job-X');
-      textP_fillCArray_resultJobX.classList.replace('text-box__paragraph--result-job-X', `text-box__paragraph--result-job-${currSJNum}`);
-      const resultCompatibleText = textP_fillCArray_resultJobX.querySelector('.fill--result-compatible-job-text');
-      if (currCEntry === 0) {
-        resultCompatibleText.innerHTML =
-        `
-          <span class="SJ-related">job ${currSJNum}</span> does not have a <span class="c-related">compatible job</span> before it.
-        `;
-      }
-      else {
-        resultCompatibleText.innerHTML =
-        `
-          <span class="SJ-related">job ${currSJNum}</span>'s nearest <span class="c-related">compatible job</span> is
-          <span class="c-related">job ${currCEntry}</span>, which ends at time ${this.jobScheduler.getJobs()[currCEntry - 1].getFinish()}.
-        `;
-      }
-      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
-      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-c-entry').forEach(toFill => toFill.textContent = `${currCEntry}`);
-
-      textbox_fillCArray.append(textP_fillCArray_forJobX);
-      textbox_fillCArray.append(textP_fillCArray_resultJobX);
-    });
-
-    resultParagraphGroupTemplate.remove();
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const generateVisualization = (jobsUnsorted) => {
+export function generateVisualization (jobsUnsorted) {
   document.querySelector('.visualization').classList.remove('hidden');
-  // TODO: Move this somewhere else
-  const dataDisplay = document.querySelector('.data-display');
-  document.addEventListener('scroll', function(e) {
-    dataDisplay.style.left = `${-window.scrollX}px`;
-  });
 
   // const jobsUnsorted = [
   //   new Job(5, 9, 7),
@@ -366,38 +27,44 @@ export const generateVisualization = (jobsUnsorted) => {
 
   const jobScheduler = new JobScheduler();
 
-  jobsUnsorted.forEach(job => {
-    jobScheduler.addJob(job);
-  });
-  jobScheduler.sortJobsByFinish();
-  jobScheduler.setCompatibleJobNums();
-  jobScheduler.initializeM();
-
-  jobScheduler.computeOPT(jobScheduler.getNumJobs(), null);
-  const jobsSorted = jobScheduler.getJobs();
+  jobsUnsorted.forEach(job => jobScheduler.addJob(job));
+  jobScheduler.performWISAlgorithm();
 
   const sceneCreator = new SceneCreator(jobScheduler);
-  sceneCreator.initialize();
-  sceneCreator.setUpScene(jobsUnsorted);
+  sceneCreator.generateScene();
 
-  (function() {
-    const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
-    freeLineArrows.forEach((freeLine, i) => {
-      const line = freeLine.querySelector('.free-line__line');
-      const marker = freeLine.querySelector('marker');
+  setUpDataDisplayScroll(dataDisplay);
+  setUpFreeLinesArrows();
+  animateDataDisplay(dataDisplay, jobScheduler);
+  animateJobCard(document.querySelector('.job-card')); // naturally starts at the root job card
+  setupPlaybackControls(animTimeline);
+};
 
-      const id = `markerArrow--${i}`
-      marker.id = id;
-      line.style.markerEnd = `url(#${id})`;
-    });
-  })();
+// allows the data display (left view with the time graph and arrays) to scroll horizontally
+function setUpDataDisplayScroll (dataDisplay) {
+  document.addEventListener('scroll', function(e) {
+    dataDisplay.style.left = `${-window.scrollX}px`;
+  });
+};
 
+// sets up the markers for free lines that are arrows
+function setUpFreeLinesArrows() {
+  const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
+  freeLineArrows.forEach((freeLine, i) => {
+    const line = freeLine.querySelector('.free-line__line');
+    const marker = freeLine.querySelector('marker');
 
-  const animTimeline = new AnimTimeline(null, {debugMode: true});
+    const id = `markerArrow--${i}`
+    marker.id = id;
+    line.style.markerEnd = `url(#${id})`;
+  });
+};
 
+// creates animation sequences for the data display
+function animateDataDisplay(dataDisplay, jobScheduler) {
   const timeGraphEl = document.querySelector('.time-graph');
-  const timeGraphRowEls = [...document.querySelectorAll('.time-graph__row')];
-  // const jobBarEls = [...document.querySelectorAll('.time-graph__job-bar')];
+  const jobsUnsorted = jobScheduler.getJobsUnsorted();
+  const jobsSorted = jobScheduler.getJobs();
 
 
   const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box');
@@ -406,9 +73,11 @@ export const generateVisualization = (jobsUnsorted) => {
   const textP_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
   const textP_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
   const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__paragraph--ordered');
-  // Describe that we're about to move bars onto graph
+
+  /****************************************************** */
+  // DESCRIBE THAT WE'RE ABOUT TO MOVE BARS ONTO GRAPH
+  /****************************************************** */
   {
-    
     const animSequence = new AnimSequence();
     animSequence.setDescription(`Describe that we're about to move bars onto graph`);
     animSequence.addManyBlocks([
@@ -418,7 +87,9 @@ export const generateVisualization = (jobsUnsorted) => {
     animTimeline.addOneSequence(animSequence);
   }
 
-  // Move job bars onto time graph in unsorted order
+  /****************************************************** */
+  // MOVE JOB BARS ONTO TIME GRAPH IN UNSORTED ORDER
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Move job bars onto time graph in unsorted order');
@@ -439,7 +110,9 @@ export const generateVisualization = (jobsUnsorted) => {
   }
 
 
-  // Move job bars back off of the time graph
+  /****************************************************** */
+  // MOVE JOB BARS BACK OFF OF THE TIME GRAPH
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Move job bars back off of the time graph');
@@ -458,7 +131,9 @@ export const generateVisualization = (jobsUnsorted) => {
   }
 
 
-  // Move job bars back onto the time graph (sorted by finish time) and update time graph row headers
+  /****************************************************** */
+  // MOVE JOB BARS BACK ONTO THE TIME GRAPH (SORTED BY FINISH TIME) AND UPDATE TIME GRAPH ROW HEADERS
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Move job bars back onto the time graph (sorted by finish time) and update time graph row headers');
@@ -498,7 +173,9 @@ export const generateVisualization = (jobsUnsorted) => {
   const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .free-line');
   const textP_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
   const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
-  // Explain what a compatible job is
+  /****************************************************** */
+  // EXPLAIN WHAT A COMPATIBLE JOB IS
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Explain what a compatible job is');
@@ -511,7 +188,10 @@ export const generateVisualization = (jobsUnsorted) => {
     animTimeline.addOneSequence(animSequence);
   }
 
-  // Explain what c array will be used for
+
+  /****************************************************** */
+  // EXPLAIN WHAT C ARRAY WILL BE USED FOR
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Explain what c array will be used for');
@@ -523,7 +203,10 @@ export const generateVisualization = (jobsUnsorted) => {
     animTimeline.addOneSequence(animSequence);
   }
 
-  // Hide explanation of c array's purpose and continue into next phase
+
+  /****************************************************** */
+  // HIDE EXPLANATION OF C ARRAY'S PURPOSE AND CONTINUE INTO NEXT PHASE
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continueNext: true}); // after hiding, immediately continue into next phase
     animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
@@ -535,7 +218,9 @@ export const generateVisualization = (jobsUnsorted) => {
   }
 
 
-  // Demonstrate how to fill out the c array
+  /****************************************************** */
+  // DEMONSTRATE HOW TO FILL OUT THE C ARRAY
+  /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
   const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
@@ -556,7 +241,7 @@ export const generateVisualization = (jobsUnsorted) => {
     const textP_fillCArray_resultJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--result-job-${jobBarEl.dataset.sjnum}`);
     const textP_fillCArray_continueOn = textbox_fillCArray.querySelector(`.text-box__paragraph--continue-on`);
 
-    // Move cbar to current job bar, unhide it, and highlight current job bar and j array block
+    // MOVE CBAR TO CURRENT JOB BAR, UNHIDE IT, AND HIGHLIGHT CURRENT JOB BAR AND J ARRAY BLOCK
     {
       const animSequence = new AnimSequence(null, {continuePrev: true});
       animSequence.setDescription('Move cbar to current job bar, unhide it, and highlight current job bar and j array block');
@@ -573,7 +258,7 @@ export const generateVisualization = (jobsUnsorted) => {
     }
 
 
-    // move cbar, highlight compatible job if exists, and point to c array
+    // MOVE CBAR, HIGHLIGHT COMPATIBLE JOB IF EXISTS, AND POINT TO C ARRAY
     {
       const animSequence = new AnimSequence();
       const animSequence2 = new AnimSequence();
@@ -617,7 +302,7 @@ export const generateVisualization = (jobsUnsorted) => {
     }
 
 
-    // Hide cbar and arrow and un-highlight everything
+    // HIDE CBAR AND ARROW AND UN-HIGHLIGHT EVERYTHING
     {
       const animSequence = new AnimSequence(null, {continueNext: true});
       animSequence.setDescription('Hide cbar and arrow and un-highlight everything');
@@ -647,7 +332,9 @@ export const generateVisualization = (jobsUnsorted) => {
   const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box');
   const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
   const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
-  // State that now we need to find the maximum weight
+  /****************************************************** */
+  // STATE THAT NOW WE NEED TO FIND THE MAXIMUM WEIGHT
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('State that now we need to find the maximum weight');
@@ -659,7 +346,9 @@ export const generateVisualization = (jobsUnsorted) => {
   }
 
 
-  // Show naive approach to finding max weight
+  /****************************************************** */
+  // SHOW NAIVE APPROACH TO FINDING MAX WEIGHT
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null);
     animSequence.setDescription('Explain naive approach to finding max weight');
@@ -674,7 +363,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
   const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
   const freeLine_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .free-line');
-  // Explain possibility that job is part of optimal sequence
+  /****************************************************** */
+  // EXPLAIN POSSIBILITY THAT JOB IS PART OF OPTIMAL SEQUENCE
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null);
     animSequence.setDescription('Explain possibility that job is part of optimal sequence');
@@ -690,7 +381,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
   const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
   const freeLine_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .free-line');
-  // Explain possibility that job is NOT part of optimal sequence
+  /****************************************************** */
+  // EXPLAIN POSSIBILITY THAT JOB IS **NOT** PART OF OPTIMAL SEQUENCE
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null);
     animSequence.setDescription('Explain possibility that job is NOT part of optimal sequence');
@@ -704,7 +397,9 @@ export const generateVisualization = (jobsUnsorted) => {
     animTimeline.addOneSequence(animSequence);
   }
 
-  // Hide naive approach explanations
+  /****************************************************** */
+  // HIDE NAIVE APPROACH EXPLANATIONS
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continueNext: true});
     animSequence.setDescription('Hide naive approach explanations');
@@ -723,7 +418,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
   const textbox_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .text-box');
   const freeLine_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .free-line');
-  // Explain why naive approach is bad
+  /****************************************************** */
+  // EXPLAIN WHY NAIVE APPROACH IS BAD
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Explain why naive approach is bad');
@@ -737,7 +434,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
 
   const naiveAlgorithmText = dataDisplay.querySelector('.naive-algorithm-text');
-  // Collapse text boxes about the naive approach
+  /****************************************************** */
+  // COLLAPSE TEXT BOXES ABOUT THE NAIVE APPROACH
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continueNext: true});
     animSequence.setDescription('Collapse text boxes about the naive approach');
@@ -754,7 +453,9 @@ export const generateVisualization = (jobsUnsorted) => {
   const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .free-line');
   const textP_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
   const textP_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
-  // Explain memoization
+  /****************************************************** */
+  // EXPLAIN MEMOIZATION
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Explain memoization');
@@ -770,7 +471,9 @@ export const generateVisualization = (jobsUnsorted) => {
   const arrayBlock_M_0 = MArray.querySelector('.array__array-block--0');
   const arrayBlank_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--blank');
   const arrayValue_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--value');
-  // Explain what M array will be used for
+  /****************************************************** */
+  // EXPLAIN WHAT M ARRAY WILL BE USED FOR
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Explain what M array will be used for');
@@ -787,7 +490,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
   const textbox_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .text-box');
   const freeLine_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .free-line');
-  // Show memoized algorithm
+  /****************************************************** */
+  // SHOW MEMOIZED ALGORITHM
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Show memoized algorithm');
@@ -801,7 +506,9 @@ export const generateVisualization = (jobsUnsorted) => {
 
 
   const MArrayTextBoxes = MArray.querySelector('.text-boxes');
-  // Hide M array text explanation boxes
+  /****************************************************** */
+  // HIDE M ARRAY TEXT EXPLANATION BOXES
+  /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continueNext: true});
     animSequence.setDescription('Hide memoized algorithm');
@@ -810,365 +517,396 @@ export const generateVisualization = (jobsUnsorted) => {
     ]);
     animTimeline.addOneSequence(animSequence);
   }
+};
+
+// recursively creates animation sequences for the job card tree
+function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
+  const SJNum = Number.parseInt(jobCard.dataset.sjnum);
+  const jobCardContent = jobCard.querySelector('.job-card-content');
+  const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
+  const MAccessContainer = jobCard.querySelector('.M-access-container');
+  const MAccess = jobCard.querySelector('.M-access');
+  const MEntry = jobCard.querySelector('.M-entry');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
+  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
+  const textP_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
+  const textP_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
+
+  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
 
 
-
-  animateJobCard_R(document.querySelector('.job-card'));
-
-  function animateJobCard_R(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
-    const SJNum = Number.parseInt(jobCard.dataset.sjnum);
-    const jobCardContent = jobCard.querySelector('.job-card-content');
-    const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
-    const MAccessContainer = jobCard.querySelector('.M-access-container');
-    const MAccess = jobCard.querySelector('.M-access');
-    const MEntry = jobCard.querySelector('.M-entry');
-    const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
-    const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
-    const textP_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
-    const textP_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
-
-    const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
+  const arrowContainer = jobCard.querySelector('.arrow-container');
+  const formulaContainer = jobCard.querySelector('.formula-container');
+  const formulaComputation = jobCard.querySelector('.formula-computation');
+  const formulaResult = jobCard.querySelector('.formula-result');
+  const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
+  const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
+  const textP_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
+  const textP_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
+  const textP_formulaComputation_found = textbox_formulaComputation.querySelector('.text-box__paragraph--found');
 
 
-    const arrowContainer = jobCard.querySelector('.arrow-container');
-    const formulaContainer = jobCard.querySelector('.formula-container');
-    const formulaComputation = jobCard.querySelector('.formula-computation');
-    const formulaResult = jobCard.querySelector('.formula-result');
-    const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
-    const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
-    const textP_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
-    const textP_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
-    const textP_formulaComputation_found = textbox_formulaComputation.querySelector('.text-box__paragraph--found');
+  const computation1 = jobCard.querySelector('.computation--1');
+  const computationResult1 = computation1.querySelector('.computation-result');
+  const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .free-line');
+  const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box');
+  const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
+  const textP_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
+  const textP_computation1_summary = textbox_computation1.querySelector('.text-box__paragraph--summary');
+  const cAccessContainer = jobCard.querySelector('.c-access-container');
+  const cAccess = jobCard.querySelector('.c-access');
+  const cEntry = jobCard.querySelector('.c-entry');
+  const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access .free-line');
+  const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box');
+  const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
+  const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
+  const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block');
+  const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
+  const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
+  const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
+  const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .free-line');
+  const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box');
+  const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--find');
+  const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--found');
 
 
-    const computation1 = jobCard.querySelector('.computation--1');
-    const computationResult1 = computation1.querySelector('.computation-result');
-    const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .free-line');
-    const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box');
-    const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
-    const textP_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
-    const textP_computation1_summary = textbox_computation1.querySelector('.text-box__paragraph--summary');
-    const cAccessContainer = jobCard.querySelector('.c-access-container');
-    const cAccess = jobCard.querySelector('.c-access');
-    const cEntry = jobCard.querySelector('.c-entry');
-    const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access .free-line');
-    const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box');
-    const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
-    const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
-    const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block');
-    const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
-    const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
-    const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
-    const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .free-line');
-    const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box');
-    const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--find');
-    const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--found');
+  const computation2 = jobCard.querySelector('.computation--2');
+  const computationResult2 = computation2.querySelector('.computation-result');
+  const OPTExpression2 = computation2.querySelector('.OPT-expression');
+  const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .free-line');
+  const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box');
+  const textP_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
+  const textP_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
+  const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .free-line');
+  const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
+  const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
+  const nextSJNum = computation2.querySelector('.next-SJ-num');
 
 
-    const computation2 = jobCard.querySelector('.computation--2');
-    const computationResult2 = computation2.querySelector('.computation-result');
-    const OPTExpression2 = computation2.querySelector('.OPT-expression');
-    const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .free-line');
-    const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box');
-    const textP_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
-    const textP_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
-    const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .free-line');
-    const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
-    const textP_OPTExpression2_find = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-2 .text-box__paragraph--find');
-    const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
-    const nextSJNum = computation2.querySelector('.next-SJ-num');
+  const jobCardChild1 = [...jobCard.querySelector('.job-card-children').children][0];
+  const jobCardChild2 = [...jobCard.querySelector('.job-card-children').children][1];
 
 
-    const jobCardChild1 = [...jobCard.querySelector('.job-card-children').children][0];
-    const jobCardChild2 = [...jobCard.querySelector('.job-card-children').children][1];
+  const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
+  const MBlock_blank = MBlock.querySelector(`.array__array-entry--blank`);
+  const MBlock_value = MBlock.querySelector(`.array__array-entry--value`);
+  const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
 
 
-    const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
-    const MBlock_blank = MBlock.querySelector(`.array__array-entry--blank`);
-    const MBlock_value = MBlock.querySelector(`.array__array-entry--value`);
-    const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
+  const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
+  const freeLine_downTree = jobCard.querySelector('.free-line--down-tree');
+  const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
 
-    const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
-    const freeLine_downTree = jobCard.querySelector('.free-line--down-tree');
-    const jobCardBullet = jobCard.querySelector('.job-card-bullet');
-
-
-    // fade in job card and M access
-    {
-      const animSequence = parentAnimSequence ?? new AnimSequence(null, {continuePrev: true});
-      animSequence.setDescription('Fade in job card and M access');
-      animSequence.setTag('start');
+  /****************************************************** */
+  // FADE IN JOB CARD AND M ACCESS
+  /****************************************************** */
+  {
+    const animSequence = parentAnimSequence ?? new AnimSequence(null, {continuePrev: true});
+    animSequence.setDescription('Fade in job card and M access');
+    animSequence.setTag('start');
+    animSequence.addManyBlocks([
+      [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
+    ]);
+    if (parentArrowDown) {
       animSequence.addManyBlocks([
-        [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
+        [ 'line', parentArrowDown, 'enter-wipe-from-top', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
       ]);
-      if (parentArrowDown) {
-        animSequence.addManyBlocks([
-          [ 'line', parentArrowDown, 'enter-wipe-from-top', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
-        ]);
-      }
-      if (aboveBullet) {
-        const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
-        animSequence.addManyBlocks([
-          [ 'line', freeLine_bulletConnector, 'enter-wipe-from-top', aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
-        ]);
-      }
+    }
+    if (aboveBullet) {
+      const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
       animSequence.addManyBlocks([
-        [ 'std', MAccess, 'fade-in' ],
-        [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
-        [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
+        [ 'line', freeLine_bulletConnector, 'enter-wipe-from-top', aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
       ]);
-
-      animTimeline.addOneSequence(animSequence);
     }
+    animSequence.addManyBlocks([
+      [ 'std', MAccess, 'fade-in' ],
+      [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
+      [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // point to M block array entry
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Point to M block array entry');
-      animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
+  /****************************************************** */
+  // POINT TO M BLOCK ARRAY ENTRY
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Point to M block array entry');
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // focus on formula container
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Focus on formula container');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_toMBlock, 'exit-wipe-to-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', MAccessContainer, 'un-highlight' ],
-
-        [ 'std', arrowContainer, 'enter-wipe-from-right' ],
-        [ 'std', formulaComputation, 'fade-in', {blocksPrev: false} ],
-        [ 'std', formulaComputation, 'highlight', {blocksNext: false} ],
-        [ 'line', freeLine_formulaComputation, 'enter-wipe-from-bottom', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_formulaComputation, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // focus on computation 1
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Focus on computation 1');
-      animSequence.addManyBlocks([
-        [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_formulaComputation, 'exit-wipe-to-bottom', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', formulaComputation, 'un-highlight', {blocksPrev: false} ],
+  /****************************************************** */
+  // FOCUS ON FORMULA CONTAINER
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on formula container');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_toMBlock, 'exit-wipe-to-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', MAccessContainer, 'un-highlight' ],
 
-        [ 'std', computationExpression1, 'highlight', {blocksNext: false} ],
-        [ 'line', freeLine_computation1, 'enter-wipe-from-bottom', computation1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_computation1, 'fade-in', {blocksPrev: false} ],
-      ]);
+      [ 'std', arrowContainer, 'enter-wipe-from-right' ],
+      [ 'std', formulaComputation, 'fade-in', {blocksPrev: false} ],
+      [ 'std', formulaComputation, 'highlight', {blocksNext: false} ],
+      [ 'line', freeLine_formulaComputation, 'enter-wipe-from-bottom', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_formulaComputation, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // focus on c access
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Focus on c access');
-      animSequence.setTag('skip to');
-      animSequence.addManyBlocks([
-        [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_computation1, 'exit-wipe-to-bottom', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
-    
-        [ 'std', cAccessContainer, 'highlight', {blocksPrev: false} ],
-        [ 'line', freeLine_cAccess, 'enter-wipe-from-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_cAccess, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // point to c array entry
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Point to c array entry');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_toCBlock, 'enter-wipe-from-right', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
-      ]);
+  /****************************************************** */
+  // FOCUS ON COMPUTATION 1
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on computation 1');
+    animSequence.addManyBlocks([
+      [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_formulaComputation, 'exit-wipe-to-bottom', formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', formulaComputation, 'un-highlight', {blocksPrev: false} ],
 
-      animTimeline.addOneSequence(animSequence);
-    }
+      [ 'std', computationExpression1, 'highlight', {blocksNext: false} ],
+      [ 'line', freeLine_computation1, 'enter-wipe-from-bottom', computation1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_computation1, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-
-    // Reverse arrow and replace c access with value
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Reverse arrow and replace c access with value');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'line', freeLine_toCBlock, 'enter-wipe-from-left', cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
-        [ 'std', cAccess, 'exit-wipe-to-left', {blocksPrev: false} ],
-        [ 'std', cEntry, 'enter-wipe-from-right', {blocksNext: false} ],
-        [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
-        [ 'std', textP_cAccess_find, 'fade-out', { duration: 250 } ],
-        [ 'std', textP_cAccess_found, 'fade-in', { duration: 250 } ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // Focus on OPT expression 1 as a whole
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Focus on OPT expression 1 as a whole');
-      animSequence.addManyBlocks([
-        // hide arrow for c block
-        [ 'line', freeLine_toCBlock, 'fade-out', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
-    
-        // remove c access text
-        [ 'std', textbox_cAccess, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_cAccess, 'exit-wipe-to-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', cAccessContainer, 'un-highlight', {blocksPrev: false} ],
-    
-        // enter OPT expression 1 text
-        [ 'std', OPTExpressionContainer1, 'highlight', {blocksPrev: false, blocksNext: false} ],
-        [ 'line', freeLine_OPTExpression1, 'enter-wipe-from-bottom', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
-      ]);
+  /****************************************************** */
+  // FOCUS ON C ACCESS
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on c access');
+    animSequence.addManyBlocks([
+      [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_computation1, 'exit-wipe-to-bottom', computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', computationExpression1, 'un-highlight', {blocksNext: false, blocksPrev: false} ],
+  
+      [ 'std', cAccessContainer, 'highlight', {blocksPrev: false} ],
+      [ 'line', freeLine_cAccess, 'enter-wipe-from-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_cAccess, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
-
-    
-    let sourceEl_OPT1, freeLine_fromSourceEl1;
-    {
-      const animSeqPassDown = new AnimSequence();
-      animSeqPassDown.addManyBlocks([
-        [ 'std', textbox_OPTExpression1, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_OPTExpression1, 'exit-wipe-to-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
-      ]);
-      let animSequence;
-      // RECURSE 1
-      [animSequence, sourceEl_OPT1, freeLine_fromSourceEl1] = jobCardChild1.classList.contains('job-card--stub') ?
-        animateJobStub(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet) :
-        animateJobCard_R(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet);
-      // replace OPT1 expression with answer, change text box text
-      animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
-      animSequence.setTag('OPT point 1');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_fromSourceEl1, 'enter-wipe-from-bottom', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1.1] ],
-        [ 'std', OPTExpression1, 'exit-wipe-to-left', {blocksPrev: false} ],
-        [ 'std', OPTResult1, 'enter-wipe-from-right', {blocksNext: false} ],
-        [ 'std', textP_OPTExpression1_find, 'fade-out', { duration: 250 } ],
-        [ 'std', textP_OPTExpression1_found, 'fade-in', { duration: 250 } ],
-        [ 'line', freeLine_OPTExpression1, 'enter-wipe-from-bottom', OPTResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-    
-
-    // remove arrow coming from child, hide current text; replace computation expression with answer; and focus on whole computation1 (swap text as well)
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_fromSourceEl1, 'fade-out', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1], {blocksNext: false} ],
-        [ 'std', textbox_OPTExpression1, 'fade-out', {blocksPrev: false, blocksNext: false} ],
-        [ 'line', freeLine_OPTExpression1, 'exit-wipe-to-bottom', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', OPTExpressionContainer1, 'un-highlight', {blocksPrev: false} ],
-    
-        [ 'std', textP_computation1_intro, 'fade-out', {duration: 0, blocksNext: false} ],
-        [ 'std', textP_computation1_summary, 'fade-in', {duration: 0, blocksPrev: false} ],
-        [ 'std', computationExpression1, 'exit-wipe-to-left', ],
-        [ 'std', computationResult1, 'enter-wipe-from-right', ],
-        [ 'std', computationResult1, 'highlight', {blocksPrev: false, blocksNext: false} ],
-        [ 'line', freeLine_computation1, 'enter-wipe-from-bottom', computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_computation1, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // focus on computation 2
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Focus on computation 2');
-      animSequence.setTag('focus comp 2');
-      animSequence.addManyBlocks([
-        [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_computation1, 'exit-wipe-to-bottom', computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', computationResult1, 'un-highlight', {blocksPrev: false} ],
+  /****************************************************** */
+  // POINT TO C ARRAY ENTRY
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Point to c array entry');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_toCBlock, 'enter-wipe-from-right', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
+    ]);
 
-        [ 'std', computation2, 'highlight', {blocksNext: false} ],
-        [ 'line', freeLine_computation2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_computation2, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-    // replace subtraction with result; then focus on OPT expression 2
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Replace subtraction with result; then focus on OPT expression 2');
-      animSequence.addManyBlocks([
-        [ 'std', textbox_computation2, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_computation2, 'exit-wipe-to-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-    
-        [ 'std', nextSJNumExpression, 'exit-wipe-to-left' ],
-        [ 'std', nextSJNum, 'enter-wipe-from-right' ],
-    
-        [ 'line', freeLine_OPTExpression2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_OPTExpression2, 'fade-in', {blocksPrev: false} ],
-      ]);
+  /****************************************************** */
+  // REVERSE ARROW AND REPLACE C ACCESS WITH VALUE
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Reverse arrow and replace c access with value');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_toCBlock, 'fade-out', cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_toCBlock, 'enter-wipe-from-left', cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+      [ 'std', cAccess, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', cEntry, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+      [ 'std', textP_cAccess_find, 'fade-out', { duration: 250 } ],
+      [ 'std', textP_cAccess_found, 'fade-in', { duration: 250 } ],
+    ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
+    animTimeline.addOneSequence(animSequence);
+  }
 
-    let sourceEl_OPT2, freeLine_fromSourceEl2
-    {
-      const animSeqPassDown = new AnimSequence();
-      animSeqPassDown.addManyBlocks([
-        [ 'std', textbox_OPTExpression2, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_OPTExpression2, 'exit-wipe-to-bottom', computation2, [0.5, -0.2], null, [0.5, 1] ],
-      ]);
-      let animSequence;
-      // RECURSE 2
-      [animSequence, sourceEl_OPT2, freeLine_fromSourceEl2] = jobCardChild2.classList.contains('job-card--stub') ?
-        animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet')) :
-        animateJobCard_R(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet'));
-      // replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text
-      animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_fromSourceEl2, 'enter-wipe-from-bottom', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1.1] ],
 
-        [ 'std', textP_computation2_intro, 'fade-out', {duration: 0, blocksNext: false} ],
-        [ 'std', textP_computation2_summary, 'fade-in', {duration: 0, blocksPrev: false} ],
+  /****************************************************** */
+  // FOCUS ON OPT EXPRESSION 1 AS A WHOLE
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on OPT expression 1 as a whole');
+    animSequence.addManyBlocks([
+      // hide arrow for c block
+      [ 'line', freeLine_toCBlock, 'fade-out', cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
+  
+      // remove c access text
+      [ 'std', textbox_cAccess, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_cAccess, 'exit-wipe-to-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', cAccessContainer, 'un-highlight', {blocksPrev: false} ],
+  
+      // enter OPT expression 1 text
+      [ 'std', OPTExpressionContainer1, 'highlight', {blocksPrev: false, blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression1, 'enter-wipe-from-bottom', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-        [ 'std', computation2, 'un-highlight', {blocksNext: false} ],
-        [ 'std', OPTExpression2, 'exit-wipe-to-left', {blocksPrev: false} ],
-        [ 'std', computationResult2, 'enter-wipe-from-right', {blocksNext: false} ],
-        [ 'std', computationResult2, 'highlight', {blocksPrev: false} ],
+    animTimeline.addOneSequence(animSequence);
+  }
 
-        [ 'line', freeLine_computation2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_computation2, 'fade-in', {blocksPrev: false} ],
-      ]);
+  /****************************************************** */
+  // RECURSION 1
+  /****************************************************** */
+  let sourceEl_OPT1, freeLine_fromSourceEl1; // pointing up from child
+  {
+    const animSeqPassDown = new AnimSequence();
+    // add blocks to hide text about OPT expression before recursion
+    animSeqPassDown.addManyBlocks([
+      [ 'std', textbox_OPTExpression1, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression1, 'exit-wipe-to-bottom', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+    ]);
+    let animSequence;
+    // generate animation sequences for first child job/stub
+    [animSequence, sourceEl_OPT1, freeLine_fromSourceEl1] = jobCardChild1.classList.contains('job-card--stub') ?
+      animateJobStub(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet) :
+      animateJobCard(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet);
+    /****************************************************** */
+    // REPLACE OPT1 EXPRESSION WITH ANSWER, CHANGE TEXT BOX TEXT
+    /****************************************************** */
+    animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
+    animSequence.setTag('OPT point 1');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_fromSourceEl1, 'enter-wipe-from-bottom', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1.1] ],
+      [ 'std', OPTExpression1, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', OPTResult1, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'std', textP_OPTExpression1_find, 'fade-out', { duration: 250 } ],
+      [ 'std', textP_OPTExpression1_found, 'fade-in', { duration: 250 } ],
+      [ 'line', freeLine_OPTExpression1, 'enter-wipe-from-bottom', OPTResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_OPTExpression1, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
-    
+    animTimeline.addOneSequence(animSequence);
+  }
+  
 
-    // focus on whole formula container
+  /****************************************************** */
+  // REMOVE ARROW COMING FROM CHILD, HIDE CURRENT TEXT; REPLACE COMPUTATION EXPRESSION WITH ANSWER; AND FOCUS ON WHOLE COMPUTATION1 (SWAP TEXT AS WELL)
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_fromSourceEl1, 'fade-out', sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1], {blocksNext: false} ],
+      [ 'std', textbox_OPTExpression1, 'fade-out', {blocksPrev: false, blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression1, 'exit-wipe-to-bottom', OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', OPTExpressionContainer1, 'un-highlight', {blocksPrev: false} ],
+  
+      [ 'std', textP_computation1_intro, 'fade-out', {duration: 0, blocksNext: false} ],
+      [ 'std', textP_computation1_summary, 'fade-in', {duration: 0, blocksPrev: false} ],
+      [ 'std', computationExpression1, 'exit-wipe-to-left', ],
+      [ 'std', computationResult1, 'enter-wipe-from-right', ],
+      [ 'std', computationResult1, 'highlight', {blocksPrev: false, blocksNext: false} ],
+      [ 'line', freeLine_computation1, 'enter-wipe-from-bottom', computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_computation1, 'fade-in', {blocksPrev: false} ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+
+
+  /****************************************************** */
+  // FOCUS ON COMPUTATION 2
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Focus on computation 2');
+    animSequence.setTag('focus comp 2');
+    animSequence.addManyBlocks([
+      [ 'std', textbox_computation1, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_computation1, 'exit-wipe-to-bottom', computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', computationResult1, 'un-highlight', {blocksPrev: false} ],
+
+      [ 'std', computation2, 'highlight', {blocksNext: false} ],
+      [ 'line', freeLine_computation2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_computation2, 'fade-in', {blocksPrev: false} ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+
+
+  /****************************************************** */
+  // REPLACE SUBTRACTION WITH RESULT; THEN FOCUS ON OPT EXPRESSION 2
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Replace subtraction with result; then focus on OPT expression 2');
+    animSequence.addManyBlocks([
+      [ 'std', textbox_computation2, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_computation2, 'exit-wipe-to-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+  
+      [ 'std', nextSJNumExpression, 'exit-wipe-to-left' ],
+      [ 'std', nextSJNum, 'enter-wipe-from-right' ],
+  
+      [ 'line', freeLine_OPTExpression2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_OPTExpression2, 'fade-in', {blocksPrev: false} ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+
+
+  /****************************************************** */
+  // RECURSION 2
+  /****************************************************** */
+  let sourceEl_OPT2, freeLine_fromSourceEl2; // pointing up from child
+  {
+    const animSeqPassDown = new AnimSequence();
+    animSeqPassDown.addManyBlocks([
+      [ 'std', textbox_OPTExpression2, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_OPTExpression2, 'exit-wipe-to-bottom', computation2, [0.5, -0.2], null, [0.5, 1] ],
+    ]);
+    let animSequence;
+    // create animation sequences for second child card/stub
+    [animSequence, sourceEl_OPT2, freeLine_fromSourceEl2] = jobCardChild2.classList.contains('job-card--stub') ?
+      animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet')) :
+      animateJobCard(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet'));
+    /****************************************************** */
+    // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
+    /****************************************************** */
+    animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_fromSourceEl2, 'enter-wipe-from-bottom', sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1.1] ],
+
+      [ 'std', textP_computation2_intro, 'fade-out', {duration: 0, blocksNext: false} ],
+      [ 'std', textP_computation2_summary, 'fade-in', {duration: 0, blocksPrev: false} ],
+
+      [ 'std', computation2, 'un-highlight', {blocksNext: false} ],
+      [ 'std', OPTExpression2, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', computationResult2, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'std', computationResult2, 'highlight', {blocksPrev: false} ],
+
+      [ 'line', freeLine_computation2, 'enter-wipe-from-bottom', computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_computation2, 'fade-in', {blocksPrev: false} ],
+    ]);
+
+    animTimeline.addOneSequence(animSequence);
+  }
+  
+
+  /****************************************************** */
+  // FOCUS ON WHOLE FORMULA CONTAINER
+  /****************************************************** */
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on whole formula container');
@@ -1190,340 +928,187 @@ export const generateVisualization = (jobsUnsorted) => {
   }
 
 
-    // replace formula container contents with final answer
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setTag('replace formula container contents');
-      animSequence.setDescription('Replace formula container contents with final answer');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
+  /****************************************************** */  
+  // REPLACE FORMULA CONTAINER CONTENTS WITH FINAL ANSWER
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setTag('replace formula container contents');
+    animSequence.setDescription('Replace formula container contents with final answer');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
-        [ 'std', formulaComputation, 'exit-wipe-to-left', {blocksPrev: false} ],
-        [ 'std', formulaResult, 'enter-wipe-from-right', {blocksNext: false} ],
+      [ 'std', formulaComputation, 'exit-wipe-to-left', {blocksPrev: false} ],
+      [ 'std', formulaResult, 'enter-wipe-from-right', {blocksNext: false} ],
 
-        [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
-    
-        [ 'std', textP_formulaComputation_max, 'fade-out', { duration: 250 } ],
-        [ 'std', textP_formulaComputation_found, 'fade-in', { duration: 250 } ],
-      ]);
+      [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
+  
+      [ 'std', textP_formulaComputation_max, 'fade-out', { duration: 250 } ],
+      [ 'std', textP_formulaComputation_found, 'fade-in', { duration: 250 } ],
+    ]);
 
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // show only M container, replace M access with final computed optimal value, and update M array block
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Show only M container, replace M access with final computed optimal value, and update M array block');
-      animSequence.setTag('found max');
-      animSequence.addManyBlocks([
-        // hide formula container
-        [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_formulaComputation, 'exit-wipe-to-bottom', formulaContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
-        [ 'std', formulaContainer, 'un-highlight', {blocksNext: false} ],
-        [ 'std', formulaContainer, 'exit-wipe-to-left' ],
-        [ 'std', arrowContainer, 'exit-wipe-to-left' ],
-    
-        // Visually update M access to final answer
-        [ 'std', MAccess, 'exit-wipe-to-left' ],
-        [ 'std', MEntry, 'enter-wipe-from-right' ],
-        [ 'std', MAccessContainer, 'highlight' ],
-    
-        // Visually update M array entry
-        [ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'std', MBlock_blank, 'fade-out' ],
-        [ 'std', MBlock_value, 'fade-in' ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // remove arrow pointing from M block and show final text box
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Remove arrow pointing from M block and show final text box');
-      animSequence.addManyBlocks([
-        // Add last text box
-        [ 'std', textP_MAccess_intro, 'fade-out', {duration: 0, blocksNext: false} ],
-        [ 'std', textP_MAccess_solved, 'fade-in', {duration: 0, blocksPrev: false} ],
-        [ 'line', freeLine_toMBlock, 'exit-wipe-to-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
-        [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    if (parentArrowDown) {
-      // just for hiding the last text box before moving back up the tree
-      const animSequence = new AnimSequence();
-      animSequence.setTag('finish a main card');
-      animSequence.addManyBlocks([
-        [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
-        [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccessContainer, [0.1, 0.2], null, [0.5, 1] ],
-        [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
-        [ 'std', MAccessContainer, 'un-highlight', {blocksPrev: false} ],
-      ]);
-
-      return [animSequence, MAccessContainer, freeLine_upTree];
-    }
-  }
-
-  function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
-    const SJNum = Number.parseInt(jobCard.dataset.sjnum);
-    const jobCardContent = jobCard.querySelector('.job-card-content');
-    const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
-    const MAccessContainer = jobCard.querySelector('.M-access-container');
-    const MAccess = jobCard.querySelector('.M-access');
-    const MEntry = jobCard.querySelector('.M-entry');
-    const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
-    const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
-    const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
-    const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
-    const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
-
-
-    const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
-
-    
-    const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
-    const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
-    const jobCardBullet = jobCard.querySelector('.job-card-bullet');
-
-
-    // fade in job stub and M access
-    {
-      const animSequence = parentAnimSequence;
-      animSequence.addManyBlocks([
-        [ 'std', jobCard, 'fade-in', {blocksNext: false} ],
-      ]);
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_bulletConnector, 'enter-wipe-from-top', aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
-      ]);
-      animSequence.setDescription('Fade in job stub and M access');
-      animSequence.addManyBlocks([
-        [ 'line', parentArrowDown, 'enter-wipe-from-top', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
-        [ 'std', MAccess, 'fade-in' ],
-        [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
-        [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
-        [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // point to M block array entry
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Point to M block array entry');
-      animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-    
-
-    // point back to M access from M block
-    {
-      const animSequence = new AnimSequence();
-      animSequence.setDescription('Point back to M access from M block');
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'line', freeLine_toMBlock, 'enter-wipe-from-left', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
-        [ 'std', MAccess, 'exit-wipe-to-left' ],
-        [ 'std', MEntry, 'enter-wipe-from-right' ],
-        [ 'std', textbox_MAccess_p1, 'fade-out', {duration: 250, blocksNext: false} ],
-        [ 'std', textbox_MAccess_p2, 'fade-in', {duration: 250, blocksNext: false} ],
-      ]);
-
-      animTimeline.addOneSequence(animSequence);
-    }
-
-
-    // return block that initially hides remaining stuff and points to parent
-    {
-      const animSequence = new AnimSequence();
-      animSequence.addManyBlocks([
-        [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false, lineOptions: {trackEndpoints: true}} ],
-        [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
-        [ 'std', textbox_MAccess, 'fade-out', {blocksPrev: false} ],
-        [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
-        [ 'std', MAccessContainer, 'un-highlight', {blocksPrev: false} ],
-      ]);
-    
-      return [animSequence, MAccessContainer, freeLine_upTree];
-    }
+    animTimeline.addOneSequence(animSequence);
   }
 
 
+  /****************************************************** */
+  // SHOW ONLY M CONTAINER, REPLACE M ACCESS WITH FINAL COMPUTED OPTIMAL VALUE, AND UPDATE M ARRAY BLOCK
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Show only M container, replace M access with final computed optimal value, and update M array block');
+    animSequence.setTag('found max');
+    animSequence.addManyBlocks([
+      // hide formula container
+      [ 'std', textbox_formulaComputation, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_formulaComputation, 'exit-wipe-to-bottom', formulaContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      [ 'std', formulaContainer, 'un-highlight', {blocksNext: false} ],
+      [ 'std', formulaContainer, 'exit-wipe-to-left' ],
+      [ 'std', arrowContainer, 'exit-wipe-to-left' ],
+  
+      // Visually update M access to final answer
+      [ 'std', MAccess, 'exit-wipe-to-left' ],
+      [ 'std', MEntry, 'enter-wipe-from-right' ],
+      [ 'std', MAccessContainer, 'highlight' ],
+  
+      // Visually update M array entry
+      [ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'std', MBlock_blank, 'fade-out' ],
+      [ 'std', MBlock_value, 'fade-in' ],
+    ]);
 
-  // playback buttons
-  const forwardButton = document.querySelector('.playback-button--forward');
-  const backwardButton = document.querySelector('.playback-button--backward');
-  const pauseButton = document.querySelector('.playback-button--pause');
-  const fastForwardButton = document.querySelector('.playback-button--fast-forward');
-  const skipButton = document.querySelector('.playback-button--enable-skipping');
-
-  // playback button class constants
-  const PRESSED = 'playback-button--pressed';
-  const PRESSED2 = 'playback-button--pressed--alt-color';
-  const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
-  const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStepping'; // disables pointer
-  const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
-  const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
-
-  // detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
-  const isLeftClickOrKey = (event) => event.which === 1 || event.which === undefined;
-
-  let holdingFastKey = false;
-  let holdingFastButton = false;
+    animTimeline.addOneSequence(animSequence);
+  }
 
 
-  forwardButton.addEventListener('mousedown', e => {
-    if (isLeftClickOrKey(e)) {
-      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atEnd()) { return; }
-      
-      forwardButton.classList.add(PRESSED);
-      backwardButton.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
-      backwardButton.classList.add(DISABLED_FROM_STEPPING);
-      forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+  /****************************************************** */
+  // REMOVE ARROW POINTING FROM M BLOCK AND SHOW FINAL TEXT BOX
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Remove arrow pointing from M block and show final text box');
+    animSequence.addManyBlocks([
+      // Add last text box
+      [ 'std', textP_MAccess_intro, 'fade-out', {duration: 0, blocksNext: false} ],
+      [ 'std', textP_MAccess_solved, 'fade-in', {duration: 0, blocksPrev: false} ],
+      [ 'line', freeLine_toMBlock, 'exit-wipe-to-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
+      [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-      animTimeline.step('forward')
-      .then(() => {
-        forwardButton.classList.remove(PRESSED);
-        forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-        backwardButton.classList.remove(DISABLED_FROM_STEPPING);
-        if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
-      });
-    }
-  });
+    animTimeline.addOneSequence(animSequence);
+  }
 
-  backwardButton.addEventListener('mousedown', e => {
-    if (isLeftClickOrKey(e)) {
-      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atBeginning()) { return; }
 
-      backwardButton.classList.add(PRESSED);
-      forwardButton.classList.remove(DISABLED_FROM_EDGE);
-      forwardButton.classList.add(DISABLED_FROM_STEPPING);
-      backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+  /****************************************************** */
+  // IF THIS IS A CHILD, ADD BLOCKS FOR HIDING PARENT ARROW BEFORE GOING BACK UP RECURSION TREE
+  /****************************************************** */
+  if (parentArrowDown) {
+    // just for hiding the last text box before moving back up the tree
+    const animSequence = new AnimSequence();
+    animSequence.setTag('finish a main card');
+    animSequence.addManyBlocks([
+      [ 'std', textbox_MAccess, 'fade-out', {blocksNext: false} ],
+      [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccessContainer, [0.1, 0.2], null, [0.5, 1] ],
+      [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
+      [ 'std', MAccessContainer, 'un-highlight', {blocksPrev: false} ],
+    ]);
 
-      animTimeline.step('backward')
-      .then(() => {
-        backwardButton.classList.remove(PRESSED);
-        forwardButton.classList.remove(DISABLED_FROM_STEPPING);
-        backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-        if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
-      });
-    }
-  });
+    return [animSequence, MAccessContainer, freeLine_upTree];
+  }
+};
 
-  pauseButton.addEventListener('mousedown', e => {
-    if (isLeftClickOrKey(e)) {
-      if (animTimeline.togglePause()) {
-        pauseButton.classList.add(PRESSED);
-        forwardButton.classList.add(DISABLED_FROM_PAUSE);
-        backwardButton.classList.add(DISABLED_FROM_PAUSE);
-      }
-      else {
-        pauseButton.classList.remove(PRESSED);
-        forwardButton.classList.remove(DISABLED_FROM_PAUSE);
-        backwardButton.classList.remove(DISABLED_FROM_PAUSE);
-      }
-    }
-  });
+// terminal function that creates the animation sequences for job stubs (which are leaves of the job card tree)
+function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
+  const SJNum = Number.parseInt(jobCard.dataset.sjnum);
+  const jobCardContent = jobCard.querySelector('.job-card-content');
+  const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
+  const MAccessContainer = jobCard.querySelector('.M-access-container');
+  const MAccess = jobCard.querySelector('.M-access');
+  const MEntry = jobCard.querySelector('.M-entry');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
+  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
+  const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
+  const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
+  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
 
-  skipButton.addEventListener('mousedown', e => {
-    if (isLeftClickOrKey(e)) {
-      if (animTimeline.toggleSkipping())
-        { skipButton.classList.add(PRESSED); }
-      else
-        { skipButton.classList.remove(PRESSED); }
-    }
-  });
 
-  fastForwardButton.addEventListener('mousedown', e => {
-    if (isLeftClickOrKey(e)) {
-      e.which === 1 && (holdingFastButton = true);
-      fastForwardButton.classList.add(PRESSED2);
-      animTimeline.setPlaybackRate(7);
-      document.addEventListener('mouseup', () => {
-        holdingFastButton = false;
-        if (!(holdingFastButton || holdingFastKey)) {
-          fastForwardButton.classList.remove(PRESSED2);
-          animTimeline.setPlaybackRate(1);
-        }
-      }, {once: true});
-    }
-  })
+  const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
 
-  // map keys to playback controls
-  window.addEventListener('keydown', e => {
-    // right arrow key steps forward
-    if (e.key === 'ArrowRight') {
-      e.preventDefault(); // prevent from moving page right
-      forwardButton.dispatchEvent(new Event('mousedown'));
-    }
+  
+  const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
+  const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
+  const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
-    // left arrow key steps backward
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault(); // prevent from moving page left
-      backwardButton.dispatchEvent(new Event('mousedown'));
-    }
 
-    // hold 'f' to increase playback rate (fast-forward)
-    if (e.key.toLowerCase() === 'f' && !e.repeat) {
-      holdingFastKey = true;
-      fastForwardButton.dispatchEvent(new Event('mousedown'));
-    }
+  /****************************************************** */
+  // FADE IN JOB STUB AND M ACCESS
+  /****************************************************** */
+  {
+    const animSequence = parentAnimSequence;
+    animSequence.addManyBlocks([
+      [ 'std', jobCard, 'fade-in', {blocksNext: false} ],
+    ]);
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_bulletConnector, 'enter-wipe-from-top', aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
+    ]);
+    animSequence.setDescription('Fade in job stub and M access');
+    animSequence.addManyBlocks([
+      [ 'line', parentArrowDown, 'enter-wipe-from-top', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
+      [ 'std', MAccess, 'fade-in' ],
+      [ 'std', MAccessContainer, 'highlight', {blocksNext: false, blocksPrev: false} ],
+      [ 'line', freeLine_MAccess, 'enter-wipe-from-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      [ 'std', textbox_MAccess, 'fade-in', {blocksPrev: false} ],
+    ]);
 
-    // 's' to toggle skipping
-    if (e.key.toLowerCase() === 's' && !e.repeat) { skipButton.dispatchEvent(new Event('mousedown')); }
+    animTimeline.addOneSequence(animSequence);
+  }
 
-    // ' ' (Space) to pause or unpause
-    if (e.key.toLowerCase() === ' ' && !e.repeat) {
-      e.preventDefault(); // prevent from moving page down
-      pauseButton.dispatchEvent(new Event('mousedown'));
-    }
-  });
 
-  window.addEventListener('keyup', e => {
-    // release 'f' to set playback rate back to 1 (stop fast-forwarding)
-    if (e.key === 'f') {
-      holdingFastKey = false;
-      if (!(holdingFastButton || holdingFastKey))
-      {
-        fastForwardButton.classList.remove(PRESSED2);
-        animTimeline.setPlaybackRate(1);
-      }
-    }
-  });
+  /****************************************************** */
+  // POINT TO M BLOCK ARRAY ENTRY
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Point to M block array entry');
+    animSequence.addOneBlock([ 'line', freeLine_toMBlock, 'enter-wipe-from-right', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
 
-  // animTimeline.skipTo('skip to');
-  // animTimeline.skipTo('focus comp 2');
-  // animTimeline.skipTo('found max');
-  // animTimeline.skipTo('OPT point 1');
-  // animTimeline.skipTo('start');
-  // animTimeline.skipTo('finish a main card');
-  // animTimeline.skipTo('replace formula container contents');
-  // animTimeline.skipTo('explain naive');
-  // animTimeline.skipTo('introduce memoization');
+    animTimeline.addOneSequence(animSequence);
+  }
+  
 
-  // skips to tag and checks to see if DISABLED_FROM_EDGE should be added or removed from forward/backward buttons
-  const skipTo = (tag) => {
-    animTimeline.skipTo(tag)
-    .then(() => {
-      if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
-      else { backwardButton.classList.remove(DISABLED_FROM_EDGE); }
+  /****************************************************** */
+  // POINT BACK TO M ACCESS FROM M BLOCK
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.setDescription('Point back to M access from M block');
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_toMBlock, 'fade-out', MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_toMBlock, 'enter-wipe-from-left', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      [ 'std', MAccess, 'exit-wipe-to-left' ],
+      [ 'std', MEntry, 'enter-wipe-from-right' ],
+      [ 'std', textbox_MAccess_p1, 'fade-out', {duration: 250, blocksNext: false} ],
+      [ 'std', textbox_MAccess_p2, 'fade-in', {duration: 250, blocksNext: false} ],
+    ]);
 
-      if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
-      else { forwardButton.classList.remove(DISABLED_FROM_EDGE); }
-    })
-  };
+    animTimeline.addOneSequence(animSequence);
+  }
 
-  // skipTo('start');
 
-}
-
-// generateVisualization();
+  /****************************************************** */
+  // RETURN BLOCK THAT INITIALLY HIDES REMAINING STUFF AND POINTS TO PARENT
+  /****************************************************** */
+  {
+    const animSequence = new AnimSequence();
+    animSequence.addManyBlocks([
+      [ 'line', freeLine_toMBlock, 'fade-out', MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false, lineOptions: {trackEndpoints: true}} ],
+      [ 'line', freeLine_MAccess, 'exit-wipe-to-bottom', MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
+      [ 'std', textbox_MAccess, 'fade-out', {blocksPrev: false} ],
+      [ 'line', parentArrowDown, 'fade-out', parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
+      [ 'std', MAccessContainer, 'un-highlight', {blocksPrev: false} ],
+    ]);
+  
+    return [animSequence, MAccessContainer, freeLine_upTree];
+  }
+};
