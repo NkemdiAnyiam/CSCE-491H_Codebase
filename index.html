@@ -25,9 +25,8 @@
       <div class="main-menu">
         <form action="#" method="post" class="job-form" novalidate>
           <div class="job-form__jobs-inputs">
-
             <template id="job-form__row-template">
-              <fieldset class="job-form__row">
+              <fieldset class="job-form__row" data-index="X">
                 <span class="job-form__job-letter">Job X</span>
   
                 <div class="job-form__field">
@@ -53,68 +52,13 @@
                   </label>
                   <span class="job-form__error job-form__error--weight"></span>
                 </div>
+
+                <button class="job-form__button job-form__button--delete" type="button">X &ThickSpace; Remove Job</button>
               </fieldset>
             </template>
-
-            <!-- <fieldset class="job-form__row">
-              <span class="job-form__job-letter">Job A</span>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Start Time:</span>
-                  <input type="number"class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
-                </label>
-                <span class="job-form__error job-form__error--startTime"></span>
-              </div>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Finish Time:</span>
-                  <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
-                </label>
-                <span class="job-form__error job-form__error--finishTime"></span>
-              </div>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Weight:</span>
-                  <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
-                </label>
-                <span class="job-form__error job-form__error--weight"></span>
-              </div>
-            </fieldset>
-
-            <fieldset class="job-form__row">
-              <span class="job-form__job-letter">Job B</span>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Start Time:</span>
-                  <input type="number"class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
-                </label>
-                <span class="job-form__error job-form__error--startTime"></span>
-              </div>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Finish Time:</span>
-                  <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
-                </label>
-                <span class="job-form__error job-form__error--finishTime"></span>
-              </div>
-
-              <div class="job-form__field">
-                <label class="job-form__label">
-                  <span class="job-form__label-text">Enter Weight:</span>
-                  <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
-                </label>
-                <span class="job-form__error job-form__error--weight"></span>
-              </div>
-            </fieldset> -->
-            
           </div>
-          <button class="job-form__button job-form__button--submit">Generate</button>
-          <button type="button" class="job-form__button job-form__button--add">Add</button>
+          <button class="job-form__button job-form__button--submit">Generate Visualization</button>
+          <button type="button" class="job-form__button job-form__button--add">Add Job</button>
         </form>
       </div>
 

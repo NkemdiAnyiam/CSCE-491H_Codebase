@@ -74,7 +74,10 @@
 }
 
 .job-form__button {
-  width: min-content;
+  width: max-content;
+  cursor: pointer;
+  padding: 1rem 3rem;
+  border-radius: 5rem;
 }
 
 .job-form__button--submit {
@@ -83,5 +86,11 @@
 
 .job-form__button--add {
   
+}
+
+.job-form__button--delete {
+  background-color: var(--color-red-lightest);
+  color: var(--color-red-dark);
+  height: 7rem;
 }
 

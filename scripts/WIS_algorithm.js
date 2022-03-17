@@ -21,14 +21,17 @@ const addJobRow = () => {
   if (numJobs >= 8) { console.error('Already 8 jobs'); return; }
 
   const jobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
+  jobFormRowEl.dataset.index = numJobs;
   const jobFormRowLetterEl = jobFormRowEl.querySelector('.job-form__job-letter');
-  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobs++ + 65)}`;
+  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobs + 65)}`;
 
   inputs_startTime.push(jobFormRowEl.querySelector(`[name="startTime"]`));
   inputs_finishTime.push(jobFormRowEl.querySelector(`[name="finishTime"]`));
   inputs_weight.push(jobFormRowEl.querySelector(`[name="weight"]`));
 
   formRowsEl.appendChild(jobFormRowEl);
+
+  ++numJobs;
 };
 
 addJobRow();
@@ -86,6 +89,23 @@ formEl.addEventListener('submit', (e) => {
     }
     doThing(jobsUnsorted);
   }
+});
+
+formEl.addEventListener('click', (e) => {
+  const deleteButton = e.target.closest('.job-form__button--delete');
+  if (!deleteButton) { return; }
+  if (numJobs <= 1) { console.error('Must have at least 1 job present'); return; }
+  const jobFormRowEl = deleteButton.closest('.job-form__row');
+  const rowIndex = stoi(jobFormRowEl.dataset.index);
+  [...formRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
+    rowEl.dataset.index = `${rowIndex + i}`;
+    rowEl.querySelector('.job-form__job-letter').textContent = `Job ${String.fromCharCode(rowIndex + i + 65)}`;
+  });
+  inputs_startTime.splice(rowIndex, 1);
+  inputs_finishTime.splice(rowIndex, 1);
+  inputs_weight.splice(rowIndex, 1);
+  jobFormRowEl.remove();
+  --numJobs;
 });
 
 const doThing = (jobsUnsorted) => {
