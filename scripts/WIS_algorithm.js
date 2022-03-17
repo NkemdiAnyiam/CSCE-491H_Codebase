@@ -1,3 +1,4 @@
+import { stoi } from './utility.js';
 import { Job } from './Job.js';
 import { JobScheduler } from './JobScheduler.js';
 import { AnimBlock } from './AnimBlock.js';
@@ -5,114 +6,152 @@ import { AnimBlockLine } from './AnimBlockLine.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 
-const stoi = string => Number.parseInt(string);
 
-const formEl = document.querySelector('.job-form');
-const formRowsEl = formEl.querySelector('.job-form__jobs-inputs');
-const inputs_startTime = [...formEl.querySelectorAll(`[name="startTime"]`)];
-const inputs_finishTime = [...formEl.querySelectorAll(`[name="finishTime"]`)];
-const inputs_weight = [...formEl.querySelectorAll(`[name="weight"]`)];
+const jobFormEl = document.querySelector('.job-form');
+const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-inputs');
 const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
-const addButton = formEl.querySelector('.job-form__button--add');
+const addButton = jobFormEl.querySelector('.job-form__button--add');
+const generateButton = jobFormEl.querySelector('.job-form__button--submit');
 
-let numJobs = 0;
+let numJobRows = 0;
 
 const addJobRow = () => {
-  if (numJobs >= 8) { console.error('Already 8 jobs'); return; }
+  const newJobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
+  newJobFormRowEl.dataset.index = numJobRows;
+  const jobFormRowLetterEl = newJobFormRowEl.querySelector('.job-form__job-letter');
+  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobRows + 65)}`;
 
-  const jobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
-  jobFormRowEl.dataset.index = numJobs;
-  const jobFormRowLetterEl = jobFormRowEl.querySelector('.job-form__job-letter');
-  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobs + 65)}`;
+  jobFormRowsEl.appendChild(newJobFormRowEl);
 
-  inputs_startTime.push(jobFormRowEl.querySelector(`[name="startTime"]`));
-  inputs_finishTime.push(jobFormRowEl.querySelector(`[name="finishTime"]`));
-  inputs_weight.push(jobFormRowEl.querySelector(`[name="weight"]`));
+  ++numJobRows;
+  
+  if (numJobRows === 8) { disableButton(addButton); }
 
-  formRowsEl.appendChild(jobFormRowEl);
-
-  ++numJobs;
-};
-
-addJobRow();
-
-addButton.addEventListener('click', addJobRow);
-
-const checkTimeValid = (index) => {
-  const inputStart = inputs_startTime[index];
-  const inputFinish = inputs_finishTime[index];
-
-  if (stoi(inputStart.value) >= stoi(inputFinish.value)) {
-    inputStart.setCustomValidity('Value must be less than finish time.');
-    inputFinish.setCustomValidity('Value must be greater than start time.');
-    const errorMessageEl_start = inputStart.closest('label').nextElementSibling;
-    const errorMessageEl_finish = inputFinish.closest('label').nextElementSibling;
-    errorMessageEl_start.textContent = inputStart.validationMessage;
-    errorMessageEl_finish.textContent = inputFinish.validationMessage;
-  }
-  else {
-    inputStart.setCustomValidity('');
-    inputFinish.setCustomValidity('');
+  if (numJobRows === 2) {
+    const disabledRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove.button-disabled');
+    enableButton(disabledRemoveButton);
   }
 };
 
-formEl.addEventListener('input', (e) => {
-  const input = e.target;
-  const index = Math.max(inputs_startTime.indexOf(input), inputs_finishTime.indexOf(input));
-  if (index > -1) {
-    checkTimeValid(index);
-    const inputStart = inputs_startTime[index];
-    const inputFinish = inputs_finishTime[index];
-
-    const errorMessageEl_start = inputStart.closest('label').nextElementSibling;
-    const errorMessageEl_finish = inputFinish.closest('label').nextElementSibling;
-
-    errorMessageEl_start.textContent = inputStart.validity.valid ? '' : inputStart.validationMessage;
-    errorMessageEl_finish.textContent = inputFinish.validity.valid ? '' : inputFinish.validationMessage;
-  }
-  else {
-    const errorMessageEl = input.closest('label').nextElementSibling;
-    errorMessageEl.textContent = input.validity.valid ? '' : input.validationMessage;
-  }
-});
-
-formEl.addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (formEl.checkValidity()) {
-    const jobsUnsorted = [];
-    for (let i = 0; i < inputs_startTime.length; ++i) {
-      jobsUnsorted.push(new Job(
-        stoi(inputs_startTime[i].value),
-        stoi(inputs_finishTime[i].value),
-        stoi(inputs_weight[i].value)
-      ));
-    }
-    doThing(jobsUnsorted);
-  }
-});
-
-formEl.addEventListener('click', (e) => {
+const removeJobRow = (e) => {
   const removeButton = e.target.closest('.job-form__button--remove');
   if (!removeButton) { return; }
-  if (numJobs <= 1) { console.error('Must have at least 1 job present'); return; }
+
+  addButton.disabled = false;
+  addButton.classList.remove('button-disabled');
+  
   const jobFormRowEl = removeButton.closest('.job-form__row');
   const rowIndex = stoi(jobFormRowEl.dataset.index);
-  [...formRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
+  [...jobFormRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
     rowEl.dataset.index = `${rowIndex + i}`;
     rowEl.querySelector('.job-form__job-letter').textContent = `Job ${String.fromCharCode(rowIndex + i + 65)}`;
   });
-  inputs_startTime.splice(rowIndex, 1);
-  inputs_finishTime.splice(rowIndex, 1);
-  inputs_weight.splice(rowIndex, 1);
   jobFormRowEl.remove();
-  --numJobs;
-});
+  --numJobRows;
 
-const doThing = (jobsUnsorted) => {
-  const mainMenu = document.querySelector('.main-menu');
-  mainMenu.remove();
-  const viz = document.querySelector('.visualization');
-  viz.classList.remove('hidden');
+  
+  if (numJobRows === 1) { 
+    const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
+    disableButton(lastRemoveButton);
+  }
+  
+  if (jobFormEl.checkValidity()) { enableButton(generateButton); }
+};
+
+const enableButton = buttonEl => {
+    buttonEl.disabled = false;
+    buttonEl.classList.remove('button-disabled');
+}
+const disableButton = buttonEl => {
+    buttonEl.disabled = true;
+    buttonEl.classList.add('button-disabled');
+}
+
+const checkValidity = (e) => {
+  const input = e.target;
+
+  const isTimeInput = input.classList.contains('job-form__input--startTime') || input.classList.contains('job-form__input--finishTime');
+
+  if (isTimeInput) {
+    const jobFormRowEl = input.closest('.job-form__row');
+    const input_start = jobFormRowEl.querySelector('[name="startTime"]');
+    const input_finish = jobFormRowEl.querySelector('[name="finishTime"]');
+    validateTimeInputs(input_start, input_finish);
+  }
+  else {
+    const errorMessageEl_weight = input.closest('label').nextElementSibling;
+    errorMessageEl_weight.textContent = input.validity.valid ? '' : input.validationMessage;
+  }
+
+  if (!jobFormEl.checkValidity()) { disableButton(generateButton); }
+  else { enableButton(generateButton); }
+};
+
+const validateTimeInputs = (input_start, input_finish) => {
+  const errorMessageEl_start = input_start.closest('label').nextElementSibling;
+  const errorMessageEl_finish = input_finish.closest('label').nextElementSibling;
+
+  if (stoi(input_start.value) >= stoi(input_finish.value)) {
+    input_start.setCustomValidity('Value must be less than finish time.');
+    input_finish.setCustomValidity('Value must be greater than start time.');
+    
+    errorMessageEl_start.textContent = input_start.validationMessage;
+    errorMessageEl_finish.textContent = input_finish.validationMessage;
+  }
+  else {
+    input_start.setCustomValidity('');
+    input_finish.setCustomValidity('');
+  }
+
+  errorMessageEl_start.textContent = input_start.validity.valid ? '' : input_start.validationMessage;
+  errorMessageEl_finish.textContent = input_finish.validity.valid ? '' : input_finish.validationMessage;
+};
+
+const submit = (e) => {
+  e.preventDefault();
+  if (jobFormEl.checkValidity()) {
+    const jobsUnsorted = [];
+    jobFormRowTemplateEl.remove();
+    for (let i = 0; i < numJobRows; ++i) {
+      const jobFormRowEl = jobFormRowsEl.children[i];
+      const input_start = jobFormRowEl.querySelector('[name="startTime"]');
+      const input_finish = jobFormRowEl.querySelector('[name="finishTime"]');
+      const input_weight = jobFormRowEl.querySelector('[name="weight"]');
+      jobsUnsorted.push(new Job(
+        stoi(input_start.value),
+        stoi(input_finish.value),
+        stoi(input_weight.value),
+      ));
+    }
+
+    addButton.removeEventListener('click', addJobRow);
+    jobFormEl.removeEventListener('click', removeJobRow);
+    jobFormEl.removeEventListener('input', checkValidity);
+    jobFormEl.removeEventListener('submit', submit);
+
+    generateVisualization(jobsUnsorted);
+  }
+};
+
+addButton.addEventListener('click', addJobRow);
+jobFormEl.addEventListener('click', removeJobRow);
+jobFormEl.addEventListener('input', checkValidity);
+jobFormEl.addEventListener('submit', submit);
+
+const addFirstJobFormRow = () => {
+  addButton.dispatchEvent(new Event('click')); // add one job row by default
+  const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
+  lastRemoveButton.disabled = true;
+  lastRemoveButton.classList.add('button-disabled');
+};
+addFirstJobFormRow();
+
+
+
+
+const generateVisualization = (jobsUnsorted) => {
+  document.querySelector('.main-menu').remove();
+  document.querySelector('.visualization').classList.remove('hidden');
   // TODO: Move this somewhere else
   const dataDisplay = document.querySelector('.data-display');
   document.addEventListener('scroll', function(e) {
@@ -1290,4 +1329,4 @@ const doThing = (jobsUnsorted) => {
 
 }
 
-// doThing();
+// generateVisualization();

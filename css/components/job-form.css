@@ -99,7 +99,8 @@
   background-color: var(--color-blue-light);
 }
 
-.job-form__button--add:active {
+.job-form__button--add:active,
+.job-form__button--add.button-disabled {
   background-color: var(--color-blue-dark);
   color: var(--color-blue-lightest);
   border-color: transparent;
@@ -115,7 +116,8 @@
   background-color: var(--color-green-light);
 }
 
-.job-form__button--submit:active {
+.job-form__button--submit:active,
+.job-form__button--submit.button-disabled {
   background-color: var(--color-green-dark);
   color: var(--color-green-lightest);
   border-color: transparent;
@@ -134,7 +136,8 @@
   background-color: var(--color-red-light);
 }
 
-.job-form__button--remove:active {
+.job-form__button--remove:active,
+.job-form__button--remove.button-disabled {
   background-color: var(--color-red-dark);
   color: var(--color-red-lightest);
   border-color: transparent;

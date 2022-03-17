@@ -26,6 +26,10 @@ span {
   display: none!important;
 }
 
+.button-disabled {
+  cursor: not-allowed!important;
+}
+
 .text-box.hidden,
 .time-graph__c-bar.hidden {
   visibility: hidden;
