@@ -156,7 +156,7 @@ export class JobScheduler {
   }
 
   jobFinishComparator(job1, job2) {
-    if (job1.getFinish() <= job2.getFinish()) { return -1; }
+    if (job1.getFinish() < job2.getFinish()) { return -1; }
     else { return 1; }
   }
 
