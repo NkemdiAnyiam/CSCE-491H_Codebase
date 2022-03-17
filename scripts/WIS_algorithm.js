@@ -7,10 +7,33 @@ import { AnimTimeline } from "./AnimTimeline.js";
 
 const stoi = string => Number.parseInt(string);
 
-const form = document.querySelector('.job-form');
-const inputs_startTime = [...form.querySelectorAll(`[name="startTime"]`)];
-const inputs_finishTime = [...form.querySelectorAll(`[name="finishTime"]`)];
-const inputs_weight = [...form.querySelectorAll(`[name="weight"]`)];
+const formEl = document.querySelector('.job-form');
+const formRowsEl = formEl.querySelector('.job-form__jobs-inputs');
+const inputs_startTime = [...formEl.querySelectorAll(`[name="startTime"]`)];
+const inputs_finishTime = [...formEl.querySelectorAll(`[name="finishTime"]`)];
+const inputs_weight = [...formEl.querySelectorAll(`[name="weight"]`)];
+const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
+const addButton = formEl.querySelector('.job-form__button--add');
+
+let numJobs = 0;
+
+const addJobRow = () => {
+  if (numJobs >= 8) { console.error('Already 8 jobs'); return; }
+
+  const jobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
+  const jobFormRowLetterEl = jobFormRowEl.querySelector('.job-form__job-letter');
+  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobs++ + 65)}`;
+
+  inputs_startTime.push(jobFormRowEl.querySelector(`[name="startTime"]`));
+  inputs_finishTime.push(jobFormRowEl.querySelector(`[name="finishTime"]`));
+  inputs_weight.push(jobFormRowEl.querySelector(`[name="weight"]`));
+
+  formRowsEl.appendChild(jobFormRowEl);
+};
+
+addJobRow();
+
+addButton.addEventListener('click', addJobRow);
 
 const checkTimeValid = (index) => {
   const inputStart = inputs_startTime[index];
@@ -30,7 +53,7 @@ const checkTimeValid = (index) => {
   }
 };
 
-form.addEventListener('input', (e) => {
+formEl.addEventListener('input', (e) => {
   const input = e.target;
   const index = Math.max(inputs_startTime.indexOf(input), inputs_finishTime.indexOf(input));
   if (index > -1) {
@@ -50,9 +73,9 @@ form.addEventListener('input', (e) => {
   }
 });
 
-form.addEventListener('submit', (e) => {
+formEl.addEventListener('submit', (e) => {
   e.preventDefault();
-  if (form.checkValidity()) {
+  if (formEl.checkValidity()) {
     const jobsUnsorted = [];
     for (let i = 0; i < inputs_startTime.length; ++i) {
       jobsUnsorted.push(new Job(

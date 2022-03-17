@@ -8,14 +8,31 @@
   gap: 10rem;
 }
 
-.job-form__inputs-group {
+.job-form__jobs-inputs {
   display: flex;
+  flex-direction: column;
   gap: 10rem;
+}
+
+.job-form__row {
+  display: flex;
+  /* align-items: center; */
+  gap: 10rem;
+}
+
+.job-form__job-letter {
+  font-size: 4.8rem;
+  padding: 1rem 3rem;
+  background-color: var(--color-blue-dark);
+  color: var(--color-blue-lightest);
+  border-radius: 5rem;
+
+  display: flex;
+  align-items: center;
 }
 
 .job-form__field {
   width: 65rem;
-  height: 20rem;
 
   display: flex;
   flex-direction: column;
@@ -45,7 +62,7 @@
 }
 
 .job-form__error {
-  color: var(--color-gray-lightest);
+  color: var(--color-yellow);
   background-color: var(--color-red-dark);
   padding: 1rem 3rem;
   font-size: 3.6rem;
@@ -56,7 +73,15 @@
   display: none;
 }
 
-.job-form__submit {
+.job-form__button {
   width: min-content;
+}
+
+.job-form__button--submit {
+  
+}
+
+.job-form__button--add {
+  
 }
 
