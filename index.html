@@ -24,10 +24,13 @@
     <div class="container">
       <div class="main-menu">
         <form action="#" method="post" class="job-form" novalidate>
+          
+          <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
+
           <div class="job-form__jobs-inputs">
             <template id="job-form__row-template">
               <fieldset class="job-form__row" data-index="X">
-                <span class="job-form__job-letter">Job X</span>
+                <legend class="job-form__job-letter">Job X</legend>
   
                 <div class="job-form__field">
                   <label class="job-form__label">
@@ -53,12 +56,13 @@
                   <span class="job-form__error job-form__error--weight"></span>
                 </div>
 
-                <button class="job-form__button job-form__button--delete" type="button">X &ThickSpace; Remove Job</button>
+                <button class="job-form__button job-form__button--remove" type="button">X&ThinSpace;Remove Job</button>
               </fieldset>
             </template>
           </div>
+
           <button class="job-form__button job-form__button--submit">Generate Visualization</button>
-          <button type="button" class="job-form__button job-form__button--add">Add Job</button>
+
         </form>
       </div>
 

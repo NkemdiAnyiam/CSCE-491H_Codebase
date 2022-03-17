@@ -92,10 +92,10 @@ formEl.addEventListener('submit', (e) => {
 });
 
 formEl.addEventListener('click', (e) => {
-  const deleteButton = e.target.closest('.job-form__button--delete');
-  if (!deleteButton) { return; }
+  const removeButton = e.target.closest('.job-form__button--remove');
+  if (!removeButton) { return; }
   if (numJobs <= 1) { console.error('Must have at least 1 job present'); return; }
-  const jobFormRowEl = deleteButton.closest('.job-form__row');
+  const jobFormRowEl = removeButton.closest('.job-form__row');
   const rowIndex = stoi(jobFormRowEl.dataset.index);
   [...formRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
     rowEl.dataset.index = `${rowIndex + i}`;
