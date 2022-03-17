@@ -22,7 +22,7 @@ export class Job {
   getJobBar() { return this._jobBarEl; }
 
   setSortedJobNum(sortedJobNum) { this._sortedJobNum = sortedJobNum; }
-  // setCompatibleJobNum(compatibleJobNum) { this._compatibleJobNum = compatibleJobNum; }
+  setJobBar(jobBarEl) { this._jobBarEl = jobBarEl; }
 
   findCompatibleJobNum(jobs) {
     this._compatibleJobNum = 0;
@@ -34,32 +34,6 @@ export class Job {
     }
     
     return this._compatibleJobNum;
-  }
-
-  generateJobBar() {
-    const templateBarId = "time-graph__job-bar-template";
-    const resultBarTemplateEl = document.getElementById(templateBarId);
-    const cloneBar = document.importNode(resultBarTemplateEl.content, true);
-
-    const jobBarEl = cloneBar.querySelector('.time-graph__job-bar');
-    jobBarEl.textContent = `weight ${this._weight}`;
-    jobBarEl.dataset.jobletter = this._jobLetter;
-    jobBarEl.dataset.sjnum = `${this._sortedJobNum}`;
-    jobBarEl.dataset.compatiblejobnum = `${this._compatibleJobNum}`;
-    jobBarEl.dataset.start = this._start;
-    jobBarEl.title = `Job ${this._jobLetter}:
-      start = ${this._start}
-      finish = ${this._finish}
-      weight = ${this._weight}
-      j = ${this._sortedJobNum}
-      cj = ${this._compatibleJobNum}`;
-    jobBarEl.style.width = `calc(${18 * this.getDuration()}rem + 1px)`;
-    this._jobBarEl = jobBarEl;
-    return jobBarEl;
-  }
-
-  generateJobCard() {
-
   }
 
   toStr() {

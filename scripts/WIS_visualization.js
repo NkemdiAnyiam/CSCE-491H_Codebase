@@ -1,156 +1,351 @@
-import { stoi } from './utility.js';
 import { Job } from './Job.js';
-import { JobScheduler } from './JobScheduler.js';
+import { TreeNode, JobScheduler } from './JobScheduler.js';
 import { AnimBlock } from './AnimBlock.js';
 import { AnimBlockLine } from './AnimBlockLine.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 
+class SceneCreator {
+  nextCardNum = 1;
 
-const jobFormEl = document.querySelector('.job-form');
-const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-inputs');
-const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
-const addButton = jobFormEl.querySelector('.job-form__button--add');
-const generateButton = jobFormEl.querySelector('.job-form__button--submit');
-
-let numJobRows = 0;
-
-const addJobRow = () => {
-  const newJobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
-  newJobFormRowEl.dataset.index = numJobRows;
-  const jobFormRowLetterEl = newJobFormRowEl.querySelector('.job-form__job-letter');
-  jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobRows + 65)}`;
-
-  jobFormRowsEl.appendChild(newJobFormRowEl);
-
-  ++numJobRows;
-  
-  if (numJobRows === 8) { disableButton(addButton); }
-
-  if (numJobRows === 2) {
-    const disabledRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove.button-disabled');
-    enableButton(disabledRemoveButton);
-  }
-};
-
-const removeJobRow = (e) => {
-  const removeButton = e.target.closest('.job-form__button--remove');
-  if (!removeButton) { return; }
-
-  addButton.disabled = false;
-  addButton.classList.remove('button-disabled');
-  
-  const jobFormRowEl = removeButton.closest('.job-form__row');
-  const rowIndex = stoi(jobFormRowEl.dataset.index);
-  [...jobFormRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
-    rowEl.dataset.index = `${rowIndex + i}`;
-    rowEl.querySelector('.job-form__job-letter').textContent = `Job ${String.fromCharCode(rowIndex + i + 65)}`;
-  });
-  jobFormRowEl.remove();
-  --numJobRows;
-
-  
-  if (numJobRows === 1) { 
-    const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
-    disableButton(lastRemoveButton);
-  }
-  
-  if (jobFormEl.checkValidity()) { enableButton(generateButton); }
-};
-
-const enableButton = buttonEl => {
-    buttonEl.disabled = false;
-    buttonEl.classList.remove('button-disabled');
-}
-const disableButton = buttonEl => {
-    buttonEl.disabled = true;
-    buttonEl.classList.add('button-disabled');
-}
-
-const checkValidity = (e) => {
-  const input = e.target;
-
-  const isTimeInput = input.classList.contains('job-form__input--startTime') || input.classList.contains('job-form__input--finishTime');
-
-  if (isTimeInput) {
-    const jobFormRowEl = input.closest('.job-form__row');
-    const input_start = jobFormRowEl.querySelector('[name="startTime"]');
-    const input_finish = jobFormRowEl.querySelector('[name="finishTime"]');
-    validateTimeInputs(input_start, input_finish);
-  }
-  else {
-    const errorMessageEl_weight = input.closest('label').nextElementSibling;
-    errorMessageEl_weight.textContent = input.validity.valid ? '' : input.validationMessage;
+  constructor(jobScheduler) {
+    this.jobScheduler = jobScheduler;
   }
 
-  if (!jobFormEl.checkValidity()) { disableButton(generateButton); }
-  else { enableButton(generateButton); }
-};
+  initialize() {
+    this.generateCardTree();
+  }
 
-const validateTimeInputs = (input_start, input_finish) => {
-  const errorMessageEl_start = input_start.closest('label').nextElementSibling;
-  const errorMessageEl_finish = input_finish.closest('label').nextElementSibling;
+  generateJobBar(job) {
+    const templateBarId = "time-graph__job-bar-template";
+    const resultBarTemplateEl = document.getElementById(templateBarId);
+    const cloneBar = document.importNode(resultBarTemplateEl.content, true);
 
-  if (stoi(input_start.value) >= stoi(input_finish.value)) {
-    input_start.setCustomValidity('Value must be less than finish time.');
-    input_finish.setCustomValidity('Value must be greater than start time.');
+    const jobBarEl = cloneBar.querySelector('.time-graph__job-bar');
+    jobBarEl.textContent = `weight ${job.getWeight()}`;
+    jobBarEl.dataset.jobletter = job.getJobLetter();
+    jobBarEl.dataset.sjnum = `${job.getSortedJobNum()}`;
+    jobBarEl.dataset.compatiblejobnum = `${job.getCompatibleJobNum()}`;
+    jobBarEl.dataset.start = job.getStart();
+    jobBarEl.title = `Job ${job.getJobLetter()}:
+      start = ${job.getStart()}
+      finish = ${job.getFinish()}
+      weight = ${job.getWeight()}
+      j = ${job.getSortedJobNum()}
+      cj = ${job.getCompatibleJobNum()}`;
+    jobBarEl.style.width = `calc(${18 * job.getDuration()}rem + 1px)`;
+
+    job.setJobBar(jobBarEl);
+
+    return jobBarEl;
+  }
+
+  genNewJobStub(data) {
+    const {job, MEntry} = data;
+
+    const cardNum = this.nextCardNum++;
+    const SJNum = job?.getSortedJobNum() ?? 0;
+  
+    const templateCardId = "job-stub-template";
+    const resultCardTemplate = document.getElementById(templateCardId);
+    const cloneCard = document.importNode(resultCardTemplate.content, true);
+  
+    const jobCardEl = cloneCard.querySelector('.job-card');
+    const SJNumEls = cloneCard.querySelectorAll('.SJ-num');
+    const MEntryEl = cloneCard.querySelector('.M-entry');
+    const textParagraph2 = jobCardEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--2');
+  
+    if (SJNum > 0) {
+      textParagraph2.innerHTML =
+      `
+        The entry already exists, so we already know that the optimal weight from
+        the beginning through <span class="SJ-related">job ${SJNum}</span> is ${MEntry}.
+        Let's pass this back up the tree.
+      `;
+    }
+    else {
+      textParagraph2.innerHTML =
+      `
+        The entry already exists. Of course, there is no "<span class="SJ-related">job 0</span>";
+        this is the base case for <span class="SJ-related">j = 0</span>. 0 jobs means 0 weight.
+        Let's pass this back up the tree.
+      `;
+    }
+  
+    jobCardEl.dataset.cardnum = `${cardNum}`;
+    jobCardEl.dataset.sjnum = `${SJNum}`;
+    SJNumEls.forEach((el) => {
+      el.textContent = SJNum;
+    });
+    MEntryEl.textContent = MEntry;
+  
+    return jobCardEl;
+  }
+  
+  genNewJobCard(data) {
+    const templateCardId = "job-card-template";
+    const resultCardTemplate = document.getElementById(templateCardId);
+    const cloneCard = document.importNode(resultCardTemplate.content, true);
+  
+    const jobCardEl = cloneCard.querySelector('.job-card');
+
+    this.setJobCardData(jobCardEl, data);
+
+    return jobCardEl;
+  }
+  
+  setJobCardData(jobCardEl, data) {
+    const {
+      job,
+      computationResult1,
+      computationResult2,
+      MEntry: formulaResult,
+    } = data;
+
+    const SJNum = job.getSortedJobNum();
+    const weight = job.getWeight();
+    const cEntry = job.getCompatibleJobNum();
+    const nextSJNum = SJNum - 1;
+
+    const OPTResult1 = computationResult1 - weight;
+    const OPTResult2 = computationResult2 - weight;
+  
+    const cardNum = this.nextCardNum++;
+  
+    const jobCardContentEl = jobCardEl.querySelector('.job-card-content');
+  
+    const weightEl = jobCardContentEl.querySelector('.weight');
+    const cEntryEl = jobCardContentEl.querySelector('.c-entry');
+  
+    const nextSJNumEl = jobCardContentEl.querySelector('.next-SJ-num');
+  
+    jobCardContentEl.dataset.cardnum = `${cardNum}`;
+    jobCardEl.dataset.sjnum = `${SJNum}`;
+    weightEl.textContent = weight;
+    cEntryEl.textContent = cEntry;
+    nextSJNumEl.textContent = nextSJNum;
+  
+  
+    const OPTResult1El = jobCardContentEl.querySelector('.computation--1 .OPT-result');
+    const computationResult1El = jobCardContentEl.querySelector('.computation--1 .computation-result');
+  
+    OPTResult1El.textContent = OPTResult1;
+    computationResult1El.textContent = computationResult1;
+  
+  
+    const OPTResult2El = jobCardContentEl.querySelector('.computation--2 .OPT-result');
+    const computationResult2El = jobCardContentEl.querySelector('.computation--2 .computation-result');
+  
+    OPTResult2El.textContent = OPTResult2;
+    computationResult2El.textContent = computationResult2;
+  
+  
+    const formulaResultEl = jobCardContentEl.querySelector('.formula-result');
+    const MEntryEl = jobCardContentEl.querySelector('.M-entry');
+    formulaResultEl.textContent = formulaResult;
+    MEntryEl.textContent = formulaResult;
+  
+  
+    const textP_MAccess = jobCardContentEl.querySelector('.text-box-line-group--M-access .text-box__paragraph--solved');
+    if (cardNum === 1) {
+      textP_MAccess.innerHTML =
+      `
+        Excellent, this is the last finishing job, so we are finished.
+        The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
+      `;
+    }
+    else {
+      textP_MAccess.innerHTML =
+      `
+        Excellent. Now let's pass this result back up the tree.
+      `;
+    }
+  
     
-    errorMessageEl_start.textContent = input_start.validationMessage;
-    errorMessageEl_finish.textContent = input_finish.validationMessage;
-  }
-  else {
-    input_start.setCustomValidity('');
-    input_finish.setCustomValidity('');
+    jobCardContentEl.querySelectorAll('.SJ-num').forEach((el) => el.textContent = SJNum);
+    jobCardContentEl.querySelectorAll('.fill--next-SJ-num').forEach((el) => el.textContent = nextSJNum);
+    jobCardContentEl.querySelectorAll('.fill--c-entry').forEach((el) => el.textContent = cEntry);
+    jobCardContentEl.querySelectorAll('.fill--weight').forEach((el) => el.textContent = weight);
+    jobCardContentEl.querySelectorAll('.fill--OPT-1').forEach((el) => el.textContent = OPTResult1);
+    jobCardContentEl.querySelectorAll('.fill--OPT-2').forEach((el) => el.textContent = OPTResult2);
+    jobCardContentEl.querySelectorAll('.fill--comp-1').forEach((el) => el.textContent = computationResult1);
+    jobCardContentEl.querySelectorAll('.fill--comp-2').forEach((el) => el.textContent = computationResult2);
+    jobCardContentEl.querySelectorAll('.fill--comp-final').forEach((el) => el.textContent = formulaResult);
   }
 
-  errorMessageEl_start.textContent = input_start.validity.valid ? '' : input_start.validationMessage;
-  errorMessageEl_finish.textContent = input_finish.validity.valid ? '' : input_finish.validationMessage;
-};
+  generateCardTree() {
+    const jobTreeRootNode = this.jobScheduler.getRootNode();
+    const newCardEl = this.genNewJobCard(jobTreeRootNode.data);
 
-const submit = (e) => {
-  e.preventDefault();
-  if (jobFormEl.checkValidity()) {
-    const jobsUnsorted = [];
-    jobFormRowTemplateEl.remove();
-    for (let i = 0; i < numJobRows; ++i) {
-      const jobFormRowEl = jobFormRowsEl.children[i];
-      const input_start = jobFormRowEl.querySelector('[name="startTime"]');
-      const input_finish = jobFormRowEl.querySelector('[name="finishTime"]');
-      const input_weight = jobFormRowEl.querySelector('[name="weight"]');
-      jobsUnsorted.push(new Job(
-        stoi(input_start.value),
-        stoi(input_finish.value),
-        stoi(input_weight.value),
-      ));
+    const rootContainerEl = document.querySelector('.job-cards');
+    rootContainerEl.append(newCardEl);
+
+    const childrenContainerEl = newCardEl.querySelector('.job-card-children');
+    jobTreeRootNode.children.forEach((childNode) => { this.generateCardTreeR(childNode, childrenContainerEl); });
+    
+    document.getElementById('job-card-template').remove();
+    document.getElementById('job-stub-template').remove();
+  }
+
+  generateCardTreeR(treeNode, parentContainerEl) {
+    if (!treeNode.isLeaf) {
+      const newCardEl = this.genNewJobCard(treeNode.data);
+      parentContainerEl.append(newCardEl);
+
+      const childrenContainerEl = newCardEl.querySelector('.job-card-children');
+      treeNode.children.forEach((childNode) => { this.generateCardTreeR(childNode, childrenContainerEl); });
+    }
+    else {
+      const newStubEl = this.genNewJobStub(treeNode.data);
+      parentContainerEl.append(newStubEl);
+    }
+  }
+
+  setUpScene(jobsUnsorted) {
+    // Set up row template and time row to make sure they have proper number of cells
+    const templateRowId = 'time-graph__row-template';
+    const resultRowTemplateEl = document.getElementById(templateRowId);
+    const rowTemplateRow = resultRowTemplateEl.content.querySelector('.time-graph__row');
+    const timesRow = document.querySelector('.time-graph__row--times');
+
+    for (let i = 0; i <= Math.ceil(this.jobScheduler.getMaxTime()); ++i) {
+      rowTemplateRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"></div>`);
+      timesRow.insertAdjacentHTML('beforeend', `<div class="time-graph__cell time-graph__cell--${i}"><span>${i}</span></div>`);
     }
 
-    addButton.removeEventListener('click', addJobRow);
-    jobFormEl.removeEventListener('click', removeJobRow);
-    jobFormEl.removeEventListener('input', checkValidity);
-    jobFormEl.removeEventListener('submit', submit);
+    // Generate time graph rows, and job bars
+    const jobBarsEl = document.querySelector('.time-graph__job-bars');
 
-    generateVisualization(jobsUnsorted);
+    jobsUnsorted.forEach((job, i) => {
+      // job bar
+      const jobEl = this.generateJobBar(job);
+      jobEl.style.left = `${i*10}rem`;
+      jobEl.style.top = `${i*10}rem`;
+      jobBarsEl.append(jobEl);
+
+      // time graph row
+      const cloneRow = document.importNode(resultRowTemplateEl.content, true);
+      const timeGraphRow = cloneRow.querySelector('.time-graph__row');
+      // row header data
+      const rowSJNum = cloneRow.querySelector('.time-graph__SJ-num');
+      const rowLetter_unsorted = cloneRow.querySelector('.time-graph__job-letter--unsorted');
+      const rowLetter_sorted = cloneRow.querySelector('.time-graph__job-letter--sorted');
+
+      const sortedJobLetter = this.jobScheduler.getJobs()[i].getJobLetter(); // letters but ordered with respect to sorted job numbers
+      const unsortedJobLetter = String.fromCharCode(i + 65); // in order of A, B, C, D, etc.
+
+      timeGraphRow.classList.add(`time-graph__row--${i}`);
+      timeGraphRow.dataset.jobletterunsorted = unsortedJobLetter;
+      rowLetter_unsorted.textContent = `Job ${unsortedJobLetter}`;
+      timeGraphRow.dataset.joblettersorted = sortedJobLetter;
+      rowLetter_sorted.textContent = `Job ${sortedJobLetter}`;
+      rowSJNum.textContent = `j=${i+1}`;
+
+      timesRow.before(timeGraphRow); // inserting new rows above the times row
+    });
+    document.getElementById('time-graph__job-bar-template').remove();
+    resultRowTemplateEl.remove();
+
+
+    // Insert array blocks
+    const templateArrayBlockID = 'array__array-block-template';
+    const resultBlockTemplate = document.getElementById(templateArrayBlockID);
+    const array_J1 = document.querySelector('.array-group--j-and-c .array--j');
+    const array_J2 = document.querySelector('.array-group--j-and-M .array--j');
+    const array_c = document.querySelector('.array-group--j-and-c .array--c');
+    const array_M = document.querySelector('.array-group--j-and-M .array--M');
+
+    const numJobs = this.jobScheduler.getNumJobs();
+
+    for (let i = 0; i <= numJobs; ++i) {
+      const jBlockString = `<div class="array__array-block array__array-block--${i} highlightable">${i}</div>`
+      array_J1.insertAdjacentHTML('beforeend', jBlockString);
+      array_J2.insertAdjacentHTML('beforeend', jBlockString);
+      
+      const cloneBlock_c = document.importNode(resultBlockTemplate.content, true);
+      const cloneBlock_M = document.importNode(resultBlockTemplate.content, true);
+
+      const arrayBlock_c = cloneBlock_c.querySelector('.array__array-block');
+      arrayBlock_c.classList.add(`array__array-block--${i}`);
+      arrayBlock_c.querySelector('.array__array-entry--value').textContent = this.jobScheduler.getC(i);
+      array_c.append(arrayBlock_c);
+
+      const arrayBlock_M = cloneBlock_M.querySelector('.array__array-block');
+      arrayBlock_M.classList.add(`array__array-block--${i}`);
+      arrayBlock_M.querySelector('.array__array-entry--value').textContent = this.jobScheduler.getM(i);
+      array_M.append(arrayBlock_M);
+    }
+
+    resultBlockTemplate.remove();
+
+
+    // Set up text boxes
+    document.querySelectorAll('.fill--last-job-letter').forEach((el) => el.textContent = String.fromCharCode( (numJobs - 1) + 65 ));
+    document.querySelectorAll('.fill--last-SJ-num').forEach((el) => el.textContent = numJobs);
+    
+    const templateFillCArrayParagraphsID = 'fill-c-array-paragraphs-template';
+    const resultParagraphGroupTemplate = document.getElementById(templateFillCArrayParagraphsID);
+    const textbox_fillCArray = document.querySelector('.text-box-line-group--fill-c-array .text-box');
+    this.jobScheduler.getJobs().forEach(job => {
+      const cloneParagraphGroup = document.importNode(resultParagraphGroupTemplate.content, true);
+      const currSJNum = job.getSortedJobNum();
+      const currCEntry = job.getCompatibleJobNum();
+      const currStartTime = job.getStart();
+
+      const textP_fillCArray_forJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--for-job-X');
+      textP_fillCArray_forJobX.classList.replace('text-box__paragraph--for-job-X', `text-box__paragraph--for-job-${currSJNum}`);
+      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
+      textP_fillCArray_forJobX.querySelectorAll('.fill--curr-start-time').forEach(toFill => toFill.textContent = `${currStartTime}`);
+
+
+      const textP_fillCArray_resultJobX = cloneParagraphGroup.querySelector('.text-box__paragraph--result-job-X');
+      textP_fillCArray_resultJobX.classList.replace('text-box__paragraph--result-job-X', `text-box__paragraph--result-job-${currSJNum}`);
+      const resultCompatibleText = textP_fillCArray_resultJobX.querySelector('.fill--result-compatible-job-text');
+      if (currCEntry === 0) {
+        resultCompatibleText.innerHTML =
+        `
+          <span class="SJ-related">job ${currSJNum}</span> does not have a <span class="c-related">compatible job</span> before it.
+        `;
+      }
+      else {
+        resultCompatibleText.innerHTML =
+        `
+          <span class="SJ-related">job ${currSJNum}</span>'s nearest <span class="c-related">compatible job</span> is
+          <span class="c-related">job ${currCEntry}</span>, which ends at time ${this.jobScheduler.getJobs()[currCEntry - 1].getFinish()}.
+        `;
+      }
+      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-SJ-num').forEach(toFill => toFill.textContent = `${currSJNum}`);
+      textP_fillCArray_resultJobX.querySelectorAll('.fill--curr-c-entry').forEach(toFill => toFill.textContent = `${currCEntry}`);
+
+      textbox_fillCArray.append(textP_fillCArray_forJobX);
+      textbox_fillCArray.append(textP_fillCArray_resultJobX);
+    });
+
+    resultParagraphGroupTemplate.remove();
   }
 };
 
-addButton.addEventListener('click', addJobRow);
-jobFormEl.addEventListener('click', removeJobRow);
-jobFormEl.addEventListener('input', checkValidity);
-jobFormEl.addEventListener('submit', submit);
-
-const addFirstJobFormRow = () => {
-  addButton.dispatchEvent(new Event('click')); // add one job row by default
-  const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
-  lastRemoveButton.disabled = true;
-  lastRemoveButton.classList.add('button-disabled');
-};
-addFirstJobFormRow();
 
 
 
 
-const generateVisualization = (jobsUnsorted) => {
-  document.querySelector('.main-menu').remove();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export const generateVisualization = (jobsUnsorted) => {
   document.querySelector('.visualization').classList.remove('hidden');
   // TODO: Move this somewhere else
   const dataDisplay = document.querySelector('.data-display');
@@ -178,10 +373,12 @@ const generateVisualization = (jobsUnsorted) => {
   jobScheduler.setCompatibleJobNums();
   jobScheduler.initializeM();
 
-  jobScheduler.computeOPT(jobScheduler.getNumJobs(), document.querySelector('.job-cards'));
-  // jobScheduler.print();
-  jobScheduler.setUpScene(jobsUnsorted);
+  jobScheduler.computeOPT(jobScheduler.getNumJobs(), null);
   const jobsSorted = jobScheduler.getJobs();
+
+  const sceneCreator = new SceneCreator(jobScheduler);
+  sceneCreator.initialize();
+  sceneCreator.setUpScene(jobsUnsorted);
 
   (function() {
     const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
