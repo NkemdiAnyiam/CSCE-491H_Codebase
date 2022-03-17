@@ -1,5 +1,6 @@
 export class Job {
   static _currJobLetter = 'A';
+  static resetCurrJobLetter() { Job._currJobLetter = 'A'; }
 
   _sortedJobNum = -1;
   _compatibleJobNum = -1;
