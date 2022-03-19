@@ -25,7 +25,7 @@ export class SceneCreator {
     }
 
     /****************************************************** */
-    // GENERATE TIME GRAPH ROWS, AND JOB BARS
+    // GENERATE TIME GRAPH ROWS AND JOB BARS
     /****************************************************** */
     const jobBarsEl = document.querySelector('.time-graph__job-bars');
 
