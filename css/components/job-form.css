@@ -25,7 +25,7 @@
   font-size: 4.8rem;
   padding: 1rem 3rem;
   background-color: var(--color-gray-darker);
-  color: var(--color-blue-lightest);
+  color: var(--color-gray-lighter);
 
   display: flex;
   align-items: center;
@@ -86,11 +86,6 @@
   transition: all 0.1s;
 }
 
-.job-form__button--submit,
-.job-form__button--add {
-  /* color: var(--color-purple-lightest); */
-}
-
 .job-form__button--add {
   background-color: var(--color-blue-lightest);
   color: var(--color-blue-dark);
@@ -106,7 +101,6 @@
   color: var(--color-blue-lightest);
   border-color: transparent;
 }
-
 
 .job-form__button--submit {
   background-color: var(--color-green-lightest);
@@ -142,5 +136,44 @@
   background-color: var(--color-red-dark);
   color: var(--color-red-lightest);
   border-color: transparent;
+}
+
+
+
+
+.job-form--textarea .job-form__error {
+  max-height: 50rem;
+  overflow-y: auto;
+}
+
+.job-form__textareas {
+  display: flex;
+}
+
+.job-form__user-textarea-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.job-form--textarea .job-form__label {
+  flex-direction: column;
+  padding: 3rem 3rem;
+  gap: 3rem;
+}
+
+.job-form--textarea .job-form__label-text {
+  font-size: 4.8rem;
+}
+
+.job-form__textarea {
+  font-family: inherit;
+  resize: none;
+  background-color: var(--color-gray-lighter);
+}
+
+.job-form__textarea--example {
+  background-color: var(--color-gray-darker);
+  color: var(--color-gray-lighter);
 }
 
