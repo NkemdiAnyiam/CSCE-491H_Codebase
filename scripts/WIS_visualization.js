@@ -12,7 +12,11 @@ const animTimeline = new AnimTimeline(null, {debugMode: true});
 
 
 export function generateVisualization (jobsUnsorted) {
-  document.querySelector('.visualization').classList.remove('hidden');
+  // fade-in visualization screen
+  (function() {
+    const fadeinVisualization = new AnimBlock(document.querySelector('.visualization'), 'fade-in', {duration: 375});
+    fadeinVisualization.stepForward();
+  })();
 
   // const jobsUnsorted = [
   //   new Job(5, 9, 7),

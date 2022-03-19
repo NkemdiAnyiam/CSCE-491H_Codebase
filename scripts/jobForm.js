@@ -1,6 +1,7 @@
 import { stoi, stof } from './utility.js';
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
+import { AnimBlock } from './AnimBlock.js';
 
 const maxNumJobs = 8;
 const maxWeight = 99;
@@ -130,9 +131,16 @@ export function createForm(maxNumJobs) {
       jobFormEl.removeEventListener('click', removeJobRow);
       jobFormEl.removeEventListener('input', checkValidity);
       jobFormEl.removeEventListener('submit', submit);
-      document.querySelector('.main-menu').remove();
-
-      generateVisualization(jobsUnsorted);
+      disableButton(generateButton);
+      disableButton(addButton);
+      jobFormEl.querySelectorAll('.job-form__button--remove').forEach((removeButton) => disableButton(removeButton));
+      const mainMenuEl = document.querySelector('.main-menu');
+      const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
+      fadeoutMainMenu.stepForward()
+        .then(() => {
+          mainMenuEl.remove();
+          generateVisualization(jobsUnsorted);
+        });
     }
   };
 
@@ -278,13 +286,18 @@ function submit(e) {
   e.preventDefault();
   if (jobFormEl.checkValidity()) {
     const jobsUnsorted = [];
-    console.log(jobTuplesValues);
     jobTuplesValues.forEach(([startTime, finishTime, weight]) => jobsUnsorted.push(new Job(startTime, finishTime, weight)));
 
     jobFormEl.removeEventListener('input', checkValidity);
     jobFormEl.removeEventListener('input', submit);
-    document.querySelector('.main-menu').remove();
-    generateVisualization(jobsUnsorted);
+    disableButton(generateButton);
+    const mainMenuEl = document.querySelector('.main-menu');
+    const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
+    fadeoutMainMenu.stepForward()
+      .then(() => {
+        mainMenuEl.remove();
+        generateVisualization(jobsUnsorted);
+      });
   }
 }
 
