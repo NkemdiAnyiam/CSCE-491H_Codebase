@@ -1,7 +1,10 @@
-import { stoi } from './utility.js';
+import { stoi, stof } from './utility.js';
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
 
+const maxNumJobs = 8;
+const maxWeight = 99;
+const maxTime = 11;
 
 export function createForm(maxNumJobs) {
   const jobFormEl = document.querySelector('.job-form');
@@ -146,3 +149,113 @@ export function createForm(maxNumJobs) {
   };
   addFirstJobFormRow();
 };
+
+
+
+
+
+
+
+
+
+
+
+
+const checkValidity = (e) => {
+  let isValid = true;
+  errorMessages.splice(0, errorMessages.length); // empty errorMessages array
+
+  const textarea = e.target;
+  const textString = textarea.value;
+
+  // Note: Extra '\n' characters being pushed to errorMessages helps with prettier printing when displaying the errors
+
+  // error if textarea is empty
+  if (!textString)
+    { errorMessages.push(`Total number of jobs must be in the range 0—${maxNumJobs}. Current number: 0\n`, '\n'); }
+
+  else {
+    // try to match entire string to ensure proper formating
+    const reWholeString = /(?:(?:\s|$)*(\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\}),?(?:\s|$)*)+/m;
+    if (textString.match(reWholeString)[0] !== textString) {
+      errorMessages.push('Invalid input formatting.\n', '\n');
+    }
+    // if formatting is correct, validate each tuple
+    else {
+      const reMatchTuples = /\{-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?\}/gm; // to get the tuples
+      const tuples = textString.match(reMatchTuples);
+  
+      // error if too many job tuples
+      if (tuples.length > maxNumJobs)
+        { errorMessages.push(`Total number of jobs must be in the range 0—${maxNumJobs}. Current number: ${tuples.length}\n`, '\n'); }
+  
+      tuples.forEach(tuple => {
+        const {startTime, finishTime, weight, isValid} = validateTuple(tuple);
+        if (!isValid) { errorMessages.push('\n'); }
+        else { jobValues.push([startTime, finishTime, weight]) };
+      });
+    }
+  }
+  
+  // print errors (if any)
+  const errorMessageEl = textarea.closest('label').nextElementSibling;
+  errorMessageEl.textContent = ''; // first reset the error text content
+  if (errorMessages.length > 0) {
+    errorMessages.slice(0, -1) // slicing last element gets rid of last extra '\n'
+      .forEach(message => {
+        errorMessageEl.textContent += message;
+      });
+
+    isValid = false;
+    jobValues.splice(0, jobValues.length);
+  }
+  
+  return isValid;
+};
+
+const validateTuple = (tuple) => {
+  let isValid = true;
+
+  const reCaptureGroups = /\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\}/; // captures each individual value
+  const [startTime, finishTime, weight] = tuple.match(reCaptureGroups)
+    .slice(1) // gets rid of the entry containing the whole tuple
+    .map(valueString => stof(valueString)); // convert each captured value string to a float
+
+  if (startTime >= finishTime) {
+    errorMessages.push(`In tuple ${tuple}: start time must be less than finish time.\n`);
+    isValid = false;
+  }
+  if (startTime > maxTime || startTime < 0 || !Number.isSafeInteger(startTime)) {
+    errorMessages.push(`In tuple ${tuple}: start time must be an integer in the range 0—${maxTime}.\n`);
+    isValid = false;
+  }
+  if (finishTime > maxTime || finishTime < 0 || !Number.isSafeInteger(startTime)) {
+    errorMessages.push(`In tuple ${tuple}: finish time must be an integer in the range 0—${maxTime}.\n`);
+    isValid = false;
+  }
+  if (weight > maxWeight || weight < 0 || !Number.isSafeInteger(weight)) {
+    errorMessages.push(`In tuple ${tuple}: weight must be an integer in the range 0—${maxWeight}.\n`);
+    isValid = false;
+  }
+
+  return {startTime, finishTime, weight, isValid};
+};
+
+const jobFormEl = document.querySelector('.job-form');
+const textarea = document.querySelector('.job-form .job-form__textarea');
+const jobValues = [];
+
+jobFormEl.addEventListener('input', checkValidity);
+
+textarea.value = `
+{5, 9, 7},
+{8, 11, 5},
+{0, 6, 2},
+{1, 4, 1},
+{3, 8, 5},
+{4, 7, 4},
+{6, 10, 3},
+{3, 5, 6},
+`.trim();
+
+const errorMessages = [];

@@ -68,6 +68,7 @@
   padding: 1rem 3rem;
   font-size: 3.6rem;
   line-height: 1.2;
+  white-space:pre-line;
 }
 
 .job-form__error:empty {
