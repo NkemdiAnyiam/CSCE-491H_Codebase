@@ -176,8 +176,8 @@ const checkValidity = (e) => {
 
   else {
     // try to match entire string to ensure proper formating
-    const reWholeString = /(?:(?:\s|$)*(\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\}),?(?:\s|$)*)+/m;
-    if (textString.match(reWholeString)[0] !== textString) {
+    const reWholeString = /(?:(?:\s|$)*(\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\})(,|;)?(?:\s|$)*)+/m;
+    if (textString.match(reWholeString)?.[0] !== textString) {
       errorMessages.push('Invalid input formatting.\n', '\n');
     }
     // if formatting is correct, validate each tuple
@@ -247,15 +247,17 @@ const jobValues = [];
 
 jobFormEl.addEventListener('input', checkValidity);
 
-textarea.value = `
-{5, 9, 7},
-{8, 11, 5},
-{0, 6, 2},
-{1, 4, 1},
-{3, 8, 5},
-{4, 7, 4},
-{6, 10, 3},
-{3, 5, 6},
-`.trim();
+textarea.value = `{0, 11, 1}`;
+
+// textarea.value = `
+// {5, 9, 7},
+// {8, 11, 5},
+// {0, 6, 2},
+// {1, 4, 1},
+// {3, 8, 5},
+// {4, 7, 4},
+// {6, 10, 3},
+// {3, 5, 6},
+// `.trim();
 
 const errorMessages = [];
