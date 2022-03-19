@@ -202,13 +202,13 @@ function checkValidity(e) {
 
   else {
     // try to match entire string to ensure proper formating
-    const reWholeString = /(?:(?:\s|$)*(\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\})(,|;)?(?:\s|$)*)+/m;
+    const reWholeString = /(?:(?:\s|$)*(\{[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)[^\S\r\n]*\})(,|;)?(?:\s|$)*)+/m;
     if (textString.match(reWholeString)?.[0] !== textString) {
       errorMessages.push('Invalid input formatting.\n', '\n');
     }
     // if formatting is correct, validate each tuple
     else {
-      const reMatchTuples = /\{-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?\}/gm; // to get the tuples
+      const reMatchTuples = /\{[^\S\r\n]*-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?,[^\S\r\n]*-?\d+(?:\.\d+)?[^\S\r\n]*\}/gm; // to get the tuples
       const tuples = textString.match(reMatchTuples);
   
       // error if too many job tuples
@@ -249,7 +249,7 @@ function checkValidity(e) {
 function validateTuple (tuple) {
   let isValid = true;
 
-  const reCaptureGroups = /\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\}/; // captures each individual value
+  const reCaptureGroups = /\{[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)[^\S\r\n]*\}/; // captures each individual value
   const [startTime, finishTime, weight] = tuple.match(reCaptureGroups)
     .slice(1) // gets rid of the entry containing the whole tuple
     .map(valueString => stof(valueString)); // convert each captured value string to a float
