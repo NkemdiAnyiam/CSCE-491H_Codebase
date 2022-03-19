@@ -160,10 +160,36 @@ export function createForm(maxNumJobs) {
 
 
 
+const jobFormEl = document.querySelector('.job-form');
+const textarea = document.querySelector('.job-form .job-form__textarea');
+const generateButton = jobFormEl.querySelector('.job-form__button--submit');
+const jobTuplesValues = [];
 
-const checkValidity = (e) => {
+jobFormEl.addEventListener('input', checkValidity);
+jobFormEl.addEventListener('submit', submit);
+
+textarea.value = `{0, 11, 1}`;
+jobTuplesValues.push([0, 11, 1]);
+
+// textarea.value = `
+// {5, 9, 7},
+// {8, 11, 5},
+// {0, 6, 2},
+// {1, 4, 1},
+// {3, 8, 5},
+// {4, 7, 4},
+// {6, 10, 3},
+// {3, 5, 6},
+// `.trim();
+
+const errorMessages = [];
+
+
+
+function checkValidity(e) {
   let isValid = true;
   errorMessages.splice(0, errorMessages.length); // empty errorMessages array
+  jobTuplesValues.splice(0, jobTuplesValues.length); // empty array of job tuples' values
 
   const textarea = e.target;
   const textString = textarea.value;
@@ -192,7 +218,7 @@ const checkValidity = (e) => {
       tuples.forEach(tuple => {
         const {startTime, finishTime, weight, isValid} = validateTuple(tuple);
         if (!isValid) { errorMessages.push('\n'); }
-        else { jobValues.push([startTime, finishTime, weight]) };
+        else { jobTuplesValues.push([startTime, finishTime, weight]) };
       });
     }
   }
@@ -207,13 +233,20 @@ const checkValidity = (e) => {
       });
 
     isValid = false;
-    jobValues.splice(0, jobValues.length);
   }
   
+  if (isValid) {
+    textarea.setCustomValidity('');
+    enableButton(generateButton);
+  }
+  else {
+    textarea.setCustomValidity('invalid');
+    disableButton(generateButton);
+  }
   return isValid;
-};
+}
 
-const validateTuple = (tuple) => {
+function validateTuple (tuple) {
   let isValid = true;
 
   const reCaptureGroups = /\{(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?),[^\S\r\n]*(-?\d+(?:\.\d+)?)\}/; // captures each individual value
@@ -239,25 +272,29 @@ const validateTuple = (tuple) => {
   }
 
   return {startTime, finishTime, weight, isValid};
-};
+}
 
-const jobFormEl = document.querySelector('.job-form');
-const textarea = document.querySelector('.job-form .job-form__textarea');
-const jobValues = [];
+function submit(e) {
+  e.preventDefault();
+  if (jobFormEl.checkValidity()) {
+    const jobsUnsorted = [];
+    console.log(jobTuplesValues);
+    jobTuplesValues.forEach(([startTime, finishTime, weight]) => jobsUnsorted.push(new Job(startTime, finishTime, weight)));
 
-jobFormEl.addEventListener('input', checkValidity);
+    jobFormEl.removeEventListener('input', checkValidity);
+    jobFormEl.removeEventListener('input', submit);
+    document.querySelector('.main-menu').remove();
+    generateVisualization(jobsUnsorted);
+  }
+}
 
-textarea.value = `{0, 11, 1}`;
+function enableButton(buttonEl) {
+  buttonEl.disabled = false;
+  buttonEl.classList.remove('button-disabled');
+}
 
-// textarea.value = `
-// {5, 9, 7},
-// {8, 11, 5},
-// {0, 6, 2},
-// {1, 4, 1},
-// {3, 8, 5},
-// {4, 7, 4},
-// {6, 10, 3},
-// {3, 5, 6},
-// `.trim();
+function disableButton(buttonEl) {
+  buttonEl.disabled = true;
+  buttonEl.classList.add('button-disabled');
+}
 
-const errorMessages = [];

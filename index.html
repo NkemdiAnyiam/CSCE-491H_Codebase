@@ -23,12 +23,14 @@
     
     <div class="container">
       <div class="main-menu">
-        <form action="#" method="post" class="job-form">
+        <form action="#" method="post" class="job-form" novalidate>
           <label class="job-form__label">
             <span class="job-form__label-text">Enter Text</span>
             <textarea class="job-form__textarea" name="jobTextarea" cols="30" rows="12"></textarea>
           </label>
           <span class="job-form__error job-form__error--textArea"></span>
+
+          <button class="job-form__button job-form__button--submit">Generate Visualization</button>
         </form>
 
         <form action="#" method="post" class="job-form hidden" novalidate>
