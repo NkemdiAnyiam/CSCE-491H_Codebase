@@ -43,7 +43,7 @@ export class JobScheduler {
   }
 
   performWISAlgorithm() {
-    this._jobsUnsorted = this._jobs;
+    this._jobsUnsorted = [...this._jobs];
     this._sortJobsByFinish();
     this._setCompatibleJobNums();
     this._initializeM();

@@ -23,7 +23,30 @@
     
     <div class="container">
       <div class="main-menu">
-        <form action="#" method="post" class="job-form" novalidate>
+        <!-- <button class="toggleForm">Toggle</button> -->
+
+        <form action="#" method="post" class="job-form job-form--textarea" novalidate>
+          <div class="job-form__textareas">
+            <div class="job-form__user-textarea-container">
+              <label class="job-form__label">
+                <span class="job-form__label-text">Enter Job List</span>
+                <textarea class="job-form__textarea job-form__textarea--user" name="jobTextarea" cols="64" rows="12"></textarea>
+              </label>
+              <span class="job-form__error job-form__error--textArea"></span>
+            </div>
+            <div class="job-form__example-textarea-container">
+              <label class="job-form__label" disabled>
+                <span class="job-form__label-text">Example Input {startTime, finishTime, weight}</span>
+                <textarea class="job-form__textarea job-form__textarea--example" name="jobTextarea" cols="64" rows="12" disabled></textarea>
+              </label>
+            </div>
+          </div>
+          
+
+          <button class="job-form__button job-form__button--submit">Generate Visualization</button>
+        </form>
+
+        <form action="#" method="post" class="job-form hidden" novalidate>
           
           <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
 
@@ -35,7 +58,7 @@
                 <div class="job-form__field">
                   <label class="job-form__label">
                     <span class="job-form__label-text">Enter Start Time:</span>
-                    <input type="number"class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
+                    <input type="number" class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
                   </label>
                   <span class="job-form__error job-form__error--startTime"></span>
                 </div>

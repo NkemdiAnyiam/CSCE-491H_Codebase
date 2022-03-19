@@ -1,2 +1,3 @@
-import { createForm } from './jobForm.js';
-createForm(8);
+import { createForm, createForm2 } from './jobForm.js';
+// createForm(8);
+createForm2();
