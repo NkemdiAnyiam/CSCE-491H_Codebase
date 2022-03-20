@@ -7,9 +7,9 @@ const maxNumJobs = 8;
 const maxWeight = 99;
 const maxTime = 11;
 
-export function createForm(maxNumJobs) {
+export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
   const jobFormEl = document.querySelector('.job-form--multi-input');
-  const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-inputs');
+  const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-rows');
   const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
   const addButton = jobFormEl.querySelector('.job-form__button--add');
   const randomizeButton = jobFormEl.querySelector('.job-form__button--randomize');
@@ -24,7 +24,7 @@ export function createForm(maxNumJobs) {
 
 
 
-  
+
   function removeJobRow_listener (e) {
     const removeButton = e.target.closest('.job-form__button--remove');
     if (!removeButton) { return; }
@@ -209,7 +209,7 @@ export function createForm(maxNumJobs) {
 
 
 
-export function createForm2() {
+export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
   const jobFormEl = document.querySelector('.job-form');
   const textarea = jobFormEl.querySelector('.job-form__textarea--user');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');

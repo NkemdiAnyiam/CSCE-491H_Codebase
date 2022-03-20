@@ -1,5 +1,5 @@
 import { enableButton, disableButton } from './utility.js';
-import { createForm, createForm2 } from './jobForm.js';
+import { createForm_multiInput, createForm_textarea } from './jobForm.js';
 import { AnimSequence } from './AnimSequence.js';
 
 const toggleFormButton = document.querySelector('.toggleForm');
@@ -9,8 +9,9 @@ let defaultShown = true;
 
 toggleFormButton.addEventListener('click', swapForm);
 
-const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm(8);
-const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm2();
+const constraintOptions = { maxNumJobs: 8, maxTime: 11, maxWeight: 99 };
+const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_multiInput(constraintOptions);
+const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
 const toggleSequence = new AnimSequence([
   [ 'std', jobForm_multiInput, 'exit-wipe-to-left', { duration: 250 } ],
