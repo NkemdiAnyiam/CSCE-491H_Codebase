@@ -10,6 +10,13 @@
   align-items: center;
 }
 
+.job-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+
 .job-form__button {
   width: max-content;
   cursor: pointer;
@@ -44,13 +51,6 @@
   border-color: transparent;
 }
 
-.job-form {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10rem;
-}
-
 .job-form__button--submit {
   background-color: var(--color-green-lightest);
   color: var(--color-green-darker);
@@ -82,10 +82,8 @@
 
 
 
-
+/* MULTI-INPUT JOB FORM */
 .job-form__jobs-rows {
-  width: max-content;
-
   display: flex;
   flex-direction: column;
   gap: 10rem;
@@ -140,8 +138,6 @@
 }
 
 .job-form__add-job-buttons {
-  width: min-content;
-
   display: flex;
   gap: 10rem;
 }
@@ -187,7 +183,7 @@
 
 
 
-
+/* TEXTAREA JOB FORM */
 .job-form--textarea {
   width: min-content;
 }
@@ -199,7 +195,6 @@
 
 .job-form__textareas {
   display: flex;
-  width: min-content;
 }
 
 .job-form__user-textarea-container {
