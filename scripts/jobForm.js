@@ -1,4 +1,4 @@
-import { stoi, stof } from './utility.js';
+import { stoi, stof, enableButton, disableButton, getRandInt, getRandIntRange } from './utility.js';
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
 import { AnimBlock } from './AnimBlock.js';
@@ -8,19 +8,74 @@ const maxWeight = 99;
 const maxTime = 11;
 
 export function createForm(maxNumJobs) {
-  const jobFormEl = document.querySelector('.job-form');
+  const jobFormEl = document.querySelector('.job-form--multi-input');
   const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-inputs');
   const jobFormRowTemplateEl = document.getElementById('job-form__row-template');
   const addButton = jobFormEl.querySelector('.job-form__button--add');
+  const randomizeButton = jobFormEl.querySelector('.job-form__button--randomize');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');
-
   let numJobRows = 0;
 
-  const addJobRow = () => {
+  enableForm();
+  addButton.dispatchEvent(new Event('click')); // add one job row by default
+  // disable first remove button
+  const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
+  disableButton(lastRemoveButton);
+
+
+
+  
+  function removeJobRow_listener (e) {
+    const removeButton = e.target.closest('.job-form__button--remove');
+    if (!removeButton) { return; }
+    const jobFormRowEl = removeButton.closest('.job-form__row');
+
+    removeJobRow(jobFormRowEl);
+    
+    if (numJobRows === 1) { 
+      const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
+      disableButton(lastRemoveButton);
+    }
+  }
+
+  function randomizeJobRows() {
+    const randNumJobs = getRandIntRange(1, maxNumJobs);
+
+    // remove all jobs rows
+    while (numJobRows > 0) {
+      const lastJobRowEl = jobFormEl.querySelector('.job-form__row:last-child');
+      removeJobRow(lastJobRowEl);
+    }
+
+    // add randomized job rows
+    addRandomJobRow();
+    const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
+    disableButton(lastRemoveButton);
+    while (numJobRows < randNumJobs) {
+      addRandomJobRow();
+    }
+  }
+
+  function addRandomJobRow() {
+    const randStart = getRandInt(maxTime - 1);
+    const randFinish = getRandIntRange(randStart + 1, maxTime);
+    const randWeight = getRandInt(maxWeight);
+
+    addJobRow({startTime: randStart, finishTime: randFinish, weight: randWeight});
+  }
+
+  function addJobRow ({startTime = 0, finishTime = 11, weight = 1}) {
     const newJobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
-    newJobFormRowEl.dataset.index = numJobRows;
     const jobFormRowLetterEl = newJobFormRowEl.querySelector('.job-form__job-letter');
+    const startInputEl = newJobFormRowEl.querySelector('.job-form__input--startTime');
+    const finishInputEl = newJobFormRowEl.querySelector('.job-form__input--finishTime');
+    const weightInputEl = newJobFormRowEl.querySelector('.job-form__input--weight');
+
+    newJobFormRowEl.dataset.index = numJobRows;
     jobFormRowLetterEl.textContent = `Job ${String.fromCharCode(numJobRows + 65)}`;
+    startInputEl.value = startTime;
+    finishInputEl.value = finishTime;
+    weightInputEl.value = weight;
 
     jobFormRowsEl.appendChild(newJobFormRowEl);
 
@@ -32,16 +87,9 @@ export function createForm(maxNumJobs) {
       const disabledRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove.button-disabled');
       enableButton(disabledRemoveButton);
     }
-  };
+  }
 
-  const removeJobRow = (e) => {
-    const removeButton = e.target.closest('.job-form__button--remove');
-    if (!removeButton) { return; }
-
-    addButton.disabled = false;
-    addButton.classList.remove('button-disabled');
-    
-    const jobFormRowEl = removeButton.closest('.job-form__row');
+  function removeJobRow(jobFormRowEl) {
     const rowIndex = stoi(jobFormRowEl.dataset.index);
     [...jobFormRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
       rowEl.dataset.index = `${rowIndex + i}`;
@@ -50,25 +98,11 @@ export function createForm(maxNumJobs) {
     jobFormRowEl.remove();
     --numJobRows;
 
-    
-    if (numJobRows === 1) { 
-      const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
-      disableButton(lastRemoveButton);
-    }
-    
+    enableButton(addButton);
     if (jobFormEl.checkValidity()) { enableButton(generateButton); }
-  };
-
-  const enableButton = buttonEl => {
-      buttonEl.disabled = false;
-      buttonEl.classList.remove('button-disabled');
-  }
-  const disableButton = buttonEl => {
-      buttonEl.disabled = true;
-      buttonEl.classList.add('button-disabled');
   }
 
-  const checkValidity = (e) => {
+  function checkValidity (e) {
     const input = e.target;
 
     const isTimeInput = input.classList.contains('job-form__input--startTime') || input.classList.contains('job-form__input--finishTime');
@@ -86,9 +120,9 @@ export function createForm(maxNumJobs) {
 
     if (!jobFormEl.checkValidity()) { disableButton(generateButton); }
     else { enableButton(generateButton); }
-  };
+  }
 
-  const validateTimeInputs = (input_start, input_finish) => {
+  function validateTimeInputs (input_start, input_finish) {
     const errorMessageEl_start = input_start.closest('label').nextElementSibling;
     const errorMessageEl_finish = input_finish.closest('label').nextElementSibling;
 
@@ -106,9 +140,9 @@ export function createForm(maxNumJobs) {
 
     errorMessageEl_start.textContent = input_start.validity.valid ? '' : input_start.validationMessage;
     errorMessageEl_finish.textContent = input_finish.validity.valid ? '' : input_finish.validationMessage;
-  };
+  }
 
-  const submit = (e) => {
+  function submit (e) {
     e.preventDefault();
     if (jobFormEl.checkValidity()) {
       const jobsUnsorted = [];
@@ -127,13 +161,7 @@ export function createForm(maxNumJobs) {
         ));
       }
 
-      addButton.removeEventListener('click', addJobRow);
-      jobFormEl.removeEventListener('click', removeJobRow);
-      jobFormEl.removeEventListener('input', checkValidity);
-      jobFormEl.removeEventListener('submit', submit);
-      disableButton(generateButton);
-      disableButton(addButton);
-      jobFormEl.querySelectorAll('.job-form__button--remove').forEach((removeButton) => disableButton(removeButton));
+      disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
       const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
       fadeoutMainMenu.stepForward()
@@ -142,20 +170,33 @@ export function createForm(maxNumJobs) {
           generateVisualization(jobsUnsorted);
         });
     }
-  };
+  }
 
-  addButton.addEventListener('click', addJobRow);
-  jobFormEl.addEventListener('click', removeJobRow);
-  jobFormEl.addEventListener('input', checkValidity);
-  jobFormEl.addEventListener('submit', submit);
+  function enableForm() {
+    addButton.addEventListener('click', addJobRow);
+    randomizeButton.addEventListener('click', randomizeJobRows);
+    jobFormEl.addEventListener('click', removeJobRow_listener);
+    jobFormEl.addEventListener('input', checkValidity);
+    jobFormEl.addEventListener('submit', submit);
+    if (jobFormEl.checkValidity()) { enableButton(generateButton); }
+    if ( numJobRows < maxNumJobs ) { enableButton(addButton); }
+    enableButton(randomizeButton);
+    if ( numJobRows > 1 ) { jobFormEl.querySelectorAll('.job-form__button--remove').forEach((removeButton) => enableButton(removeButton)); }
+  }
 
-  const addFirstJobFormRow = () => {
-    addButton.dispatchEvent(new Event('click')); // add one job row by default
-    const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
-    lastRemoveButton.disabled = true;
-    lastRemoveButton.classList.add('button-disabled');
-  };
-  addFirstJobFormRow();
+  function disableForm() {
+    addButton.removeEventListener('click', addJobRow);
+    randomizeButton.removeEventListener('click', randomizeJobRows);
+    jobFormEl.removeEventListener('click', removeJobRow_listener);
+    jobFormEl.removeEventListener('input', checkValidity);
+    jobFormEl.removeEventListener('submit', submit);
+    disableButton(generateButton);
+    disableButton(addButton);
+    disableButton(randomizeButton);
+    jobFormEl.querySelectorAll('.job-form__button--remove').forEach((removeButton) => disableButton(removeButton));
+  }
+
+  return {enableForm, disableForm};
 };
 
 
@@ -173,9 +214,6 @@ export function createForm2() {
   const textarea = jobFormEl.querySelector('.job-form__textarea--user');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');
   const jobTuplesValues = [];
-
-  jobFormEl.addEventListener('input', checkValidity);
-  jobFormEl.addEventListener('submit', submit);
 
   textarea.value = `{0, 11, 1}`;
   jobTuplesValues.push([0, 11, 1]);
@@ -295,9 +333,7 @@ export function createForm2() {
       const jobsUnsorted = [];
       jobTuplesValues.forEach(([startTime, finishTime, weight]) => jobsUnsorted.push(new Job(startTime, finishTime, weight)));
 
-      jobFormEl.removeEventListener('input', checkValidity);
-      jobFormEl.removeEventListener('input', submit);
-      disableButton(generateButton);
+      disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
       const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
       fadeoutMainMenu.stepForward()
@@ -308,15 +344,19 @@ export function createForm2() {
     }
   }
 
-  function enableButton(buttonEl) {
-    buttonEl.disabled = false;
-    buttonEl.classList.remove('button-disabled');
-  }
+  const enableForm = () => {
+    jobFormEl.addEventListener('input', checkValidity);
+    jobFormEl.addEventListener('submit', submit);
+    if (jobFormEl.checkValidity()) { enableButton(generateButton); }
+  };
 
-  function disableButton(buttonEl) {
-    buttonEl.disabled = true;
-    buttonEl.classList.add('button-disabled');
-  }
+  const disableForm = () => {
+    jobFormEl.removeEventListener('input', checkValidity);
+    jobFormEl.removeEventListener('input', submit);
+    disableButton(generateButton);
+  };
+
+  return { enableForm, disableForm };
 }
 
 

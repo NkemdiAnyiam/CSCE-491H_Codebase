@@ -3,6 +3,9 @@
 /*****************************************************************/
 
 .job-form {
+  position: absolute;
+  top: 15rem;
+
   display: flex;
   flex-direction: column;
   gap: 10rem;
@@ -86,17 +89,26 @@
   transition: all 0.1s;
 }
 
-.job-form__button--add {
+.job-form__add-job-buttons {
+  display: flex;
+  gap: 10rem;
+}
+
+.job-form__button--add,
+.job-form__button--randomize {
   background-color: var(--color-blue-lightest);
   color: var(--color-blue-dark);
 }
 
-.job-form__button--add:hover {
+.job-form__button--add:hover,
+.job-form__button--randomize:hover {
   background-color: var(--color-blue-light);
 }
 
 .job-form__button--add:active,
-.job-form__button--add.button-disabled {
+.job-form__button--add.button-disabled,
+.job-form__button--randomize:active,
+.job-form__button--randomize.button-disabled {
   background-color: var(--color-blue-dark);
   color: var(--color-blue-lightest);
   border-color: transparent;

@@ -23,9 +23,9 @@
     
     <div class="container">
       <div class="main-menu">
-        <!-- <button class="toggleForm">Toggle</button> -->
+        <button class="toggleForm">Toggle</button>
 
-        <form action="#" method="post" class="job-form job-form--textarea" novalidate>
+        <form action="#" method="post" class="job-form job-form--textarea hidden" novalidate>
           <div class="job-form__textareas">
             <div class="job-form__user-textarea-container">
               <label class="job-form__label">
@@ -46,9 +46,12 @@
           <button class="job-form__button job-form__button--submit">Generate Visualization</button>
         </form>
 
-        <form action="#" method="post" class="job-form hidden" novalidate>
+        <form action="#" method="post" class="job-form job-form--multi-input" novalidate>
           
-          <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
+          <div class="job-form__add-job-buttons">
+            <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
+            <button type="button" class="job-form__button job-form__button--randomize">Randomize Jobs</button>
+          </div>
 
           <div class="job-form__jobs-inputs">
             <template id="job-form__row-template">
