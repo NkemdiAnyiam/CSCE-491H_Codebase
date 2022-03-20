@@ -3,7 +3,8 @@
 /*****************************************************************/
 
 :root {
-  --color-purple-dark: purple;
+  --color-purple-darkest: #660066;
+  --color-purple-dark: #800080;
   --color-purple: #A522EC;
   --color-purple-light: #ffb5ff;
   --color-purple-lightest: #ffdcff;

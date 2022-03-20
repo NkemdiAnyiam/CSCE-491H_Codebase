@@ -3,9 +3,6 @@ import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
 import { AnimBlock } from './AnimBlock.js';
 
-const maxNumJobs = 8;
-const maxWeight = 99;
-const maxTime = 11;
 
 export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
   const jobFormEl = document.querySelector('.job-form--multi-input');
@@ -91,7 +88,7 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 
   function removeJobRow(jobFormRowEl) {
     const rowIndex = stoi(jobFormRowEl.dataset.index);
-    [...jobFormRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => {
+    [...jobFormRowsEl.querySelectorAll('.job-form__row')].slice(rowIndex + 1).forEach((rowEl, i) => { // rowIndex + 1 to skip <template></template>
       rowEl.dataset.index = `${rowIndex + i}`;
       rowEl.querySelector('.job-form__job-letter').textContent = `Job ${String.fromCharCode(rowIndex + i + 65)}`;
     });
@@ -210,29 +207,21 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 
 
 export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
-  const jobFormEl = document.querySelector('.job-form');
+  const jobFormEl = document.querySelector('.job-form--textarea');
   const textarea = jobFormEl.querySelector('.job-form__textarea--user');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');
-  const jobTuplesValues = [];
+  const jobTuplesValues = []; // holds arrays of the form [startTime, finishTime, weight]
 
+  // provide an initial job entry in textarea
   textarea.value = `{0, 11, 1}`;
   jobTuplesValues.push([0, 11, 1]);
 
+  // set the example text
   (function() {
     const exampleTextarea = jobFormEl.querySelector('.job-form__textarea--example');
     exampleTextarea.value = `{5, 9, 7},\n{8, 11, 5},\n{0, 6, 2},\n{1, 4, 1},\n{3, 8, 5},\n{4, 7, 4},\n{6, 10, 3},\n{3, 5, 6},\
     \n\n(Commas, Semicolons, or white spaces can be used to separate tuples, but they are optional)`;
   })();
-  // textarea.value = `
-  // {5, 9, 7},
-  // {8, 11, 5},
-  // {0, 6, 2},
-  // {1, 4, 1},
-  // {3, 8, 5},
-  // {4, 7, 4},
-  // {6, 10, 3},
-  // {3, 5, 6},
-  // `.trim();
 
   const errorMessages = [];
 

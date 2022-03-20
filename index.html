@@ -23,73 +23,80 @@
     
     <div class="container">
       <div class="main-menu">
-        <button class="toggleForm">Toggle</button>
+        
+        <div class="forms-container">
+          <div class="toggle-form-buttons">
+            <button class="job-form__button job-form__button--toggle-form job-form__button--toggle-form--MI">Multi-input Form</button>
+            <button class="job-form__button job-form__button--toggle-form job-form__button--toggle-form--TA">Text Input Form</button>
+          </div>
 
-        <form action="#" method="post" class="job-form job-form--textarea hidden" novalidate>
-          <div class="job-form__textareas">
-            <div class="job-form__user-textarea-container">
-              <label class="job-form__label">
-                <span class="job-form__label-text">Enter Job List</span>
-                <textarea class="job-form__textarea job-form__textarea--user" name="jobTextarea" cols="64" rows="12"></textarea>
-              </label>
-              <span class="job-form__error job-form__error--textArea"></span>
+          <form action="#" method="post" class="job-form job-form--multi-input" novalidate>
+            
+            <div class="job-form__add-job-buttons">
+              <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
+              <button type="button" class="job-form__button job-form__button--randomize">Randomize Jobs</button>
             </div>
-            <div class="job-form__example-textarea-container">
-              <label class="job-form__label" disabled>
-                <span class="job-form__label-text">Example Input {startTime, finishTime, weight}</span>
-                <textarea class="job-form__textarea job-form__textarea--example" name="jobTextarea" cols="64" rows="12" disabled></textarea>
-              </label>
+  
+            <div class="job-form__jobs-rows">
+              <template id="job-form__row-template">
+                <fieldset class="job-form__row" data-index="X">
+                  <legend class="job-form__job-letter">Job X</legend>
+    
+                  <div class="job-form__field">
+                    <label class="job-form__label">
+                      <span class="job-form__label-text">Enter Start Time:</span>
+                      <input type="number" class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
+                    </label>
+                    <span class="job-form__error job-form__error--startTime"></span>
+                  </div>
+    
+                  <div class="job-form__field">
+                    <label class="job-form__label">
+                      <span class="job-form__label-text">Enter Finish Time:</span>
+                      <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
+                    </label>
+                    <span class="job-form__error job-form__error--finishTime"></span>
+                  </div>
+    
+                  <div class="job-form__field">
+                    <label class="job-form__label">
+                      <span class="job-form__label-text">Enter Weight:</span>
+                      <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
+                    </label>
+                    <span class="job-form__error job-form__error--weight"></span>
+                  </div>
+  
+                  <button class="job-form__button job-form__button--remove" type="button">X&ThinSpace;Remove Job</button>
+                </fieldset>
+              </template>
             </div>
-          </div>
-          
-
-          <button class="job-form__button job-form__button--submit">Generate Visualization</button>
-        </form>
-
-        <form action="#" method="post" class="job-form job-form--multi-input" novalidate>
-          
-          <div class="job-form__add-job-buttons">
-            <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
-            <button type="button" class="job-form__button job-form__button--randomize">Randomize Jobs</button>
-          </div>
-
-          <div class="job-form__jobs-rows">
-            <template id="job-form__row-template">
-              <fieldset class="job-form__row" data-index="X">
-                <legend class="job-form__job-letter">Job X</legend>
   
-                <div class="job-form__field">
-                  <label class="job-form__label">
-                    <span class="job-form__label-text">Enter Start Time:</span>
-                    <input type="number" class="job-form__input job-form__input--startTime" name="startTime" value="0" min="0" max="11" required>
-                  </label>
-                  <span class="job-form__error job-form__error--startTime"></span>
-                </div>
+            <button class="job-form__button job-form__button--submit">Generate Visualization</button>
   
-                <div class="job-form__field">
-                  <label class="job-form__label">
-                    <span class="job-form__label-text">Enter Finish Time:</span>
-                    <input type="number" class="job-form__input job-form__input--finishTime" name="finishTime" value="11" min="0" max="11" required>
-                  </label>
-                  <span class="job-form__error job-form__error--finishTime"></span>
-                </div>
+          </form>
+
+          <form action="#" method="post" class="job-form job-form--textarea hidden" novalidate>
+            <div class="job-form__textareas">
+              <div class="job-form__user-textarea-container">
+                <label class="job-form__label">
+                  <span class="job-form__label-text">Enter Job List</span>
+                  <textarea class="job-form__textarea job-form__textarea--user" name="jobTextarea" cols="64" rows="12"></textarea>
+                </label>
+                <span class="job-form__error job-form__error--textArea"></span>
+              </div>
+              <div class="job-form__example-textarea-container">
+                <label class="job-form__label" disabled>
+                  <span class="job-form__label-text">Example Input {startTime, finishTime, weight}</span>
+                  <textarea class="job-form__textarea job-form__textarea--example" name="jobTextarea" cols="64" rows="12" disabled></textarea>
+                </label>
+              </div>
+            </div>
+            
   
-                <div class="job-form__field">
-                  <label class="job-form__label">
-                    <span class="job-form__label-text">Enter Weight:</span>
-                    <input type="number" class="job-form__input job-form__input--weight" name="weight" value="1" min="1" max="99" required>
-                  </label>
-                  <span class="job-form__error job-form__error--weight"></span>
-                </div>
-
-                <button class="job-form__button job-form__button--remove" type="button">X&ThinSpace;Remove Job</button>
-              </fieldset>
-            </template>
-          </div>
-
-          <button class="job-form__button job-form__button--submit">Generate Visualization</button>
-
-        </form>
+            <button class="job-form__button job-form__button--submit">Generate Visualization</button>
+          </form>
+        </div>
+        
       </div>
 
       <div class="visualization hidden">
