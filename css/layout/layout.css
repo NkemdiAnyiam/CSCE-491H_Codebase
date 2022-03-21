@@ -6,6 +6,10 @@
 
 }
 
+label {
+  box-sizing: border-box;
+}
+
 .main-menu {
   margin-top: 10rem;
   display: flex;

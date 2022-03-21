@@ -4,6 +4,9 @@ import { generateVisualization } from "./WIS_visualization.js";
 import { AnimBlock } from './AnimBlock.js';
 
 
+/****************************************/
+/* MULTI-INPUT FUNCTIONS */
+/****************************************/
 export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
   const jobFormEl = document.querySelector('.job-form--multi-input');
   const jobFormRowsEl = jobFormEl.querySelector('.job-form__jobs-rows');
@@ -12,15 +15,24 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
   const randomizeButton = jobFormEl.querySelector('.job-form__button--randomize');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');
   let numJobRows = 0;
+  // Set up initial input values and constraints for template
+  (function() {
+    const startTimeInputTemplate  = jobFormRowTemplateEl.content.querySelector('.job-form__input--startTime');
+    const finishTimeInputTemplate  = jobFormRowTemplateEl.content.querySelector('.job-form__input--finishTime');
+    const weightInputTemplate  = jobFormRowTemplateEl.content.querySelector('.job-form__input--weight');
+    startTimeInputTemplate.value = 0;
+    startTimeInputTemplate.max = maxTime;
+    finishTimeInputTemplate.value = maxTime;
+    finishTimeInputTemplate.max = maxTime;
+    weightInputTemplate.value = 1;
+    weightInputTemplate.max = maxWeight;
+  })();
 
   enableForm();
   addButton.dispatchEvent(new Event('click')); // add one job row by default
   // disable first remove button
   const lastRemoveButton = jobFormRowsEl.querySelector('.job-form__button--remove');
   disableButton(lastRemoveButton);
-
-
-
 
   function removeJobRow_listener (e) {
     const removeButton = e.target.closest('.job-form__button--remove');
@@ -61,7 +73,7 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
     addJobRow({startTime: randStart, finishTime: randFinish, weight: randWeight});
   }
 
-  function addJobRow ({startTime = 0, finishTime = 11, weight = 1}) {
+  function addJobRow ({startTime = 0, finishTime = maxTime, weight = 1}) {
     const newJobFormRowEl = document.importNode(jobFormRowTemplateEl.content, true).querySelector('.job-form__row');
     const jobFormRowLetterEl = newJobFormRowEl.querySelector('.job-form__job-letter');
     const startInputEl = newJobFormRowEl.querySelector('.job-form__input--startTime');
@@ -197,15 +209,9 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 };
 
 
-
-
-
-
-
-
-
-
-
+/****************************************/
+/* TEXTAREA FUNCTIONS */
+/****************************************/
 export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
   const jobFormEl = document.querySelector('.job-form--textarea');
   const textarea = jobFormEl.querySelector('.job-form__textarea--user');
@@ -213,8 +219,8 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
   const jobTuplesValues = []; // holds arrays of the form [startTime, finishTime, weight]
 
   // provide an initial job entry in textarea
-  textarea.value = `{0, 11, 1}`;
-  jobTuplesValues.push([0, 11, 1]);
+  textarea.value = `{0, ${maxTime}, 1}`;
+  jobTuplesValues.push([0, maxTime, 1]);
 
   // set the example text
   (function() {
@@ -224,8 +230,6 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
   })();
 
   const errorMessages = [];
-
-
 
   function checkValidity(e) {
     let isValid = true;

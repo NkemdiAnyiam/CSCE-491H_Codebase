@@ -7,7 +7,6 @@ const jobForm_textarea = document.querySelector('.job-form--textarea');
 const toggleFormButton_toTA = document.querySelector('.job-form__button--toggle-form--TA');
 const toggleFormButton_toMI = document.querySelector('.job-form__button--toggle-form--MI');
 disableButton(toggleFormButton_toMI);
-// let defaultShown = true;
 
 toggleFormButton_toTA.addEventListener('click', swapForm);
 toggleFormButton_toMI.addEventListener('click', swapForm);
@@ -21,17 +20,19 @@ const toggleSequence = new AnimSequence([
   [ 'std', jobForm_textarea, 'enter-wipe-from-right', { duration: 250 } ],
 ]);
 
-
 function swapForm(e) {
   const toggleButton = e.target;
-  disableButton(toggleButton);
+  disableButton(toggleButton); // disable currently pressed button
+
+  // switch from multi-input form to textarea form
   if (toggleButton === toggleFormButton_toTA) {
-    disableForm_MI();
-    toggleSequence.play().then(() => {
-      enableForm_TA();
-      enableButton(toggleFormButton_toMI);
+    disableForm_MI(); // disable multi-input form
+    toggleSequence.play().then(() => { // play animation to swap forms
+      enableForm_TA(); // enable textarea form
+      enableButton(toggleFormButton_toMI); // enable button to switch back to multi-input form
     });
   }
+  // switch from textarea form to multi-input form
   if (toggleButton === toggleFormButton_toMI) {
     disableForm_TA();
     toggleSequence.rewind().then(() => {
@@ -40,23 +41,3 @@ function swapForm(e) {
     });
   }
 }
-
-// function swapForm() {
-//   disableButton(toggleFormButton);
-//   if (defaultShown) {
-//     disableForm_MI();
-//     toggleSequence.play().then(() => {
-//       enableForm_TA();
-//       defaultShown = !defaultShown;
-//       enableButton(toggleFormButton);
-//     });
-//   }
-//   else {
-//     disableForm_TA();
-//     toggleSequence.rewind().then(() => {
-//       enableForm_MI();
-//       defaultShown = !defaultShown;
-//       enableButton(toggleFormButton);
-//     });
-//   }
-// }

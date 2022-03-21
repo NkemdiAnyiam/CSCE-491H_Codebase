@@ -5,9 +5,8 @@
 .forms-container {
   display: flex;
   flex-direction: column;
-  width: 70%;
+  width: 75%;
   gap: 10rem;
-  align-items: center;
 }
 
 .job-form {
@@ -29,8 +28,6 @@
 }
 
 .toggle-form-buttons {
-  align-self: flex-start;
-
   display: flex;
   gap: 10rem;
 }
@@ -185,7 +182,7 @@
 
 /* TEXTAREA JOB FORM */
 .job-form--textarea {
-  width: min-content;
+  /* width: min-content; */
 }
 
 .job-form--textarea .job-form__error {
