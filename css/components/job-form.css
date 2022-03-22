@@ -122,11 +122,20 @@
   background-color: var(--color-gray-light);
 }
 
+.job-form__label-text {
+  flex: 1;
+}
+
 .job-form__label .job-form__input {
   display: inline-block;
   font-family: inherit;
   margin-left: auto;
   background-color: var(--color-gray-lighter);
+}
+
+.job-form--multi-input .job-form__input {
+  width: 12rem;
+  font-size: 4rem;
 }
 
 .job-form__input[type=number]::-webkit-inner-spin-button {
@@ -181,10 +190,6 @@
 
 
 /* TEXTAREA JOB FORM */
-.job-form--textarea {
-  /* width: min-content; */
-}
-
 .job-form--textarea .job-form__error {
   max-height: 50rem;
   overflow-y: auto;
@@ -214,6 +219,7 @@
   font-family: inherit;
   resize: none;
   background-color: var(--color-gray-lighter);
+  font-size: 4rem;
 }
 
 .job-form__textarea--example {
