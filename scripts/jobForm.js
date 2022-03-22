@@ -299,21 +299,22 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
     const [startTime, finishTime, weight] = tuple.match(reCaptureGroups)
       .slice(1) // gets rid of the entry containing the whole tuple
       .map(valueString => stof(valueString)); // convert each captured value string to a float
+    const errorMessageIntro = `In tuple {${startTime}, ${finishTime}, ${weight}}`;
 
     if (startTime >= finishTime) {
-      errorMessages.push(`In tuple ${tuple}: start time must be less than finish time.\n`);
+      errorMessages.push(`${errorMessageIntro}: start time must be less than finish time.\n`);
       isValid = false;
     }
     if (startTime > maxTime || startTime < 0 || !Number.isSafeInteger(startTime)) {
-      errorMessages.push(`In tuple ${tuple}: start time must be an integer in the range 0—${maxTime}.\n`);
+      errorMessages.push(`${errorMessageIntro}: start time must be an integer in the range 0—${maxTime}.\n`);
       isValid = false;
     }
     if (finishTime > maxTime || finishTime < 0 || !Number.isSafeInteger(startTime)) {
-      errorMessages.push(`In tuple ${tuple}: finish time must be an integer in the range 0—${maxTime}.\n`);
+      errorMessages.push(`${errorMessageIntro}: finish time must be an integer in the range 0—${maxTime}.\n`);
       isValid = false;
     }
     if (weight > maxWeight || weight < 0 || !Number.isSafeInteger(weight)) {
-      errorMessages.push(`In tuple ${tuple}: weight must be an integer in the range 0—${maxWeight}.\n`);
+      errorMessages.push(`${errorMessageIntro}: weight must be an integer in the range 0—${maxWeight}.\n`);
       isValid = false;
     }
 
