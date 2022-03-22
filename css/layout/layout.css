@@ -6,7 +6,17 @@
 
 }
 
-.container {
+label {
+  box-sizing: border-box;
+}
+
+.main-menu {
+  margin-top: 10rem;
+  display: flex;
+  justify-content: center;
+}
+
+.visualization {
   display: grid;
   grid-template-columns: 250rem auto;
   grid-template-areas:

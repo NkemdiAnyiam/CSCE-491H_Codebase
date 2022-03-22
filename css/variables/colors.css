@@ -3,19 +3,23 @@
 /*****************************************************************/
 
 :root {
-  --color-purple-dark: purple;
+  --color-purple-darkest: #660066;
+  --color-purple-dark: #800080;
   --color-purple: #A522EC;
   --color-purple-light: #ffb5ff;
   --color-purple-lightest: #ffdcff;
 
+  --color-red-dark: #A30000;
   --color-red: #db0000;
   --color-red-light: #ffc0c0;
   --color-red-lightest: #f5e7ea;
 
+  --color-blue-dark: #2020a2;
   --color-blue: blue;
   --color-blue-light: #cfcfff;
   --color-blue-lightest: #e5e5ff;
 
+  --color-green-darker: #025F02;
   --color-green-dark: #027d02;
   --color-green: #62B720;
   --color-green-light: #b1efb1;

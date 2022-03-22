@@ -1,0 +1,223 @@
+/*****************************************************************/
+/**************************** JOB FORM ****************************/
+/*****************************************************************/
+
+.forms-container {
+  display: flex;
+  flex-direction: column;
+  width: 75%;
+  gap: 10rem;
+}
+
+.job-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+
+.job-form__button {
+  width: max-content;
+  cursor: pointer;
+  padding: 1rem 3rem;
+  border-radius: 5rem;
+  font-family: inherit;
+  border: 0.25rem solid currentColor;
+
+  transition: all 0.1s;
+}
+
+.toggle-form-buttons {
+  display: flex;
+  gap: 10rem;
+}
+
+.job-form__button--toggle-form {
+  background-color: var(--color-purple-lightest);
+  color: var(--color-purple-darkest);
+}
+
+.job-form__button--toggle-form:hover {
+  background-color: var(--color-purple-light);
+}
+
+.job-form__button--toggle-form:active,
+.job-form__button--toggle-form.button-disabled {
+  background-color: var(--color-purple-darkest);
+  color: var(--color-purple-lightest);
+  border-color: transparent;
+}
+
+.job-form__button--submit {
+  background-color: var(--color-green-lightest);
+  color: var(--color-green-darker);
+}
+
+.job-form__button--submit:hover {
+  background-color: var(--color-green-light);
+}
+
+.job-form__button--submit:active,
+.job-form__button--submit.button-disabled {
+  background-color: var(--color-green-dark);
+  color: var(--color-green-lightest);
+  border-color: transparent;
+}
+
+.job-form__error {
+  color: var(--color-yellow);
+  background-color: var(--color-red-dark);
+  padding: 1rem 3rem;
+  font-size: 3.6rem;
+  line-height: 1.2;
+  white-space:pre-line;
+}
+
+.job-form__error:empty {
+  display: none;
+}
+
+
+
+/* MULTI-INPUT JOB FORM */
+.job-form__jobs-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10rem;
+}
+
+.job-form__row {
+  display: flex;
+  gap: 10rem;
+}
+
+.job-form__job-letter {
+  float: left;
+
+  font-size: 4.8rem;
+  padding: 1rem 3rem;
+  background-color: var(--color-gray-darker);
+  color: var(--color-gray-lighter);
+
+  display: flex;
+  align-items: center;
+}
+
+.job-form__field {
+  width: 65rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 2rem;
+}
+
+.job-form__label {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  
+  padding: 1rem 3rem;
+  background-color: var(--color-gray-light);
+}
+
+.job-form__label .job-form__input {
+  display: inline-block;
+  font-family: inherit;
+  margin-left: auto;
+  background-color: var(--color-gray-lighter);
+}
+
+.job-form__input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.job-form__add-job-buttons {
+  display: flex;
+  gap: 10rem;
+}
+
+.job-form__button--add,
+.job-form__button--randomize {
+  background-color: var(--color-blue-lightest);
+  color: var(--color-blue-dark);
+}
+
+.job-form__button--add:hover,
+.job-form__button--randomize:hover {
+  background-color: var(--color-blue-light);
+}
+
+.job-form__button--add:active,
+.job-form__button--add.button-disabled,
+.job-form__button--randomize:active,
+.job-form__button--randomize.button-disabled {
+  background-color: var(--color-blue-dark);
+  color: var(--color-blue-lightest);
+  border-color: transparent;
+}
+
+.job-form__button--remove {
+  background-color: var(--color-red-lightest);
+  color: var(--color-red-dark);
+
+  display: flex;
+  align-items: center;
+}
+
+.job-form__button--remove:hover {
+  background-color: var(--color-red-light);
+}
+
+.job-form__button--remove:active,
+.job-form__button--remove.button-disabled {
+  background-color: var(--color-red-dark);
+  color: var(--color-red-lightest);
+  border-color: transparent;
+}
+
+
+
+/* TEXTAREA JOB FORM */
+.job-form--textarea {
+  /* width: min-content; */
+}
+
+.job-form--textarea .job-form__error {
+  max-height: 50rem;
+  overflow-y: auto;
+}
+
+.job-form__textareas {
+  display: flex;
+}
+
+.job-form__user-textarea-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.job-form--textarea .job-form__label {
+  flex-direction: column;
+  padding: 3rem 3rem;
+  gap: 3rem;
+}
+
+.job-form--textarea .job-form__label-text {
+  font-size: 4.8rem;
+}
+
+.job-form__textarea {
+  font-family: inherit;
+  resize: none;
+  background-color: var(--color-gray-lighter);
+}
+
+.job-form__textarea--example {
+  background-color: var(--color-gray-darker);
+  color: var(--color-gray-lighter);
+}
+

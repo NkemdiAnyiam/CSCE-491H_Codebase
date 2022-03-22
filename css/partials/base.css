@@ -13,8 +13,6 @@ html {
 
 body {
   line-height: 1;
-  padding: 5rem;
-  /* background-color: #aaa; */
 
   font-family: 'Roboto Mono', monospace;
   font-size: 4rem;
@@ -26,6 +24,10 @@ span {
 
 .hidden:not(.text-box):not(.time-graph__c-bar) {
   display: none!important;
+}
+
+.button-disabled {
+  cursor: not-allowed!important;
 }
 
 .text-box.hidden,

@@ -1,6 +1,3 @@
-//TODO: move wait() to a utility file
-const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
-
 export class AnimBlock {
   static id = 0;
 
@@ -27,6 +24,7 @@ export class AnimBlock {
   blocksNext = true;
   blocksPrev = true;
   duration = 500;
+  playbackRate = 1;
 
   constructor(domElem, animName, options) {
     this.id = AnimBlock.id++;
@@ -71,7 +69,7 @@ export class AnimBlock {
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
     // set playback rate
-    animation.updatePlaybackRate(this.parentTimeline.playbackRate.value);
+    animation.updatePlaybackRate((this.parentTimeline?.playbackRate.value ?? 1) * this.playbackRate);
 
     if (isEntering) {
       this.domElem.classList.remove('hidden');
@@ -80,7 +78,7 @@ export class AnimBlock {
     }
     
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
-    this.parentTimeline.isSkipping || this.parentTimeline.usingSkipTo ? animation.finish() : animation.play();
+    this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play();
 
     // return Promise that fulfills when the animation is completed
     return animation.finished.then(() => {
@@ -158,12 +156,14 @@ export class AnimBlock {
       blocksNext,
       blocksPrev,
       duration,
+      playbackRate,
       translateOptions,
     } = options;
 
     this.blocksNext = blocksNext ?? this.blocksNext;
     this.blocksPrev = blocksPrev ?? this.blocksPrev;
     this.duration = duration ?? this.duration;
+    this.playbackRate = playbackRate ?? this.playbackRate;
 
     if (translateOptions) {
       this.applyTranslateOptions(translateOptions);
