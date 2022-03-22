@@ -76,16 +76,13 @@ export class AnimTimeline {
     let continueOn;
     if (direction === 'forward') {
       // reject promise if trying to step forward at the end of the timeline
-      if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = this.usingSkipTo = false; reject('Cannot stepForward() at end of timeline')}); }
-      // if using skipTo(), ignore an AnimSequence request to automatically play the upcoming sequence
-      if (this.usingSkipTo) { await this.stepForward(); }
-      else { do {continueOn = await this.stepForward();} while(continueOn); }
+      if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
+      do {continueOn = await this.stepForward();} while(continueOn);
     }
     else if (direction === 'backward') {
       // reject promise if trying to step backward at the beginning of the timeline
-      if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = this.usingSkipTo = false; reject('Cannot stepBackward() at beginning of timeline')}); }
-      if (this.usingSkipTo) { await this.stepBackward(); }
-      else { do {continueOn = await this.stepBackward();} while(continueOn); }
+      if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
+      do {continueOn = await this.stepBackward();} while(continueOn);
     }
     else { throw new Error(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`); }
 
@@ -108,7 +105,7 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
-      .then((continueNext) => {
+      .then(continueNext => {
         ++this.nextSeqIndex;
         resolve(continueNext && !this.atEnd());
       });
@@ -126,7 +123,7 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].rewind()
-      .then((continuePrev) => {
+      .then(continuePrev => {
         resolve(continuePrev && !this.atBeginning());
       });
     });
@@ -150,9 +147,9 @@ export class AnimTimeline {
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
     if (this.wasPaused) { this.togglePause(); }
     if (this.nextSeqIndex <= tagIndex)
-      { while (this.nextSeqIndex < tagIndex) { await this.step('forward'); } } // <= to play the sequence as well
+      { while (this.nextSeqIndex < tagIndex) { await this.stepForward(); } } // <= to play the sequence as well
     else
-      { while (this.nextSeqIndex > tagIndex) { await this.step('backward'); } } // +1 to ensure the sequence isn't undone
+      { while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); } } // +1 to ensure the sequence isn't undone
     if (this.wasPaused) { this.togglePause(); }
 
     return new Promise(resolve => {
