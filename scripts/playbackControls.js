@@ -150,8 +150,8 @@ export const setupPlaybackControls = (animTimeline) => {
   // animTimeline.skipTo('introduce memoization');
 
   // skips to tag and checks to see if DISABLED_FROM_EDGE should be added or removed from forward/backward buttons
-  const skipTo = (tag) => {
-    animTimeline.skipTo(tag)
+  const skipTo = (tag, offset) => {
+    animTimeline.skipTo(tag, offset)
     .then(() => {
       if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
       else { backwardButton.classList.remove(DISABLED_FROM_EDGE); }
