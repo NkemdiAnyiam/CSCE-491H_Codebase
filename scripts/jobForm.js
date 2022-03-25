@@ -309,7 +309,7 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
       errorMessages.push(`${errorMessageIntro}: start time must be an integer in the range 0—${maxTime}.\n`);
       isValid = false;
     }
-    if (finishTime > maxTime || finishTime < 0 || !Number.isSafeInteger(startTime)) {
+    if (finishTime > maxTime || finishTime < 0 || !Number.isSafeInteger(finishTime)) {
       errorMessages.push(`${errorMessageIntro}: finish time must be an integer in the range 0—${maxTime}.\n`);
       isValid = false;
     }
