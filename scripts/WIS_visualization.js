@@ -320,11 +320,12 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
         animSequence.addOneBlock([ 'line', timeGraphArrowEl, 'exit-wipe-to-top', cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
       }
       animSequence.addManyBlocks([
-        [ 'std', textbox_fillCArray, 'fade-out', {blocksPrev: false} ],
-        [ 'std', textP_fillCArray_continueOn, 'fade-out', {duration: 0}],
+        [ 'std', textbox_fillCArray, 'fade-out', {blocksPrev: false, blocksNext: false} ],
+        // [ 'std', textP_fillCArray_continueOn, 'fade-out', {duration: 0}], // TODO: This being here and having to add blocksNext: false above needs to be considered
         [ 'std', cBar, 'fade-out', {blocksNext: false, blocksPrev: false} ],
         [ 'std', jobBarEl, 'un-highlight', {blocksPrev: false, blocksNext: false} ],
         [ 'std', jBlock, 'un-highlight', {blocksPrev: false} ],
+        [ 'std', textP_fillCArray_continueOn, 'fade-out', {duration: 0}],
       ]);
       animTimeline.addOneSequence(animSequence);
     }
