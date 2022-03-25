@@ -10,7 +10,7 @@ export class AnimBlockLineUpdater {
 
   static setInterval(domElem, func) {
     // get the IntervalController associated with the DOM element and set an interval to periodically call udpateEndpoints()
-    AnimBlockLineUpdater.domElemMap.get(domElem).setIntervalID(func, 25); // updateEndpoints() for a given line will be called every 100 milliseconds
+    AnimBlockLineUpdater.domElemMap.get(domElem).setIntervalID(func, 1); // updateEndpoints() for a given line will be called every (specified) milliseconds
   }
 
   static clearInterval(domElem) {
