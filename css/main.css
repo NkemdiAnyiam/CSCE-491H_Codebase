@@ -9,5 +9,6 @@
 @import "./layout/layout.css";
 
 @import "./partials/base.css";
+@import "./partials/typography.css";
 
 @import "./variables/colors.css";

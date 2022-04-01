@@ -2,18 +2,25 @@
 /**************************** LAYOUT ****************************/
 /*****************************************************************/
 
-.main {
+.banner {
+  position: fixed;
+  height: 19rem;
+  background-image: linear-gradient(to right, var(--color-gray-darker), var(--color-gray));
+  color: var(--color-gray-lightest);
+  padding: 1.6rem 5rem;
+  width: 100%;
+  z-index: 10000;
+  top: 0;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 
-}
-
-label {
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .main-menu {
-  margin-top: 10rem;
-  display: flex;
-  justify-content: center;
+  margin-top: 30rem;
+  width: max-content;
+  padding-left: 5rem;
 }
 
 .visualization {
@@ -30,7 +37,7 @@ label {
   left: 0;
   
   grid-area: data;
-  padding-top: 10rem;
+  padding-top: 14rem;
   padding-right: 10rem;
   padding-left: 5rem;
   height: 100%;
@@ -40,6 +47,8 @@ label {
   flex-direction: column;
   gap: 10rem;
 }
+
 .job-cards {
   grid-area: cards;
+  margin-top: 54rem;
 }

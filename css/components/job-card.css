@@ -2,13 +2,6 @@
 /**************************** JOB CARD ****************************/
 /*****************************************************************/
 
-.job-cards {
-  /* display: flex;
-  flex-direction: column;
-  gap: 25rem; */
-  margin-top: 50rem;
-}
-
 .job-card {
   display: flex;
   flex-direction: column;

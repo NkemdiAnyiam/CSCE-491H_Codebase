@@ -74,9 +74,9 @@
 
 .time-graph__job-bar {
   position: absolute;
-  height: calc(12rem + 1px);
+  height: calc(11rem + 1px);
   padding: 1rem 1.6rem;
-  background-color: var(--color-blue-light);
+  background-color: var(--color-blue-light-transparent);
   border: 1px solid var(--color-blue);
   border-right-width: 5px;
   z-index: 1;
@@ -90,7 +90,7 @@
 
 .time-graph__row {
   display: flex;
-  height: 12rem;
+  height: 11rem;
   background-color: var(--color-gray-lighter);
 }
 
