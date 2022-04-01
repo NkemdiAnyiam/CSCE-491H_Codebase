@@ -2,6 +2,23 @@
 /**************************** JOB FORM ****************************/
 /*****************************************************************/
 
+.constraint-text {
+  margin-bottom: 10rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.constraint-text input {
+  width: 12rem;
+  cursor: not-allowed;
+}
+
+.constraint-text input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
+}
+
 .forms-container {
   display: flex;
   flex-direction: column;

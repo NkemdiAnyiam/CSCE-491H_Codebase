@@ -22,6 +22,11 @@ span {
   display: inline-block;
 }
 
+input {
+  font-family: inherit;
+  display: inline-block;
+}
+
 .hidden:not(.text-box):not(.time-graph__c-bar) {
   display: none!important;
 }

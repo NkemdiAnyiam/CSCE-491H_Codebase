@@ -242,8 +242,8 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
     // Note: Extra '\n' characters being pushed to errorMessages helps with prettier printing when displaying the errors
 
     // error if textarea is empty
-    if (!textString)
-      { errorMessages.push(`Total number of jobs must be in the range 0—${maxNumJobs}. Current number: 0\n`, '\n'); }
+    if (!textString.trim())
+      { errorMessages.push(`Total number of jobs must be in the range 1—${maxNumJobs}. Current number: 0\n`, '\n'); }
 
     else {
       // try to match entire string to ensure proper formating
@@ -258,7 +258,7 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
     
         // error if too many job tuples
         if (tuples.length > maxNumJobs)
-          { errorMessages.push(`Total number of jobs must be in the range 0—${maxNumJobs}. Current number: ${tuples.length}\n`, '\n'); }
+          { errorMessages.push(`Total number of jobs must be in the range 1—${maxNumJobs}. Current number: ${tuples.length}\n`, '\n'); }
         else {
           tuples.forEach(tuple => {
             const {startTime, finishTime, weight, isValid} = validateTuple(tuple);
@@ -314,7 +314,7 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
       isValid = false;
     }
     if (weight > maxWeight || weight < 0 || !Number.isSafeInteger(weight)) {
-      errorMessages.push(`${errorMessageIntro}: weight must be an integer in the range 0—${maxWeight}.\n`);
+      errorMessages.push(`${errorMessageIntro}: weight must be an integer in the range 1—${maxWeight}.\n`);
       isValid = false;
     }
 

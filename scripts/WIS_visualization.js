@@ -511,14 +511,16 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
 
   const MArrayTextBoxes = MArray.querySelector('.text-boxes');
+  const dataDisplayBorder = dataDisplay.querySelector('.data-display__right-border');
   /****************************************************** */
   // HIDE M ARRAY TEXT EXPLANATION BOXES
   /****************************************************** */
   {
     const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('Hide memoized algorithm');
+    animSequence.setDescription('Hide M array text explanation boxes');
     animSequence.addManyBlocks([
       [ 'std', MArrayTextBoxes, 'fade-out' ],
+      [ 'std', dataDisplayBorder, 'enter-wipe-from-top' ],
     ]);
     animTimeline.addOneSequence(animSequence);
   }
@@ -611,7 +613,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Fade in job card and M access');
     animSequence.setTag('start');
     animSequence.addManyBlocks([
-      [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ],
+      [ 'std', jobCard, 'fade-in', {blocksNext: parentArrowDown ? false : true} ], // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
     ]);
     if (parentArrowDown) {
       animSequence.addManyBlocks([

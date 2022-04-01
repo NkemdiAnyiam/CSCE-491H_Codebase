@@ -30,6 +30,11 @@
       </header>
 
       <div class="main-menu">
+        <div class="constraint-text">
+          <p>Maximum Jobs: <input type="number" class="fill--max-jobs" disabled></p>
+          <p>Maximum Time: <input type="number" class="fill--max-time" disabled></p>
+          <p>Maximum Weight: <input type="number" class="fill--max-weight" disabled></p>
+        </div>
         
         <div class="forms-container">
           <div class="toggle-form-buttons">
@@ -41,7 +46,7 @@
             
             <div class="job-form__add-job-buttons">
               <button type="button" class="job-form__button job-form__button--add">Add New Job</button>
-              <button type="button" class="job-form__button job-form__button--randomize">Randomize Jobs</button>
+              <button type="button" class="job-form__button job-form__button--randomize">Randomize</button>
             </div>
   
             <div class="job-form__jobs-rows">
@@ -400,6 +405,8 @@
               </div>
             </div>
           </div>
+
+          <div class="data-display__right-border hidden"></div>
         </div>
         
   

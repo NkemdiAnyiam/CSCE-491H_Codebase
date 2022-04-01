@@ -18,7 +18,7 @@
 }
 
 .main-menu {
-  margin-top: 30rem;
+  margin-top: 24rem;
   width: max-content;
   padding-left: 5rem;
 }
@@ -41,11 +41,18 @@
   padding-right: 10rem;
   padding-left: 5rem;
   height: 100%;
-  border-right: solid 1px var(--color-gray-darkest);
 
   display: flex;
   flex-direction: column;
   gap: 10rem;
+}
+
+.data-display__right-border {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 1px;
+  background-color: var(--color-gray-darkest);
 }
 
 .job-cards {
