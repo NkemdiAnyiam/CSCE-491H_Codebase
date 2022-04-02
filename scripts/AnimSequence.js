@@ -56,7 +56,7 @@ export class AnimSequence {
     animBlocks.forEach(animBlock => this.addOneBlock(animBlock));
   }
 
-  // plays each animBlock contained in this AnimSequence instance in Sequenceuential order
+  // plays each animBlock contained in this AnimSequence instance in sequential order
   async play() {
     for (let i = 0; i < this.animBlocks.length; ++i) {
       // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
