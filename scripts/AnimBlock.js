@@ -181,17 +181,17 @@ export class AnimBlock {
       targetElem, // if specified, translations will be with respect to this target element
       alignmentY = 'top', // determines vertical alignment with target element
       alignmentX = 'left', // determines horizontal alignment with target element
+      offsetTargetX = 0, // determines offset with respect to width of target (e.g. 0.5 pushes us 50% of the target element's width to the right)
+      offsetTargetY = 0, // determines offset with respect to height of target (e.g. 0.5 pushes us 50% of the target element's height downward)
+      offsetTargetXY, // overrides offsetTargetX and offsetTargetY
+      preserveX = false, // if true, there will be no horizontal translation with respect to the target element (offsets still apply)
+      preserveY = false, // if true, there will be no vertical translation with respect to the target element (offsets still apply)
       offsetX = 0, // determines offset to apply to the respective positional property
       offsetY = 0, // determines offset to apply to the respective positional property
       offsetXY, // overrides offsetX and offsetY
       offsetUnitsX = 'px',
       offsetUnitsY = 'px',
       offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
-      offsetTargetX = 0, // determines offset with respect to width of target (e.g. 0.5 pushes us 50% of the target element's width to the right)
-      offsetTargetY = 0, // determines offset with respect to height of target (e.g. 0.5 pushes us 50% of the target element's height downward)
-      offsetTargetXY, // overrides offsetTargetX and offsetTargetY
-      preserveX = false,
-      preserveY = false,
     } = translateOptions;
 
     if (targetElem) {
