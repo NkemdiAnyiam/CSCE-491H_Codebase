@@ -141,9 +141,9 @@ export class AnimTimeline {
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
     if (this.wasPaused) { this.togglePause(); }
     if (this.nextSeqIndex <= tagIndex)
-      { while (this.nextSeqIndex < tagIndex) { await this.stepForward(); } } // <= to play the sequence as well
+      { while (this.nextSeqIndex < tagIndex) { await this.stepForward(); } } // could be <= to play the sequence as well
     else
-      { while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); } } // +1 to ensure the sequence isn't undone
+      { while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); } } // could be tagIndex+1 to prevent the sequence from being undone
     if (this.wasPaused) { this.togglePause(); }
 
     return new Promise(resolve => {
