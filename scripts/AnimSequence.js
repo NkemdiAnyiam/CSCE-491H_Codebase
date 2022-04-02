@@ -48,7 +48,7 @@ export class AnimSequence {
       const [type, ...animBlockParams] = animBlock;
       if (type === 'std') { this.addOneBlock(new AnimBlock(...animBlockParams)); return; }
       if (type === 'line') { this.addOneBlock(new AnimBlockLine(...animBlockParams)); return; }
-      console.error('animBlock type not specified'); // TODO: throw error
+      throw new Error('animBlock type not specified');
     }
   }
 
@@ -84,7 +84,7 @@ export class AnimSequence {
     // an animation "belongs" to this sequence if its sequence id matches
     for (let i = 0; i < allAnimations.length; ++i) {
       // an animation "belongs" to this sequence if its ids match
-      if (Number.parseInt(allAnimations[i].timelineID) === this.timelineID && Number.parseInt(allAnimations[i].sequenceID) === this.id) { allAnimations[i].finish(); }
+      if (Number.parseInt(allAnimations[i].sequenceID) === this.id) { allAnimations[i].finish(); }
     }
   }
 }
