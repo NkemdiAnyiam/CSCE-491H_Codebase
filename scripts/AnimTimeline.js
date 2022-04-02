@@ -172,12 +172,10 @@ export class AnimTimeline {
     this.isPaused = isPaused ?? !this.isPaused;
     if (this.isPaused) {
       this.doForCurrentAnimations((animation) => animation.pause());
-      this.isPaused = true;
     }
     else {
       this.doForCurrentAnimations((animation) => animation.play());
       if (this.isSkipping) { this.skipCurrentAnimations(); }
-      this.isPaused = false;
     }
     return this.isPaused;
   }
