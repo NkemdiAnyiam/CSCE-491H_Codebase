@@ -12,7 +12,7 @@ export class AnimTimeline {
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
-  playbackRate = {value: 1};
+  playbackRate = 1;
 
   constructor(animSequences = null, options = null) {
     this.id = AnimTimeline.id++;
@@ -28,10 +28,6 @@ export class AnimTimeline {
     }
 
     this.debugMode = options ? (options?.debugMode ?? false) : false;
-
-    this.step = this.step.bind(this);
-    this.getForwardStepper = this.getForwardStepper.bind(this);
-    this.getBackwardStepper = this.getBackwardStepper.bind(this);
   }
 
   addOneSequence(animSequenceOrData) {
@@ -56,13 +52,11 @@ export class AnimTimeline {
   }
 
   setPlaybackRate(rate) {
-    this.playbackRate.value = rate;
+    this.playbackRate = rate;
     this.updateCurrentAnimationsRates(rate);
   }
-  getPlaybackRate() { return this.playbackRate.value; }
+  getPlaybackRate() { return this.playbackRate; }
 
-  getForwardStepper() { return () => this.step('forward'); }
-  getBackwardStepper() { return () => this.step('backward'); }
   getCurrDirection() { return this.currDirection; }
   getIsStepping() { return this.isStepping; }
   getIsPaused() { return this.isPaused; }

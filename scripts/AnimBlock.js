@@ -69,7 +69,7 @@ export class AnimBlock {
     if (isTranslating) { animation.effect = this.createTranslationKeyframes(animName); }
     else { animation.effect = this.getPresetKeyframes(animName); }
     // set playback rate
-    animation.updatePlaybackRate((this.parentTimeline?.playbackRate.value ?? 1) * this.playbackRate);
+    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.playbackRate);
 
     if (isEntering) {
       this.domElem.classList.remove('hidden');
