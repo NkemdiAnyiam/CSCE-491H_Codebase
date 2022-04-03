@@ -133,14 +133,14 @@ export class AnimTimeline {
       { throw new Error(`Error: skipping to tag "${tag}" with offset "${offset}" goes out of timeline bounds`); }
 
     this.usingSkipTo = true;
-    this.wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then pause
+    let wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then pause
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
-    if (this.wasPaused) { this.togglePause(); }
+    if (wasPaused) { this.togglePause(); }
     if (this.nextSeqIndex <= tagIndex)
       { while (this.nextSeqIndex < tagIndex) { await this.stepForward(); } } // could be <= to play the sequence as well
     else
       { while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); } } // could be tagIndex+1 to prevent the sequence from being undone
-    if (this.wasPaused) { this.togglePause(); }
+    if (wasPaused) { this.togglePause(); }
 
     return new Promise(resolve => {
       this.usingSkipTo = false;
