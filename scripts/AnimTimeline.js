@@ -95,8 +95,6 @@ export class AnimTimeline {
 
     if (this.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
 
-    if (this.isSkipping || this.usingSkipTo) { this.skipCurrentAnimations(); }
-
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
       .then(continueNext => {
@@ -112,8 +110,6 @@ export class AnimTimeline {
     this.currDirection = 'backward';
 
     if (this.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
-
-    if (this.isSkipping || this.usingSkipTo) { this.skipCurrentAnimations(); }
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].rewind()
