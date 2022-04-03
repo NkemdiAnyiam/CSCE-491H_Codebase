@@ -107,6 +107,12 @@
   gap: 10rem;
 }
 
+.job-form__job-letter,
+.job-form--multi-input .job-form__label,
+.job-form__button--remove {
+  height: 7.2rem;
+}
+
 .job-form__job-letter {
   float: left;
 
