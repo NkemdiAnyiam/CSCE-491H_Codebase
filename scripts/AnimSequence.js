@@ -15,7 +15,7 @@ export class AnimSequence {
 
     if (animBlocks) {
       if (animBlocks instanceof Array
-        && (animBlocks[0] instanceof Array || animBlocks[0] instanceof Array)) { this.addManyBlocks(animBlocks); }
+        && (animBlocks[0] instanceof Array || animBlocks[0] instanceof AnimBlock)) { this.addManyBlocks(animBlocks); }
       else { this.addOneBlock(animBlocks); }
     }
 
