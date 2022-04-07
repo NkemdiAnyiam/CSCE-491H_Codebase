@@ -11,7 +11,7 @@ export class AnimBlockLineUpdater {
   static setInterval(domElem, func) {
     // get the IntervalController associated with the DOM element and set an interval to periodically call udpateEndpoints()
     // updateEndpoints() for a given line will be called every (specified) milliseconds
-    AnimBlockLineUpdater.domElemMap.get(domElem).setIntervalID(func, 1);
+    AnimBlockLineUpdater.domElemMap.get(domElem).setIntervalID(func, 4);
   }
 
   static clearInterval(domElem) {
@@ -20,9 +20,9 @@ export class AnimBlockLineUpdater {
   }
 }
 
-// IntervalController is used to set or clear intervals. Because AnimBlockLineUpdater.domElemMap bases its mapping on a DOM element,...
-// ... any AnimBlockLine that uses the same <svg> element for its line will essentially share an IntervalController,...
-// ... allowing separate AnimBlockLine instances to turn on/off intervals for updateEndpoints() for the same line
+// IntervalController is used to set or clear intervals. Because AnimBlockLineUpdater.domElemMap bases its mapping on a DOM...
+// ...element, any AnimBlockLine that uses the same <svg> element for its line will essentially share an IntervalController,...
+// ...allowing separate AnimBlockLine instances to turn on/off intervals for updateEndpoints() for the same line
 class IntervalController {
   intervalID = null;
 

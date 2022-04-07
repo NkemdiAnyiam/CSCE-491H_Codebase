@@ -88,8 +88,10 @@ export class AnimBlock {
     return animation.finished.then(() => {
       animation.commitStyles(); // actually applies the styles to the element
       if (isExiting) { this.domElem.classList.add('hidden'); }
-      animation.cancel(); // prevents a weird bug(?) where animations are able to jump backwards in their execution if the duration or playback rate is modified
-      if (isEntering) { this.domElem.style.removeProperty('clip-path'); } // prevents clipping out nested absolutely-positioned elements outside the bounding box
+      // prevents animations from jumping backward in their execution when duration or playback rate is modified
+      animation.cancel();
+      // prevents clipping out nested absolutely-positioned elements outside the bounding box
+      if (isEntering) { this.domElem.style.removeProperty('clip-path'); }
     });
   }
 
@@ -100,8 +102,8 @@ export class AnimBlock {
       this.domElem,
       AnimBlock[animName], // gets transformations from appropriate static property on AnimBlock
       {
-        duration: this.duration, // TODO: potentially allow variable duration values (both forwards and backwards)
-        fill: 'forwards', // makes it so that the styles visually stick after the animation is finished (helps us commit them latter)
+        duration: this.duration, // TODO: potentially allow setting for both -->> and <<--
+        fill: 'forwards', // styles visually stick after the animation is finished
       }
     );
   }
@@ -124,7 +126,7 @@ export class AnimBlock {
       const rectTarget = this.targetElem.getBoundingClientRect();
 
       // the displacement will start as the difference between the target element's position and our element's position...
-      // plus any offset within the target itself
+      // ...plus any offset within the target itself
       translateX = this.preserveX ? 0 : rectTarget[this.alignmentX] - rectThis[this.alignmentX];
       translateX += this.offsetTargetX ? this.offsetTargetX * rectTarget.width : 0;
       translateY = this.preserveY ? 0 : rectTarget[this.alignmentY] - rectThis[this.alignmentY];
@@ -185,11 +187,11 @@ export class AnimBlock {
       targetElem, // if specified, translations will be with respect to this target element
       alignmentY = 'top', // determines vertical alignment with target element
       alignmentX = 'left', // determines horizontal alignment with target element
-      offsetTargetX = 0, // determines offset with respect to width of target (e.g. 0.5 pushes us 50% of the target element's width to the right)
-      offsetTargetY = 0, // determines offset with respect to height of target (e.g. 0.5 pushes us 50% of the target element's height downward)
+      offsetTargetX = 0, // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
+      offsetTargetY = 0, // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
       offsetTargetXY, // overrides offsetTargetX and offsetTargetY
-      preserveX = false, // if true, there will be no horizontal translation with respect to the target element (offsets still apply)
-      preserveY = false, // if true, there will be no vertical translation with respect to the target element (offsets still apply)
+      preserveX = false, // if true, no horizontal translation with respect to the target element (offsets still apply)
+      preserveY = false, // if true, no vertical translation with respect to the target element (offsets still apply)
       offsetX = 0, // determines offset to apply to the respective positional property
       offsetY = 0, // determines offset to apply to the respective positional property
       offsetXY, // overrides offsetX and offsetY

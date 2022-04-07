@@ -10,7 +10,8 @@ export class AnimBlockLine extends AnimBlock {
     super(domSVGElem.querySelector('.free-line__line'), animName, options);
 
     this.domSVGElem = domSVGElem;
-    AnimBlockLineUpdater.registerDomElem(this.domSVGElem); // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
+    // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
+    AnimBlockLineUpdater.registerDomElem(this.domSVGElem);
 
     // set the reference points for the start and end of the line (our <svg> element's nested <line>).
     // Defaults to the sibling DOM element above our DOM element
@@ -18,8 +19,8 @@ export class AnimBlockLine extends AnimBlock {
     this.endElem = endElem ? endElem : this.domSVGElem.previousElementSibling;
 
     // set the values used for the endpoint offsets relative to the top-left of each reference element
-    this.leftStart = leftStart; // a value of 0 leaves the starting endpoint on the left edge of startElem. 0.5 centers it horizontally within startElem
-    this.topStart = topStart; // a value of 0 leaves the starting endpoint on the top edge of startElem. 0.5 centers it vertically within startElem
+    this.leftStart = leftStart; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
+    this.topStart = topStart; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
     this.leftEnd = leftEnd;
     this.topEnd = topEnd;
 
@@ -75,13 +76,13 @@ export class AnimBlockLine extends AnimBlock {
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the parent element's current top and left from the offset
-    // But because elements start in their parent's Content box—which excludes the border—...
-    // ...instead of the Fill area—which includes the border—,our element's top and left are offset by the parent element's border width...
-    // ... with respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
+    // But because elements start in their parent's Content box (which excludes the border) instead of the Fill area...
+    // ...(which includes the border), our element's top and left are offset by the parent element's border width with...
+    // ...respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
     const SVGLeftOffset = -rectParent.left - Number.parseFloat(getComputedStyle(this.domSVGElem.parentElement).borderLeftWidth);
     const SVGTopOffset = -rectParent.top - Number.parseFloat(getComputedStyle(this.domSVGElem.parentElement).borderTopWidth);
 
-    // change the x and y coordinates of our <svg>'s nested <line> based on the bounding boxes of the starting and ending reference elements
+    // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
     const line = this.domSVGElem.querySelector('.free-line__line');
     line.x1.baseVal.value = (1 - this.leftStart) * rectStart.left + (this.leftStart) * rectStart.right + SVGLeftOffset;
