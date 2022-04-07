@@ -233,7 +233,7 @@ export class AnimBlock {
 }
 
 
-//******** TRANSFORMATION PRESETS
+//******** ANIMATION PRESETS
 //*** Fade
 AnimBlock['fade-in'] = AnimBlock['undo--fade-out'] = [
   {opacity: '0'},
