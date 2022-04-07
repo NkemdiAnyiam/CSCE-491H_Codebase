@@ -22,8 +22,8 @@ export class AnimSequence {
     if (options) {
       this.description = options.description ?? this.description;
       this.tag = options.tag ?? this.tag;
-      this.continueNext = options.continueNext; // determines whether or not the next AnimSequence should automatically play after this one
-      this.continuePrev = options.continuePrev; // determines whether or not the previous AnimSequence should automatically play after this one
+      this.continueNext = options.continueNext; // decides if the next AnimSequence should automatically play after this one
+      this.continuePrev = options.continuePrev; // decides if the prev AnimSequence should automatically play after this one
     }
   }
 
@@ -60,8 +60,10 @@ export class AnimSequence {
   async play() {
     for (let i = 0; i < this.animBlocks.length; ++i) {
       // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      if (i === this.animBlocks.length - 1 || this.animBlocks[i].getBlocksNext()) { await this.animBlocks[i].stepForward(); }
-      else { this.animBlocks[i].stepForward(); }
+      if (i === this.animBlocks.length - 1 || this.animBlocks[i].getBlocksNext())
+        { await this.animBlocks[i].stepForward(); }
+      else
+        { this.animBlocks[i].stepForward(); }
     }
 
     return Promise.resolve(this.continueNext);
@@ -70,8 +72,10 @@ export class AnimSequence {
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
   async rewind() {
     for (let i = this.animBlocks.length - 1; i >= 0; --i) {
-      if (i === 0 || this.animBlocks[i].getBlocksPrev()) { await this.animBlocks[i].stepBackward(); }
-      else { this.animBlocks[i].stepBackward(); }
+      if (i === 0 || this.animBlocks[i].getBlocksPrev())
+        { await this.animBlocks[i].stepBackward(); }
+      else
+        { this.animBlocks[i].stepBackward(); }
     }
 
     return Promise.resolve(this.continuePrev);

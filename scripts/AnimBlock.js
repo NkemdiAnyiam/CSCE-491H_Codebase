@@ -24,7 +24,7 @@ export class AnimBlock {
   sequenceID; // set to match the id of the parent AnimSequence
   timelineID; // set to match the id of the parent AnimTimeline
   
-  // Determines whether or not the upcoming animation should wait for this one to finish (can be changed in applyOptions())
+  // Decides if the upcoming animation should wait for this one to finish (can be changed in applyOptions())
   blocksNext = true;
   blocksPrev = true;
   duration = 500;
