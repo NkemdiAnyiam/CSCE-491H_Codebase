@@ -2,15 +2,19 @@ export class AnimBlock {
   static id = 0;
 
   static exitingList = [
-    'fade-out', 'undo--fade-in', 'exit-wipe-to-right', 'undo--enter-wipe-from-right', 'exit-wipe-to-left', 'undo--enter-wipe-from-left',
-    'exit-wipe-to-top', 'undo--enter-wipe-from-top', 'exit-wipe-to-bottom', 'undo--enter-wipe-from-bottom',
+    'fade-out', 'undo--fade-in',
+    'exit-wipe-to-right', 'undo--enter-wipe-from-right',
+    'exit-wipe-to-left', 'undo--enter-wipe-from-left',
+    'exit-wipe-to-top', 'undo--enter-wipe-from-top',
+    'exit-wipe-to-bottom', 'undo--enter-wipe-from-bottom',
   ];
   static enteringList = [
-    'fade-in', 'undo--fade-out', 'enter-wipe-from-right', 'undo--exit-wipe-to-right', 'enter-wipe-from-left', 'undo--exit-wipe-to-left',
-    'enter-wipe-from-top', 'undo--exit-wipe-to-top', 'enter-wipe-from-bottom', 'undo--exit-wipe-to-bottom',
+    'fade-in', 'undo--fade-out',
+    'enter-wipe-from-right', 'undo--exit-wipe-to-right',
+    'enter-wipe-from-left', 'undo--exit-wipe-to-left',
+    'enter-wipe-from-top', 'undo--exit-wipe-to-top',
+    'enter-wipe-from-bottom', 'undo--exit-wipe-to-bottom',
   ];
-  static highlightingList = ['highlight', 'undo--un-highlight'];
-  static unhighlightingList = ['un-highlight', 'undo--highlight'];
   static translatingList = ['translate', 'undo--translate'];
   static isExiting(animName) { return AnimBlock.exitingList.includes(animName); }
   static isEntering(animName) { return AnimBlock.enteringList.includes(animName); }
