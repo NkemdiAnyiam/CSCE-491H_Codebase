@@ -480,7 +480,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   // EXPLAIN WHAT M ARRAY WILL BE USED FOR
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
+    const animSequence = new AnimSequence();
     animSequence.setDescription('Explain what M array will be used for');
     animSequence.addManyBlocks([
       [ 'line', freeLine_MArray, 'enter-wipe-from-left', null, [0, 0.5], MArray, [1, 0.5] ],
