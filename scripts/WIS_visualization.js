@@ -58,7 +58,7 @@ function setUpFreeLinesArrows() {
     const line = freeLine.querySelector('.free-line__line');
     const marker = freeLine.querySelector('marker');
 
-    const id = `markerArrow--${i}`
+    const id = `markerArrow--${i}`;
     marker.id = id;
     line.style.markerEnd = `url(#${id})`;
   });
