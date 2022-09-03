@@ -130,7 +130,7 @@ export const setupPlaybackControls = (animTimeline) => {
 
   window.addEventListener('keyup', e => {
     // release 'f' to set playback rate back to 1 (stop fast-forwarding)
-    if (e.key === 'f') {
+    if (e.key.toLowerCase() === 'f') {
       holdingFastKey = false;
       if (!(holdingFastButton || holdingFastKey))
       {
