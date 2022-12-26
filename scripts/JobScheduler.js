@@ -9,11 +9,11 @@ export class TreeNode {
 
 export class JobScheduler {
   _maxTime = 11;
-  _greatestTime = -1;
+  // _greatestTime = -1;
   _c = [];
   _M = [];
   _treeRootNode = new TreeNode();
-  static nextCardNum = 1;
+  // static nextCardNum = 1;
 
   constructor(jobs = []) {
     this._jobs = [...jobs];
@@ -24,7 +24,7 @@ export class JobScheduler {
   getRootNode() { return this._treeRootNode; }
   getNumJobs() { return this._n_jobs; }
   getMaxTime() { return this._maxTime; }
-  getGreatestTime() { return this._greatestTime; }
+  // getGreatestTime() { return this._greatestTime; }
   getJobs() { return [...this._jobs]; }
   getJobsUnsorted() { return [...this._jobsUnsorted]; }
   getC(index) { return this._c[index]; }
@@ -35,7 +35,7 @@ export class JobScheduler {
     if (job.getFinish() > this._maxTime) { throw new Error(`Error: Invalid job finish time "${job.getFinish()}". Finish time must be < ${this._maxTime}`); }
     this._jobs.push(job);
     this._n_jobs++;
-    this._greatestTime = Math.max(this._greatestTime, job.getFinish());
+    // this._greatestTime = Math.max(this._greatestTime, job.getFinish());
   }
 
   addJobs(jobs) {
