@@ -5,9 +5,12 @@ export class AnimBlockLine extends AnimBlock {
   // the defaults of both updateEndpointsOnEntry and trackEndpoints can be replaced in applyOptions()
   updateEndpointsOnEntry = true; // determines whether or not to call updateEndpoints() upon using an entering animation
   trackEndpoints = false; // determines whether or not to continuously periodically called updateEndpoints() while visible
+  lineElement: SVGLineElement;
 
-  constructor(domSVGElem, animName, startElem, [leftStart, topStart], endElem, [leftEnd, topEnd], options) {
-    super(domSVGElem.querySelector('.free-line__line'), animName, options);
+  constructor(domSVGElem: SVGSVGElement, animName, startElem, [leftStart, topStart], endElem, [leftEnd, topEnd], options) {
+    const lineElement = domSVGElem.querySelector('line.free-line__line') as SVGLineElement;
+    if (!lineElement) { throw new Error('ERROR: SVG Element must contain line element'); } // TODO: Make more specific
+    super(lineElement, animName, options);
 
     this.domSVGElem = domSVGElem;
     // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates

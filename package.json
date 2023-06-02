@@ -1,0 +1,23 @@
+{
+  "name": "research-code",
+  "version": "1.0.0",
+  "description": "Use the visualization here: https://nkemdianyiam.github.io/CSCE-491H_WIS-Visualization-with-AnimTimeline/\r (This README will be filled out with more details later)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NkemdiAnyiam/CSCE-491H_WIS-Visualization-with-AnimTimeline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NkemdiAnyiam/CSCE-491H_WIS-Visualization-with-AnimTimeline/issues"
+  },
+  "homepage": "https://github.com/NkemdiAnyiam/CSCE-491H_WIS-Visualization-with-AnimTimeline#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}
