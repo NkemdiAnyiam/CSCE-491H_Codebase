@@ -35,9 +35,18 @@ input {
   cursor: not-allowed!important;
 }
 
+/* TODO: Remove .hidden and add separate form of invisibility */
 .text-box.hidden,
 .time-graph__c-bar.hidden {
   visibility: hidden;
+}
+
+.wbfk-hidden:not(.wbfk-override-hidden) {
+  display: none !important;
+}
+
+.wbfk-invisible:not(.wbfk-override-hidden) {
+  visibility: hidden !important;
 }
 
 .highlightable {
