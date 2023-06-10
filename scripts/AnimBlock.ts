@@ -1,4 +1,4 @@
-import { Entrances } from "./Presets";
+import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik";
 
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
@@ -9,15 +9,25 @@ type CustomKeyframeEffectOptions = {
 type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
 // TODO: validate duration and playbackRate?
 
-interface TNoElem {
+type TOffset = {
+  offsetX: number; // determines offset to apply to the respective positional property
+  offsetY: number; // determines offset to apply to the respective positional property
+  offsetXY?: number; // overrides offsetX and offsetY
+  offsetUnitsX: CssLengthUnit;
+  offsetUnitsY: CssLengthUnit;
+  offsetUnitsXY?: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
+}
+
+interface TNoElem extends TOffset {
   translateX: number;
   translateY: number;
-  translateXY: number; // overrides translateX and translateY
+  translateXY?: number; // overrides translateX and translateY
   unitsX: CssLengthUnit;
   unitsY: CssLengthUnit;
-  unitsXY: CssLengthUnit; // overrides unitsX and unitsY
+  unitsXY?: CssLengthUnit; // overrides unitsX and unitsY
 }
-interface TElem {
+
+interface TElem extends TOffset {
   targetElem: HTMLElement; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
@@ -26,12 +36,6 @@ interface TElem {
   offsetTargetXY: number; // overrides offsetTargetX and offsetTargetY
   preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
-  offsetX: number; // determines offset to apply to the respective positional property
-  offsetY: number; // determines offset to apply to the respective positional property
-  offsetXY: number; // overrides offsetX and offsetY
-  offsetUnitsX: CssLengthUnit;
-  offsetUnitsY: CssLengthUnit;
-  offsetUnitsXY: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
 }
 
 // type TranslateOptions = {
@@ -112,13 +116,13 @@ export abstract class AnimBlock {
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  options: AnimBlockOptions;
+  abstract options: AnimBlockOptions;
   abstract animation: AnimTimelineAnimation;
 
   constructor(public domElem: HTMLElement | SVGGraphicsElement, public animName: string, options: Partial<AnimBlockOptions> = {}) {
     this.id = AnimBlock.id++;
 
-    this.options = this.applyOptions(options);
+    // this.options = this.applyOptions(options);
   }
 
   getBlocksNext() { return this.options.blocksNext; }
@@ -131,7 +135,7 @@ export abstract class AnimBlock {
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      this.animate(this.animName, this.animation.forwardAnimation, 'forward')
+      this.animate(this.animation.forwardAnimation, 'forward')
         .then(() => resolve());
     });
   }
@@ -146,7 +150,7 @@ export abstract class AnimBlock {
       //   this.animate(this.undoAnimName, this.animation.backwardAnimation)
       //     .then(resolve);
       // }
-      this.animate(this.animName, this.animation.backwardAnimation, 'backward')
+      this.animate(this.animation.backwardAnimation, 'backward')
         .then(() => resolve());
     });
   }
@@ -154,16 +158,11 @@ export abstract class AnimBlock {
   protected abstract _onFinish(direction: 'forward' | 'backward'): void;
   protected abstract _onStart(direction: 'forward' | 'backward'): void;
 
-  animate(animName: string, animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
+  protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
     this._onStart(direction);
 
     // set playback rate
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.options.playbackRate);
-
-    // if (isEntering) {
-    //   this.domElem.classList.add('wpfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
-    //   // CHANGE NOTE: Removed removal of clip-path and opacity
-    // }
     
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
@@ -183,7 +182,6 @@ export abstract class AnimBlock {
         }
       }
       this._onFinish(direction);
-      // if (isExiting) { this.domElem.classList.add('wpfk-hidden'); }
       // prevents animations from jumping backward in their execution when duration or playback rate is modified
       animation.cancel();
       // // prevents clipping out nested absolutely-positioned elements outside the bounding box
@@ -249,7 +247,7 @@ export abstract class AnimBlock {
   // }
 
   // TODO: Remove unnecessary parameter
-  applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
+  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
     return {
       blocksNext: true,
       blocksPrev: true,
@@ -403,27 +401,29 @@ export abstract class AnimBlock {
   // }
 }
 
-type AnimNames<TBank> = {
-  [AnimName in keyof TBank as TBank[AnimName] extends Keyframe[] ? AnimName : never]: TBank[AnimName];
-}
-
-export class EntranceBlock extends AnimBlock {
+// CHANGE NOTE: Generic class accepting an extension of AnimationBank
+export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
   animation: AnimTimelineAnimation;
-  
-  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: keyof AnimNames<typeof Entrances>, options: Partial<AnimBlockOptions> = {}) {
+  options: AnimBlockOptions;
+  // CHANGE NOTE: Add static animation bank and static method for setting bank 
+  static Bank: IKeyframesBank = {};
+  static setBank<T extends IKeyframesBank>(bank: T) { EntranceBlock.Bank = {...bank}; }
+
+  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, options: Partial<AnimBlockOptions> = {}) {
+    const animationBank = EntranceBlock.Bank as TBank;
     super(domElem, animName);
-    this.id = AnimBlock.id++;
+    this.options = this.applyOptions(options);
 
     // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = Entrances[animName];
+    const forwardFrames: Keyframe[] = animationBank[animName];
     if (!forwardFrames) { throw new Error(`Invalid entrance animation name "${animName}"`); }
 
     // if an explicit definition for reversal frames exists, use them.
     // otherwise, use the reverse of the forward frames
     let backwardFrames: Keyframe[];
     const undoAnimationName = `undo--${animName}`;
-    backwardFrames = (undoAnimationName in Entrances) ?
-      Entrances[undoAnimationName as typeof animName] :
+    backwardFrames = (undoAnimationName in animationBank) ?
+      animationBank[undoAnimationName as typeof animName] :
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
@@ -459,12 +459,176 @@ export class EntranceBlock extends AnimBlock {
     }
   }
 
-  applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
+  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
     return {
       ...super.applyOptions(options),
       // TODO: consider commitStyles: false as default
       ...options,
     };
+  }
+}
+
+export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
+  animation: AnimTimelineAnimation;
+  options: AnimBlockOptions;
+  static Bank: IKeyframesBank = {};
+  static setBank<T extends IKeyframesBank>(bank: T) { ExitBlock.Bank = {...bank}; }
+  
+  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, options: Partial<AnimBlockOptions> = {}) {
+    const animationBank = ExitBlock.Bank as TBank;
+    super(domElem, animName);
+    this.options = this.applyOptions(options);
+
+    // Create the Animation instance that we will use on our DOM element
+    const forwardFrames: Keyframe[] = animationBank[animName];
+    if (!forwardFrames) { throw new Error(`Invalid exit animation name "${animName}"`); }
+
+    // if an explicit definition for reversal frames exists, use them.
+    // otherwise, use the reverse of the forward frames
+    let backwardFrames: Keyframe[];
+    const undoAnimationName = `undo--${animName}`;
+    backwardFrames = (undoAnimationName in animationBank) ?
+      animationBank[undoAnimationName as typeof animName] :
+      [...forwardFrames].reverse();
+
+    const keyframeOptions: KeyframeEffectOptions = {
+      duration: options.duration,
+      fill: options.commitStyles ? 'forwards' : 'none',
+      easing: options.easing,
+      // playbackRate: options.playbackRate, // TODO: implement and uncomment
+    }
+    
+    this.animation = new AnimTimelineAnimation(
+      new KeyframeEffect(
+        domElem,
+        forwardFrames,
+        keyframeOptions
+      ),
+      new KeyframeEffect(
+        domElem,
+        backwardFrames,
+        keyframeOptions
+      ),
+    );
+  }
+
+  protected _onStart(direction: 'forward' | 'backward'): void {
+    if (direction === 'backward') {
+      this.domElem.classList.remove('wbfk-hidden');
+    }
+  }
+
+  protected _onFinish(direction: "forward" | "backward"): void {
+    if (direction === 'forward') {
+      this.domElem.classList.add('wbfk-hidden');
+    }
+  }
+
+  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
+    return {
+      ...super.applyOptions(options),
+      commitStyles: false,
+      ...options,
+    };
+  }
+}
+
+export class TranslateBlock extends AnimBlock {
+  translationOptions: TNoElem;
+  options: AnimBlockOptions;
+  animation: AnimTimelineAnimation;
+
+  constructor(domElem: HTMLElement | SVGGraphicsElement, options: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
+    super(domElem, 'translate', options);
+
+    this.translationOptions = {
+      ...this.applyTranslateOptions(translationOptions),
+      ...translationOptions,
+    };
+
+    this.options = this.applyOptions(options);
+
+    const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
+
+    this.animation = new AnimTimelineAnimation(
+      new KeyframeEffect(
+        domElem,
+        forwardFrames,
+        {
+          duration: this.options.duration,
+          fill: 'forwards', // TODO: Make customizable?
+          easing: this.options.easing,
+          composite: 'accumulate',
+          // playbackRate: options.playbackRate, // TODO: implement and uncomment
+        }
+      ),
+      new KeyframeEffect(
+        domElem,
+        backwardFrames,
+        {
+          duration: this.options.duration,
+          fill: 'forwards', // TODO: Make customizable?
+          easing: this.options.easing,
+          composite: 'accumulate',
+          // playbackRate: options.playbackRate, // TODO: implement and uncomment
+        }
+      )
+    );
+  }
+
+  protected _onStart(direction: "forward" | "backward"): void {
+    
+  }
+
+  protected _onFinish(direction: "forward" | "backward"): void {
+    
+  }
+
+  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
+    return {
+      ...super.applyOptions(options),
+      ...options,
+    };
+  }
+
+  protected applyTranslateOptions(translateOptions: Partial<TNoElem>): TNoElem {
+    return {
+      translateX: 0,
+      translateY: 0,
+      unitsX: 'px',
+      unitsY: 'px',
+      offsetX: 0,
+      offsetY: 0,
+      offsetUnitsX: 'px',
+      offsetUnitsY: 'px',
+    };
+  }
+
+  private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
+    let {
+      translateX, translateY, translateXY,
+      unitsX, unitsY, unitsXY,
+      offsetX, offsetY, offsetXY,
+      offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+    } = this.translationOptions;
+
+    translateX = translateXY ?? translateX;
+    translateY = translateXY ?? translateY;
+    unitsX = unitsXY ?? unitsX;
+    unitsY = unitsXY ?? unitsY;
+    offsetX = offsetXY ?? offsetX;
+    offsetY = offsetXY ?? offsetY;
+    offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
+    offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
+    
+    return [
+      [{transform: `translate(calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}),
+                            calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`
+      }],
+      [{transform: `translate(calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}),
+                            calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
+      }],
+    ];
   }
 }
 

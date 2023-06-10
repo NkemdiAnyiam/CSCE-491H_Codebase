@@ -1,39 +1,74 @@
-export class _Entrances  {
+import { IKeyframesBank } from "./TestUsability/WebFlik";
+
+class PresetEntrances implements IKeyframesBank<PresetEntrances> {
   private constructor() {}
 
-  static createInstance(): _Entrances {
-    return new _Entrances();
+  static createInstance(): PresetEntrances {
+    return new PresetEntrances();
   }
 
-  [`fade-in`] = [
+  [`~fade-in`] = [
     {opacity: '0'},
     {opacity: '1'},
   ];
     
-  [`enter-wipe-from-right`] = [
+  [`~wipe-from-right`] = [
     {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
   ];
     
-  [`enter-wipe-from-left`] = [
+  [`~wipe-from-left`] = [
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
   ];
     
-  [`enter-wipe-from-top`] = [
+  [`~wipe-from-top`] = [
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
   ];
   
-  [`enter-wipe-from-bottom`] = [
+  [`~wipe-from-bottom`] = [
     {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
   ];
 
-  invalidProperty = 5;
+  // invalidProperty = 5;
 }
 
-// class Presets {
+class PresetExits implements IKeyframesBank<PresetExits> {
+  private constructor() {}
+
+  static createInstance(): PresetExits {
+    return new PresetExits();
+  }
+
+  [`~fade-out`] = [
+    {opacity: '1'},
+    {opacity: '0'},
+  ];
+        
+  ['~wipe-to-right'] = [
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+    {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
+  ];
+
+  [`~wipe-to-left`] = [
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  ];
+
+  [`~wipe-to-top`] = [
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
+  ];
+
+  [`~wipe-to-bottom`] = [
+    {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+    {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+  ];
+}
+
+//#region class Presets {
 //   private constructor() {
 
 //   }
@@ -105,7 +140,6 @@ export class _Entrances  {
 
 //   //****************************************************** ANIMATION PRESETS
 
-//   //#region 
 //   //******************************************** Highlight
 //   [`highlight`] = [
 //     {backgroundPositionX: '100%'},
@@ -168,15 +202,9 @@ export class _Entrances  {
 //     {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
 //     {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
 //   ];
-//   //#endregion
 // }
+//#endregion
 
-// const _Presets: Readonly<Presets> = Presets.createInstance();
-// const x = _Presets.Emphasis.
-// export { _Presets as Presets };
 
-// export const Presets = {
-//   Entrances: Entrances.createInstance(),
-// } as const;
-
-export const Entrances = _Entrances.createInstance();
+export const presetEntrances = PresetEntrances.createInstance() satisfies IKeyframesBank<PresetEntrances>;
+export const presetExits = PresetExits.createInstance() satisfies IKeyframesBank<PresetExits>;
