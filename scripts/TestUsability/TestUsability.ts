@@ -1,4 +1,4 @@
-import { WebFlik } from "./WebFlik";
+import { IKeyframesBank, WebFlik } from "./WebFlik";
 
 // WebFlik.createBanks()
 
@@ -24,18 +24,25 @@ import { WebFlik } from "./WebFlik";
 
 const {
   Entrance,
-  Exit
+  Exit,
+  Emphasis,
 } = WebFlik.createBanks({
   Entrances: {
-    [`super-jump`]: [{opacity: '1'}],
+    [`super-jump`]: {
+      keyframes: [{opacity: '1'}],
+    },
     // [`preset-anim-name`]: [{fontSize: '4px'}],
   },
+
   Exits: {
-    [`super-jump`]: [{opacity: '1'}],
-    4: [{opacity: '1'}]
-  }
-});
+    [`super-jump-prime`]: {
+      keyframes: [{opacity: '1'}],
+    },
+    // 4: [{opacity: '1'}]
+  },
+} satisfies {[key: string]: IKeyframesBank});
 
 // Entrance(null,).animName
 // Entrance(null, '')
-// Exit(new HTMLElement(), 'super-jump',
+// Exit(new HTMLElement(), '',
+// Emphasis(null, '')

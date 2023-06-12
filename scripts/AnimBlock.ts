@@ -4,9 +4,10 @@ type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
   blocksPrev: boolean;
   commitStyles: boolean;
+  classesOnStartForward: string[];
 }
 
-type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
+export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
 // TODO: validate duration and playbackRate?
 
 type TOffset = {
@@ -88,8 +89,6 @@ class AnimTimelineAnimation {
 }
 
 export abstract class AnimBlock {
-
-  
   static id: number = 0;
 
   // static exitingList = [
@@ -116,13 +115,14 @@ export abstract class AnimBlock {
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  abstract options: AnimBlockOptions;
+  options: AnimBlockOptions;
   abstract animation: AnimTimelineAnimation;
 
-  constructor(public domElem: HTMLElement | SVGGraphicsElement, public animName: string, options: Partial<AnimBlockOptions> = {}) {
-    this.id = AnimBlock.id++;
+  protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
-    // this.options = this.applyOptions(options);
+  constructor(public domElem: HTMLElement | SVGGraphicsElement, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
+    this.id = AnimBlock.id++;
+    this.options = this.mergeOptions(userOptions, behaviorGroupOptions);
   }
 
   getBlocksNext() { return this.options.blocksNext; }
@@ -155,11 +155,26 @@ export abstract class AnimBlock {
     });
   }
 
-  protected abstract _onFinish(direction: 'forward' | 'backward'): void;
-  protected abstract _onStart(direction: 'forward' | 'backward'): void;
+  // TODO: Figure out good way to implement XNOR
+  protected _onStartForward(): void {};
+  protected _onFinishForward(): void {};
+  protected _onStartBackward(): void {};
+  protected _onFinishBackward(): void {};
+
+  protected _addClassesOnStartForward(...classes: string[]): void {
+    this.domElem.classList.add(...classes);
+  }
 
   protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
-    this._onStart(direction);
+    switch(direction) {
+      case 'forward':
+        this.domElem.classList.add(...this.options.classesOnStartForward);
+        this._onStartForward();
+        break;
+      case 'backward':
+        this._onStartBackward();
+        break;
+    }
 
     // set playback rate
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.options.playbackRate);
@@ -170,6 +185,7 @@ export abstract class AnimBlock {
     // return Promise that fulfills when the animation is completed
     return animation.finished.then(() => {
       // CHANGE NOTE: Move hidden class stuff here
+      // TODO: Account for case where parent is hidden
       if (this.options.commitStyles) {
         try {
           animation.commitStyles(); // actually applies the styles to the element
@@ -181,7 +197,17 @@ export abstract class AnimBlock {
           this.domElem.classList.remove('wpfk-override-hidden');
         }
       }
-      this._onFinish(direction);
+      
+      switch(direction) {
+        case 'forward':
+          this._onFinishForward();
+          break;
+        case 'backward':
+          this._onFinishBackward();
+          this.domElem.classList.remove(...this.options.classesOnStartForward);
+          break;
+      }
+      
       // prevents animations from jumping backward in their execution when duration or playback rate is modified
       animation.cancel();
       // // prevents clipping out nested absolutely-positioned elements outside the bounding box
@@ -247,14 +273,31 @@ export abstract class AnimBlock {
   // }
 
   // TODO: Remove unnecessary parameter
-  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
+  private mergeOptions(userOptions: Partial<AnimBlockOptions>, behaviorGroupOptions: Partial<AnimBlockOptions>): AnimBlockOptions {
     return {
+      // pure defaults
       blocksNext: true,
       blocksPrev: true,
       duration: 500,
-      playbackRate: 1,
+      playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
       commitStyles: true,
       easing: 'linear',
+
+      // subclass defaults take priority
+      ...this.defaultOptions,
+
+      // options defined in animation bank take priority
+      ...behaviorGroupOptions,
+
+      // custom options take priority
+      ...userOptions,
+
+      // mergeable properties
+      classesOnStartForward: mergeArrays(
+        this.defaultOptions.classesOnStartForward ?? [],
+        behaviorGroupOptions.classesOnStartForward ?? [],
+        userOptions.classesOnStartForward ?? [],
+      ),
     };
   }
 
@@ -404,26 +447,33 @@ export abstract class AnimBlock {
 // CHANGE NOTE: Generic class accepting an extension of AnimationBank
 export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
   animation: AnimTimelineAnimation;
-  options: AnimBlockOptions;
   // CHANGE NOTE: Add static animation bank and static method for setting bank 
-  static Bank: IKeyframesBank = {};
+  private static Bank: IKeyframesBank = {};
   static setBank<T extends IKeyframesBank>(bank: T) { EntranceBlock.Bank = {...bank}; }
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    // TODO: Consider commitStyles for false by default
+    return {};
+  }
 
   constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, options: Partial<AnimBlockOptions> = {}) {
     const animationBank = EntranceBlock.Bank as TBank;
-    super(domElem, animName);
-    this.options = this.applyOptions(options);
+    const behaviorGroup = animationBank[animName];
+    if (!behaviorGroup) { throw new Error(`Invalid entrance animation name "${animName}"`); }
+
+    super(domElem, animName, options, behaviorGroup.options);
 
     // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = animationBank[animName];
-    if (!forwardFrames) { throw new Error(`Invalid entrance animation name "${animName}"`); }
+    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
 
     // if an explicit definition for reversal frames exists, use them.
     // otherwise, use the reverse of the forward frames
+    // TODO: Handle case where only one keyframe is provided
+    // TODO: Make separate property of same behavior group instead of separate group
     let backwardFrames: Keyframe[];
     const undoAnimationName = `undo--${animName}`;
     backwardFrames = (undoAnimationName in animationBank) ?
-      animationBank[undoAnimationName as typeof animName] :
+      animationBank[undoAnimationName as typeof animName].keyframes :
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
@@ -447,54 +497,48 @@ export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
     );
   }
 
-  protected _onStart(direction: 'forward' | 'backward'): void {
-    if (direction === 'forward') {
-      this.domElem.classList.remove('wbfk-hidden');
-    }
+  protected _onStartForward(): void {
+    this.domElem.classList.remove('wbfk-hidden');
   }
 
-  protected _onFinish(direction: "forward" | "backward"): void {
-    if (direction === 'backward') {
-      this.domElem.classList.add('wbfk-hidden');
-    }
-  }
-
-  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
-    return {
-      ...super.applyOptions(options),
-      // TODO: consider commitStyles: false as default
-      ...options,
-    };
+  protected _onFinishBackward(): void {
+    this.domElem.classList.add('wbfk-hidden');
   }
 }
 
 export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
   animation: AnimTimelineAnimation;
-  options: AnimBlockOptions;
-  static Bank: IKeyframesBank = {};
+  private static Bank: IKeyframesBank = {};
   static setBank<T extends IKeyframesBank>(bank: T) { ExitBlock.Bank = {...bank}; }
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {
+      commitStyles: false,
+    };
+  }
   
-  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, options: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = ExitBlock.Bank as TBank;
-    super(domElem, animName);
-    this.options = this.applyOptions(options);
+    const behaviorGroup = animationBank[animName];
+    if (!behaviorGroup) { throw new Error(`Invalid exit animation name "${animName}"`); }
+
+    super(domElem, animName, userOptions, behaviorGroup.options);
 
     // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = animationBank[animName];
-    if (!forwardFrames) { throw new Error(`Invalid exit animation name "${animName}"`); }
+    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
 
     // if an explicit definition for reversal frames exists, use them.
     // otherwise, use the reverse of the forward frames
     let backwardFrames: Keyframe[];
     const undoAnimationName = `undo--${animName}`;
     backwardFrames = (undoAnimationName in animationBank) ?
-      animationBank[undoAnimationName as typeof animName] :
+      animationBank[undoAnimationName as typeof animName].keyframes :
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: options.duration,
-      fill: options.commitStyles ? 'forwards' : 'none',
-      easing: options.easing,
+      duration: userOptions.duration,
+      fill: userOptions.commitStyles ? 'forwards' : 'none',
+      easing: userOptions.easing,
       // playbackRate: options.playbackRate, // TODO: implement and uncomment
     }
     
@@ -512,31 +556,71 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
     );
   }
 
-  protected _onStart(direction: 'forward' | 'backward'): void {
-    if (direction === 'backward') {
-      this.domElem.classList.remove('wbfk-hidden');
-    }
+  protected _onFinishForward(): void {
+    this.domElem.classList.add('wbfk-hidden');
   }
 
-  protected _onFinish(direction: "forward" | "backward"): void {
-    if (direction === 'forward') {
-      this.domElem.classList.add('wbfk-hidden');
-    }
+  protected _onStartBackward(): void {
+    this.domElem.classList.remove('wbfk-hidden');
   }
+}
 
-  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
-    return {
-      ...super.applyOptions(options),
-      commitStyles: false,
-      ...options,
-    };
+export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
+  animation: AnimTimelineAnimation;
+  private static Bank: IKeyframesBank = {};
+  static setBank<T extends IKeyframesBank>(bank: T) { EmphasisBlock.Bank = {...bank}; }
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
+  
+  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+    const animationBank = EmphasisBlock.Bank as TBank;
+    const behaviorGroup = animationBank[animName];
+    if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name "${animName}"`); }
+
+    super(domElem, animName, userOptions, behaviorGroup.options);
+
+    // Create the Animation instance that we will use on our DOM element
+    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
+
+    // if an explicit definition for reversal frames exists, use them.
+    // otherwise, use the reverse of the forward frames
+    let backwardFrames: Keyframe[];
+    const undoAnimationName = `undo--${animName}`;
+    backwardFrames = (undoAnimationName in animationBank) ?
+      animationBank[undoAnimationName as typeof animName].keyframes :
+      [...forwardFrames].reverse();
+
+    const keyframeOptions: KeyframeEffectOptions = {
+      duration: userOptions.duration,
+      fill: userOptions.commitStyles ? 'forwards' : 'none',
+      easing: userOptions.easing,
+      // playbackRate: options.playbackRate, // TODO: implement and uncomment
+    }
+    
+    this.animation = new AnimTimelineAnimation(
+      new KeyframeEffect(
+        domElem,
+        forwardFrames,
+        keyframeOptions
+      ),
+      new KeyframeEffect(
+        domElem,
+        backwardFrames,
+        keyframeOptions
+      ),
+    );
   }
 }
 
 export class TranslateBlock extends AnimBlock {
   translationOptions: TNoElem;
-  options: AnimBlockOptions;
   animation: AnimTimelineAnimation;
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
 
   constructor(domElem: HTMLElement | SVGGraphicsElement, options: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
     super(domElem, 'translate', options);
@@ -545,8 +629,6 @@ export class TranslateBlock extends AnimBlock {
       ...this.applyTranslateOptions(translationOptions),
       ...translationOptions,
     };
-
-    this.options = this.applyOptions(options);
 
     const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
 
@@ -582,13 +664,6 @@ export class TranslateBlock extends AnimBlock {
 
   protected _onFinish(direction: "forward" | "backward"): void {
     
-  }
-
-  protected applyOptions(options: Partial<AnimBlockOptions>): AnimBlockOptions {
-    return {
-      ...super.applyOptions(options),
-      ...options,
-    };
   }
 
   protected applyTranslateOptions(translateOptions: Partial<TNoElem>): TNoElem {
@@ -748,4 +823,9 @@ export class TranslateBlock extends AnimBlock {
 //   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
 //   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
 // ];
+
+// TODO: Create util
+function mergeArrays<T>(...arrays: T[][]): Array<T> {
+  return Array.from(new Set([...arrays.flat()]));
+}
 
