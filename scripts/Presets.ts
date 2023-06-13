@@ -341,7 +341,7 @@ export const presetEmphases = {
       {backgroundPositionX: '0%'},
     ],
     options: {
-      classesOnStartForward: [`highlightable`],
+      addedClassesOnStartForward: [`highlightable`],
       // invalidProp: 4,
     },
   }

@@ -1,10 +1,12 @@
+import { AnimSequence } from "./AnimSequence";
 import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik";
 
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
   blocksPrev: boolean;
   commitStyles: boolean;
-  classesOnStartForward: string[];
+  addedClassesOnStartForward: string[];
+  removedClassesOnStartForward: string[]; // TODO: Consider order of addition/removal
 }
 
 export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -69,15 +71,20 @@ type CssLengthUnit = | 'px' | 'rem' | '%';
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
-class AnimTimelineAnimation {
-  forwardAnimation: Animation;
-  backwardAnimation: Animation;
-  constructor(public forwardEffect: KeyframeEffect, public backwardEffect: KeyframeEffect) {
+export class AnimTimelineAnimation extends Animation {
+  // TODO: improve syntax
+  get forward(): AnimTimelineAnimation {
+    this.effect = this.forwardEffect;
+    return this;
+  }
+  get backward(): AnimTimelineAnimation {
+    this.effect = this.backwardEffect;
+    return this;
+  }
+  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
+    super();
     if (forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
     if (forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
-
-    this.forwardAnimation = new Animation(forwardEffect);
-    this.backwardAnimation = new Animation(backwardEffect);
   }
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
@@ -91,26 +98,7 @@ class AnimTimelineAnimation {
 export abstract class AnimBlock {
   static id: number = 0;
 
-  // static exitingList = [
-  //   'fade-out', 'undo--fade-in',
-  //   'exit-wipe-to-right', 'undo--enter-wipe-from-right',
-  //   'exit-wipe-to-left', 'undo--enter-wipe-from-left',
-  //   'exit-wipe-to-top', 'undo--enter-wipe-from-top',
-  //   'exit-wipe-to-bottom', 'undo--enter-wipe-from-bottom',
-  // ];
-  // static enteringList = [
-  //   'fade-in', 'undo--fade-out',
-  //   'enter-wipe-from-right', 'undo--exit-wipe-to-right',
-  //   'enter-wipe-from-left', 'undo--exit-wipe-to-left',
-  //   'enter-wipe-from-top', 'undo--exit-wipe-to-top',
-  //   'enter-wipe-from-bottom', 'undo--exit-wipe-to-bottom',
-  // ];
-  // static translatingList = ['translate', 'undo--translate'];
-  // static isExiting(animName: string): boolean { return AnimBlock.exitingList.includes(animName); }
-  // static isEntering(animName: string): boolean { return AnimBlock.enteringList.includes(animName); }
-  // static isTranslating(animName: string): boolean { return AnimBlock.translatingList.includes(animName); }
-  // static isBackward(animName: string): boolean { return animName.startsWith('undo--'); }
-
+  parentSequence?: AnimSequence; // TODO: replace with own dynamic list of running animations
   parentTimeline?: any; // TODO: specify annotation
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
@@ -135,7 +123,7 @@ export abstract class AnimBlock {
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      this.animate(this.animation.forwardAnimation, 'forward')
+      this.animate(this.animation.forward, 'forward')
         .then(() => resolve());
     });
   }
@@ -150,7 +138,7 @@ export abstract class AnimBlock {
       //   this.animate(this.undoAnimName, this.animation.backwardAnimation)
       //     .then(resolve);
       // }
-      this.animate(this.animation.backwardAnimation, 'backward')
+      this.animate(this.animation.backward, 'backward')
         .then(() => resolve());
     });
   }
@@ -168,7 +156,8 @@ export abstract class AnimBlock {
   protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
     switch(direction) {
       case 'forward':
-        this.domElem.classList.add(...this.options.classesOnStartForward);
+        this.domElem.classList.add(...this.options.addedClassesOnStartForward);
+        this.domElem.classList.remove(...this.options.removedClassesOnStartForward);
         this._onStartForward();
         break;
       case 'backward':
@@ -204,7 +193,8 @@ export abstract class AnimBlock {
           break;
         case 'backward':
           this._onFinishBackward();
-          this.domElem.classList.remove(...this.options.classesOnStartForward);
+          this.domElem.classList.add(...this.options.removedClassesOnStartForward);
+          this.domElem.classList.remove(...this.options.addedClassesOnStartForward);
           break;
       }
       
@@ -213,6 +203,40 @@ export abstract class AnimBlock {
       // // prevents clipping out nested absolutely-positioned elements outside the bounding box
       // if (isEntering) { this.domElem.style.removeProperty('clip-path'); }
     });
+  }
+
+  private mergeOptions(userOptions: Partial<AnimBlockOptions>, behaviorGroupOptions: Partial<AnimBlockOptions>): AnimBlockOptions {
+    return {
+      // pure defaults
+      blocksNext: true,
+      blocksPrev: true,
+      duration: 500,
+      playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
+      commitStyles: true,
+      easing: 'linear',
+
+      // subclass defaults take priority
+      ...this.defaultOptions,
+
+      // options defined in animation bank take priority
+      ...behaviorGroupOptions,
+
+      // custom options take priority
+      ...userOptions,
+
+      // mergeable properties
+      addedClassesOnStartForward: mergeArrays(
+        this.defaultOptions.addedClassesOnStartForward ?? [],
+        behaviorGroupOptions.addedClassesOnStartForward ?? [],
+        userOptions.addedClassesOnStartForward ?? [],
+      ),
+
+      removedClassesOnStartForward: mergeArrays(
+        this.defaultOptions.removedClassesOnStartForward ?? [],
+        behaviorGroupOptions.removedClassesOnStartForward ?? [],
+        userOptions.removedClassesOnStartForward ?? [],
+      ),
+    };
   }
 
   // createTranslationKeyframes(animName: string) {
@@ -273,33 +297,7 @@ export abstract class AnimBlock {
   // }
 
   // TODO: Remove unnecessary parameter
-  private mergeOptions(userOptions: Partial<AnimBlockOptions>, behaviorGroupOptions: Partial<AnimBlockOptions>): AnimBlockOptions {
-    return {
-      // pure defaults
-      blocksNext: true,
-      blocksPrev: true,
-      duration: 500,
-      playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
-      commitStyles: true,
-      easing: 'linear',
-
-      // subclass defaults take priority
-      ...this.defaultOptions,
-
-      // options defined in animation bank take priority
-      ...behaviorGroupOptions,
-
-      // custom options take priority
-      ...userOptions,
-
-      // mergeable properties
-      classesOnStartForward: mergeArrays(
-        this.defaultOptions.classesOnStartForward ?? [],
-        behaviorGroupOptions.classesOnStartForward ?? [],
-        userOptions.classesOnStartForward ?? [],
-      ),
-    };
-  }
+  
 
   // applyTranslateOptions(translateOptions: TranslateOptions) {
   //   interface TNoElem {
