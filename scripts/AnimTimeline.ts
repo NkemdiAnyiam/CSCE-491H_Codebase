@@ -1,57 +1,56 @@
+import { AnimTimelineAnimation } from "./AnimBlock.js";
 import { AnimSequence } from "./AnimSequence.js";
+
+type AnimTimelineOptions = {
+  debugMode: boolean;
+};
 
 export class AnimTimeline {
   static id = 0;
 
   id; // used to uniquely identify this specific timeline
-  animSequences = []; // array of every AnimSequence in this timeline
-  numSequences = 0;
+  animSequences: AnimSequence[] = []; // array of every AnimSequence in this timeline
   nextSeqIndex = 0; // index into animSequences
+  isStepping = false;
   isSkipping = false; // used to determine whether or not all animations should be instantaneous
   isPaused = false;
   currDirection = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
+  options: AnimTimelineOptions;
 
-  constructor(animSequences = null, options = null) {
+  get numSequences() { return this.animSequences.length; }
+
+  constructor(animSequences: AnimSequence[] | AnimSequence | null = null, options: Partial<AnimTimelineOptions> = {}) {
     this.id = AnimTimeline.id++;
 
     if (animSequences) {
-      // [AnimSequence] OR [[]]
-      if (animSequences instanceof Array && (animSequences[0] instanceof AnimSequence || animSequences[0] instanceof Array)) {
-        this.addSequences(animSequences);
+      if (animSequences instanceof Array) {
+        this.addManySequences(animSequences);
       }
       else {
         this.addOneSequence(animSequences);
       }
     }
 
-    this.debugMode = options ? (options?.debugMode ?? false) : false;
+    this.options = {
+      debugMode: false,
+      ...options,
+    };
   }
 
-  addOneSequence(animSequenceOrData) {
-    if (animSequenceOrData instanceof AnimSequence) {
-      animSequenceOrData.parentTimeline = this;
-      animSequenceOrData.setID(this.id);
-      this.animSequences.push(animSequenceOrData);
-    }
-    else {
-      const newAnimSequence = new AnimSequence();
-      if (animSequenceOrData[0] instanceof Array) { newAnimSequence.addManyBlocks(animSequenceOrData); }
-      else { newAnimSequence.addOneBlock(animSequenceOrData); }
-      newAnimSequence.parentTimeline = this;
-      newAnimSequence.setID(this.id);
-      this.animSequences.push(newAnimSequence);
-    }
-    ++this.numSequences;
+  addOneSequence(animSequence: AnimSequence) {
+      animSequence.parentTimeline = this;
+      animSequence.setID(this.id);
+      this.animSequences.push(animSequence);
   }
 
-  addManySequences(animSequences) {
+  addManySequences(animSequences: AnimSequence[]) {
     animSequences.forEach(animSequence => this.addOneSequence(animSequence));
   }
 
-  setPlaybackRate(rate) {
+  setPlaybackRate(rate: number) {
     this.playbackRate = rate;
     this.updateCurrentAnimationsRates(rate);
   }
@@ -62,24 +61,30 @@ export class AnimTimeline {
   getIsPaused() { return this.isPaused; }
 
   // steps forward or backward and does error-checking
-  async step(direction) {
+  async step(direction: 'forward' | 'backward') {
     if (this.isPaused) { return Promise.reject('Cannot step while playback is paused'); }
     if (this.isStepping) { return Promise.reject('Cannot step while already animating'); }
     this.isStepping = true;
 
     let continueOn;
-    if (direction === 'forward') {
-      // reject promise if trying to step forward at the end of the timeline
-      if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
-      do {continueOn = await this.stepForward();} while(continueOn);
-    }
-    else if (direction === 'backward') {
-      // reject promise if trying to step backward at the beginning of the timeline
-      if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
-      do {continueOn = await this.stepBackward();} while(continueOn);
-    }
-    else { throw new Error(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`); }
+    switch(direction) {
+      case 'forward':
+        // reject promise if trying to step forward at the end of the timeline
+        if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
+        do {continueOn = await this.stepForward();} while(continueOn);
+        break;
 
+      case 'backward':
+        // reject promise if trying to step backward at the beginning of the timeline
+        if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
+        do {continueOn = await this.stepBackward();} while(continueOn);
+        break;
+
+      default:
+        throw new Error(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`);
+    }
+
+    // TODO: Potentially rewrite async/await syntax
     return new Promise(resolve => {
       this.isStepping = false;
       resolve(direction);
@@ -93,7 +98,7 @@ export class AnimTimeline {
   stepForward() {
     this.currDirection = 'forward';
 
-    if (this.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.options.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
@@ -109,7 +114,7 @@ export class AnimTimeline {
     --this.nextSeqIndex;
     this.currDirection = 'backward';
 
-    if (this.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.options.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].rewind()
@@ -120,7 +125,7 @@ export class AnimTimeline {
   }
 
   // immediately skips to first AnimSequence in animSequences with matching tag field
-  async skipTo(tag, offset = 0) {
+  async skipTo(tag: string, offset: number = 0) {
     if (this.isStepping) { return Promise.reject('Cannot use skipTo() while currently animating'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingSkipTo) { return Promise.reject('Do not perform simultaneous calls to skipTo() in timeline'); }
@@ -148,7 +153,7 @@ export class AnimTimeline {
     });
   }
 
-  toggleSkipping(isSkipping) {
+  toggleSkipping(isSkipping?: boolean) {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
     if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipCurrentAnimations(); }
@@ -159,30 +164,30 @@ export class AnimTimeline {
   skipCurrentAnimations() { this.animSequences[this.nextSeqIndex].skipCurrentAnimations(); }
 
   // used to set playback rate of currently running animations so that they don't unintuitively run at regular speed
-  updateCurrentAnimationsRates(rate) {
-    this.doForCurrentAnimations((animation) => animation.playbackRate = rate);
+  updateCurrentAnimationsRates(rate: number) {
+    this.doForCurrentAnimations((animation: Animation) => animation.playbackRate = rate);
   }
 
   // pauses or unpauses playback
-  togglePause(isPaused) {
+  togglePause(isPaused?: boolean) {
     this.isPaused = isPaused ?? !this.isPaused;
     if (this.isPaused) {
-      this.doForCurrentAnimations((animation) => animation.pause());
+      this.doForCurrentAnimations((animation: Animation) => animation.pause());
     }
     else {
-      this.doForCurrentAnimations((animation) => animation.play());
+      this.doForCurrentAnimations((animation: Animation) => animation.play());
       if (this.isSkipping) { this.skipCurrentAnimations(); }
     }
     return this.isPaused;
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
-  doForCurrentAnimations(operation) {
+  doForCurrentAnimations(operation: (animation: Animation) => void) {
     // get all currently running animations
-    const allAnimations = document.getAnimations();
+    const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
     // an animation "belongs" to this timeline if its timeline id matches
     for (let i = 0; i < allAnimations.length; ++i) {
-      if (Number.parseInt(allAnimations[i].timelineID) === this.id) { operation(allAnimations[i]); }
+      if (allAnimations[i].timelineID === this.id) { operation(allAnimations[i]); }
     }
   }
 }
