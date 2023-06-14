@@ -2,6 +2,9 @@ import { stoi, stof, enableButton, disableButton, getRandInt, getRandIntRange } 
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
 import { AnimBlock } from './AnimBlock.js';
+import { WebFlik } from './TestUsability/WebFlik.js';
+
+const {Entrance, Exit} = WebFlik.createBanks({});
 
 
 /****************************************/
@@ -172,7 +175,7 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 
       disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
-      const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
+      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', {duration: 375});
       fadeoutMainMenu.stepForward()
         .then(() => {
           mainMenuEl.remove();
@@ -329,7 +332,7 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
 
       disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
-      const fadeoutMainMenu = new AnimBlock(mainMenuEl, 'fade-out', {duration: 375});
+      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', {duration: 375});
       fadeoutMainMenu.stepForward()
         .then(() => {
           mainMenuEl.remove();
