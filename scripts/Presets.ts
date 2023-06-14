@@ -1,4 +1,4 @@
-import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik";
+import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // class PresetEntrances implements IKeyframesBank<PresetEntrances>
 //#region
@@ -344,5 +344,17 @@ export const presetEmphases = {
       addedClassesOnStartForward: [`highlightable`],
       // invalidProp: 4,
     },
-  }
+  },
+
+  [`~un-highlight`]: {
+    keyframes: [
+      {backgroundPositionX: '0'},
+      {backgroundPositionX: '100%'},
+    ],
+    options: {
+      // TODO: Create removedClassesOnFinishForward
+      // addedClassesOnStartForward: [`highlightable`],
+      // invalidProp: 4,
+    },
+  },
 } satisfies IKeyframesBank;
