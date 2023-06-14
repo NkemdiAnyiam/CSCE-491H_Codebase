@@ -88,7 +88,10 @@ export abstract class AnimBlock {
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
-  constructor(public domElem: HTMLElement | SVGGraphicsElement, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(public domElem: /* HTMLElement | SVGGraphicsElement */ Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
+    if (!domElem) {
+      throw new Error(`Element must not be undefined`); // TODO: Improve error message
+    }
     this.id = AnimBlock.id++;
     this.options = this.mergeOptions(userOptions, behaviorGroupOptions);
   }
@@ -221,15 +224,17 @@ export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     // TODO: Consider commitStyles for false by default
-    return {};
+    return {
+      commitStyles: false,
+    };
   }
 
-  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, options: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = EntranceBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid entrance animation name "${animName}"`); }
 
-    super(domElem, animName, options, behaviorGroup.options);
+    super(domElem, animName, userOptions, behaviorGroup.options);
 
     // Create the Animation instance that we will use on our DOM element
     const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
@@ -245,9 +250,9 @@ export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: options.duration,
-      fill: options.commitStyles ? 'forwards' : 'none',
-      easing: options.easing,
+      duration: this.options.duration,
+      fill: this.options.commitStyles ? 'forwards' : 'none',
+      easing: this.options.easing,
       // playbackRate: options.playbackRate, // TODO: implement and uncomment
     }
     
@@ -285,7 +290,7 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
     };
   }
   
-  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = ExitBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid exit animation name "${animName}"`); }
@@ -304,9 +309,9 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: userOptions.duration,
-      fill: userOptions.commitStyles ? 'forwards' : 'none',
-      easing: userOptions.easing,
+      duration: this.options.duration,
+      fill: this.options.commitStyles ? 'forwards' : 'none',
+      easing: this.options.easing,
       // playbackRate: options.playbackRate, // TODO: implement and uncomment
     }
     
@@ -342,7 +347,7 @@ export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
     return {};
   }
   
-  constructor(domElem: HTMLElement | SVGGraphicsElement, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = EmphasisBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name "${animName}"`); }
@@ -361,9 +366,9 @@ export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
       [...forwardFrames].reverse();
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: userOptions.duration,
-      fill: userOptions.commitStyles ? 'forwards' : 'none',
-      easing: userOptions.easing,
+      duration: this.options.duration,
+      fill: this.options.commitStyles ? 'forwards' : 'none',
+      easing: this.options.easing,
       // playbackRate: options.playbackRate, // TODO: implement and uncomment
     }
     
@@ -390,8 +395,8 @@ export class TranslateBlock extends AnimBlock {
     return {};
   }
 
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, options: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
-    super(domElem, 'translate', options);
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
+    super(domElem, 'translate', userOptions);
 
     this.translationOptions = {
       ...this.applyTranslateOptions(translationOptions),
