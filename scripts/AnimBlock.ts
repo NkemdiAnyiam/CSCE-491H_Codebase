@@ -1,5 +1,5 @@
-import { AnimSequence } from "./AnimSequence";
-import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik";
+import { AnimSequence } from "./AnimSequence.js";
+import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik.js";
 
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
@@ -88,7 +88,7 @@ export abstract class AnimBlock {
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
-  constructor(public domElem: /* HTMLElement | SVGGraphicsElement */ Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(public domElem: Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
     if (!domElem) {
       throw new Error(`Element must not be undefined`); // TODO: Improve error message
     }
@@ -229,7 +229,7 @@ export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
     };
   }
 
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = EntranceBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid entrance animation name "${animName}"`); }
@@ -290,7 +290,7 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
     };
   }
   
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = ExitBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid exit animation name "${animName}"`); }
@@ -347,7 +347,7 @@ export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
     return {};
   }
   
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
+  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
     const animationBank = EmphasisBlock.Bank as TBank;
     const behaviorGroup = animationBank[animName];
     if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name "${animName}"`); }
@@ -395,7 +395,7 @@ export class TranslateBlock extends AnimBlock {
     return {};
   }
 
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
+  constructor(domElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
     super(domElem, 'translate', userOptions);
 
     this.translationOptions = {
@@ -485,7 +485,7 @@ export class TargetedTranslateBlock extends AnimBlock {
     return {};
   }
 
-  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, private targetElem: /* HTMLElement */ Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
+  constructor(domElem: Element, private targetElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
     super(domElem, 'translate', userOptions);
 
     this.translationOptions = {

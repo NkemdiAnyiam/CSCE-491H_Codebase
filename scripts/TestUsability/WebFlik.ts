@@ -65,6 +65,5 @@ class _WebFlik {
     };
   }
 }
-}
 
 export const WebFlik = new _WebFlik();
