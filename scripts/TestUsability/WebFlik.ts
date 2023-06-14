@@ -1,5 +1,5 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions } from "../AnimBlock";
-import { presetEntrances, presetExits, presetEmphases } from "../Presets";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions, TranslateBlock, TargetedTranslateBlock } from "../AnimBlock.js";
+import { presetEntrances, presetExits, presetEmphases } from "../Presets.js";
 
 export type KeyframeBehaviorGroup = Readonly<{
   keyframes: Keyframe[];
@@ -33,7 +33,7 @@ class _WebFlik {
     {
       Entrances?: UserEntranceBank;
       Exits?: UserExitBank;
-      Emphases?: UserEmphasisBank
+      Emphases?: UserEmphasisBank;
     },
     includePresets: IncludePresets | void
   ) /* TODO: Add coherent return type */ {
@@ -54,12 +54,17 @@ class _WebFlik {
       Entrance: function(...args) { return new EntranceBlock<CombinedEntranceBank>(...args); },
       Exit: function(...args) { return new ExitBlock<CombinedExitBank>(...args); },
       Emphasis: function(...args) { return new EmphasisBlock<CombinedEmphasisBank>(...args); },
+      Translate: function(...args) { return new TranslateBlock(...args); },
+      TargetedTranslate: function(...args) { return new TargetedTranslateBlock(...args); },
     } satisfies {
-      Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>
-      Exit: AnimBlockCreator<typeof ExitBlock<CombinedExitBank>>
-      Emphasis: AnimBlockCreator<typeof EmphasisBlock<CombinedEmphasisBank>>
-    }
+      Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>;
+      Exit: AnimBlockCreator<typeof ExitBlock<CombinedExitBank>>;
+      Emphasis: AnimBlockCreator<typeof EmphasisBlock<CombinedEmphasisBank>>;
+      Translate: AnimBlockCreator<typeof TranslateBlock>;
+      TargetedTranslate: AnimBlockCreator<typeof TargetedTranslateBlock>;
+    };
   }
+}
 }
 
 export const WebFlik = new _WebFlik();

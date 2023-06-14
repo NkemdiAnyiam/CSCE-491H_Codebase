@@ -31,41 +31,15 @@ interface TNoElem extends TOffset {
 }
 
 interface TElem extends TOffset {
-  targetElem: HTMLElement; // if specified, translations will be with respect to this target element
+  // targetElem: HTMLElement; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
-  offsetTargetX: number; // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
+  offsetTargetX: number; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)
   offsetTargetY: number; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-  offsetTargetXY: number; // overrides offsetTargetX and offsetTargetY
+  offsetTargetXY?: number; // overrides offsetTargetX and offsetTargetY
   preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
 }
-
-// type TranslateOptions = {
-//   translateX: number;
-//   translateY: number;
-//   translateXY: number; // overrides translateX and translateY
-//   unitsX: CssLengthUnit;
-//   unitsY: CssLengthUnit;
-//   unitsXY: CssLengthUnit; // overrides unitsX and unitsY
-
-//   targetElem: HTMLElement; // if specified, translations will be with respect to this target element
-//   alignmentY: CssYAlignment; // determines vertical alignment with target element
-//   alignmentX: CssXAlignment; // determines horizontal alignment with target element
-//   offsetTargetX: number; // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
-//   offsetTargetY: number; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-//   offsetTargetXY: number; // overrides offsetTargetX and offsetTargetY
-//   preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
-//   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
-//   offsetX: number; // determines offset to apply to the respective positional property
-//   offsetY: number; // determines offset to apply to the respective positional property
-//   offsetXY: number; // overrides offsetX and offsetY
-//   offsetUnitsX: CssLengthUnit;
-//   offsetUnitsY: CssLengthUnit;
-//   offsetUnitsXY: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
-// }
-
-type TranslateOptions = TNoElem | TElem;
 
 type CssLengthUnit = | 'px' | 'rem' | '%';
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
@@ -80,6 +54,12 @@ export class AnimTimelineAnimation extends Animation {
   get backward(): AnimTimelineAnimation {
     this.effect = this.backwardEffect;
     return this;
+  }
+  setForwardFrames(frames: Keyframe[]) {
+    this.forwardEffect.setKeyframes(frames);
+  }
+  setBackwardFrames(frames: Keyframe[]) {
+    this.backwardEffect.setKeyframes(frames);
   }
   constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
     super();
@@ -130,14 +110,6 @@ export abstract class AnimBlock {
 
   stepBackward(): Promise<void> {
     return new Promise(resolve => {
-      // if (this.animation.backwardAnimation) {
-      //   this.animate(this.undoAnimName, this.animation.backwardAnimation)
-      //     .then(resolve);
-      // }
-      // else {
-      //   this.animate(this.undoAnimName, this.animation.backwardAnimation)
-      //     .then(resolve);
-      // }
       this.animate(this.animation.backward, 'backward')
         .then(() => resolve());
     });
@@ -238,208 +210,6 @@ export abstract class AnimBlock {
       ),
     };
   }
-
-  // createTranslationKeyframes(animName: string) {
-  //   let translateX;
-  //   let translateY;
-  //   let offsetX = this.offsetX;
-  //   let offsetY = this.offsetY;
-
-  //   if (this.targetElem) {
-  //     if (AnimBlock.isBackward(animName)) {
-  //       translateX = this.undoTranslateX;
-  //       translateY = this.undoTranslateY;
-  //       offsetX *= -1;
-  //       offsetY *= -1;
-  //     }
-  //     else {
-  //        // get the bounding boxes of our DOM element and the target element
-  //       const rectThis = this.domElem.getBoundingClientRect();
-  //       const rectTarget = this.targetElem.getBoundingClientRect();
-
-  //       // the displacement will start as the difference between the target element's position and our element's position...
-  //       // ...plus any offset within the target itself
-  //       translateX = this.preserveX ? 0 : rectTarget[this.alignmentX] - rectThis[this.alignmentX];
-  //       translateX += this.offsetTargetX ? this.offsetTargetX * rectTarget.width : 0;
-  //       translateY = this.preserveY ? 0 : rectTarget[this.alignmentY] - rectThis[this.alignmentY];
-  //       translateY += this.offsetTargetY ? this.offsetTargetY * rectTarget.height : 0;
-
-  //       // when the animation is rewinded, the negatives will be used to undo the translation
-  //       this.undoTranslateX = -translateX;
-  //       this.undoTranslateY = -translateY;
-  //     }
-  //   }
-  //   else {
-  //     if (AnimBlock.isBackward(animName)) {
-  //       translateX = this.undoTranslateX;
-  //       translateY = this.undoTranslateY;
-  //       offsetX *= -1;
-  //       offsetY *= -1;
-  //     }
-  //     else {
-  //       translateX = this.translateX;
-  //       translateY = this.translateY;
-  //     }
-  //   }
-
-  //   return new KeyframeEffect(
-  //     this.domElem,
-  //     // added to the translations are the offet (with respect to our moving element) if specified
-  //     { transform: `translate(calc(${translateX}${this.unitsX} + ${offsetX}${this.offsetUnitsX}),
-  //                             calc(${translateY}${this.unitsY} + ${offsetY}${this.offsetUnitsY})`
-  //     },
-  //     {
-  //       duration: this.duration,
-  //       fill: 'forwards',
-  //       composite: 'accumulate', // this is so that translations can stack
-  //     }
-  //   );
-  // }
-
-  // TODO: Remove unnecessary parameter
-  
-
-  // applyTranslateOptions(translateOptions: TranslateOptions) {
-  //   interface TNoElem {
-  //     translateX: number;
-  //     translateY: number;
-  //     translateXY: number; // overrides translateX and translateY
-  //     unitsX: CssLengthUnit;
-  //     unitsY: CssLengthUnit;
-  //     unitsXY: CssLengthUnit; // overrides unitsX and unitsY
-  //   }
-  //   interface TElem {
-  //     targetElem: HTMLElement; // if specified, translations will be with respect to this target element
-  //     alignmentY: CssYAlignment; // determines vertical alignment with target element
-  //     alignmentX: CssXAlignment; // determines horizontal alignment with target element
-  //     offsetTargetX: number; // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
-  //     offsetTargetY: number; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-  //     offsetTargetXY: number; // overrides offsetTargetX and offsetTargetY
-  //     preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
-  //     preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
-  //     offsetX: number; // determines offset to apply to the respective positional property
-  //     offsetY: number; // determines offset to apply to the respective positional property
-  //     offsetXY: number; // overrides offsetX and offsetY
-  //     offsetUnitsX: CssLengthUnit;
-  //     offsetUnitsY: CssLengthUnit;
-  //     offsetUnitsXY: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
-  //   }
-  //   type TranslateOptions = TNoElem | TElem;
-    
-  //   // const {
-  //   //   translateX = 0,
-  //   //   translateY = 0,
-  //   //   translateXY, // overrides translateX and translateY
-  //   //   unitsX = 'px',
-  //   //   unitsY = 'px',
-  //   //   unitsXY, // overrides unitsX and unitsY
-
-  //   //   targetElem, // if specified, translations will be with respect to this target element
-  //   //   alignmentY = 'top', // determines vertical alignment with target element
-  //   //   alignmentX = 'left', // determines horizontal alignment with target element
-  //   //   offsetTargetX = 0, // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
-  //   //   offsetTargetY = 0, // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-  //   //   offsetTargetXY, // overrides offsetTargetX and offsetTargetY
-  //   //   preserveX = false, // if true, no horizontal translation with respect to the target element (offsets still apply)
-  //   //   preserveY = false, // if true, no vertical translation with respect to the target element (offsets still apply)
-  //   //   offsetX = 0, // determines offset to apply to the respective positional property
-  //   //   offsetY = 0, // determines offset to apply to the respective positional property
-  //   //   offsetXY, // overrides offsetX and offsetY
-  //   //   offsetUnitsX = 'px',
-  //   //   offsetUnitsY = 'px',
-  //   //   offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
-  //   // } = translateOptions;
-
-  //   const { targetElem } = translateOptions;
-
-  //   // const wholeTranslateOptions: TranslateOptions = {
-  //   //   translateX: translateXY ?? translateX ?? 0,
-  //   //   translateY: translateXY ?? translateY ?? 0,
-  //   //   translateXY: translateXY ?? undefined,
-  //   //   unitsX: unitsXY ?? unitsX ?? 'px',
-  //   //   unitsY: unitsXY ?? unitsY ?? 'px',
-  //   //   unitsXY: unitsXY ?? undefined,
-
-  //   //   targetElem,
-  //   //   alignmentY: alignmentY ?? 'top',
-  //   //   alignmentX: alignmentX ?? 'left',
-  //   //   offsetTargetX: offsetTargetXY ?? offsetTargetX ?? 0,
-  //   //   offsetTargetY: offsetTargetXY ?? offsetTargetY ?? 0,
-  //   //   offsetTargetXY: offsetTargetXY ?? undefined,
-  //   //   preserveX: preserveX ?? false,
-  //   //   preserveY: preserveY ?? false,
-  //   //   offsetX: offsetXY ?? offsetX ?? 0,
-  //   //   offsetY: offsetXY ?? offsetY ?? 0,
-  //   //   offsetXY: offsetXY ?? 0,
-  //   //   offsetUnitsX: offsetUnitsXY ?? offsetUnitsX ?? 'px',
-  //   //   offsetUnitsY: offsetUnitsXY ?? offsetUnitsY ?? 'px',
-  //   //   offsetUnitsXY: offsetUnitsXY ?? undefined,
-  //   // };
-
-  //   if ('targetElem' in translateOptions) {
-  //     this.targetElem = targetElem;
-
-  //     this.alignmentX = alignmentX;
-  //     this.alignmentY = alignmentY;
-
-  //     this.unitsX = 'px';
-  //     this.unitsY = 'px';
-
-  //     this.offsetTargetX = offsetTargetXY ?? offsetTargetX;
-  //     this.offsetTargetY = offsetTargetXY ?? offsetTargetY;
-
-  //     this.preserveX = preserveX;
-  //     this.preserveY = preserveY;
-
-  //     const {
-  //       targetElem, // if specified, translations will be with respect to this target element
-  //       alignmentY = 'top', // determines vertical alignment with target element
-  //       alignmentX = 'left', // determines horizontal alignment with target element
-  //       offsetTargetX = 0, // offset based target's width (0.5 pushes us 50% of the target element's width rightward)
-  //       offsetTargetY = 0, // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-  //       offsetTargetXY, // overrides offsetTargetX and offsetTargetY
-  //       preserveX = false, // if true, no horizontal translation with respect to the target element (offsets still apply)
-  //       preserveY = false, // if true, no vertical translation with respect to the target element (offsets still apply)
-  //       offsetX = 0, // determines offset to apply to the respective positional property
-  //       offsetY = 0, // determines offset to apply to the respective positional property
-  //       offsetXY, // overrides offsetX and offsetY
-  //       offsetUnitsX = 'px',
-  //       offsetUnitsY = 'px',
-  //       offsetUnitsXY, // overrides offsetUnitsX and offsetUnitsY
-  //     } = translateOptions;
-
-  //     const wholeTranslateOptions: TranslateOptions = {
-  //       targetElem,
-  //       alignmentY: alignmentY ?? 'top',
-  //       alignmentX: alignmentX ?? 'left',
-  //       offsetTargetX: offsetTargetXY ?? offsetTargetX ?? 0,
-  //       offsetTargetY: offsetTargetXY ?? offsetTargetY ?? 0,
-  //       offsetTargetXY: offsetTargetXY ?? undefined,
-  //       preserveX: preserveX ?? false,
-  //       preserveY: preserveY ?? false,
-  //       offsetX: offsetXY ?? offsetX ?? 0,
-  //       offsetY: offsetXY ?? offsetY ?? 0,
-  //       offsetXY: offsetXY ?? 0,
-  //       offsetUnitsX: offsetUnitsXY ?? offsetUnitsX ?? 'px',
-  //       offsetUnitsY: offsetUnitsXY ?? offsetUnitsY ?? 'px',
-  //       offsetUnitsXY: offsetUnitsXY ?? undefined,
-  //     };
-  //   }
-  //   else {
-  //     this.translateX = translateXY ?? translateX;
-  //     this.undoTranslateX = -this.translateX;
-  //     this.translateY = translateXY ?? translateY;
-  //     this.undoTranslateY = -this.translateY;
-
-  //     this.unitsX = unitsXY ?? unitsX;
-  //     this.unitsY = unitsXY ?? unitsY;
-  //   }
-
-  //   this.offsetX = offsetXY ?? offsetX;
-  //   this.offsetY = offsetXY ?? offsetY;
-  //   this.offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
-  //   this.offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
-  // }
 }
 
 // CHANGE NOTE: Generic class accepting an extension of AnimationBank
@@ -620,7 +390,7 @@ export class TranslateBlock extends AnimBlock {
     return {};
   }
 
-  constructor(domElem: HTMLElement | SVGGraphicsElement, options: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, options: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
     super(domElem, 'translate', options);
 
     this.translationOptions = {
@@ -656,14 +426,6 @@ export class TranslateBlock extends AnimBlock {
     );
   }
 
-  protected _onStart(direction: "forward" | "backward"): void {
-    
-  }
-
-  protected _onFinish(direction: "forward" | "backward"): void {
-    
-  }
-
   protected applyTranslateOptions(translateOptions: Partial<TNoElem>): TNoElem {
     return {
       translateX: 0,
@@ -674,6 +436,8 @@ export class TranslateBlock extends AnimBlock {
       offsetY: 0,
       offsetUnitsX: 'px',
       offsetUnitsY: 'px',
+
+      ...translateOptions,
     };
   }
 
@@ -695,9 +459,12 @@ export class TranslateBlock extends AnimBlock {
     offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
     
     return [
+      // forward
       [{transform: `translate(calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}),
                             calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`
       }],
+
+      // backward
       [{transform: `translate(calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}),
                             calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
       }],
@@ -705,122 +472,121 @@ export class TranslateBlock extends AnimBlock {
   }
 }
 
+export class TargetedTranslateBlock extends AnimBlock {
+  translationOptions: TElem;
+  animation: AnimTimelineAnimation;
 
-// //******** ANIMATION PRESETS
-// //*** Fade
-// AnimBlock['fade-in'] = AnimBlock['undo--fade-out'] = [
-//   {opacity: '0'},
-//   {opacity: '1'}
-// ];
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
 
-// AnimBlock['fade-out'] = AnimBlock['undo--fade-in'] = [
-//   {opacity: '1'},
-//   {opacity: '0'}
-// ];
+  constructor(domElem: /* HTMLElement | SVGGraphicsElement */ Element, private targetElem: /* HTMLElement */ Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
+    super(domElem, 'translate', userOptions);
 
+    this.translationOptions = {
+      ...this.applyTranslateOptions(translationOptions),
+    };
 
-// //*** Highlight
-// AnimBlock['highlight'] = AnimBlock['undo--un-highlight'] = [
-//     {backgroundPositionX: '100%'},
-//     {backgroundPositionX: '0%'},
-// ];
+    const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
 
-// AnimBlock['un-highlight'] = AnimBlock['undo--highlight'] = [
-//   {backgroundPositionX: '0%'},
-//   {backgroundPositionX: '100%'},
-// ];
+    this.animation = new AnimTimelineAnimation(
+      new KeyframeEffect(
+        domElem,
+        forwardFrames,
+        {
+          duration: this.options.duration,
+          fill: 'forwards', // TODO: Make customizable?
+          easing: this.options.easing,
+          composite: 'accumulate',
+          // playbackRate: options.playbackRate, // TODO: implement and uncomment
+        }
+      ),
+      new KeyframeEffect(
+        domElem,
+        backwardFrames,
+        {
+          duration: this.options.duration,
+          fill: 'forwards', // TODO: Make customizable?
+          easing: this.options.easing,
+          composite: 'accumulate',
+          // playbackRate: options.playbackRate, // TODO: implement and uncomment
+        }
+      )
+    );
+  }
 
+  // TODO: Re-implement
+  stepForward(): Promise<void> {
+    const [newF, newB] = this.createTranslationKeyframes();
+    this.animation.setForwardFrames(newF);
+    this.animation.setBackwardFrames(newB);
+    return super.stepForward();
+  }
 
-// //*** Wipe
-// // To/From Right
-// AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
-//   {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
+  protected applyTranslateOptions(translateOptions: Partial<TElem>): TElem {
+    return {
+      offsetX: 0,
+      offsetY: 0,
+      offsetUnitsX: 'px',
+      offsetUnitsY: 'px',
 
-// AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
-// ];
+      alignmentX: 'left',
+      alignmentY: 'top',
+      offsetTargetX: 0,
+      offsetTargetY: 0,
+      preserveX: false,
+      preserveY: false,
 
-// // To/From Left
-// AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
+      ...translateOptions,
+    };
+  }
 
-// AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
+  private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
+    let {
+      alignmentX, alignmentY,
+      offsetX, offsetY, offsetXY,
+      offsetTargetX, offsetTargetY, offsetTargetXY,
+      offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+      preserveX, preserveY
+    } = this.translationOptions;
 
-// // To/From Top
-// AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
+    let translateX: number;
+    let translateY: number;
+    
+    // get the bounding boxes of our DOM element and the target element
+    // TODO: Find better spot for visibility override
+    this.domElem.classList.value += ` wbfk-override-hidden`;
+    this.targetElem.classList.value += ` wbfk-override-hidden`;
+    const rectThis = this.domElem.getBoundingClientRect();
+    const rectTarget = this.targetElem.getBoundingClientRect();
+    this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
+    this.targetElem.classList.value = this.targetElem.classList.value.replace(` wbfk-override-hidden`, '');
+    // the displacement will start as the difference between the target element's position and our element's position...
+    // ...plus any offset within the target itself
+    offsetTargetX = offsetTargetXY ?? offsetTargetX;
+    offsetTargetY = offsetTargetXY ?? offsetTargetY;
+    translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
+    translateX += offsetTargetX * rectTarget.width;
+    translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
+    translateY += offsetTargetY * rectTarget.height;
+    offsetX = offsetXY ?? offsetX;
+    offsetY = offsetXY ?? offsetY;
+    offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
+    offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
+    
+    return [
+      // forward
+      [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
+                            calc(${translateY}px + ${offsetY}${offsetUnitsY})`
+      }],
 
-// AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
-// ];
-
-// // To/From Bottom
-// AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
-
-// AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-//   {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-// ];
-
-
-// //*** Wipe
-// // To/From Right
-// AnimBlock['enter-wipe-from-right'] = AnimBlock['undo--exit-wipe-to-right'] = [
-//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-right'] = AnimBlock['undo--enter-wipe-from-right'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-// ];
-
-// // To/From Left
-// AnimBlock['enter-wipe-from-left'] = AnimBlock['undo--exit-wipe-to-left'] = [
-//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-left'] = AnimBlock['undo--enter-wipe-from-left'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
-// ];
-
-// // To/From Top
-// AnimBlock['enter-wipe-from-top'] = AnimBlock['undo--exit-wipe-to-top'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-top'] = AnimBlock['undo--enter-wipe-from-top'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-// ];
-
-// // To/From Bottom
-// AnimBlock['enter-wipe-from-bottom'] = AnimBlock['undo--exit-wipe-to-bottom'] = [
-//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-// ];
-
-// AnimBlock['exit-wipe-to-bottom'] = AnimBlock['undo--enter-wipe-from-bottom'] = [
-//   {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-//   {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
-// ];
+      // backward
+      [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
+                            calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
+      }],
+    ];
+  }
+}
 
 // TODO: Create util
 function mergeArrays<T>(...arrays: T[][]): Array<T> {
