@@ -35,7 +35,7 @@ class _WebFlik {
       Exits?: UserExitBank;
       Emphases?: UserEmphasisBank;
     },
-    includePresets: IncludePresets | void
+    includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
     type TogglePresets<TUserBank, TPresetBank> = TUserBank & (IncludePresets extends true ? TPresetBank : {});
     type CombinedEntranceBank = TogglePresets<UserEntranceBank, typeof presetEntrances>;
