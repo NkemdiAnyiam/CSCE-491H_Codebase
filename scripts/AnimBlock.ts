@@ -181,9 +181,9 @@ export abstract class AnimBlock {
         }
         catch (err) {
           console.warn(err); // TODO: Make more specific
-          this.domElem.classList.add('wpfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
+          this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
           animation.commitStyles();
-          this.domElem.classList.remove('wpfk-override-hidden');
+          this.domElem.classList.remove('wbfk-override-hidden');
         }
       }
       
