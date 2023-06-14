@@ -87,7 +87,7 @@
   
           </form>
 
-          <form action="#" method="post" class="job-form job-form--textarea" hidden novalidate>
+          <form action="#" method="post" class="job-form job-form--textarea wbfk-hidden" novalidate>
             <div class="job-form__textareas">
               <div class="job-form__user-textarea-container">
                 <label class="job-form__label">
@@ -111,27 +111,27 @@
         
       </div>
 
-      <div class="visualization" hidden>
+      <div class="visualization wbfk-hidden">
         <div class="data-display">
           <div class="text-boxes">
             <!-- Text box: Place-bars -->
             <div class="text-box-line-group text-box-line-group--place-bars">
-              <div class="text-box text-box" hidden>
+              <div class="text-box text-box wbfk-hidden">
                 <p class="text-box__paragraph text-box__paragraph--unorder">
                   These blue bars represent jobs A&mdash;<span class="fill--last-job-letter"></span>.
                   You can hover over them to view their stats if you wish (the bottom stats will be explained soon).
                   <br />
                   Let's place them on the time graph from top to bottom.
                 </p>
-                <p class="text-box__paragraph text-box__paragraph--unorder-2" hidden>
+                <p class="text-box__paragraph text-box__paragraph--unorder-2 wbfk-hidden">
                   Done. We just placed them on the graph in the order you initially defined the jobs, right?
                 </p>
-                <p class="text-box__paragraph text-box__paragraph--order" hidden>
+                <p class="text-box__paragraph text-box__paragraph--order wbfk-hidden">
                   Let's take them back off for a moment. The first step in the process is to sort them in order of finish time, so let's visualize that.
                   <br />
                   (The sorting method is irrelevant; let's assume that it uses Merge Sort)
                 </p>
-                <p class="text-box__paragraph text-box__paragraph--ordered" hidden>
+                <p class="text-box__paragraph text-box__paragraph--ordered wbfk-hidden">
                   Perfect, this will make it easier to visually understand which jobs are compatible with each other.
                   <br />
                   We can refer to each job by their <span class="SJ-related">sorted index</span>.
@@ -139,7 +139,7 @@
                 </p>
               </div>
               <svg class="free-line">
-                <line class="free-line__line" hidden />
+                <line class="free-line__line wbfk-hidden" />
               </svg>
             </div>
   
@@ -147,20 +147,20 @@
               
             <!-- Text box: finished c-array -->
               <div class="text-box-line-group text-box-line-group--finished-c-array">
-                <div class="text-box text-box" hidden>
+                <div class="text-box text-box wbfk-hidden">
                   <p class="text-box__paragraph text-box__paragraph">
                     Excellent, we've found every job's nearest <span class="c-related">compatible job</span>.
                     Our next step is to figure out the optimal (maximum) weight we can obtain from these jobs without having any of them overlap.
                   </p>
                 </div>
                 <svg class="free-line">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
               </div>
   
               <!-- Text box: show naive -->
               <div class="text-box-line-group text-box-line-group--show-naive">
-                <div class="text-box text-box" hidden>
+                <div class="text-box text-box wbfk-hidden">
                   <p class="text-box__paragraph text-box__paragraph">
                     The naive or brute force approach would be to test every single combination of jobs, which could be done using this recursive algorithm
                     <br />
@@ -185,13 +185,13 @@
                   </p>
                 </div>
                 <svg class="free-line">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
               </div>
   
               <!-- Text box: explain naive 1 -->
               <div class="text-box-line-group text-box-line-group--explain-naive-1 line-front">
-                <div class="text-box text-box" hidden>
+                <div class="text-box text-box wbfk-hidden">
                   <p class="text-box__paragraph text-box__paragraph">
                     This first term represents the possibility that the current <span class="SJ-related">job j</span> is indeed part of the optimal sequence of jobs.
                     Thus, it adds <span class="SJ-related">job j</span>'s <span class="weight-related">weight</span>,
@@ -202,13 +202,13 @@
                   </p>
                 </div>
                 <svg class="free-line">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
               </div>
   
               <!-- Text box: explain naive 2 -->
               <div class="text-box-line-group text-box-line-group--explain-naive-2 line-front">
-                <div class="text-box text-box" hidden>
+                <div class="text-box text-box wbfk-hidden">
                   <p class="text-box__paragraph text-box__paragraph">
                     This second term represents the possibility that <span class="SJ-related">job j</span> is NOT part of the optimal sequence of jobs. Thus, of course,
                     <span class="SJ-related">job j</span>'s <span class="weight-related">weight</span> is NOT added, and it then computes the optimal weight starting from
@@ -216,20 +216,20 @@
                   </p>
                 </div>
                 <svg class="free-line">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
               </div>
   
               <!-- Text box: explain naive bad -->
               <div class="text-box-line-group text-box-line-group--explain-naive-bad">
-                <div class="text-box text-box" hidden>
+                <div class="text-box text-box wbfk-hidden">
                   <p class="text-box__paragraph text-box__paragraph">
                     The problem with the naive approach is that it may recompute many overlapping subproblems.
                     In other words, we might solve the same <span class="OPT-related">OPT(X)</span> multiple times, which is incredibly inefficient.
                   </p>
                 </div>
                 <svg class="free-line">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
               </div>
             </div>
@@ -243,9 +243,9 @@
                   <path d="M0,0 L0,8 L6,4 L0,0" />
                 </marker>
               </defs>
-              <line class="free-line__line" hidden />
+              <line class="free-line__line wbfk-hidden" />
             </svg>
-            <div class="time-graph__c-bar" hidden></div>
+            <div class="time-graph__c-bar wbfk-hidden"></div>
             
             <div class="time-graph__job-bars">
               <template id="time-graph__job-bar-template">
@@ -257,9 +257,9 @@
               <template id="time-graph__row-template">
                 <div class="time-graph__row highlightable">
                   <div class="time-graph__cell time-graph__cell--header">
-                    <span class="time-graph__SJ-num SJ-num" hidden>(j=X)</span>
+                    <span class="time-graph__SJ-num SJ-num wbfk-hidden">(j=X)</span>
                     <span class="time-graph__job-letter time-graph__job-letter--unsorted" >Job X</span>
-                    <span class="time-graph__job-letter time-graph__job-letter--sorted" hidden>Job X</span>
+                    <span class="time-graph__job-letter time-graph__job-letter--sorted wbfk-hidden">Job X</span>
                   </div>
                 </div>
               </template>
@@ -276,19 +276,19 @@
             <template id="array__array-block-template">
               <div class="array__array-block highlightable">
                 <span class="array__array-entry--blank">_</span>
-                <span class="array__array-entry--value" hidden>X</span>
+                <span class="array__array-entry--value wbfk-hidden">X</span>
               </div>
             </template>
             <div class="array-group array-group--j-and-c">
-              <div class="array array--j" hidden>
+              <div class="array array--j wbfk-hidden">
                 <div class="array__array-block array__array-block--header">j</div>
               </div>
     
-              <div class="array array--c" hidden>
+              <div class="array array--c wbfk-hidden">
                 <div class="text-boxes">
                   <!-- Text box: c-array -->
                   <div class="text-box-line-group text-box-line-group--c-array c-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--explain">
                         Next, we will find each job's nearest <span class="c-related">"compatible"</span> job.
                         <!-- <br /> -->
@@ -300,7 +300,7 @@
                         <br /> Thus, <span class="SJ-related">J<sub>x</sub></span>'s NEAREST compatible job will be
                         <span class="c-related">J<sub>y</sub></span> such that <span class="c-related">y</span> is maximized.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--ref-array" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--ref-array wbfk-hidden">
                         This green <span class="c-related">c array</span> to the left will be used to store the index of
                         each job's <span class="c-related">compatible job</span>.
                         If a job does not have a <span class="c-related">compatible job</span>,
@@ -310,32 +310,32 @@
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
                   <!-- Text box: fill c-array -->
                   <div class="text-box-line-group text-box-line-group--fill-c-array c-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <template id="fill-c-array-paragraphs-template">
-                        <p class="text-box__paragraph text-box__paragraph--for-job-X" hidden>
+                        <p class="text-box__paragraph text-box__paragraph--for-job-X wbfk-hidden">
                           Let's find the nearest <span class="c-related">compatible job</span>
                           for <span class="SJ-related">job <span class="fill--curr-SJ-num">X</span></span>,
                           which starts at time <span class="fill--curr-start-time">X</span>.
                          </p>
-                         <p class="text-box__paragraph text-box__paragraph--result-job-X" hidden>
+                         <p class="text-box__paragraph text-box__paragraph--result-job-X wbfk-hidden">
                            After scanning the list, we see that <span class="fill--result-compatible-job-text"></span>
                            Therefore, <span class="c-related">c[<span class="SJ-related fill--curr-SJ-num">X</span>]</span> =
                            <span class="c-related fill--curr-c-entry"></span>.
                            Let's fill in <span class="c-related">c[<span class="SJ-related fill--curr-SJ-num">X</span>]</span>.
                          </p>
                       </template>
-                      <p class="text-box__paragraph text-box__paragraph--continue-on" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--continue-on wbfk-hidden">
                         Perfect, let's continue.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                 </div>
@@ -345,15 +345,15 @@
             </div>
   
             <div class="array-group array-group--j-and-M">
-              <div class="array array--j" hidden>
+              <div class="array array--j wbfk-hidden">
                 <div class="array__array-block array__array-block--header">j</div>
               </div>
     
-              <div class="array array--M" hidden>
+              <div class="array array--M wbfk-hidden">
                 <div class="text-boxes">
                   <!-- Text box: M-array -->
                   <div class="text-box-line-group text-box-line-group--M-array M-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--explain">
                         The solution is actually simple: Every time we find the optimal weight for a sequence from time 0 to some job, let's store it in an array.
                         Then, every time we call <span class="OPT-related">OPT(<span class="SJ-related">j</span>)</span>
@@ -361,20 +361,20 @@
                         <br />
                         This act of storing results in a table to prevent needless recalculations is called <span class="M-related">memoization</span>.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--ref-array" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--ref-array wbfk-hidden">
                         This purple <span class="M-related">M array</span> to the left will be used as our memoization table; it will store the result of
                         each job's <span class="OPT-related">OPT()</span> computation.
                         If we have 0 jobs, of course the optimal weight would be 0, so our base case is that <span class="M-related">M[0]</span> = 0.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
                   <!-- Text box: show memoized algorithm -->
                   <div class="text-box-line-group text-box-line-group--show-memoized">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph">
                         Our new <span class="M-related">memoized</span> weighted interval scheduling algorithm looks like this:
                         <br />
@@ -397,7 +397,7 @@
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                 </div>
@@ -406,13 +406,13 @@
             </div>
           </div>
 
-          <div class="data-display__right-border" hidden></div>
+          <div class="data-display__right-border wbfk-hidden"></div>
         </div>
         
   
         <div class="job-cards">
           <template id="job-card-template">
-            <div class="job-card" hidden data-cardnum="X">
+            <div class="job-card wbfk-hidden" data-cardnum="X">
   
   
               <!--**************** CONTENT ****************-->
@@ -421,31 +421,31 @@
                 <div class="text-boxes">
                   <!-- Text box: M Access -->
                   <div class="text-box-line-group text-box-line-group--M-access M-related">
-                    <div class="text-box" hidden>
+                    <div class="text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--intro">
                         We need to know the optimal weight from time 0 through <span class="SJ-related">job <span class="SJ-num">X</span></span>.
                         First, let's check the <span class="M-related">M array</span> to see if it has already been computed.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--solved" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--solved wbfk-hidden">
                         Excellent, this is the last finishing job, so we are finished.
                         The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                   
                   <!-- Text box: Formula container -->
                   <div class="text-box-line-group text-box-line-group--formula-computation">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--find">
                         The entry is blank, so we need to compute the optimal weight ourselves using this equation.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--max" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--max wbfk-hidden">
                         We have computed both possibilities. Now we can compute the maximum.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--found" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--found wbfk-hidden">
                         The greater result was <span class="fill--comp-final">X</span>. Thus, the optimal weight from the beginning through
                         <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-final">X</span>.
                         Let's assign it to <span class="M-related">M[<span class="SJ-num">X</span>]</span>
@@ -453,85 +453,85 @@
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                   
                   <!-- Text box: Computation 1 -->
                   <div class="text-box-line-group text-box-line-group--computation--1">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--intro">
                         This first expression assumes that <span class="SJ-related">job <span class="SJ-num">X</span></span> IS part of the optimal chain of jobs.
                         It adds this job's <span class="weight-related">weight <span class="fill--weight">X</span></span>
                         and then computes from the best <span class="c-related">compatible job</span>.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--summary" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--summary wbfk-hidden">
                         Let's summarize: If <span class="SJ-related">job <span class="SJ-num">X</span></span> is part of the optimal solution, then the maximum weight from
                         the beginning through <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-1">X</span>.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
   
                   <!-- Text Box: c Access -->
                   <div class="text-box-line-group text-box-line-group--c-access c-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--find">
                         We need to find the optimal substructure starting from this job's compatible job.
                         Let's look at the <span class="c-related">c array</span> to get the job number.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--found" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--found wbfk-hidden">
                         The <span class="c-related">compatible job</span> was <span class="c-related">job <span class="fill--c-entry">X</span></span>.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
                   <!-- Text Box: OPT 1 -->
                   <div class="text-box-line-group text-box-line-group--OPT-expression-1 OPT-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--find">
                         Thus we will compute the total weight from the optimal substructure from time 0 through
                         <span class="c-related">job <span class="fill--c-entry">X</span></span>.
                         Let's do that now.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--found" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--found wbfk-hidden">
                         The optimal weight from the beginning through <span class="c-related">job <span class="fill--c-entry">X</span></span> was <span class="fill--OPT-1">X</span>.
                         Let's add this to <span class="SJ-related">job <span class="SJ-num">X</span></span>'s <span class="weight-related">weight <span class="fill--weight">X</span></span>.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
   
                   <!-- Text Box: Computation 2 -->
                   <div class="text-box-line-group text-box-line-group--computation--2">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph--intro">
                         This second expression assumes that <span class="SJ-related">job <span class="SJ-num">X</span></span> is NOT part of the optimal sequence.
                         It computes from the job right behind this one since it doesn't need to worry about overlap.
                       </p>
-                      <p class="text-box__paragraph--summary" hidden>
+                      <p class="text-box__paragraph--summary wbfk-hidden">
                         Let's summarize: If <span class="SJ-related">job <span class="SJ-num">X</span></span> is NOT part of the optimal solution,
                         then the maximum weight from the beginning through
                         <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-2">X</span>.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
   
                   <!-- Text Box: OPT 2 -->
                   <div class="text-box-line-group text-box-line-group--OPT-expression-2 OPT-related">
-                    <div class="text-box text-box" hidden>
+                    <div class="text-box text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--find">
                         <span class="SJ-num">X</span>-1 is <span class="fill--next-SJ-num">X</span>.
                         So we need to compute the weight from the optimal substructure starting at job <span class="fill--next-SJ-num">X</span>.
@@ -539,7 +539,7 @@
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                 </div>
@@ -551,7 +551,7 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for c array block -->
@@ -561,7 +561,7 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for pointing down tree -->
@@ -571,7 +571,7 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for pointing up tree -->
@@ -581,12 +581,12 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for connecting bullets -->
                 <svg class="free-line free-line--bullet-connector free-line--dotted">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- BULLET -->
@@ -602,16 +602,16 @@
                 <div class="M-container">
     
                   <span class="M-access-container highlightable">
-                    <span class="M-access highlightable" hidden>
+                    <span class="M-access highlightable wbfk-hidden">
                       M[<span class="SJ-num">X</span>]
                     </span>
-                    <span class="M-entry highlightable" hidden>X</span>
+                    <span class="M-entry highlightable wbfk-hidden">X</span>
                   </span>
                 </div>
             
   
                 <!-- ARROW CONTAINER -->
-                <div class="arrow-container" hidden>
+                <div class="arrow-container wbfk-hidden">
                   <div class="arrow-head"></div>
                   <div class="arrow-tail"></div>
                 </div>
@@ -619,7 +619,7 @@
                 
                 <!-- FORMULA CONTAINER -->
                 <div class="formula-container highlightable">
-                  <span class="formula-computation highlightable" hidden>
+                  <span class="formula-computation highlightable wbfk-hidden">
                     <!-- Max Container -->
                     <div class="max-container">
                       <span class="max-text">max</span>
@@ -637,29 +637,29 @@
                           <span class="plus-sign">+</span>
                           <span class="OPT-expression-container highlightable">
                             <span class="OPT-expression highlightable">
-                              OPT(<span class="c-access-container highlightable"><span class="c-access highlightable">c[<span class="SJ-num">X</span>]</span><span class="c-entry" hidden>X</span></span>)
+                              OPT(<span class="c-access-container highlightable"><span class="c-access highlightable">c[<span class="SJ-num">X</span>]</span><span class="c-entry wbfk-hidden">X</span></span>)
                             </span>
-                            <span class="OPT-result" hidden>X</span>
+                            <span class="OPT-result wbfk-hidden">X</span>
                           </span>
                         </span>
-                        <span class="computation-result highlightable" hidden>X</span>
+                        <span class="computation-result highlightable wbfk-hidden">X</span>
                       </div>
             
                       <!-- Computation 2 -->
                       <div class="computation computation--2 highlightable">
                         <span class="OPT-expression-container">
                           <span class="OPT-expression">
-                            OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num" hidden>X</span></span>)
+                            OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num wbfk-hidden">X</span></span>)
                           </span>
-                          <span class="OPT-result" hidden>X</span>
-                          <span class="computation-result highlightable" hidden>X</span>
+                          <span class="OPT-result wbfk-hidden">X</span>
+                          <span class="computation-result highlightable wbfk-hidden">X</span>
                         </span>
                       </div>
                     </div>
                   </span>
   
                   <!-- Result -->
-                  <span class="formula-result highlightable" hidden>X</span>
+                  <span class="formula-result highlightable wbfk-hidden">X</span>
                 </div>
               </div>
               
@@ -671,7 +671,7 @@
           </template>
   
           <template id="job-stub-template">
-            <div class="job-card job-card--stub" hidden data-cardnum="X">
+            <div class="job-card job-card--stub wbfk-hidden" data-cardnum="X">
   
               <!--**************** CONTENT ****************-->
               <div class="job-card-content">
@@ -679,18 +679,18 @@
                 <div class="text-boxes">
                   <!-- Text box: M Access -->
                   <div class="text-box-line-group text-box-line-group--M-access M-related">
-                    <div class="text-box" hidden>
+                    <div class="text-box wbfk-hidden">
                       <p class="text-box__paragraph text-box__paragraph--1">
                         We need to know the optimal weight ending through <span class="SJ-related">job <span class="SJ-num">X</span></span>.
                         First, let's check the <span class="M-related">M array</span> to see if it has already been computed.
                       </p>
-                      <p class="text-box__paragraph text-box__paragraph--2" hidden>
+                      <p class="text-box__paragraph text-box__paragraph--2 wbfk-hidden">
                         The entry already exists. Of course, this is the base case for <span class="SJ-related">j = 0</span>. 0 jobs means 0 weight.
                         Let's pass this back up the tree.
                       </p>
                     </div>
                     <svg class="free-line">
-                      <line class="free-line__line" hidden />
+                      <line class="free-line__line wbfk-hidden" />
                     </svg>
                   </div>
                 </div>
@@ -702,7 +702,7 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for pointing up tree -->
@@ -712,12 +712,12 @@
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- Line for connecting siblings -->
                 <svg class="free-line free-line--bullet-connector free-line--dotted">
-                  <line class="free-line__line" hidden />
+                  <line class="free-line__line wbfk-hidden" />
                 </svg>
   
                 <!-- SJ NUM LABEL -->
@@ -731,10 +731,10 @@
                 <!-- M CONTAINER -->
                 <div class="M-container">
                   <span class="M-access-container highlightable">
-                    <span class="M-access highlightable" hidden>
+                    <span class="M-access highlightable wbfk-hidden">
                       M[<span class="SJ-num">X</span>]
                     </span>
-                    <span class="M-entry highlightable" hidden>X</span>
+                    <span class="M-entry highlightable wbfk-hidden">X</span>
                   </span>
                 </div>
               </div>
