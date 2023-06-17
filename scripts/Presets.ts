@@ -1,3 +1,4 @@
+import { EntranceBlock, TranslateBlock } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // class PresetEntrances implements IKeyframesBank<PresetEntrances>
@@ -258,42 +259,49 @@ import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.j
 
 export const presetEntrances = {
   [`~fade-in`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {opacity: '0'},
       {opacity: '1'},
-    ],
+    ]],
   },
     
   [`~wipe-from-right`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
     
   [`~wipe-from-left`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
     
   [`~wipe-from-top`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
   
   [`~wipe-from-bottom`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
 
+  ['~to-spec']: {
+    generateKeyframes(larg: number, bool?: boolean) {
+      console.log(larg);
+      return [[], []]
+    },
+  }
+
   // invalidProperty: 5,
-} satisfies IKeyframesBank;
+} satisfies IKeyframesBank<EntranceBlock>;
 
 
 export const presetExits = {
@@ -358,3 +366,54 @@ export const presetEmphases = {
     },
   },
 } satisfies IKeyframesBank;
+
+export const presetTranslate = {
+  ['~translate']: {
+    generateKeyframes: (tBlock: TranslateBlock): [Keyframe[], Keyframe[]] => {
+      let {
+        translateX, translateY, translateXY,
+        unitsX, unitsY, unitsXY,
+        offsetX, offsetY, offsetXY,
+        offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+      } = tBlock.translationOptions;
+  
+      translateX = translateXY ?? translateX;
+      translateY = translateXY ?? translateY;
+      unitsX = unitsXY ?? unitsX;
+      unitsY = unitsXY ?? unitsY;
+      offsetX = offsetXY ?? offsetX;
+      offsetY = offsetXY ?? offsetY;
+      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
+      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
+      
+      return [
+        // forward
+        [{transform: `translate(calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}),
+                              calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`
+        }],
+  
+        // backward
+        [{transform: `translate(calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}),
+                              calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
+        }],
+      ];
+    }
+  }
+} satisfies IKeyframesBank; 
+
+// export const presetFreeLineEntrances = {
+//   [`~draw-from-start`]: {
+//     keyframes: [
+//       {strokeDashOffset: 1},
+//       {strokeDashOffset: 0},
+//     ]
+//   },
+
+//   // TODO: Utilize appropriate classes to handle marker
+//   [`~draw-from-end`]: {
+//     keyframes: [
+//       {strokeDashOffset: -1},
+//       {strokeDashOffset: 0},
+//     ]
+//   },
+// } satisfies IKeyframesBank;

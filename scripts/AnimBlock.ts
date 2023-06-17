@@ -1,5 +1,5 @@
 import { AnimSequence } from "./AnimSequence.js";
-import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik.js";
+import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
@@ -75,7 +75,7 @@ export class AnimTimelineAnimation extends Animation {
   set sequenceID(id: number) { this._sequenceID = id; }
 }
 
-export abstract class AnimBlock {
+export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> {
   static id: number = 0;
 
   parentSequence?: AnimSequence; // TODO: replace with own dynamic list of running animations
@@ -83,17 +83,48 @@ export abstract class AnimBlock {
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  options: AnimBlockOptions;
-  abstract animation: AnimTimelineAnimation;
+  options: AnimBlockOptions = {} as AnimBlockOptions;
+  animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
-  constructor(public domElem: Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}) {
+  // constructor(/*public domElem: Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}*/) {
+    constructor(public domElem: Element, public animName: string, public behaviorGroup: TBehavior) {
     if (!domElem) {
       throw new Error(`Element must not be undefined`); // TODO: Improve error message
     }
+
     this.id = AnimBlock.id++;
-    this.options = this.mergeOptions(userOptions, behaviorGroupOptions);
+  }
+
+   initialize(params: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
+    this.options = this.mergeOptions(userOptions, this.behaviorGroup.options ?? {});
+
+    // TODO: Handle case where only one keyframe is provided
+    let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...params); // TODO: extract generateKeyframes
+
+    const keyframeOptions: KeyframeEffectOptions = {
+      duration: this.options.duration,
+      fill: this.options.commitStyles ? 'forwards' : 'none',
+      easing: this.options.easing,
+      // TODO: handle composite
+    };
+
+    // TODO: Add playbackRate
+    this.animation = new AnimTimelineAnimation(
+      new KeyframeEffect(
+        this.domElem,
+        forwardFrames,
+        keyframeOptions,
+      ),
+      new KeyframeEffect(
+        this.domElem,
+        backwardFrames ?? [...forwardFrames],
+        {...keyframeOptions, direction: backwardFrames ? 'normal' : 'reverse'},
+      )
+    );
+
+    return this;
   }
 
   getBlocksNext() { return this.options.blocksNext; }
@@ -216,11 +247,10 @@ export abstract class AnimBlock {
 }
 
 // CHANGE NOTE: Generic class accepting an extension of AnimationBank
-export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
-  animation: AnimTimelineAnimation;
-  // CHANGE NOTE: Add static animation bank and static method for setting bank 
-  private static Bank: IKeyframesBank = {};
-  static setBank<T extends IKeyframesBank>(bank: T) { EntranceBlock.Bank = {...bank}; }
+export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  // TODO: remove
+  AAADummyProp = 'hello';
+  ZZZDummyProp = 'world';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     // TODO: Consider commitStyles for false by default
@@ -229,45 +259,9 @@ export class EntranceBlock<TBank extends IKeyframesBank> extends AnimBlock {
     };
   }
 
-  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
-    const animationBank = EntranceBlock.Bank as TBank;
-    const behaviorGroup = animationBank[animName];
-    if (!behaviorGroup) { throw new Error(`Invalid entrance animation name "${animName}"`); }
-
-    super(domElem, animName, userOptions, behaviorGroup.options);
-
-    // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
-
-    // if an explicit definition for reversal frames exists, use them.
-    // otherwise, use the reverse of the forward frames
-    // TODO: Handle case where only one keyframe is provided
-    // TODO: Make separate property of same behavior group instead of separate group
-    let backwardFrames: Keyframe[];
-    const undoAnimationName = `undo--${animName}`;
-    backwardFrames = (undoAnimationName in animationBank) ?
-      animationBank[undoAnimationName as typeof animName].keyframes :
-      [...forwardFrames].reverse();
-
-    const keyframeOptions: KeyframeEffectOptions = {
-      duration: this.options.duration,
-      fill: this.options.commitStyles ? 'forwards' : 'none',
-      easing: this.options.easing,
-      // playbackRate: options.playbackRate, // TODO: implement and uncomment
-    }
-    
-    this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        domElem,
-        forwardFrames,
-        keyframeOptions
-      ),
-      new KeyframeEffect(
-        domElem,
-        backwardFrames,
-        keyframeOptions
-      ),
-    );
+  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
+    super(domElem, animName, behaviorGroup);
   }
 
   protected _onStartForward(): void {
@@ -306,7 +300,7 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
     const undoAnimationName = `undo--${animName}`;
     backwardFrames = (undoAnimationName in animationBank) ?
       animationBank[undoAnimationName as typeof animName].keyframes :
-      [...forwardFrames].reverse();
+      [...forwardFrames];
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: this.options.duration,
@@ -324,7 +318,7 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
       new KeyframeEffect(
         domElem,
         backwardFrames,
-        keyframeOptions
+        {...keyframeOptions, direction: 'reverse'}
       ),
     );
   }
@@ -363,7 +357,7 @@ export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
     const undoAnimationName = `undo--${animName}`;
     backwardFrames = (undoAnimationName in animationBank) ?
       animationBank[undoAnimationName as typeof animName].keyframes :
-      [...forwardFrames].reverse();
+      [...forwardFrames];
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: this.options.duration,
@@ -381,7 +375,7 @@ export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
       new KeyframeEffect(
         domElem,
         backwardFrames,
-        keyframeOptions
+        {...keyframeOptions, direction: 'reverse'}
       ),
     );
   }
