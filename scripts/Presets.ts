@@ -360,7 +360,7 @@ export const presetEmphases = {
       {backgroundPositionX: '100%'},
     ]],
     options: {
-      // TODO: Create removedClassesOnFinishForward
+      removedClassesOnFinishForward: [`highlightable`],
     },
   },
 } satisfies IKeyframesBank<EmphasisBlock>;

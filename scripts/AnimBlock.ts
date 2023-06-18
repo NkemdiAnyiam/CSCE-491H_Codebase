@@ -7,6 +7,8 @@ type CustomKeyframeEffectOptions = {
   commitStyles: boolean;
   addedClassesOnStartForward: string[];
   removedClassesOnStartForward: string[]; // TODO: Consider order of addition/removal
+  addedClassesOnFinishForward: string[];
+  removedClassesOnFinishForward: string[];
 }
 
 export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -167,6 +169,8 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
         break;
       case 'backward':
         this._onStartBackward();
+        this.domElem.classList.add(...this.options.removedClassesOnFinishForward);
+        this.domElem.classList.remove(...this.options.addedClassesOnFinishForward);
         break;
     }
 
@@ -194,6 +198,8 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       
       switch(direction) {
         case 'forward':
+          this.domElem.classList.add(...this.options.addedClassesOnFinishForward);
+          this.domElem.classList.remove(...this.options.removedClassesOnFinishForward);
           this._onFinishForward();
           break;
         case 'backward':
@@ -240,6 +246,18 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
         this.defaultOptions.removedClassesOnStartForward ?? [],
         behaviorGroupOptions.removedClassesOnStartForward ?? [],
         userOptions.removedClassesOnStartForward ?? [],
+      ),
+
+      addedClassesOnFinishForward: mergeArrays(
+        this.defaultOptions.addedClassesOnFinishForward ?? [],
+        behaviorGroupOptions.addedClassesOnFinishForward ?? [],
+        userOptions.addedClassesOnFinishForward ?? [],
+      ),
+
+      removedClassesOnFinishForward: mergeArrays(
+        this.defaultOptions.removedClassesOnFinishForward ?? [],
+        behaviorGroupOptions.removedClassesOnFinishForward ?? [],
+        userOptions.removedClassesOnFinishForward ?? [],
       ),
     };
   }
