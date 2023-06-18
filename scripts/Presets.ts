@@ -1,4 +1,4 @@
-import { EntranceBlock, TranslateBlock } from "./AnimBlock.js";
+import { EmphasisBlock, EntranceBlock, ExitBlock, TranslateBlock } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // class PresetEntrances implements IKeyframesBank<PresetEntrances>
@@ -306,48 +306,48 @@ export const presetEntrances = {
 
 export const presetExits = {
   [`~fade-out`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {opacity: '1'},
       {opacity: '0'},
-    ],
+    ]],
   },
         
   ['~wipe-to-right']: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
 
   [`~wipe-to-left`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
 
   [`~wipe-to-top`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
-    ],
+    ]],
   },
 
   [`~wipe-to-bottom`]: {
-    keyframes: [
+    generateKeyframes: () => [[
       {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
       {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-    ],
+    ]],
   },
-} satisfies IKeyframesBank;
+} satisfies IKeyframesBank<ExitBlock>;
 
 
 export const presetEmphases = {
   [`~highlight`]: {
-    keyframes: [
+    generateKeyframes: () =>  [[
       {backgroundPositionX: '100%'},
       {backgroundPositionX: '0%'},
-    ],
+    ]],
     options: {
       addedClassesOnStartForward: [`highlightable`],
       // invalidProp: 4,
@@ -355,17 +355,15 @@ export const presetEmphases = {
   },
 
   [`~un-highlight`]: {
-    keyframes: [
+    generateKeyframes: () =>  [[
       {backgroundPositionX: '0'},
       {backgroundPositionX: '100%'},
-    ],
+    ]],
     options: {
       // TODO: Create removedClassesOnFinishForward
-      // addedClassesOnStartForward: [`highlightable`],
-      // invalidProp: 4,
     },
   },
-} satisfies IKeyframesBank;
+} satisfies IKeyframesBank<EmphasisBlock>;
 
 export const presetTranslate = {
   ['~translate']: {

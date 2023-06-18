@@ -88,8 +88,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
-  // constructor(/*public domElem: Element, public animName: string, userOptions: Partial<AnimBlockOptions> = {}, behaviorGroupOptions: Partial<AnimBlockOptions> = {}*/) {
-    constructor(public domElem: Element, public animName: string, public behaviorGroup: TBehavior) {
+  constructor(public domElem: Element, public animName: string, public behaviorGroup: TBehavior) {
     if (!domElem) {
       throw new Error(`Element must not be undefined`); // TODO: Improve error message
     }
@@ -246,11 +245,10 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   }
 }
 
-// CHANGE NOTE: Generic class accepting an extension of AnimationBank
 export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
   // TODO: remove
-  AAADummyProp = 'hello';
-  ZZZDummyProp = 'world';
+  AAADummyEntranceProp = 'Ent';
+  ZZZDummyEntranceProp = 'rance';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     // TODO: Consider commitStyles for false by default
@@ -273,54 +271,20 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
   }
 }
 
-export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
-  animation: AnimTimelineAnimation;
-  private static Bank: IKeyframesBank = {};
-  static setBank<T extends IKeyframesBank>(bank: T) { ExitBlock.Bank = {...bank}; }
+export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  // TODO: remove
+  AAADummyExitProp = 'Ex';
+  ZZZDummyExitProp = 'it';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     return {
       commitStyles: false,
     };
   }
-  
-  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
-    const animationBank = ExitBlock.Bank as TBank;
-    const behaviorGroup = animationBank[animName];
-    if (!behaviorGroup) { throw new Error(`Invalid exit animation name "${animName}"`); }
 
-    super(domElem, animName, userOptions, behaviorGroup.options);
-
-    // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
-
-    // if an explicit definition for reversal frames exists, use them.
-    // otherwise, use the reverse of the forward frames
-    let backwardFrames: Keyframe[];
-    const undoAnimationName = `undo--${animName}`;
-    backwardFrames = (undoAnimationName in animationBank) ?
-      animationBank[undoAnimationName as typeof animName].keyframes :
-      [...forwardFrames];
-
-    const keyframeOptions: KeyframeEffectOptions = {
-      duration: this.options.duration,
-      fill: this.options.commitStyles ? 'forwards' : 'none',
-      easing: this.options.easing,
-      // playbackRate: options.playbackRate, // TODO: implement and uncomment
-    }
-    
-    this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        domElem,
-        forwardFrames,
-        keyframeOptions
-      ),
-      new KeyframeEffect(
-        domElem,
-        backwardFrames,
-        {...keyframeOptions, direction: 'reverse'}
-      ),
-    );
+  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid exit animation name ${animName}`); }
+    super(domElem, animName, behaviorGroup);
   }
 
   protected _onFinishForward(): void {
@@ -332,52 +296,18 @@ export class ExitBlock<TBank extends IKeyframesBank> extends AnimBlock {
   }
 }
 
-export class EmphasisBlock<TBank extends IKeyframesBank> extends AnimBlock {
-  animation: AnimTimelineAnimation;
-  private static Bank: IKeyframesBank = {};
-  static setBank<T extends IKeyframesBank>(bank: T) { EmphasisBlock.Bank = {...bank}; }
+export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  // TODO: remove
+  AAADummyEmphasisProp = 'Emph';
+  ZZZDummyEmphasisProp = 'asis';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     return {};
   }
-  
-  constructor(domElem: Element, animName: AnimationNameIn<TBank>, userOptions: Partial<AnimBlockOptions> = {}) {
-    const animationBank = EmphasisBlock.Bank as TBank;
-    const behaviorGroup = animationBank[animName];
-    if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name "${animName}"`); }
 
-    super(domElem, animName, userOptions, behaviorGroup.options);
-
-    // Create the Animation instance that we will use on our DOM element
-    const forwardFrames: Keyframe[] = behaviorGroup.keyframes;
-
-    // if an explicit definition for reversal frames exists, use them.
-    // otherwise, use the reverse of the forward frames
-    let backwardFrames: Keyframe[];
-    const undoAnimationName = `undo--${animName}`;
-    backwardFrames = (undoAnimationName in animationBank) ?
-      animationBank[undoAnimationName as typeof animName].keyframes :
-      [...forwardFrames];
-
-    const keyframeOptions: KeyframeEffectOptions = {
-      duration: this.options.duration,
-      fill: this.options.commitStyles ? 'forwards' : 'none',
-      easing: this.options.easing,
-      // playbackRate: options.playbackRate, // TODO: implement and uncomment
-    }
-    
-    this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        domElem,
-        forwardFrames,
-        keyframeOptions
-      ),
-      new KeyframeEffect(
-        domElem,
-        backwardFrames,
-        {...keyframeOptions, direction: 'reverse'}
-      ),
-    );
+  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name ${animName}`); }
+    super(domElem, animName, behaviorGroup);
   }
 }
 
