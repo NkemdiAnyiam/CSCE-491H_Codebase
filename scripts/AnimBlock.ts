@@ -1,10 +1,12 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
+// TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
   blocksPrev: boolean;
   commitStyles: boolean;
+  composite: 'replace' | 'add' | 'accumulate';
   addedClassesOnStartForward: string[];
   removedClassesOnStartForward: string[]; // TODO: Consider order of addition/removal
   addedClassesOnFinishForward: string[];
@@ -117,7 +119,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       duration: this.options.duration,
       fill: this.options.commitStyles ? 'forwards' : 'none',
       easing: this.options.easing,
-      // TODO: handle composite
+      composite: this.options.composite,
     };
 
     // TODO: Add playbackRate
@@ -233,6 +235,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       duration: 500,
       playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
       commitStyles: true,
+      composite: 'replace',
       easing: 'linear',
       regenerateKeyframes: false,
 
@@ -345,7 +348,9 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
   ZZZDummyEmphasisProp = 'lation';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
-    return {};
+    return {
+      composite: 'accumulate',
+    };
   }
 
   constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
