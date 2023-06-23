@@ -9,6 +9,7 @@ type CustomKeyframeEffectOptions = {
   removedClassesOnStartForward: string[]; // TODO: Consider order of addition/removal
   addedClassesOnFinishForward: string[];
   removedClassesOnFinishForward: string[];
+  regenerateKeyframes: boolean;
 }
 
 export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -23,7 +24,9 @@ type TOffset = {
   offsetUnitsXY?: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
 }
 
-interface TNoElem extends TOffset {
+// TODO: individual X/Y should override XY, not the other way around
+// TODO: Potentially allow strings in the format of <number><CssLengthUnit>
+export interface TNoElem extends TOffset {
   translateX: number;
   translateY: number;
   translateXY?: number; // overrides translateX and translateY
@@ -32,8 +35,8 @@ interface TNoElem extends TOffset {
   unitsXY?: CssLengthUnit; // overrides unitsX and unitsY
 }
 
-interface TElem extends TOffset {
-  // targetElem: HTMLElement; // if specified, translations will be with respect to this target element
+export interface TElem extends TOffset {
+  targetElem: Element; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
   offsetTargetX: number; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)
@@ -63,6 +66,10 @@ export class AnimTimelineAnimation extends Animation {
   setBackwardFrames(frames: Keyframe[]) {
     this.backwardEffect.setKeyframes(frames);
   }
+  setFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[]) {
+    this.forwardEffect.setKeyframes(forwardFrames);
+    this.backwardEffect.setKeyframes(backwardFrames);
+  }
   constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
     super();
     if (forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
@@ -87,6 +94,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   id: number;
   options: AnimBlockOptions = {} as AnimBlockOptions;
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
+  params: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
@@ -100,6 +108,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
    initialize(params: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
     this.options = this.mergeOptions(userOptions, this.behaviorGroup.options ?? {});
+    this.params = params;
 
     // TODO: Handle case where only one keyframe is provided
     let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...params); // TODO: extract generateKeyframes
@@ -138,6 +147,10 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
+      if (this.options.regenerateKeyframes) {
+        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.params);
+        this.animation.setFrames(forwardFrames, backwardFrames ?? [...forwardFrames].reverse());
+      }
       this.animate(this.animation.forward, 'forward')
         .then(() => resolve());
     });
@@ -156,6 +169,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   protected _onStartBackward(): void {};
   protected _onFinishBackward(): void {};
 
+  // TODO: Remove this useless method
   protected _addClassesOnStartForward(...classes: string[]): void {
     this.domElem.classList.add(...classes);
   }
@@ -225,6 +239,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
       commitStyles: true,
       easing: 'linear',
+      regenerateKeyframes: false,
 
       // subclass defaults take priority
       ...this.defaultOptions,
@@ -329,214 +344,138 @@ export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
   }
 }
 
-export class TranslateBlock extends AnimBlock {
-  translationOptions: TNoElem;
-  animation: AnimTimelineAnimation;
+export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  // TODO: remove
+  AAADummyEmphasisProp = 'Trans';
+  ZZZDummyEmphasisProp = 'lation';
 
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     return {};
   }
 
-  constructor(domElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TNoElem> = {}) {
-    super(domElem, 'translate', userOptions);
-
-    this.translationOptions = {
-      ...this.applyTranslateOptions(translationOptions),
-      ...translationOptions,
-    };
-
-    const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
-
-    this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        domElem,
-        forwardFrames,
-        {
-          duration: this.options.duration,
-          fill: 'forwards', // TODO: Make customizable?
-          easing: this.options.easing,
-          composite: 'accumulate',
-          // playbackRate: options.playbackRate, // TODO: implement and uncomment
-        }
-      ),
-      new KeyframeEffect(
-        domElem,
-        backwardFrames,
-        {
-          duration: this.options.duration,
-          fill: 'forwards', // TODO: Make customizable?
-          easing: this.options.easing,
-          composite: 'accumulate',
-          // playbackRate: options.playbackRate, // TODO: implement and uncomment
-        }
-      )
-    );
-  }
-
-  protected applyTranslateOptions(translateOptions: Partial<TNoElem>): TNoElem {
-    return {
-      translateX: 0,
-      translateY: 0,
-      unitsX: 'px',
-      unitsY: 'px',
-      offsetX: 0,
-      offsetY: 0,
-      offsetUnitsX: 'px',
-      offsetUnitsY: 'px',
-
-      ...translateOptions,
-    };
-  }
-
-  private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
-    let {
-      translateX, translateY, translateXY,
-      unitsX, unitsY, unitsXY,
-      offsetX, offsetY, offsetXY,
-      offsetUnitsX, offsetUnitsY, offsetUnitsXY,
-    } = this.translationOptions;
-
-    translateX = translateXY ?? translateX;
-    translateY = translateXY ?? translateY;
-    unitsX = unitsXY ?? unitsX;
-    unitsY = unitsXY ?? unitsY;
-    offsetX = offsetXY ?? offsetX;
-    offsetY = offsetXY ?? offsetY;
-    offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
-    offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
-    
-    return [
-      // forward
-      [{transform: `translate(calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}),
-                            calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`
-      }],
-
-      // backward
-      [{transform: `translate(calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}),
-                            calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
-      }],
-    ];
+  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid translation animation name ${animName}`); }
+    super(domElem, animName, behaviorGroup);
   }
 }
 
-export class TargetedTranslateBlock extends AnimBlock {
-  translationOptions: TElem;
-  animation: AnimTimelineAnimation;
+// export class TargetedTranslateBlock extends AnimBlock {
+//   translationOptions: TElem;
+//   animation: AnimTimelineAnimation;
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
-    return {};
-  }
+//   protected get defaultOptions(): Partial<AnimBlockOptions> {
+//     return {};
+//   }
 
-  constructor(domElem: Element, private targetElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
-    super(domElem, 'translate', userOptions);
+//   constructor(domElem: Element, private targetElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
+//     super(domElem, 'translate', userOptions);
 
-    this.translationOptions = {
-      ...this.applyTranslateOptions(translationOptions),
-    };
+//     this.translationOptions = {
+//       ...this.applyTranslateOptions(translationOptions),
+//     };
 
-    const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
+//     const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
 
-    this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        domElem,
-        forwardFrames,
-        {
-          duration: this.options.duration,
-          fill: 'forwards', // TODO: Make customizable?
-          easing: this.options.easing,
-          composite: 'accumulate',
-          // playbackRate: options.playbackRate, // TODO: implement and uncomment
-        }
-      ),
-      new KeyframeEffect(
-        domElem,
-        backwardFrames,
-        {
-          duration: this.options.duration,
-          fill: 'forwards', // TODO: Make customizable?
-          easing: this.options.easing,
-          composite: 'accumulate',
-          // playbackRate: options.playbackRate, // TODO: implement and uncomment
-        }
-      )
-    );
-  }
+//     this.animation = new AnimTimelineAnimation(
+//       new KeyframeEffect(
+//         domElem,
+//         forwardFrames,
+//         {
+//           duration: this.options.duration,
+//           fill: 'forwards', // TODO: Make customizable?
+//           easing: this.options.easing,
+//           composite: 'accumulate',
+//           // playbackRate: options.playbackRate, // TODO: implement and uncomment
+//         }
+//       ),
+//       new KeyframeEffect(
+//         domElem,
+//         backwardFrames,
+//         {
+//           duration: this.options.duration,
+//           fill: 'forwards', // TODO: Make customizable?
+//           easing: this.options.easing,
+//           composite: 'accumulate',
+//           // playbackRate: options.playbackRate, // TODO: implement and uncomment
+//         }
+//       )
+//     );
+//   }
 
-  // TODO: Re-implement
-  stepForward(): Promise<void> {
-    const [newF, newB] = this.createTranslationKeyframes();
-    this.animation.setForwardFrames(newF);
-    this.animation.setBackwardFrames(newB);
-    return super.stepForward();
-  }
+//   // TODO: Re-implement
+//   stepForward(): Promise<void> {
+//     const [newF, newB] = this.createTranslationKeyframes();
+//     this.animation.setForwardFrames(newF);
+//     this.animation.setBackwardFrames(newB);
+//     return super.stepForward();
+//   }
 
-  protected applyTranslateOptions(translateOptions: Partial<TElem>): TElem {
-    return {
-      offsetX: 0,
-      offsetY: 0,
-      offsetUnitsX: 'px',
-      offsetUnitsY: 'px',
+//   protected applyTranslateOptions(translateOptions: Partial<TElem>): TElem {
+//     return {
+//       offsetX: 0,
+//       offsetY: 0,
+//       offsetUnitsX: 'px',
+//       offsetUnitsY: 'px',
 
-      alignmentX: 'left',
-      alignmentY: 'top',
-      offsetTargetX: 0,
-      offsetTargetY: 0,
-      preserveX: false,
-      preserveY: false,
+//       alignmentX: 'left',
+//       alignmentY: 'top',
+//       offsetTargetX: 0,
+//       offsetTargetY: 0,
+//       preserveX: false,
+//       preserveY: false,
 
-      ...translateOptions,
-    };
-  }
+//       ...translateOptions,
+//     };
+//   }
 
-  private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
-    let {
-      alignmentX, alignmentY,
-      offsetX, offsetY, offsetXY,
-      offsetTargetX, offsetTargetY, offsetTargetXY,
-      offsetUnitsX, offsetUnitsY, offsetUnitsXY,
-      preserveX, preserveY
-    } = this.translationOptions;
+//   private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
+//     let {
+//       alignmentX, alignmentY,
+//       offsetX, offsetY, offsetXY,
+//       offsetTargetX, offsetTargetY, offsetTargetXY,
+//       offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+//       preserveX, preserveY
+//     } = this.translationOptions;
 
-    let translateX: number;
-    let translateY: number;
+//     let translateX: number;
+//     let translateY: number;
     
-    // get the bounding boxes of our DOM element and the target element
-    // TODO: Find better spot for visibility override
-    this.domElem.classList.value += ` wbfk-override-hidden`;
-    this.targetElem.classList.value += ` wbfk-override-hidden`;
-    const rectThis = this.domElem.getBoundingClientRect();
-    const rectTarget = this.targetElem.getBoundingClientRect();
-    this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
-    this.targetElem.classList.value = this.targetElem.classList.value.replace(` wbfk-override-hidden`, '');
-    // the displacement will start as the difference between the target element's position and our element's position...
-    // ...plus any offset within the target itself
-    offsetTargetX = offsetTargetXY ?? offsetTargetX;
-    offsetTargetY = offsetTargetXY ?? offsetTargetY;
-    translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
-    translateX += offsetTargetX * rectTarget.width;
-    translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
-    translateY += offsetTargetY * rectTarget.height;
-    offsetX = offsetXY ?? offsetX;
-    offsetY = offsetXY ?? offsetY;
-    offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
-    offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
+//     // get the bounding boxes of our DOM element and the target element
+//     // TODO: Find better spot for visibility override
+//     this.domElem.classList.value += ` wbfk-override-hidden`;
+//     this.targetElem.classList.value += ` wbfk-override-hidden`;
+//     const rectThis = this.domElem.getBoundingClientRect();
+//     const rectTarget = this.targetElem.getBoundingClientRect();
+//     this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
+//     this.targetElem.classList.value = this.targetElem.classList.value.replace(` wbfk-override-hidden`, '');
+//     // the displacement will start as the difference between the target element's position and our element's position...
+//     // ...plus any offset within the target itself
+//     offsetTargetX = offsetTargetXY ?? offsetTargetX;
+//     offsetTargetY = offsetTargetXY ?? offsetTargetY;
+//     translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
+//     translateX += offsetTargetX * rectTarget.width;
+//     translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
+//     translateY += offsetTargetY * rectTarget.height;
+//     offsetX = offsetXY ?? offsetX;
+//     offsetY = offsetXY ?? offsetY;
+//     offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
+//     offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
     
-    return [
-      // forward
-      [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
-                            calc(${translateY}px + ${offsetY}${offsetUnitsY})`
-      }],
+//     return [
+//       // forward
+//       [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
+//                             calc(${translateY}px + ${offsetY}${offsetUnitsY})`
+//       }],
 
-      // backward
-      [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
-                            calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
-      }],
-    ];
-  }
-}
+//       // backward
+//       [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
+//                             calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
+//       }],
+//     ];
+//   }
+// }
 
 // TODO: Create util
 function mergeArrays<T>(...arrays: T[][]): Array<T> {
   return Array.from(new Set([...arrays.flat()]));
 }
-

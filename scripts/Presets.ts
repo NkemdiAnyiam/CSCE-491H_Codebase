@@ -1,4 +1,4 @@
-import { EmphasisBlock, EntranceBlock, ExitBlock, TranslateBlock } from "./AnimBlock.js";
+import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // class PresetEntrances implements IKeyframesBank<PresetEntrances>
@@ -257,6 +257,8 @@ import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.j
 //#endregion
 
 
+type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
+
 export const presetEntrances = {
   [`~fade-in`]: {
     generateKeyframes: () => [[
@@ -298,7 +300,7 @@ export const presetEntrances = {
       console.log(larg);
       return [[], []]
     },
-  }
+  },
 
   // invalidProperty: 5,
 } satisfies IKeyframesBank<EntranceBlock>;
@@ -365,24 +367,25 @@ export const presetEmphases = {
   },
 } satisfies IKeyframesBank<EmphasisBlock>;
 
-export const presetTranslate = {
+// TODO: Implement composite: accumulates somewhewre
+export const presetTranslations = {
   ['~translate']: {
-    generateKeyframes: (tBlock: TranslateBlock): [Keyframe[], Keyframe[]] => {
+    generateKeyframes: (translationOptions: Partial<TNoElem>): [Keyframe[], Keyframe[]] => {
       let {
         translateX, translateY, translateXY,
         unitsX, unitsY, unitsXY,
         offsetX, offsetY, offsetXY,
         offsetUnitsX, offsetUnitsY, offsetUnitsXY,
-      } = tBlock.translationOptions;
+      } = translationOptions;
   
-      translateX = translateXY ?? translateX;
-      translateY = translateXY ?? translateY;
-      unitsX = unitsXY ?? unitsX;
-      unitsY = unitsXY ?? unitsY;
-      offsetX = offsetXY ?? offsetX;
-      offsetY = offsetXY ?? offsetY;
-      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
-      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
+      translateX = translateXY ?? translateX ?? 0;
+      translateY = translateXY ?? translateY ?? 0;
+      unitsX = unitsXY ?? unitsX ?? 'px';
+      unitsY = unitsXY ?? unitsY ?? 'px';
+      offsetX = offsetXY ?? offsetX ?? 0;
+      offsetY = offsetXY ?? offsetY ?? 0;
+      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX ?? 'px';
+      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY ?? 'px';
       
       return [
         // forward
@@ -395,9 +398,62 @@ export const presetTranslate = {
                               calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
         }],
       ];
-    }
-  }
-} satisfies IKeyframesBank; 
+    },
+  },
+
+  ['~target-translate']: {
+    generateKeyframes(translationOptions: WithRequired<TElem, 'targetElem'>) {
+      let {
+        targetElem,
+        alignmentX = 'left', alignmentY = 'top',
+        offsetX, offsetY, offsetXY,
+        offsetTargetX, offsetTargetY, offsetTargetXY,
+        offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+        preserveX = false, preserveY = false,
+      } = translationOptions;
+
+      let translateX: number;
+      let translateY: number;
+      
+      // get the bounding boxes of our DOM element and the target element
+      // TODO: Find better spot for visibility override
+      this.domElem.classList.value += ` wbfk-override-hidden`;
+      targetElem.classList.value += ` wbfk-override-hidden`;
+      const rectThis = this.domElem.getBoundingClientRect();
+      const rectTarget = targetElem.getBoundingClientRect();
+      this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
+      targetElem.classList.value = targetElem.classList.value.replace(` wbfk-override-hidden`, '');
+
+      // the displacement will start as the difference between the target element's position and our element's position...
+      // ...plus any offset within the target itself
+      offsetTargetX = offsetTargetXY ?? offsetTargetX ?? 0;
+      offsetTargetY = offsetTargetXY ?? offsetTargetY ?? 0;
+      translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
+      translateX += offsetTargetX * rectTarget.width;
+      translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
+      translateY += offsetTargetY * rectTarget.height;
+      offsetX = offsetXY ?? offsetX ?? 0;
+      offsetY = offsetXY ?? offsetY ?? 0;
+      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX ?? 'px';
+      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY ?? 'px';
+      
+      return [
+        // forward
+        [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
+                              calc(${translateY}px + ${offsetY}${offsetUnitsY})`
+        }],
+
+        // backward
+        [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
+                              calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
+        }],
+      ];
+    },
+    options: {
+      regenerateKeyframes: true,
+    },
+  },
+} satisfies IKeyframesBank<TranslationBlock>; 
 
 // export const presetFreeLineEntrances = {
 //   [`~draw-from-start`]: {

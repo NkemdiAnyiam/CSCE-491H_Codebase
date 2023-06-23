@@ -4,6 +4,7 @@ const {
   Entrance,
   Exit,
   Emphasis,
+  Translation,
   // DrawLine,
 } = WebFlik.createBanks({
   Entrances: {
@@ -36,7 +37,8 @@ const {
 const someHtmlElement = new HTMLElement()
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500, blocksPrev: false});
 Entrance(someHtmlElement, '~wipe-from-left', []);
-Exit(someHtmlElement, '', ['kyle']);
-Emphasis(someHtmlElement, '')
+// Exit(someHtmlElement, '', ['kyle']);
+// Emphasis(someHtmlElement, '')
+// Translation(someHtmlElement, '~translate', [{}])
 // Emphasis(null, '')
 // DrawLine(null, '~draw-from-start', null, [], a, [], {}, {})

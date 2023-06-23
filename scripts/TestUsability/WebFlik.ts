@@ -1,6 +1,6 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions, TranslateBlock, TargetedTranslateBlock } from "../AnimBlock.js";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions, TranslationBlock } from "../AnimBlock.js";
 import { DrawLine } from "../AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, /*presetFreeLineEntrances*/ } from "../Presets.js";
+import { presetEntrances, presetExits, presetEmphases, presetTranslations, /*presetFreeLineEntrances*/ } from "../Presets.js";
 
 export type KeyframeBehaviorGroup = Readonly<{
   generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -46,15 +46,17 @@ class _WebFlik {
     UserEntranceBank extends IKeyframesBank = {},
     UserExitBank extends IKeyframesBank = {},
     UserEmphasisBank extends IKeyframesBank = {},
+    UserTranslationBank extends IKeyframesBank = {},
     IncludePresets extends boolean = true
   >
   (
-    { Entrances, Exits, Emphases }:
+    { Entrances, Exits, Emphases, Translations }:
     {
       Entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
       Exits?: UserExitBank & IKeyframesBank<ExitBlock>;
       Emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
-    },
+      Translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
+    }, // TODO: Add = {} default so user doesn't have to pass in empty object if using only presets
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
     type TogglePresets<TUserBank, TPresetBank> = Readonly<TUserBank & (IncludePresets extends true ? TPresetBank : {})>;
@@ -62,6 +64,7 @@ class _WebFlik {
     type CombinedEntranceBank = TogglePresets<UserEntranceBank, typeof presetEntrances>;
     type CombinedExitBank = TogglePresets<UserExitBank, typeof presetExits>;
     type CombinedEmphasisBank = TogglePresets<UserEmphasisBank, typeof presetEmphases>;
+    type CombinedTranslationBank = TogglePresets<UserTranslationBank, typeof presetTranslations>;
     // type CombinedDrawLineBank = typeof presetFreeLineEntrances;
 
     const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
@@ -70,6 +73,7 @@ class _WebFlik {
     const combinedEntranceBank = combineBanks(presetEntrances, Entrances) as CombinedEntranceBank;
     const combinedExitBank = combineBanks(presetExits, Exits) as CombinedExitBank;
     const combinedEmphasisBank = combineBanks(presetEmphases, Emphases) as CombinedEmphasisBank;
+    const combinedTranslationBank = combineBanks(presetTranslations, Translations) as CombinedTranslationBank;
     // DrawLine.setBank(presetFreeLineEntrances);
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
@@ -82,6 +86,9 @@ class _WebFlik {
       },
       Emphasis: function(domElem, animName, ...params) {
         return new EmphasisBlock(domElem, animName, combinedEmphasisBank[animName]).initialize(...params);
+      },
+      Translation: function(domElem, animName, ...params) {
+        return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
       },
       // Translate: function(...args) { return new TranslateBlock(...args); },
       // TargetedTranslate: function(...args) { return new TargetedTranslateBlock(...args); },
@@ -104,6 +111,12 @@ class _WebFlik {
         animName: AnimName,
         ...params: BlockInitParams<EmphasisBlock<CombinedEmphasisBank[AnimName]>>
       ) => EmphasisBlock<CombinedEmphasisBank[AnimName]>;
+
+      Translation: <AnimName extends AnimationNameIn<CombinedTranslationBank>>(
+        domElem: Element,
+        animName: AnimName,
+        ...params: BlockInitParams<TranslationBlock<CombinedTranslationBank[AnimName]>>
+      ) => TranslationBlock<CombinedTranslationBank[AnimName]>;
     }
     // satisfies {
     //   // Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>;
