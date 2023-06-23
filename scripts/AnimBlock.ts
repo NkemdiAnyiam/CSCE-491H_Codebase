@@ -169,11 +169,6 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   protected _onStartBackward(): void {};
   protected _onFinishBackward(): void {};
 
-  // TODO: Remove this useless method
-  protected _addClassesOnStartForward(...classes: string[]): void {
-    this.domElem.classList.add(...classes);
-  }
-
   protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
     switch(direction) {
       case 'forward':
