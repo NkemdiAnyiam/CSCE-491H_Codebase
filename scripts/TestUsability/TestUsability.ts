@@ -34,9 +34,9 @@ const {
 });
 
 // Entrance(null,).animName
-const someHtmlElement = new HTMLElement()
+const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500, blocksPrev: false});
-Entrance(someHtmlElement, '~wipe-from-left', []);
+Entrance(someHtmlElement, '~wipe', ['left']);
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])

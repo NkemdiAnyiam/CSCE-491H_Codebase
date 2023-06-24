@@ -175,7 +175,7 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 
       disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
-      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', {duration: 375});
+      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', [], {duration: 375});
       fadeoutMainMenu.stepForward()
         .then(() => {
           mainMenuEl.remove();
@@ -332,7 +332,7 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
 
       disableForm();
       const mainMenuEl = document.querySelector('.main-menu');
-      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', {duration: 375});
+      const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', [], {duration: 375});
       fadeoutMainMenu.stepForward()
         .then(() => {
           mainMenuEl.remove();
