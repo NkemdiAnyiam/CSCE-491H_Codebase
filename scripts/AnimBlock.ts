@@ -108,12 +108,12 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     this.id = AnimBlock.id++;
   }
 
-   initialize(params: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
+   initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
     this.options = this.mergeOptions(userOptions, this.behaviorGroup.options ?? {});
-    this.params = params;
+    this.params = animArgs;
 
     // TODO: Handle case where only one keyframe is provided
-    let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...params); // TODO: extract generateKeyframes
+    let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...animArgs); // TODO: extract generateKeyframes
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: this.options.duration,
