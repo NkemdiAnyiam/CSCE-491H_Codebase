@@ -38,7 +38,7 @@ export interface TNoElem extends TOffset {
 }
 
 export interface TElem extends TOffset {
-  targetElem: Element; // if specified, translations will be with respect to this target element
+  // targetElem: Element; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
   offsetTargetX: number; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)

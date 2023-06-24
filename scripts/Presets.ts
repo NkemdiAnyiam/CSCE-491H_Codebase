@@ -401,8 +401,8 @@ export const presetTranslations = {
     },
   },
 
-  ['~target-translate']: {
-    generateKeyframes(translationOptions: WithRequired<TElem, 'targetElem'>) {
+  ['~move-to']: {
+    generateKeyframes(targetElem: Element, translationOptions: Partial<TElem> = {}) {
       let {
         targetElem,
         alignmentX = 'left', alignmentY = 'top',
