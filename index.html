@@ -173,9 +173,9 @@
                           <br />
                         &emsp;else
                           <br />
-                          &emsp;&emsp;return max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
+                          &emsp;&emsp;return max(<span class="algorithm__term-1"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
                           + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
-                          <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
+                          <span class="algorithm__term-2"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
                         <br />
                       }
                     </span>
@@ -249,13 +249,13 @@
             
             <div class="time-graph__job-bars">
               <template id="time-graph__job-bar-template">
-                <div class="time-graph__job-bar highlightable" data-jobletter="X">X</div>
+                <div class="time-graph__job-bar" data-jobletter="X">X</div>
               </template>
             </div>
             
             <div class="time-graph__rows">
               <template id="time-graph__row-template">
-                <div class="time-graph__row highlightable">
+                <div class="time-graph__row">
                   <div class="time-graph__cell time-graph__cell--header">
                     <span class="time-graph__SJ-num SJ-num wbfk-hidden">(j=X)</span>
                     <span class="time-graph__job-letter time-graph__job-letter--unsorted" >Job X</span>
@@ -274,7 +274,7 @@
   
           <div class="array-groups">
             <template id="array__array-block-template">
-              <div class="array__array-block highlightable">
+              <div class="array__array-block">
                 <span class="array__array-entry--blank">_</span>
                 <span class="array__array-entry--value wbfk-hidden">X</span>
               </div>
@@ -383,9 +383,9 @@
                             <br />
                             &emsp;if (<span class="M-related">M[<span class="SJ-related">j</span>]</span> = empty)
                               <br />
-                                &emsp;&emsp;<span class="M-related">M[<span class="SJ-related">j</span>]</span> := max(<span class="algorithm__term-1 highlightable"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
+                                &emsp;&emsp;<span class="M-related">M[<span class="SJ-related">j</span>]</span> := max(<span class="algorithm__term-1"><span class="weight-related">w<sub><span class="SJ-related">j</span></sub></span>
                                 + <span class="OPT-related">OPT(<span class="c-related">c[<span class="SJ-related">j</span>]</span>)</span></span>,
-                                <span class="algorithm__term-2 highlightable"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
+                                <span class="algorithm__term-2"><span class="OPT-related">OPT(<span class="next-SJ-num-expression"><span class="SJ-related">j</span>-1</span>)</span></span>);
                               <br />
                             &emsp;return <span class="M-related">M[<span class="SJ-related">j</span>]</span>
                             <br />
@@ -601,11 +601,11 @@
                 <!-- M CONTAINER -->
                 <div class="M-container">
     
-                  <span class="M-access-container highlightable">
-                    <span class="M-access highlightable wbfk-hidden">
+                  <span class="M-access-container">
+                    <span class="M-access wbfk-hidden">
                       M[<span class="SJ-num">X</span>]
                     </span>
-                    <span class="M-entry highlightable wbfk-hidden">X</span>
+                    <span class="M-entry wbfk-hidden">X</span>
                   </span>
                 </div>
             
@@ -618,8 +618,8 @@
             
                 
                 <!-- FORMULA CONTAINER -->
-                <div class="formula-container highlightable">
-                  <span class="formula-computation highlightable wbfk-hidden">
+                <div class="formula-container">
+                  <span class="formula-computation wbfk-hidden">
                     <!-- Max Container -->
                     <div class="max-container">
                       <span class="max-text">max</span>
@@ -631,35 +631,35 @@
                     <!-- Computations -->
                     <div class="computations-container">
                       <!-- Computation 1 -->
-                      <div class="computation computation--1 highlightable">
-                        <span class="computation-expression computation-expression--1 highlightable">
+                      <div class="computation computation--1">
+                        <span class="computation-expression computation-expression--1">
                           <span class="weight">X</span>
                           <span class="plus-sign">+</span>
-                          <span class="OPT-expression-container highlightable">
-                            <span class="OPT-expression highlightable">
-                              OPT(<span class="c-access-container highlightable"><span class="c-access highlightable">c[<span class="SJ-num">X</span>]</span><span class="c-entry wbfk-hidden">X</span></span>)
+                          <span class="OPT-expression-container">
+                            <span class="OPT-expression">
+                              OPT(<span class="c-access-container"><span class="c-access">c[<span class="SJ-num">X</span>]</span><span class="c-entry wbfk-hidden">X</span></span>)
                             </span>
                             <span class="OPT-result wbfk-hidden">X</span>
                           </span>
                         </span>
-                        <span class="computation-result highlightable wbfk-hidden">X</span>
+                        <span class="computation-result wbfk-hidden">X</span>
                       </div>
             
                       <!-- Computation 2 -->
-                      <div class="computation computation--2 highlightable">
+                      <div class="computation computation--2">
                         <span class="OPT-expression-container">
                           <span class="OPT-expression">
                             OPT(<span class="next-SJ-num-container"><span class="next-SJ-num-expression"><span class="SJ-num">X</span>-1</span><span class="next-SJ-num wbfk-hidden">X</span></span>)
                           </span>
                           <span class="OPT-result wbfk-hidden">X</span>
-                          <span class="computation-result highlightable wbfk-hidden">X</span>
+                          <span class="computation-result wbfk-hidden">X</span>
                         </span>
                       </div>
                     </div>
                   </span>
   
                   <!-- Result -->
-                  <span class="formula-result highlightable wbfk-hidden">X</span>
+                  <span class="formula-result wbfk-hidden">X</span>
                 </div>
               </div>
               
@@ -730,11 +730,11 @@
   
                 <!-- M CONTAINER -->
                 <div class="M-container">
-                  <span class="M-access-container highlightable">
-                    <span class="M-access highlightable wbfk-hidden">
+                  <span class="M-access-container">
+                    <span class="M-access wbfk-hidden">
                       M[<span class="SJ-num">X</span>]
                     </span>
-                    <span class="M-entry highlightable wbfk-hidden">X</span>
+                    <span class="M-entry wbfk-hidden">X</span>
                   </span>
                 </div>
               </div>
