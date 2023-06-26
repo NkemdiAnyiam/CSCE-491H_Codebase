@@ -96,7 +96,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   id: number;
   options: AnimBlockOptions = {} as AnimBlockOptions;
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
-  params: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
+  animArgs: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
 
   protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
 
@@ -110,7 +110,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
    initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
     this.options = this.mergeOptions(userOptions, this.behaviorGroup.options ?? {});
-    this.params = animArgs;
+    this.animArgs = animArgs;
 
     // TODO: Handle case where only one keyframe is provided
     let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...animArgs); // TODO: extract generateKeyframes
@@ -150,7 +150,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   stepForward(): Promise<void> {
     return new Promise(resolve => {
       if (this.options.regenerateKeyframes) {
-        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.params);
+        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs);
         this.animation.setFrames(forwardFrames, backwardFrames ?? [...forwardFrames].reverse());
       }
       this.animate(this.animation.forward, 'forward')
