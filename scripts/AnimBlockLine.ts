@@ -1,6 +1,6 @@
-import { AnimBlock, AnimBlockOptions, EntranceBlock } from "./AnimBlock.js";
+import { AnimBlock, AnimBlockOptions, AnimTimelineAnimation, EntranceBlock } from "./AnimBlock.js";
 import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
-import { AnimationNameIn, IKeyframesBank } from "./TestUsability/WebFlik.js";
+import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 type LineOptions = {
   trackEndpoints: boolean;
@@ -149,7 +149,32 @@ export class FreeLine extends HTMLElement {
 
   private lineId: number = 0;
   useEndMarker: boolean;
-  mainLine: SVGLineElement;
+  visibleLine: SVGLineElement;
+  maskLine: SVGLineElement;
+  gBody: SVGGElement;
+
+  set x1(val: number) {
+    this.visibleLine.x1.baseVal.value = val;
+    this.maskLine.x1.baseVal.value = val;
+  }
+  set x2(val: number) {
+    this.visibleLine.x2.baseVal.value = val;
+    this.maskLine.x2.baseVal.value = val;
+  }
+  set y1(val: number) {
+    this.visibleLine.y1.baseVal.value = val;
+    this.maskLine.y1.baseVal.value = val;
+  }
+  set y2(val: number) {
+    this.visibleLine.y2.baseVal.value = val;
+    this.maskLine.y2.baseVal.value = val;
+  }
+
+  getBoundingClientRect() {
+    return this.gBody.getBoundingClientRect();
+  }
+
+  // TODO: Add lifecycle callbacks
   
   constructor() {
     super();
@@ -174,75 +199,168 @@ export class FreeLine extends HTMLElement {
 
     const htmlString = `
       <svg>
-        <mask id="${maskId}">
-          <g class="mask-group">
-            <marker id="${markerId}-2" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+        <g class="free-line__body">
+          <mask id="${maskId}">
+            <g class="mask-group">
+              <marker id="${markerId}-end-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+                <path d="M0,0 L0,8 L6,4 L0,0" />
+              </marker>
+
+              <line marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask" stroke="white" />
+            </g>
+          </mask>
+
+          <g mask="url(#${maskId})">
+            <marker id="${markerId}-end-visible" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
               <path d="M0,0 L0,8 L6,4 L0,0" />
             </marker>
 
-            <line style="marker-end: url(#${markerId}-2);" class="b" stroke="white" />
+            <line marker-end="url(#${markerId}-end-visible)" class="free-line__line free-line__line--visible" pathLength="1" />
           </g>
-        </mask>
-
-        <g mask="url(#${maskId})">
-          <marker id="${markerId}" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-            <path d="M0,0 L0,8 L6,4 L0,0" />
-          </marker>
-
-          <line style="marker-end: url(#${markerId});" class="a" pathLength="1" />
         </g>
       </svg>
     `;
 
+
     const template = document.createElement('template');
     template.insertAdjacentHTML('afterbegin', htmlString);
     const element = template.content.firstElementChild as SVGSVGElement;
-    shadow.appendChild(element);
+    shadow.appendChild(element); // TODO: Fix Node error
     
-    this.mainLine = element.querySelector('.a')!;
+    this.gBody = element.querySelector('.free-line__body') as SVGGElement;
+    this.visibleLine = this.gBody.querySelector('.free-line__line--visible') as SVGLineElement;
+    this.maskLine = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
   }
 }
 
 customElements.define('wbfk-line', FreeLine);
 
-export class DrawLine<TBank extends IKeyframesBank> extends EntranceBlock<TBank> {
-  mainLine: SVGLineElement;
+export class DrawLine<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  // visibleLine: SVGLineElement;
+  freeLineBody: SVGGElement;
   lineOptions: LineOptions;
-  leftStart: number;
-  topStart: number;
-  leftEnd: number;
-  topEnd: number;
+  startLeftOffset: number;
+  startTopOffset: number;
+  endLeftOffset: number;
+  endTopOffset: number;
+
+  animation: AnimTimelineAnimation = new AnimTimelineAnimation(null, null);
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
+
+  // constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+  //   if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
+  //   super(domElem, animName, behaviorGroup);
+  // }
 
   constructor(
-    public domSVGElem: FreeLine,
-    public animName: AnimationNameIn<TBank>,
+    public freeLineElem: FreeLine,
+    public animName: string,
+    behaviorGroup: TBehavior,
     public startElem: Element,
-    [leftStart, topStart]: [leftStart: number, topStart: number],
+    startOffset: [leftStart: number, topStart: number],
     public endElem: Element,
-    [leftEnd, topEnd]: [leftEnd: number, topEnd: number],
+    endOffset: [leftEnd: number, topEnd: number],
     options: Partial<AnimBlockOptions>,
     lineOptions: Partial<LineOptions>,
   ) {
-    const mainLine = domSVGElem.mainLine;
-    super(mainLine, animName, options);
+    const freeLineBody = freeLineElem.gBody;
+    
+  //   if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
+    super(freeLineElem, animName, behaviorGroup);
+    super(freeLineBody, animName, options);
 
-    this.mainLine = mainLine;
+    this.freeLineBody = freeLineBody;
     this.lineOptions = this.applyLineOptions(lineOptions);
 
     // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
-    AnimBlockLineUpdater.registerDomElem(this.domSVGElem);
+    AnimBlockLineUpdater.registerDomElem(this.freeLineElem);
 
     // set the values used for the endpoint offsets relative to the top-left of each reference element
-    this.leftStart = leftStart; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
-    this.topStart = topStart; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
-    this.leftEnd = leftEnd;
-    this.topEnd = topEnd;
+    this.startLeftOffset = startOffset[0]; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
+    this.startTopOffset = startOffset[1]; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
+    this.endLeftOffset = endOffset[0];
+    this.endTopOffset = endOffset[1];
   }
+
+  // constructor(
+  //   public freeLineElem: FreeLine,
+  //   public animName: AnimationNameIn<TBank>,
+  //   public startElem: Element,
+  //   startOffset: [leftStart: number, topStart: number],
+  //   public endElem: Element,
+  //   endOffset: [leftEnd: number, topEnd: number],
+  //   options: Partial<AnimBlockOptions>,
+  //   lineOptions: Partial<LineOptions>,
+  // ) {
+  //   const freeLineBody = freeLineElem.svgBody;
+  //   super(freeLineBody, animName, options);
+
+  //   this.freeLineBody = freeLineBody;
+  //   this.lineOptions = this.applyLineOptions(lineOptions);
+
+  //   // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
+  //   AnimBlockLineUpdater.registerDomElem(this.freeLineElem);
+
+  //   // set the values used for the endpoint offsets relative to the top-left of each reference element
+  //   this.leftStart = startOffset[0]; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
+  //   this.topStart = startOffset[1]; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
+  //   this.leftEnd = endOffset[0];
+  //   this.topEnd = endOffset[1];
+  // }
   
   applyLineOptions(lineOptions: Partial<LineOptions>): LineOptions {
     return {
       trackEndpoints: true,
       ...lineOptions,
     };
+  }
+
+  handleUpdateSettings(animName) {
+    if (AnimBlock.isEntering(animName)) {
+      // if (this.updateEndpointsOnEntry) { this.updateEndpoints(); }
+      this.updateEndpoints();
+
+      // if we are exiting, turn off the interval for updateEndPoints()
+      if (AnimBlock.isExiting(animName)) { AnimBlockLineUpdater.clearInterval(this.freeLineElem); }
+
+      // if continuous tracking is enabled, tell AnimBlockLineUpdater to set an interval for updateEndpoints()
+      if (this.trackEndpoints) { AnimBlockLineUpdater.setInterval(this.freeLineElem, this.updateEndpoints); }
+    }
+  }
+
+  updateEndpoints = () => {
+    // to properly place the endpoints, we need the positions of their bounding boxes
+    // get the bounding rectangles for starting reference element, ending reference element, and parent element
+    // TODO: Use offsetParent to account for direct parent beieng statically positioned
+    const svgParentElement = this.freeLineElem.parentElement!;
+    
+    // the class is appended without classList.add() so that multiple applications
+    // of the class do not interfere with each other upon removal
+
+    // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
+    this.startElem.classList.value += ` wbfk-override-hidden`;
+    this.endElem.classList.value += ` wbfk-override-hidden`;
+    const {left: startLeft, right: startRight, top: startTop, bottom: startBottom} = this.startElem.getBoundingClientRect();
+    const {left: endLeft, right: endRight, top: endTop, bottom: endBottom} = this.endElem.getBoundingClientRect();
+    const {left: parentLeft, top: parentTop} = svgParentElement.getBoundingClientRect();
+    this.startElem.classList.value = this.startElem.classList.value.replace(` wbfk-override-hidden`, '');
+    this.endElem.classList.value = this.endElem.classList.value.replace(` wbfk-override-hidden`, '');
+
+    // The x and y coordinates of the line need to be with respect to the top left of document
+    // Thus, we must subtract the parent element's current top and left from the offset
+    // But because elements start in their parent's Content box (which excludes the border) instead of the Fill area,...
+    // ...(which includes the border), our element's top and left are offset by the parent element's border width with...
+    // ...respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
+    const freeLineLeftOffset = -parentLeft - Number.parseFloat(getComputedStyle(svgParentElement).borderLeftWidth);
+    const freeLineTopOffset = -parentTop - Number.parseFloat(getComputedStyle(svgParentElement).borderTopWidth);
+
+    // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
+    // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
+    this.freeLineElem.x1 = (1 - this.startLeftOffset) * startLeft + (this.startLeftOffset) * startRight + freeLineLeftOffset;
+    this.freeLineElem.y1 = (1 - this.startTopOffset) * startTop + (this.startTopOffset) * startBottom + freeLineTopOffset;
+    this.freeLineElem.x2 = (1 - this.endLeftOffset) * endLeft + (this.endLeftOffset) * endRight + freeLineLeftOffset;
+    this.freeLineElem.y2 = (1 - this.endTopOffset) * endTop + (this.endTopOffset) * endBottom + freeLineTopOffset;
   }
 }
