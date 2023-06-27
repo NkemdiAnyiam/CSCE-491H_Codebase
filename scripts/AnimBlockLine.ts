@@ -152,6 +152,12 @@ export class FreeLine extends HTMLElement {
   visibleLine: SVGLineElement;
   maskLine: SVGLineElement;
   gBody: SVGGElement;
+  svg: SVGSVGElement;
+
+  startPoint?: [startElem: Element, leftOffset: number, topOffset: number];
+  endPoint?: [endElem: Element, leftOffset: number, topOffset: number];
+  tracking: boolean = true;
+  private trackingTimeout?: NodeJS.Timer;
 
   set x1(val: number) {
     this.visibleLine.x1.baseVal.value = val;
@@ -221,132 +227,35 @@ export class FreeLine extends HTMLElement {
       </svg>
     `;
 
-
     const template = document.createElement('template');
     template.insertAdjacentHTML('afterbegin', htmlString);
     const element = template.content.firstElementChild as SVGSVGElement;
     shadow.appendChild(element); // TODO: Fix Node error
     
+    this.svg = element.querySelector('svg') as SVGSVGElement;
     this.gBody = element.querySelector('.free-line__body') as SVGGElement;
     this.visibleLine = this.gBody.querySelector('.free-line__line--visible') as SVGLineElement;
     this.maskLine = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
   }
-}
-
-customElements.define('wbfk-line', FreeLine);
-
-export class DrawLine<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
-  // visibleLine: SVGLineElement;
-  freeLineBody: SVGGElement;
-  lineOptions: LineOptions;
-  startLeftOffset: number;
-  startTopOffset: number;
-  endLeftOffset: number;
-  endTopOffset: number;
-
-  animation: AnimTimelineAnimation = new AnimTimelineAnimation(null, null);
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
-    return {};
-  }
-
-  // constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
-  //   if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
-  //   super(domElem, animName, behaviorGroup);
-  // }
-
-  constructor(
-    public freeLineElem: FreeLine,
-    public animName: string,
-    behaviorGroup: TBehavior,
-    public startElem: Element,
-    startOffset: [leftStart: number, topStart: number],
-    public endElem: Element,
-    endOffset: [leftEnd: number, topEnd: number],
-    options: Partial<AnimBlockOptions>,
-    lineOptions: Partial<LineOptions>,
-  ) {
-    const freeLineBody = freeLineElem.gBody;
-    
-  //   if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
-    super(freeLineElem, animName, behaviorGroup);
-    super(freeLineBody, animName, options);
-
-    this.freeLineBody = freeLineBody;
-    this.lineOptions = this.applyLineOptions(lineOptions);
-
-    // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
-    AnimBlockLineUpdater.registerDomElem(this.freeLineElem);
-
-    // set the values used for the endpoint offsets relative to the top-left of each reference element
-    this.startLeftOffset = startOffset[0]; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
-    this.startTopOffset = startOffset[1]; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
-    this.endLeftOffset = endOffset[0];
-    this.endTopOffset = endOffset[1];
-  }
-
-  // constructor(
-  //   public freeLineElem: FreeLine,
-  //   public animName: AnimationNameIn<TBank>,
-  //   public startElem: Element,
-  //   startOffset: [leftStart: number, topStart: number],
-  //   public endElem: Element,
-  //   endOffset: [leftEnd: number, topEnd: number],
-  //   options: Partial<AnimBlockOptions>,
-  //   lineOptions: Partial<LineOptions>,
-  // ) {
-  //   const freeLineBody = freeLineElem.svgBody;
-  //   super(freeLineBody, animName, options);
-
-  //   this.freeLineBody = freeLineBody;
-  //   this.lineOptions = this.applyLineOptions(lineOptions);
-
-  //   // enables any AnimBlockLines using the same DOM element as us to effectively toggle the continuous updates
-  //   AnimBlockLineUpdater.registerDomElem(this.freeLineElem);
-
-  //   // set the values used for the endpoint offsets relative to the top-left of each reference element
-  //   this.leftStart = startOffset[0]; // 0 -> starting endpoint on left edge of startElem. 0.5 -> horizontal center of startElem
-  //   this.topStart = startOffset[1]; // 0 -> starting endpoint on top edge of startElem. 0.5 -> vertical center of startElem
-  //   this.leftEnd = endOffset[0];
-  //   this.topEnd = endOffset[1];
-  // }
-  
-  applyLineOptions(lineOptions: Partial<LineOptions>): LineOptions {
-    return {
-      trackEndpoints: true,
-      ...lineOptions,
-    };
-  }
-
-  handleUpdateSettings(animName) {
-    if (AnimBlock.isEntering(animName)) {
-      // if (this.updateEndpointsOnEntry) { this.updateEndpoints(); }
-      this.updateEndpoints();
-
-      // if we are exiting, turn off the interval for updateEndPoints()
-      if (AnimBlock.isExiting(animName)) { AnimBlockLineUpdater.clearInterval(this.freeLineElem); }
-
-      // if continuous tracking is enabled, tell AnimBlockLineUpdater to set an interval for updateEndpoints()
-      if (this.trackEndpoints) { AnimBlockLineUpdater.setInterval(this.freeLineElem, this.updateEndpoints); }
-    }
-  }
 
   updateEndpoints = () => {
+    if (!this.startPoint || !this.endPoint) { return; }
+
     // to properly place the endpoints, we need the positions of their bounding boxes
     // get the bounding rectangles for starting reference element, ending reference element, and parent element
     // TODO: Use offsetParent to account for direct parent beieng statically positioned
-    const svgParentElement = this.freeLineElem.parentElement!;
+    const svgParentElement = this.svg.parentElement!;
     
     // the class is appended without classList.add() so that multiple applications
     // of the class do not interfere with each other upon removal
-
     // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
-    this.startElem.classList.value += ` wbfk-override-hidden`;
-    this.endElem.classList.value += ` wbfk-override-hidden`;
-    const {left: startLeft, right: startRight, top: startTop, bottom: startBottom} = this.startElem.getBoundingClientRect();
-    const {left: endLeft, right: endRight, top: endTop, bottom: endBottom} = this.endElem.getBoundingClientRect();
+    this.startPoint[0].classList.value += ` wbfk-override-hidden`;
+    this.endPoint[0].classList.value += ` wbfk-override-hidden`;
+    const {left: startLeft, right: startRight, top: startTop, bottom: startBottom} = this.startPoint[0].getBoundingClientRect();
+    const {left: endLeft, right: endRight, top: endTop, bottom: endBottom} = this.endPoint[0].getBoundingClientRect();
     const {left: parentLeft, top: parentTop} = svgParentElement.getBoundingClientRect();
-    this.startElem.classList.value = this.startElem.classList.value.replace(` wbfk-override-hidden`, '');
-    this.endElem.classList.value = this.endElem.classList.value.replace(` wbfk-override-hidden`, '');
+    this.startPoint[0].classList.value = this.startPoint[0].classList.value.replace(` wbfk-override-hidden`, '');
+    this.endPoint[0].classList.value = this.endPoint[0].classList.value.replace(` wbfk-override-hidden`, '');
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the parent element's current top and left from the offset
@@ -358,9 +267,109 @@ export class DrawLine<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavior
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    this.freeLineElem.x1 = (1 - this.startLeftOffset) * startLeft + (this.startLeftOffset) * startRight + freeLineLeftOffset;
-    this.freeLineElem.y1 = (1 - this.startTopOffset) * startTop + (this.startTopOffset) * startBottom + freeLineTopOffset;
-    this.freeLineElem.x2 = (1 - this.endLeftOffset) * endLeft + (this.endLeftOffset) * endRight + freeLineLeftOffset;
-    this.freeLineElem.y2 = (1 - this.endTopOffset) * endTop + (this.endTopOffset) * endBottom + freeLineTopOffset;
+    this.x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + freeLineLeftOffset;
+    this.y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + freeLineTopOffset;
+    this.x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + freeLineLeftOffset;
+    this.y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + freeLineTopOffset;
+  }
+
+  setTrackingInterval = () => {
+    this.trackingTimeout = setInterval(this.updateEndpoints, 4);
+  }
+
+  clearTrackingInterval = () => {
+    clearInterval(this.trackingTimeout);
+  }
+}
+
+customElements.define('wbfk-line', FreeLine);
+
+export class SetLineBlock extends AnimBlock {
+  previousStartPoint?: [startElem: Element, leftOffset: number, topOffset: number];
+  previousEndPoint?: [endElem: Element, leftOffset: number, topOffset: number];
+
+  lineOptions: LineOptions = {} as LineOptions;
+  previousLineOptions: LineOptions = {} as LineOptions;
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {
+      duration: 0,
+      commitStyles: false,
+    };
+  }
+  
+  constructor(
+    public freeLineElem: FreeLine,
+    public startPoint: [startElem: Element, leftOffset: number, topOffset: number],
+    public endPoint: [endElem: Element, leftOffset: number, topOffset: number],
+    lineOptions: Partial<LineOptions> = {},
+    /*animName: string, behaviorGroup: TBehavior*/
+    ) {
+    // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
+
+    if (!(startPoint?.[0] instanceof Element)) {
+      throw new Error(`Start point element must not be undefined`); // TODO: Improve error message
+    }
+    if (!(endPoint?.[0] instanceof Element)) {
+      throw new Error(`End point element must not be undefined`); // TODO: Improve error message
+    }
+
+    // TODO: Validate offsets?
+
+    super(freeLineElem, `~set-line-points`, {
+      generateKeyframes() {
+        return [[], []];
+      },
+    });
+
+    this.lineOptions = this.applyLineOptions(lineOptions);
+  }
+
+  protected _onStartForward(): void {
+    this.previousStartPoint = this.freeLineElem.startPoint;
+    this.previousEndPoint = this.freeLineElem.endPoint;
+    this.previousLineOptions.trackEndpoints = this.freeLineElem.tracking;
+    this.freeLineElem.startPoint = this.startPoint;
+    this.freeLineElem.endPoint = this.endPoint;
+    this.freeLineElem.tracking = this.lineOptions.trackEndpoints;
+  }
+
+  protected _onStartBackward(): void {
+    this.freeLineElem.startPoint = this.previousStartPoint;
+    this.freeLineElem.endPoint = this.previousEndPoint;
+    this.freeLineElem.tracking = this.previousLineOptions.trackEndpoints;
+  }
+
+  applyLineOptions(lineOptions: Partial<LineOptions>): LineOptions {
+    return {
+      trackEndpoints: this.freeLineElem.tracking,
+      ...lineOptions,
+    };
+  }
+}
+
+export class DrawLine<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  freeLineBody: SVGGElement;
+
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
+
+  constructor(public freeLineElem: FreeLine, public animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
+    const freeLineBody = freeLineElem.gBody;
+    super(freeLineElem, animName, behaviorGroup);
+    this.freeLineBody = freeLineBody;
+  }
+
+  protected _onStartForward(): void {
+    this.freeLineElem.updateEndpoints();
+    if (this.freeLineElem.tracking) {
+      this.freeLineElem.setTrackingInterval();
+    }
+  }
+
+  protected _onFinishBackward(): void {
+    this.freeLineElem.clearTrackingInterval();
   }
 }
