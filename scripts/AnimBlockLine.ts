@@ -211,17 +211,13 @@ export class SetLineBlock extends AnimBlock {
 }
 
 export class DrawLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
-  freeLineBody: SVGGElement;
-
   protected get defaultOptions(): Partial<AnimBlockOptions> {
     return {};
   }
 
   constructor(public freeLineElem: FreeLine, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
-    const freeLineBody = freeLineElem.gBody;
     super(freeLineElem, animName, behaviorGroup);
-    this.freeLineBody = freeLineBody;
   }
 
   protected _onStartForward(): void {
