@@ -1,4 +1,5 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
+import { DrawLineBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
@@ -209,19 +210,33 @@ export const presetTranslations = {
   },
 } satisfies IKeyframesBank<TranslationBlock>; 
 
-// export const presetFreeLineEntrances = {
-//   [`~draw-from-start`]: {
-//     keyframes: [
-//       {strokeDashOffset: 1},
-//       {strokeDashOffset: 0},
-//     ]
-//   },
+export const presetFreeLineEntrances = {
+  // TODO: Utilize appropriate classes to handle marker
+  [`~trace`]: {
+    generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
+      switch(fromPoint) {
+        case 'from-start':
+          return [[
+            {strokeDashOffset: 1},
+            {strokeDashOffset: 0},
+          ]];
 
-//   // TODO: Utilize appropriate classes to handle marker
-//   [`~draw-from-end`]: {
-//     keyframes: [
-//       {strokeDashOffset: -1},
-//       {strokeDashOffset: 0},
-//     ]
-//   },
-// } satisfies IKeyframesBank;
+        case 'from-end':
+          return [[
+            {strokeDashOffset: -1},
+            {strokeDashOffset: 0},
+          ]];
+
+        default:
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
+      }
+    },
+  },
+
+  [`~fade-in`]: {
+    generateKeyframes: () => [[
+      {opacity: '0'},
+      {opacity: '1'},
+    ]],
+  },
+} satisfies IKeyframesBank<DrawLineBlock>;

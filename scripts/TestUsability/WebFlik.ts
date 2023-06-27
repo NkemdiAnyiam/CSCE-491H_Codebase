@@ -1,6 +1,6 @@
 import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions, TranslationBlock } from "../AnimBlock.js";
-import { DrawLine } from "../AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, presetTranslations, /*presetFreeLineEntrances*/ } from "../Presets.js";
+import { DrawLineBlock, FreeLine, SetLineBlock } from "../AnimBlockLine.js";
+import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetFreeLineEntrances, /*presetFreeLineEntrances*/ } from "../Presets.js";
 
 export type KeyframeBehaviorGroup = Readonly<{
   generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -65,7 +65,7 @@ class _WebFlik {
     type CombinedExitBank = TogglePresets<UserExitBank, typeof presetExits>;
     type CombinedEmphasisBank = TogglePresets<UserEmphasisBank, typeof presetEmphases>;
     type CombinedTranslationBank = TogglePresets<UserTranslationBank, typeof presetTranslations>;
-    // type CombinedDrawLineBank = typeof presetFreeLineEntrances;
+    type CombinedDrawLineBank = typeof presetFreeLineEntrances;
 
     const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
     
@@ -74,7 +74,7 @@ class _WebFlik {
     const combinedExitBank = combineBanks(presetExits, Exits) as CombinedExitBank;
     const combinedEmphasisBank = combineBanks(presetEmphases, Emphases) as CombinedEmphasisBank;
     const combinedTranslationBank = combineBanks(presetTranslations, Translations) as CombinedTranslationBank;
-    // DrawLine.setBank(presetFreeLineEntrances);
+    const combinedDrawLineBank = combineBanks(presetFreeLineEntrances, {}) as CombinedDrawLineBank;
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
@@ -89,6 +89,12 @@ class _WebFlik {
       },
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
+      },// TODO: Add option lineOptions
+      SetLine: function(freeLineElem: FreeLine, startPoint: [startElem: Element, leftOffset: number, topOffset: number], endPoint: [endElem: Element, leftOffset: number, topOffset: number]) {
+        return new SetLineBlock(freeLineElem, startPoint, endPoint);
+      },
+      DrawLine: function(freeLineElem, animName, ...params) {
+        return new DrawLineBlock(freeLineElem, animName, combinedDrawLineBank[animName]).initialize(...params);
       },
       // Translate: function(...args) { return new TranslateBlock(...args); },
       // TargetedTranslate: function(...args) { return new TargetedTranslateBlock(...args); },
@@ -117,6 +123,18 @@ class _WebFlik {
         animName: AnimName,
         ...params: BlockInitParams<TranslationBlock<CombinedTranslationBank[AnimName]>>
       ) => TranslationBlock<CombinedTranslationBank[AnimName]>;
+
+      SetLine: (
+        FreeLineElem: FreeLine,
+        startPoint: [startElem: Element, leftOffset: number, topOffset: number],
+        endPoint: [endElem: Element, leftOffset: number, topOffset: number]
+      ) => SetLineBlock;
+
+      DrawLine: <AnimName extends AnimationNameIn<CombinedDrawLineBank>>(
+        freeLineElem: FreeLine,
+        animName: AnimName,
+        ...params: BlockInitParams<DrawLineBlock<CombinedDrawLineBank[AnimName]>>
+      ) => DrawLineBlock<CombinedDrawLineBank[AnimName]>;
     }
     // satisfies {
     //   // Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>;
