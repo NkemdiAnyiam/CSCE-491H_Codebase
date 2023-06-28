@@ -217,14 +217,14 @@ export const presetFreeLineEntrances = {
       switch(fromPoint) {
         case 'from-start':
           return [[
-            {strokeDashOffset: 1},
-            {strokeDashOffset: 0},
+            {strokeDashoffset: 1},
+            {strokeDashoffset: 0},
           ]];
 
         case 'from-end':
           return [[
-            {strokeDashOffset: -1},
-            {strokeDashOffset: 0},
+            {strokeDashoffset: -1},
+            {strokeDashoffset: 0},
           ]];
 
         default:
