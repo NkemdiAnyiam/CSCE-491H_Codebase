@@ -1,4 +1,4 @@
-import { FreeLine } from "../AnimBlockLine";
+import { Connector } from "../AnimBlockLine";
 import { IKeyframesBank, WebFlik } from "./WebFlik";
 
 const {
@@ -6,8 +6,8 @@ const {
   Exit,
   Emphasis,
   Translation,
-  SetLine,
-  DrawLine,
+  SetConnector,
+  DrawConnector,
 } = WebFlik.createBanks({
   Entrances: {
     [`super-jump`]: {
@@ -39,8 +39,8 @@ const {
 const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500, blocksPrev: false});
 Entrance(someHtmlElement, '~wipe', ['left']);
-SetLine(new FreeLine(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
-DrawLine(new FreeLine(), '~trace', ['from-start'])
+SetConnector(new Connector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
+DrawConnector(new Connector(), '~trace', ['from-start'])
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])

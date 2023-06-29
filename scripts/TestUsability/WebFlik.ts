@@ -1,6 +1,6 @@
 import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock } from "../AnimBlock.js";
-import { DrawLineBlock, EraseLineBlock, FreeLine, SetLineBlock } from "../AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetFreeLineEntrances, presetFreeLineExits, /*presetFreeLineEntrances*/ } from "../Presets.js";
+import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock } from "../AnimBlockLine.js";
+import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
 export type KeyframeBehaviorGroup = Readonly<{
   generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -65,8 +65,8 @@ class _WebFlik {
     type CombinedExitBank = TogglePresets<UserExitBank, typeof presetExits>;
     type CombinedEmphasisBank = TogglePresets<UserEmphasisBank, typeof presetEmphases>;
     type CombinedTranslationBank = TogglePresets<UserTranslationBank, typeof presetTranslations>;
-    type CombinedDrawLineBank = typeof presetFreeLineEntrances;
-    type CombinedEraseLineBank = typeof presetFreeLineExits;
+    type CombinedDrawConnectorBank = typeof presetConnectorEntrances;
+    type CombinedEraseConnectorBank = typeof presetConnectorExits;
 
     const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
     
@@ -75,8 +75,8 @@ class _WebFlik {
     const combinedExitBank = combineBanks(presetExits, Exits) as CombinedExitBank;
     const combinedEmphasisBank = combineBanks(presetEmphases, Emphases) as CombinedEmphasisBank;
     const combinedTranslationBank = combineBanks(presetTranslations, Translations) as CombinedTranslationBank;
-    const combinedDrawLineBank = combineBanks(presetFreeLineEntrances, {}) as CombinedDrawLineBank;
-    const combinedEraseLineBank = combineBanks(presetFreeLineExits, {}) as CombinedEraseLineBank;
+    const combinedDrawConnectorBank = combineBanks(presetConnectorEntrances, {}) as CombinedDrawConnectorBank;
+    const combinedEraseConnectorBank = combineBanks(presetConnectorExits, {}) as CombinedEraseConnectorBank;
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
@@ -92,14 +92,14 @@ class _WebFlik {
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
       },// TODO: Add optional lineOptions
-      SetLine: function(freeLineElem: FreeLine, startPoint, endPoint) {
-        return new SetLineBlock(freeLineElem, startPoint, endPoint).initialize([]);
+      SetConnector: function(connectorElem: Connector, startPoint, endPoint) {
+        return new SetConnectorBlock(connectorElem, startPoint, endPoint).initialize([]);
       },
-      DrawLine: function(freeLineElem, animName, ...params) {
-        return new DrawLineBlock(freeLineElem, animName, combinedDrawLineBank[animName]).initialize(...params);
+      DrawConnector: function(connectorElem, animName, ...params) {
+        return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank[animName]).initialize(...params);
       },
-      EraseLine: function(freeLineElem, animName, ...params) {
-        return new EraseLineBlock(freeLineElem, animName, combinedEraseLineBank[animName]).initialize(...params);
+      EraseConnector: function(connectorElem, animName, ...params) {
+        return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank[animName]).initialize(...params);
       },
     } satisfies {
       Entrance: <AnimName extends AnimationNameIn<CombinedEntranceBank>>(
@@ -126,23 +126,23 @@ class _WebFlik {
         ...params: BlockInitParams<TranslationBlock<CombinedTranslationBank[AnimName]>>
       ) => TranslationBlock<CombinedTranslationBank[AnimName]>;
 
-      SetLine: (
-        FreeLineElem: FreeLine,
+      SetConnector: (
+        connectorElem: Connector,
         startPoint: [startElem: Element, leftOffset: number, topOffset: number],
         endPoint: [endElem: Element, leftOffset: number, topOffset: number]
-      ) => SetLineBlock;
+      ) => SetConnectorBlock;
 
-      DrawLine: <AnimName extends AnimationNameIn<CombinedDrawLineBank>>(
-        freeLineElem: FreeLine,
+      DrawConnector: <AnimName extends AnimationNameIn<CombinedDrawConnectorBank>>(
+        connectorElem: Connector,
         animName: AnimName,
-        ...params: BlockInitParams<DrawLineBlock<CombinedDrawLineBank[AnimName]>>
-      ) => DrawLineBlock<CombinedDrawLineBank[AnimName]>;
+        ...params: BlockInitParams<DrawConnectorBlock<CombinedDrawConnectorBank[AnimName]>>
+      ) => DrawConnectorBlock<CombinedDrawConnectorBank[AnimName]>;
 
-      EraseLine: <AnimName extends AnimationNameIn<CombinedEraseLineBank>>(
-        freeLineElem: FreeLine,
+      EraseConnector: <AnimName extends AnimationNameIn<CombinedEraseConnectorBank>>(
+        connectorElem: Connector,
         animName: AnimName,
-        ...params: BlockInitParams<EraseLineBlock<CombinedEraseLineBank[AnimName]>>
-      ) => EraseLineBlock<CombinedEraseLineBank[AnimName]>;
+        ...params: BlockInitParams<EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>>
+      ) => EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>;
     }
     // satisfies {
     //   // Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>;

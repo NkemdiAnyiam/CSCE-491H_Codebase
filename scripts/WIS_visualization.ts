@@ -19,9 +19,9 @@ const {
   Exit,
   Emphasis,
   Translation,
-  SetLine,
-  DrawLine,
-  EraseLine,
+  SetConnector,
+  DrawConnector,
+  EraseConnector,
 } = WebFlik.createBanks({});
 
 export function generateVisualization (jobsUnsorted) {
@@ -85,7 +85,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
 
   const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box');
-  const freeLine_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-line');
+  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-connector');
   const textP_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
   const textP_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
   const textP_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
@@ -99,8 +99,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription(`Describe that we're about to move bars onto graph`);
     animSequence.addManyBlocks([
       // [ 'line', freeLine_placeBars, '~wipe-from-bottom', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0] ],
-      SetLine(freeLine_placeBars, [textbox_placeBars, 0.5, 1], [jobsUnsorted[0].getJobBar(), 0.5, 0]),
-      DrawLine(freeLine_placeBars, '~trace', ['from-end']),
+      SetConnector(connector_placeBars, [textbox_placeBars, 0.5, 1], [jobsUnsorted[0].getJobBar(), 0.5, 0]),
+      DrawConnector(connector_placeBars, '~trace', ['from-end']),
       Entrance(textbox_placeBars, '~fade-in', [], {blocksPrev: false}),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -114,7 +114,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Move job bars onto time graph in unsorted order');
     // animSequence.addOneBlock(new AnimBlockLine(freeLine_placeBars, '~wipe-to-top', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0], {blocksNext: false}));
     animSequence.addOneBlock(
-      EraseLine(freeLine_placeBars, '~fade-out', [], {blocksNext: false})
+      EraseConnector(connector_placeBars, '~trace', ['from-start'], {blocksNext: false})
     );
     jobsUnsorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
@@ -232,7 +232,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
     animSequence.addManyBlocks([
       Exit(textbox_cArray, '~fade-out', [], {blocksNext: false}),
-      SetLine(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
+      SetConnector(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
       // DrawLine(freeLine_cArray, '~trace', ['from-end']),
       // [ 'line', freeLine_cArray, '~wipe', ['left'], null, [0, 0.5], cArray, [1, 0.5] ],
       // DrawLine(freeLine_cArray, [thing, 0, 0.5], [cArray, 1, 0.5], '~wipe', ['from-start'])

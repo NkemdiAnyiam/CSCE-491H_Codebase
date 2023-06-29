@@ -2,20 +2,19 @@ import { AnimBlock, AnimBlockConfig, AnimTimelineAnimation, EntranceBlock } from
 import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
 import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
-type LineConfig = {
+type ConnectorConfig = {
   trackEndpoints: boolean;
 };
 
-export class FreeLine extends HTMLElement {
+export class Connector extends HTMLElement {
   static staticId: number = 0;
 
-  private lineId: number = 0;
+  private connectorId: number = 0;
   useEndMarker: boolean;
   useStartMarker: boolean;
-  lineLayer: SVGLineElement;
-  lineMask: SVGLineElement;
-  gBody: SVGGElement;
-  svg: SVGSVGElement;
+  private lineLayer: SVGLineElement;
+  private lineMask: SVGLineElement;
+  private gBody: SVGGElement;
 
   startPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   endPoint?: [endElem: Element, leftOffset: number, topOffset: number];
@@ -47,27 +46,15 @@ export class FreeLine extends HTMLElement {
   
   constructor() {
     super();
-    this.lineId = FreeLine.staticId++;
+    this.connectorId = Connector.staticId++;
     const shadow = this.attachShadow({mode: 'open'});
 
-    const markerId = `markerArrow--${this.lineId}`;
-    const maskId = `mask--${this.lineId}`;
+    const markerId = `markerArrow--${this.connectorId}`;
+    const maskId = `mask--${this.connectorId}`;
     this.useEndMarker = this.hasAttribute('end-marker');
     this.useStartMarker = this.hasAttribute('start-marker');
 
     this.classList.add('markers-hidden'); // TODO: Find better solution
-
-    // const mainLineString = `<line class="a" pathLength="1" mask="url(#mask--${this.lineId})" />`;
-    // const elemString = `
-    //   <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
-    //     <defs>
-    //       <marker id="${markerId}" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-    //         <path d="M0,0 L0,8 L6,4 L0,0" />
-    //       </marker>
-    //     </defs>
-    //     <line style="marker-end: url("#${markerId}");" class="free-line__line wpfk-hidden" />
-    //   </svg>
-    // `
 
     // <link rel="preload" href="/scripts/TestUsability/line-styles.css" as="style" />
 
@@ -87,7 +74,7 @@ export class FreeLine extends HTMLElement {
         visibility: hidden;
       }
       
-      .free-line {
+      .connector__svg {
         visibility: hidden;
         width: auto;
         height: auto;
@@ -99,26 +86,25 @@ export class FreeLine extends HTMLElement {
         z-index: 1000;
       }
       
-      .free-line__body {
+      .connector__g-body {
         visibility: initial;
       }
       
-      .mask-group {
+      .connector__mask-group {
         color: white !important;
         stroke: currentColor !important;
         fill: currentColor !important;
       }
       
-      .mask-line {
-        stroke-dashoffset: 0 !important;
-      /*   stroke-dasharray: 10; */
-      }
-      
-      .main-group {
+      .connector__layer-group {
         
       }
       
-      .main-line {
+      .connector__line--mask {
+        stroke-dashoffset: 0 !important;
+      }
+      
+      .connector__line--layer {
         stroke: currentColor !important;
         stroke-dasharray: 1 !important;
       }
@@ -132,10 +118,10 @@ export class FreeLine extends HTMLElement {
       }*/
     </style>
 
-      <svg class="free-line">
-        <g class="free-line__body">
+      <svg class="connector__svg">
+        <g class="connector__g-body">
           <mask id="${maskId}">
-            <g class="mask-group">
+            <g class="connector__mask-group">
               ${
                 this.useStartMarker ?
                 `<marker id="${markerId}-start-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
@@ -154,12 +140,12 @@ export class FreeLine extends HTMLElement {
               <line
                 ${this.useStartMarker ? `marker-start="url(#${markerId}-start-mask)"` : ''}
                 ${this.useEndMarker ? `marker-end="url(#${markerId}-end-mask)"` : ''}
-                class="free-line__line free-line__line--mask mask-line" stroke="white"
+                class="connector__line connector__line--mask"
               />
             </g>
           </mask>
 
-          <g mask="url(#${maskId})" class="layer-group">
+          <g mask="url(#${maskId})" class="connector__layer-group">
             ${
               this.useStartMarker ?
               `<marker id="${markerId}-start-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
@@ -178,7 +164,7 @@ export class FreeLine extends HTMLElement {
             <line
               ${this.useStartMarker ? `marker-start="url(#${markerId}-start-layer)"` : ''}
               ${this.useEndMarker ? `marker-end="url(#${markerId}-end-layer)"` : ''}
-              class="free-line__line free-line__line--layer main-line"
+              class="connector__line connector__line--layer"
               pathLength="1"
             />
           </g>
@@ -191,10 +177,9 @@ export class FreeLine extends HTMLElement {
     const element = template.content.cloneNode(true);
     shadow.append(element);
     
-    this.svg = shadow.querySelector('svg') as SVGSVGElement;
-    this.gBody = shadow.querySelector('.free-line__body') as SVGGElement;
-    this.lineLayer = this.gBody.querySelector('.free-line__line--layer') as SVGLineElement;
-    this.lineMask = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
+    this.gBody = shadow.querySelector('.connector__g-body') as SVGGElement;
+    this.lineLayer = this.gBody.querySelector('.connector__line--layer') as SVGLineElement;
+    this.lineMask = this.gBody.querySelector('.connector__line--mask') as SVGLineElement;
   }
 
   updateEndpoints = () => {
@@ -221,15 +206,15 @@ export class FreeLine extends HTMLElement {
     // But because elements start in their parent's Content box (which excludes the border) instead of the Fill area,...
     // ...(which includes the border), our element's top and left are offset by the parent element's border width with...
     // ...respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
-    const freeLineLeftOffset = -parentLeft - Number.parseFloat(getComputedStyle(svgParentElement).borderLeftWidth);
-    const freeLineTopOffset = -parentTop - Number.parseFloat(getComputedStyle(svgParentElement).borderTopWidth);
+    const connectorLeftOffset = -parentLeft - Number.parseFloat(getComputedStyle(svgParentElement).borderLeftWidth);
+    const connectorTopOffset = -parentTop - Number.parseFloat(getComputedStyle(svgParentElement).borderTopWidth);
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    this.x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + freeLineLeftOffset;
-    this.y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + freeLineTopOffset;
-    this.x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + freeLineLeftOffset;
-    this.y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + freeLineTopOffset;
+    this.x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + connectorLeftOffset;
+    this.y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + connectorTopOffset;
+    this.x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + connectorLeftOffset;
+    this.y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + connectorTopOffset;
   }
 
   setTrackingInterval = () => {
@@ -241,14 +226,14 @@ export class FreeLine extends HTMLElement {
   }
 }
 
-customElements.define('wbfk-line', FreeLine);
+customElements.define('wbfk-connector', Connector);
 
-export class SetLineBlock extends AnimBlock {
+export class SetConnectorBlock extends AnimBlock {
   previousStartPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   previousEndPoint?: [endElem: Element, leftOffset: number, topOffset: number];
 
-  lineConfig: LineConfig = {} as LineConfig;
-  previousLineConfig: LineConfig = {} as LineConfig;
+  connectorConfig: ConnectorConfig = {} as ConnectorConfig;
+  previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -258,10 +243,10 @@ export class SetLineBlock extends AnimBlock {
   }
   
   constructor(
-    public freeLineElem: FreeLine,
+    public connectorElem: Connector,
     public startPoint: [startElem: Element, leftOffset: number, topOffset: number],
     public endPoint: [endElem: Element, leftOffset: number, topOffset: number],
-    lineConfig: Partial<LineConfig> = {},
+    connectorConfig: Partial<ConnectorConfig> = {},
     /*animName: string, behaviorGroup: TBehavior*/
     ) {
     // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
@@ -275,80 +260,80 @@ export class SetLineBlock extends AnimBlock {
 
     // TODO: Validate offsets?
 
-    super(freeLineElem, `~set-line-points`, {
+    super(connectorElem, `~set-line-points`, {
       generateKeyframes() {
         return [[], []];
       },
     });
 
-    this.lineConfig = this.applyLineConfig(lineConfig);
+    this.connectorConfig = this.applyLineConfig(connectorConfig);
   }
 
   protected _onStartForward(): void {
-    this.previousStartPoint = this.freeLineElem.startPoint;
-    this.previousEndPoint = this.freeLineElem.endPoint;
-    this.previousLineConfig.trackEndpoints = this.freeLineElem.tracking;
-    this.freeLineElem.startPoint = this.startPoint;
-    this.freeLineElem.endPoint = this.endPoint;
-    this.freeLineElem.tracking = this.lineConfig.trackEndpoints;
+    this.previousStartPoint = this.connectorElem.startPoint;
+    this.previousEndPoint = this.connectorElem.endPoint;
+    this.previousConnectorConfig.trackEndpoints = this.connectorElem.tracking;
+    this.connectorElem.startPoint = this.startPoint;
+    this.connectorElem.endPoint = this.endPoint;
+    this.connectorElem.tracking = this.connectorConfig.trackEndpoints;
   }
 
   protected _onStartBackward(): void {
-    this.freeLineElem.startPoint = this.previousStartPoint;
-    this.freeLineElem.endPoint = this.previousEndPoint;
-    this.freeLineElem.tracking = this.previousLineConfig.trackEndpoints;
+    this.connectorElem.startPoint = this.previousStartPoint;
+    this.connectorElem.endPoint = this.previousEndPoint;
+    this.connectorElem.tracking = this.previousConnectorConfig.trackEndpoints;
   }
 
-  applyLineConfig(lineConfig: Partial<LineConfig>): LineConfig {
+  applyLineConfig(connectorConfig: Partial<ConnectorConfig>): ConnectorConfig {
     return {
-      trackEndpoints: this.freeLineElem.tracking,
-      ...lineConfig,
+      trackEndpoints: this.connectorElem.tracking,
+      ...connectorConfig,
     };
   }
 }
 
-export class DrawLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
-  constructor(public freeLineElem: FreeLine, public animName: string, behaviorGroup: TBehavior) {
+  constructor(public connectorElem: Connector, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
-    super(freeLineElem, animName, behaviorGroup);
+    super(connectorElem, animName, behaviorGroup);
   }
 
   protected _onStartForward(): void {
-    this.freeLineElem.updateEndpoints();
+    this.connectorElem.updateEndpoints();
     this.domElem.classList.remove('wbfk-hidden');
-    if (this.freeLineElem.tracking) {
-      this.freeLineElem.setTrackingInterval();
+    if (this.connectorElem.tracking) {
+      this.connectorElem.setTrackingInterval();
     }
   }
 
   protected _onFinishBackward(): void {
     this.domElem.classList.add('wbfk-hidden');
-    this.freeLineElem.clearTrackingInterval();
+    this.connectorElem.clearTrackingInterval();
   }
 }
 
-export class EraseLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
-  constructor(public freeLineElem: FreeLine, public animName: string, behaviorGroup: TBehavior) {
+  constructor(public connectorElem: Connector, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
-    super(freeLineElem, animName, behaviorGroup);
+    super(connectorElem, animName, behaviorGroup);
   }
 
   protected _onStartForward(): void {
-    this.freeLineElem.clearTrackingInterval();
+    this.connectorElem.clearTrackingInterval();
   }
 
   protected _onStartBackward(): void {
-    this.freeLineElem.updateEndpoints();
-    if (this.freeLineElem.tracking) {
-      this.freeLineElem.setTrackingInterval();
+    this.connectorElem.updateEndpoints();
+    if (this.connectorElem.tracking) {
+      this.connectorElem.setTrackingInterval();
     }
   }
 }

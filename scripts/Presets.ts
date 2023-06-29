@@ -1,5 +1,5 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
-import { DrawLineBlock, EraseLineBlock } from "./AnimBlockLine.js";
+import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
@@ -210,7 +210,7 @@ export const presetTranslations = {
   },
 } satisfies IKeyframesBank<TranslationBlock>; 
 
-export const presetFreeLineEntrances = {
+export const presetConnectorEntrances = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
     generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
@@ -242,9 +242,9 @@ export const presetFreeLineEntrances = {
       {opacity: '1'},
     ]],
   },
-} satisfies IKeyframesBank<DrawLineBlock>;
+} satisfies IKeyframesBank<DrawConnectorBlock>;
 
-export const presetFreeLineExits = {
+export const presetConnectorExits = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
     generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
@@ -276,4 +276,4 @@ export const presetFreeLineExits = {
       {opacity: '0'},
     ]],
   },
-} satisfies IKeyframesBank<EraseLineBlock>;
+} satisfies IKeyframesBank<EraseConnectorBlock>;
