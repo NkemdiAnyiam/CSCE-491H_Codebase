@@ -7,11 +7,11 @@ type CustomKeyframeEffectOptions = {
   blocksPrev: boolean;
   commitStyles: boolean;
   composite: 'replace' | 'add' | 'accumulate';
-  addedClassesOnStartForward: string[];
-  removedClassesOnStartForward: string[]; // TODO: Consider order of addition/removal
-  addedClassesOnFinishForward: string[];
-  removedClassesOnFinishForward: string[];
-  regenerateKeyframes: boolean;
+  classesToAddOnFinish: string[];
+  classesToAddOnStart: string[];
+  classesToRemoveOnFinish: string[];
+  classesToRemoveOnStart: string[]; // TODO: Consider order of addition/removal
+  regenerateKeyframesOnStart: boolean;
 }
 
 export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -149,7 +149,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      if (this.options.regenerateKeyframes) {
+      if (this.options.regenerateKeyframesOnStart) {
         let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs);
         this.animation.setFrames(forwardFrames, backwardFrames ?? [...forwardFrames].reverse());
       }
@@ -174,14 +174,14 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
     switch(direction) {
       case 'forward':
-        this.domElem.classList.add(...this.options.addedClassesOnStartForward);
-        this.domElem.classList.remove(...this.options.removedClassesOnStartForward);
+        this.domElem.classList.add(...this.options.classesToAddOnStart);
+        this.domElem.classList.remove(...this.options.classesToRemoveOnStart);
         this._onStartForward();
         break;
       case 'backward':
         this._onStartBackward();
-        this.domElem.classList.add(...this.options.removedClassesOnFinishForward);
-        this.domElem.classList.remove(...this.options.addedClassesOnFinishForward);
+        this.domElem.classList.add(...this.options.classesToRemoveOnFinish);
+        this.domElem.classList.remove(...this.options.classesToAddOnFinish);
         break;
     }
 
@@ -209,14 +209,14 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       
       switch(direction) {
         case 'forward':
-          this.domElem.classList.add(...this.options.addedClassesOnFinishForward);
-          this.domElem.classList.remove(...this.options.removedClassesOnFinishForward);
+          this.domElem.classList.add(...this.options.classesToAddOnFinish);
+          this.domElem.classList.remove(...this.options.classesToRemoveOnFinish);
           this._onFinishForward();
           break;
         case 'backward':
           this._onFinishBackward();
-          this.domElem.classList.add(...this.options.removedClassesOnStartForward);
-          this.domElem.classList.remove(...this.options.addedClassesOnStartForward);
+          this.domElem.classList.add(...this.options.classesToRemoveOnStart);
+          this.domElem.classList.remove(...this.options.classesToAddOnStart);
           break;
       }
       
@@ -237,7 +237,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       commitStyles: true,
       composite: 'replace',
       easing: 'linear',
-      regenerateKeyframes: false,
+      regenerateKeyframesOnStart: false,
 
       // subclass defaults take priority
       ...this.defaultOptions,
@@ -249,28 +249,28 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       ...userOptions,
 
       // mergeable properties
-      addedClassesOnStartForward: mergeArrays(
-        this.defaultOptions.addedClassesOnStartForward ?? [],
-        behaviorGroupOptions.addedClassesOnStartForward ?? [],
-        userOptions.addedClassesOnStartForward ?? [],
+      classesToAddOnStart: mergeArrays(
+        this.defaultOptions.classesToAddOnStart ?? [],
+        behaviorGroupOptions.classesToAddOnStart ?? [],
+        userOptions.classesToAddOnStart ?? [],
       ),
 
-      removedClassesOnStartForward: mergeArrays(
-        this.defaultOptions.removedClassesOnStartForward ?? [],
-        behaviorGroupOptions.removedClassesOnStartForward ?? [],
-        userOptions.removedClassesOnStartForward ?? [],
+      classesToRemoveOnStart: mergeArrays(
+        this.defaultOptions.classesToRemoveOnStart ?? [],
+        behaviorGroupOptions.classesToRemoveOnStart ?? [],
+        userOptions.classesToRemoveOnStart ?? [],
       ),
 
-      addedClassesOnFinishForward: mergeArrays(
-        this.defaultOptions.addedClassesOnFinishForward ?? [],
-        behaviorGroupOptions.addedClassesOnFinishForward ?? [],
-        userOptions.addedClassesOnFinishForward ?? [],
+      classesToAddOnFinish: mergeArrays(
+        this.defaultOptions.classesToAddOnFinish ?? [],
+        behaviorGroupOptions.classesToAddOnFinish ?? [],
+        userOptions.classesToAddOnFinish ?? [],
       ),
 
-      removedClassesOnFinishForward: mergeArrays(
-        this.defaultOptions.removedClassesOnFinishForward ?? [],
-        behaviorGroupOptions.removedClassesOnFinishForward ?? [],
-        userOptions.removedClassesOnFinishForward ?? [],
+      classesToRemoveOnFinish: mergeArrays(
+        this.defaultOptions.classesToRemoveOnFinish ?? [],
+        behaviorGroupOptions.classesToRemoveOnFinish ?? [],
+        userOptions.classesToRemoveOnFinish ?? [],
       ),
     };
   }

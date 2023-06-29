@@ -107,7 +107,7 @@ export const presetEmphases = {
       {backgroundPositionX: '0%'},
     ]],
     options: {
-      addedClassesOnStartForward: [`highlightable`],
+      classesToAddOnStart: [`highlightable`],
       // invalidProp: 4,
     },
   },
@@ -118,7 +118,7 @@ export const presetEmphases = {
       {backgroundPositionX: '100%'},
     ]],
     options: {
-      removedClassesOnFinishForward: [`highlightable`],
+      classesToRemoveOnFinish: [`highlightable`],
     },
   },
 } satisfies IKeyframesBank<EmphasisBlock>;
@@ -205,7 +205,7 @@ export const presetTranslations = {
       ];
     },
     options: {
-      regenerateKeyframes: true,
+      regenerateKeyframesOnStart: true,
     },
   },
 } satisfies IKeyframesBank<TranslationBlock>; 
@@ -232,7 +232,7 @@ export const presetFreeLineEntrances = {
       }
     },
     options: {
-      removedClassesOnFinishForward: ['markers-hidden'],
+      classesToRemoveOnFinish: ['markers-hidden'],
     }
   },
 
@@ -266,7 +266,7 @@ export const presetFreeLineExits = {
       }
     },
     options: {
-      addedClassesOnStartForward: ['markers-hidden'],
+      classesToAddOnStart: ['markers-hidden'],
     }
   },
 
