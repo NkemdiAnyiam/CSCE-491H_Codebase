@@ -17,26 +17,26 @@ export const presetEntrances = {
       switch(fromDirection) {
         case 'top':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
         case 'right':
           return [[
-            {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
         case 'bottom':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
         case 'left':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
         default:
@@ -70,26 +70,26 @@ export const presetExits = {
       switch(toDirection) {
         case 'top':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem))'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
           ]];
 
         case 'right':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+            {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
           ]];
 
         case 'bottom':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+            {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
           ]];
 
         case 'left':
           return [[
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(0px - 2rem), calc(100% + 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
-            {clipPath: 'polygon(calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(0px - 2rem), calc(0px - 2rem) calc(100% + 2rem), calc(0px - 2rem) calc(100% + 2rem))'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+            {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
           ]];
 
         default:
