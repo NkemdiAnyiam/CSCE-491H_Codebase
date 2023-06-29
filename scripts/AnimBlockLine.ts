@@ -11,8 +11,9 @@ export class FreeLine extends HTMLElement {
 
   private lineId: number = 0;
   useEndMarker: boolean;
-  visibleLine: SVGLineElement;
-  maskLine: SVGLineElement;
+  useStartMarker: boolean;
+  lineLayer: SVGLineElement;
+  lineMask: SVGLineElement;
   gBody: SVGGElement;
   svg: SVGSVGElement;
 
@@ -22,20 +23,20 @@ export class FreeLine extends HTMLElement {
   private trackingTimeout?: NodeJS.Timer;
 
   set x1(val: number) {
-    this.visibleLine.x1.baseVal.value = val;
-    this.maskLine.x1.baseVal.value = val;
+    this.lineLayer.x1.baseVal.value = val;
+    this.lineMask.x1.baseVal.value = val;
   }
   set x2(val: number) {
-    this.visibleLine.x2.baseVal.value = val;
-    this.maskLine.x2.baseVal.value = val;
+    this.lineLayer.x2.baseVal.value = val;
+    this.lineMask.x2.baseVal.value = val;
   }
   set y1(val: number) {
-    this.visibleLine.y1.baseVal.value = val;
-    this.maskLine.y1.baseVal.value = val;
+    this.lineLayer.y1.baseVal.value = val;
+    this.lineMask.y1.baseVal.value = val;
   }
   set y2(val: number) {
-    this.visibleLine.y2.baseVal.value = val;
-    this.maskLine.y2.baseVal.value = val;
+    this.lineLayer.y2.baseVal.value = val;
+    this.lineMask.y2.baseVal.value = val;
   }
 
   getBoundingClientRect() {
@@ -52,6 +53,7 @@ export class FreeLine extends HTMLElement {
     const markerId = `markerArrow--${this.lineId}`;
     const maskId = `mask--${this.lineId}`;
     this.useEndMarker = this.hasAttribute('end-marker');
+    this.useStartMarker = this.hasAttribute('start-marker');
 
     this.classList.add('markers-hidden'); // TODO: Find better solution
 
@@ -134,26 +136,51 @@ export class FreeLine extends HTMLElement {
         <g class="free-line__body">
           <mask id="${maskId}">
             <g class="mask-group">
-              <marker id="${markerId}-start-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
-                <path d="M0,0 L0,8 L6,4 L0,0" />
-              </marker>
-              <marker id="${markerId}-end-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-                <path d="M0,0 L0,8 L6,4 L0,0" />
-              </marker>
+              ${
+                this.useStartMarker ?
+                `<marker id="${markerId}-start-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
+                  <path d="M0,0 L0,8 L6,4 L0,0" />
+                </marker>` :
+                ''
+              }
+              ${
+                this.useEndMarker ?
+                `<marker id="${markerId}-end-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+                  <path d="M0,0 L0,8 L6,4 L0,0" />
+                </marker>` :
+                ''
+              }
 
-              <line marker-start="url(#${markerId}-start-mask)" marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask mask-line" stroke="white" />
+              <line
+                ${this.useStartMarker ? `marker-start="url(#${markerId}-start-mask)"` : ''}
+                ${this.useEndMarker ? `marker-end="url(#${markerId}-end-mask)"` : ''}
+                class="free-line__line free-line__line--mask mask-line" stroke="white"
+              />
             </g>
           </mask>
 
           <g mask="url(#${maskId})" class="layer-group">
-            <marker id="${markerId}-start-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
-              <path d="M0,0 L0,8 L6,4 L0,0" />
-            </marker>
-            <marker id="${markerId}-end-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-              <path d="M0,0 L0,8 L6,4 L0,0" />
-            </marker>
+            ${
+              this.useStartMarker ?
+              `<marker id="${markerId}-start-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
+                <path d="M0,0 L0,8 L6,4 L0,0" />
+              </marker>` :
+              ''
+            }
+            ${
+              this.useEndMarker ?
+              `<marker id="${markerId}-end-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+                <path d="M0,0 L0,8 L6,4 L0,0" />
+              </marker>` :
+              ''
+            }
 
-            <line marker-start="url(#${markerId}-start-layer)" marker-end="url(#${markerId}-end-layer)" class="free-line__line free-line__line--layer main-line" pathLength="1" />
+            <line
+              ${this.useStartMarker ? `marker-start="url(#${markerId}-start-layer)"` : ''}
+              ${this.useEndMarker ? `marker-end="url(#${markerId}-end-layer)"` : ''}
+              class="free-line__line free-line__line--layer main-line"
+              pathLength="1"
+            />
           </g>
         </g>
       </svg>
@@ -166,8 +193,8 @@ export class FreeLine extends HTMLElement {
     
     this.svg = shadow.querySelector('svg') as SVGSVGElement;
     this.gBody = shadow.querySelector('.free-line__body') as SVGGElement;
-    this.visibleLine = this.gBody.querySelector('.free-line__line--layer') as SVGLineElement;
-    this.maskLine = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
+    this.lineLayer = this.gBody.querySelector('.free-line__line--layer') as SVGLineElement;
+    this.lineMask = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
   }
 
   updateEndpoints = () => {
