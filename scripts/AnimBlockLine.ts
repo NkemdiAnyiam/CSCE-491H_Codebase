@@ -18,7 +18,7 @@ export class FreeLine extends HTMLElement {
 
   startPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   endPoint?: [endElem: Element, leftOffset: number, topOffset: number];
-  tracking: boolean = true;
+  tracking: boolean = false;
   private trackingTimeout?: NodeJS.Timer;
 
   set x1(val: number) {
@@ -53,6 +53,8 @@ export class FreeLine extends HTMLElement {
     const maskId = `mask--${this.lineId}`;
     this.useEndMarker = this.hasAttribute('end-marker');
 
+    this.classList.add('markers-hidden'); // TODO: Find better solution
+
     // const mainLineString = `<line class="a" pathLength="1" mask="url(#mask--${this.lineId})" />`;
     // const elemString = `
     //   <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
@@ -65,8 +67,69 @@ export class FreeLine extends HTMLElement {
     //   </svg>
     // `
 
+    // <link rel="preload" href="/scripts/TestUsability/line-styles.css" as="style" />
     const htmlString = `
-      <svg>
+    <style>
+      :host {
+        display: inline-block;
+        color: black;
+        stroke-linecap: round;
+        line-height: 0 !important;
+        overflow: visible !important;
+        stroke-width: 2;
+        /* visibility: hidden; */
+      }
+
+      :host(.markers-hidden) marker {
+        visibility: hidden;
+      }
+      
+      .free-line {
+        visibility: hidden;
+        width: auto;
+        height: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        /* pointer-events: none; */
+        overflow: visible !important;
+        z-index: 1000;
+      }
+      
+      .free-line__body {
+        visibility: initial;
+      }
+      
+      .mask-group {
+        color: white !important;
+        stroke: currentColor !important;
+        fill: currentColor !important;
+      }
+      
+      .mask-line {
+        stroke-dashoffset: 0 !important;
+      /*   stroke-dasharray: 10; */
+      }
+      
+      .main-group {
+        
+      }
+      
+      .main-line {
+        stroke: currentColor !important;
+        stroke-dasharray: 1 !important;
+      }
+      
+      marker {
+        fill: currentColor !important;
+      }
+      
+      /*marker.hidden {
+        visibility: hidden;
+      }*/
+    </style>
+
+      <svg class="free-line">
         <g class="free-line__body">
           <mask id="${maskId}">
             <g class="mask-group">
@@ -74,7 +137,7 @@ export class FreeLine extends HTMLElement {
                 <path d="M0,0 L0,8 L6,4 L0,0" />
               </marker>
 
-              <line marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask" stroke="white" />
+              <line marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask mask-line" stroke="white" />
             </g>
           </mask>
 
@@ -83,19 +146,20 @@ export class FreeLine extends HTMLElement {
               <path d="M0,0 L0,8 L6,4 L0,0" />
             </marker>
 
-            <line marker-end="url(#${markerId}-end-visible)" class="free-line__line free-line__line--visible" pathLength="1" />
+            <line marker-end="url(#${markerId}-end-visible)" class="free-line__line free-line__line--visible main-line" pathLength="1" />
           </g>
         </g>
       </svg>
     `;
 
     const template = document.createElement('template');
-    template.insertAdjacentHTML('afterbegin', htmlString);
-    const element = template.content.firstElementChild as SVGSVGElement;
-    shadow.appendChild(element); // TODO: Fix Node error
+    template.innerHTML = htmlString;
+    // console.log(template.innerHTML);
+    const element = template.content.cloneNode(true);
+    shadow.append(element); // TODO: Fix Node error
     
-    this.svg = element.querySelector('svg') as SVGSVGElement;
-    this.gBody = element.querySelector('.free-line__body') as SVGGElement;
+    this.svg = shadow.querySelector('svg') as SVGSVGElement;
+    this.gBody = shadow.querySelector('.free-line__body') as SVGGElement;
     this.visibleLine = this.gBody.querySelector('.free-line__line--visible') as SVGLineElement;
     this.maskLine = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
   }
@@ -106,7 +170,7 @@ export class FreeLine extends HTMLElement {
     // to properly place the endpoints, we need the positions of their bounding boxes
     // get the bounding rectangles for starting reference element, ending reference element, and parent element
     // TODO: Use offsetParent to account for direct parent beieng statically positioned
-    const svgParentElement = this.svg.parentElement!;
+    const svgParentElement = this.parentElement!;
     
     // the class is appended without classList.add() so that multiple applications
     // of the class do not interfere with each other upon removal
@@ -222,12 +286,36 @@ export class DrawLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
 
   protected _onStartForward(): void {
     this.freeLineElem.updateEndpoints();
+    this.domElem.classList.remove('wbfk-hidden');
     if (this.freeLineElem.tracking) {
       this.freeLineElem.setTrackingInterval();
     }
   }
 
   protected _onFinishBackward(): void {
+    this.domElem.classList.add('wbfk-hidden');
     this.freeLineElem.clearTrackingInterval();
+  }
+}
+
+export class EraseLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  protected get defaultOptions(): Partial<AnimBlockOptions> {
+    return {};
+  }
+
+  constructor(public freeLineElem: FreeLine, public animName: string, behaviorGroup: TBehavior) {
+    if (!behaviorGroup) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
+    super(freeLineElem, animName, behaviorGroup);
+  }
+
+  protected _onStartForward(): void {
+    this.freeLineElem.clearTrackingInterval();
+  }
+
+  protected _onStartBackward(): void {
+    this.freeLineElem.updateEndpoints();
+    if (this.freeLineElem.tracking) {
+      this.freeLineElem.setTrackingInterval();
+    }
   }
 }

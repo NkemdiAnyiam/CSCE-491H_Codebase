@@ -1,5 +1,5 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
-import { DrawLineBlock } from "./AnimBlockLine.js";
+import { DrawLineBlock, EraseLineBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
@@ -231,6 +231,9 @@ export const presetFreeLineEntrances = {
           throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
       }
     },
+    options: {
+      removedClassesOnFinishForward: ['markers-hidden'],
+    }
   },
 
   [`~fade-in`]: {
@@ -240,3 +243,37 @@ export const presetFreeLineEntrances = {
     ]],
   },
 } satisfies IKeyframesBank<DrawLineBlock>;
+
+export const presetFreeLineExits = {
+  // TODO: Utilize appropriate classes to handle marker
+  [`~trace`]: {
+    generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
+      switch(fromPoint) {
+        case 'from-start':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: 1},
+          ]];
+
+        case 'from-end':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: -1},
+          ]];
+
+        default:
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
+      }
+    },
+    options: {
+      addedClassesOnStartForward: ['markers-hidden'],
+    }
+  },
+
+  [`~fade-out`]: {
+    generateKeyframes: () => [[
+      {opacity: '1'},
+      {opacity: '0'},
+    ]],
+  },
+} satisfies IKeyframesBank<EraseLineBlock>;
