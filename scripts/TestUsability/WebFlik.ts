@@ -1,10 +1,10 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockOptions, TranslationBlock } from "../AnimBlock.js";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock } from "../AnimBlock.js";
 import { DrawLineBlock, EraseLineBlock, FreeLine, SetLineBlock } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetFreeLineEntrances, presetFreeLineExits, /*presetFreeLineEntrances*/ } from "../Presets.js";
 
 export type KeyframeBehaviorGroup = Readonly<{
   generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
-  options?: Partial<AnimBlockOptions>;
+  config?: Partial<AnimBlockConfig>;
 }>
 export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<string, KeyframeBehaviorGroup>> & (T extends void ? {} : ThisType<T>);
 
@@ -91,7 +91,7 @@ class _WebFlik {
       },
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
-      },// TODO: Add option lineOptions
+      },// TODO: Add optional lineOptions
       SetLine: function(freeLineElem: FreeLine, startPoint, endPoint) {
         return new SetLineBlock(freeLineElem, startPoint, endPoint).initialize([]);
       },

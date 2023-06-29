@@ -106,7 +106,7 @@ export const presetEmphases = {
       {backgroundPositionX: '100%'},
       {backgroundPositionX: '0%'},
     ]],
-    options: {
+    config: {
       classesToAddOnStart: [`highlightable`],
       // invalidProp: 4,
     },
@@ -117,7 +117,7 @@ export const presetEmphases = {
       {backgroundPositionX: '0'},
       {backgroundPositionX: '100%'},
     ]],
-    options: {
+    config: {
       classesToRemoveOnFinish: [`highlightable`],
     },
   },
@@ -204,7 +204,7 @@ export const presetTranslations = {
         }],
       ];
     },
-    options: {
+    config: {
       regenerateKeyframesOnStart: true,
     },
   },
@@ -231,7 +231,7 @@ export const presetFreeLineEntrances = {
           throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
       }
     },
-    options: {
+    config: {
       classesToRemoveOnFinish: ['markers-hidden'],
     }
   },
@@ -265,7 +265,7 @@ export const presetFreeLineExits = {
           throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
       }
     },
-    options: {
+    config: {
       classesToAddOnStart: ['markers-hidden'],
     }
   },

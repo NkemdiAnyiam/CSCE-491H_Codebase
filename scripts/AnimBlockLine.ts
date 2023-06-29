@@ -1,8 +1,8 @@
-import { AnimBlock, AnimBlockOptions, AnimTimelineAnimation, EntranceBlock } from "./AnimBlock.js";
+import { AnimBlock, AnimBlockConfig, AnimTimelineAnimation, EntranceBlock } from "./AnimBlock.js";
 import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
 import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
 
-type LineOptions = {
+type LineConfig = {
   trackEndpoints: boolean;
 };
 
@@ -214,10 +214,10 @@ export class SetLineBlock extends AnimBlock {
   previousStartPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   previousEndPoint?: [endElem: Element, leftOffset: number, topOffset: number];
 
-  lineOptions: LineOptions = {} as LineOptions;
-  previousLineOptions: LineOptions = {} as LineOptions;
+  lineConfig: LineConfig = {} as LineConfig;
+  previousLineConfig: LineConfig = {} as LineConfig;
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
       commitStyles: false,
@@ -228,7 +228,7 @@ export class SetLineBlock extends AnimBlock {
     public freeLineElem: FreeLine,
     public startPoint: [startElem: Element, leftOffset: number, topOffset: number],
     public endPoint: [endElem: Element, leftOffset: number, topOffset: number],
-    lineOptions: Partial<LineOptions> = {},
+    lineConfig: Partial<LineConfig> = {},
     /*animName: string, behaviorGroup: TBehavior*/
     ) {
     // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
@@ -248,34 +248,34 @@ export class SetLineBlock extends AnimBlock {
       },
     });
 
-    this.lineOptions = this.applyLineOptions(lineOptions);
+    this.lineConfig = this.applyLineConfig(lineConfig);
   }
 
   protected _onStartForward(): void {
     this.previousStartPoint = this.freeLineElem.startPoint;
     this.previousEndPoint = this.freeLineElem.endPoint;
-    this.previousLineOptions.trackEndpoints = this.freeLineElem.tracking;
+    this.previousLineConfig.trackEndpoints = this.freeLineElem.tracking;
     this.freeLineElem.startPoint = this.startPoint;
     this.freeLineElem.endPoint = this.endPoint;
-    this.freeLineElem.tracking = this.lineOptions.trackEndpoints;
+    this.freeLineElem.tracking = this.lineConfig.trackEndpoints;
   }
 
   protected _onStartBackward(): void {
     this.freeLineElem.startPoint = this.previousStartPoint;
     this.freeLineElem.endPoint = this.previousEndPoint;
-    this.freeLineElem.tracking = this.previousLineOptions.trackEndpoints;
+    this.freeLineElem.tracking = this.previousLineConfig.trackEndpoints;
   }
 
-  applyLineOptions(lineOptions: Partial<LineOptions>): LineOptions {
+  applyLineConfig(lineConfig: Partial<LineConfig>): LineConfig {
     return {
       trackEndpoints: this.freeLineElem.tracking,
-      ...lineOptions,
+      ...lineConfig,
     };
   }
 }
 
 export class DrawLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
@@ -299,7 +299,7 @@ export class DrawLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
 }
 
 export class EraseLineBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 

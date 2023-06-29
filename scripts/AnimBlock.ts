@@ -14,7 +14,7 @@ type CustomKeyframeEffectOptions = {
   regenerateKeyframesOnStart: boolean;
 }
 
-export type AnimBlockOptions = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
+export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
 // TODO: validate duration and playbackRate?
 
 type TOffset = {
@@ -94,11 +94,11 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  options: AnimBlockOptions = {} as AnimBlockOptions;
+  config: AnimBlockConfig = {} as AnimBlockConfig;
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
   animArgs: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
 
-  protected abstract get defaultOptions(): Partial<AnimBlockOptions>;
+  protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
   constructor(public domElem: Element, public animName: string, public behaviorGroup: TBehavior) {
     if (!domElem) {
@@ -108,18 +108,18 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     this.id = AnimBlock.id++;
   }
 
-   initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userOptions: Partial<AnimBlockOptions> = {}) {
-    this.options = this.mergeOptions(userOptions, this.behaviorGroup.options ?? {});
+   initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}) {
+    this.config = this.mergeConfigs(userConfig, this.behaviorGroup.config ?? {});
     this.animArgs = animArgs;
 
     // TODO: Handle case where only one keyframe is provided
     let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...animArgs); // TODO: extract generateKeyframes
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: this.options.duration,
-      fill: this.options.commitStyles ? 'forwards' : 'none',
-      easing: this.options.easing,
-      composite: this.options.composite,
+      duration: this.config.duration,
+      fill: this.config.commitStyles ? 'forwards' : 'none',
+      easing: this.config.easing,
+      composite: this.config.composite,
     };
 
     // TODO: Add playbackRate
@@ -139,8 +139,8 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     return this;
   }
 
-  getBlocksNext() { return this.options.blocksNext; }
-  getBlocksPrev() { return this.options.blocksPrev; }
+  getBlocksNext() { return this.config.blocksNext; }
+  getBlocksPrev() { return this.config.blocksPrev; }
 
   setID(idSeq: number, idTimeline: number) {
     [this.sequenceID, this.timelineID] = [idSeq, idTimeline];
@@ -149,7 +149,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      if (this.options.regenerateKeyframesOnStart) {
+      if (this.config.regenerateKeyframesOnStart) {
         let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs);
         this.animation.setFrames(forwardFrames, backwardFrames ?? [...forwardFrames].reverse());
       }
@@ -174,19 +174,19 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
     switch(direction) {
       case 'forward':
-        this.domElem.classList.add(...this.options.classesToAddOnStart);
-        this.domElem.classList.remove(...this.options.classesToRemoveOnStart);
+        this.domElem.classList.add(...this.config.classesToAddOnStart);
+        this.domElem.classList.remove(...this.config.classesToRemoveOnStart);
         this._onStartForward();
         break;
       case 'backward':
         this._onStartBackward();
-        this.domElem.classList.add(...this.options.classesToRemoveOnFinish);
-        this.domElem.classList.remove(...this.options.classesToAddOnFinish);
+        this.domElem.classList.add(...this.config.classesToRemoveOnFinish);
+        this.domElem.classList.remove(...this.config.classesToAddOnFinish);
         break;
     }
 
     // set playback rate
-    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.options.playbackRate);
+    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
@@ -195,7 +195,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     return animation.finished.then(() => {
       // CHANGE NOTE: Move hidden class stuff here
       // TODO: Account for case where parent is hidden
-      if (this.options.commitStyles) {
+      if (this.config.commitStyles) {
         try {
           animation.commitStyles(); // actually applies the styles to the element
         }
@@ -209,14 +209,14 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       
       switch(direction) {
         case 'forward':
-          this.domElem.classList.add(...this.options.classesToAddOnFinish);
-          this.domElem.classList.remove(...this.options.classesToRemoveOnFinish);
+          this.domElem.classList.add(...this.config.classesToAddOnFinish);
+          this.domElem.classList.remove(...this.config.classesToRemoveOnFinish);
           this._onFinishForward();
           break;
         case 'backward':
           this._onFinishBackward();
-          this.domElem.classList.add(...this.options.classesToRemoveOnStart);
-          this.domElem.classList.remove(...this.options.classesToAddOnStart);
+          this.domElem.classList.add(...this.config.classesToRemoveOnStart);
+          this.domElem.classList.remove(...this.config.classesToAddOnStart);
           break;
       }
       
@@ -227,7 +227,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     });
   }
 
-  private mergeOptions(userOptions: Partial<AnimBlockOptions>, behaviorGroupOptions: Partial<AnimBlockOptions>): AnimBlockOptions {
+  private mergeConfigs(userConfig: Partial<AnimBlockConfig>, behaviorGroupConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
     return {
       // pure defaults
       blocksNext: true,
@@ -240,37 +240,37 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       regenerateKeyframesOnStart: false,
 
       // subclass defaults take priority
-      ...this.defaultOptions,
+      ...this.defaultConfig,
 
-      // options defined in animation bank take priority
-      ...behaviorGroupOptions,
+      // config defined in animation bank take priority
+      ...behaviorGroupConfig,
 
-      // custom options take priority
-      ...userOptions,
+      // custom config take priority
+      ...userConfig,
 
       // mergeable properties
       classesToAddOnStart: mergeArrays(
-        this.defaultOptions.classesToAddOnStart ?? [],
-        behaviorGroupOptions.classesToAddOnStart ?? [],
-        userOptions.classesToAddOnStart ?? [],
+        this.defaultConfig.classesToAddOnStart ?? [],
+        behaviorGroupConfig.classesToAddOnStart ?? [],
+        userConfig.classesToAddOnStart ?? [],
       ),
 
       classesToRemoveOnStart: mergeArrays(
-        this.defaultOptions.classesToRemoveOnStart ?? [],
-        behaviorGroupOptions.classesToRemoveOnStart ?? [],
-        userOptions.classesToRemoveOnStart ?? [],
+        this.defaultConfig.classesToRemoveOnStart ?? [],
+        behaviorGroupConfig.classesToRemoveOnStart ?? [],
+        userConfig.classesToRemoveOnStart ?? [],
       ),
 
       classesToAddOnFinish: mergeArrays(
-        this.defaultOptions.classesToAddOnFinish ?? [],
-        behaviorGroupOptions.classesToAddOnFinish ?? [],
-        userOptions.classesToAddOnFinish ?? [],
+        this.defaultConfig.classesToAddOnFinish ?? [],
+        behaviorGroupConfig.classesToAddOnFinish ?? [],
+        userConfig.classesToAddOnFinish ?? [],
       ),
 
       classesToRemoveOnFinish: mergeArrays(
-        this.defaultOptions.classesToRemoveOnFinish ?? [],
-        behaviorGroupOptions.classesToRemoveOnFinish ?? [],
-        userOptions.classesToRemoveOnFinish ?? [],
+        this.defaultConfig.classesToRemoveOnFinish ?? [],
+        behaviorGroupConfig.classesToRemoveOnFinish ?? [],
+        userConfig.classesToRemoveOnFinish ?? [],
       ),
     };
   }
@@ -281,7 +281,7 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
   AAADummyEntranceProp = 'Ent';
   ZZZDummyEntranceProp = 'rance';
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     // TODO: Consider commitStyles for false by default
     return {
       commitStyles: false,
@@ -307,7 +307,7 @@ export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavio
   AAADummyExitProp = 'Ex';
   ZZZDummyExitProp = 'it';
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitStyles: false,
     };
@@ -332,7 +332,7 @@ export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
   AAADummyEmphasisProp = 'Emph';
   ZZZDummyEmphasisProp = 'asis';
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
@@ -347,7 +347,7 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
   AAADummyEmphasisProp = 'Trans';
   ZZZDummyEmphasisProp = 'lation';
 
-  protected get defaultOptions(): Partial<AnimBlockOptions> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',
     };
@@ -358,122 +358,6 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
     super(domElem, animName, behaviorGroup);
   }
 }
-
-// export class TargetedTranslateBlock extends AnimBlock {
-//   translationOptions: TElem;
-//   animation: AnimTimelineAnimation;
-
-//   protected get defaultOptions(): Partial<AnimBlockOptions> {
-//     return {};
-//   }
-
-//   constructor(domElem: Element, private targetElem: Element, userOptions: Partial<AnimBlockOptions> = {}, translationOptions: Partial<TElem> = {}) {
-//     super(domElem, 'translate', userOptions);
-
-//     this.translationOptions = {
-//       ...this.applyTranslateOptions(translationOptions),
-//     };
-
-//     const [forwardFrames, backwardFrames] = this.createTranslationKeyframes();
-
-//     this.animation = new AnimTimelineAnimation(
-//       new KeyframeEffect(
-//         domElem,
-//         forwardFrames,
-//         {
-//           duration: this.options.duration,
-//           fill: 'forwards', // TODO: Make customizable?
-//           easing: this.options.easing,
-//           composite: 'accumulate',
-//           // playbackRate: options.playbackRate, // TODO: implement and uncomment
-//         }
-//       ),
-//       new KeyframeEffect(
-//         domElem,
-//         backwardFrames,
-//         {
-//           duration: this.options.duration,
-//           fill: 'forwards', // TODO: Make customizable?
-//           easing: this.options.easing,
-//           composite: 'accumulate',
-//           // playbackRate: options.playbackRate, // TODO: implement and uncomment
-//         }
-//       )
-//     );
-//   }
-
-//   // TODO: Re-implement
-//   stepForward(): Promise<void> {
-//     const [newF, newB] = this.createTranslationKeyframes();
-//     this.animation.setForwardFrames(newF);
-//     this.animation.setBackwardFrames(newB);
-//     return super.stepForward();
-//   }
-
-//   protected applyTranslateOptions(translateOptions: Partial<TElem>): TElem {
-//     return {
-//       offsetX: 0,
-//       offsetY: 0,
-//       offsetUnitsX: 'px',
-//       offsetUnitsY: 'px',
-
-//       alignmentX: 'left',
-//       alignmentY: 'top',
-//       offsetTargetX: 0,
-//       offsetTargetY: 0,
-//       preserveX: false,
-//       preserveY: false,
-
-//       ...translateOptions,
-//     };
-//   }
-
-//   private createTranslationKeyframes(): [Keyframe[], Keyframe[]] {
-//     let {
-//       alignmentX, alignmentY,
-//       offsetX, offsetY, offsetXY,
-//       offsetTargetX, offsetTargetY, offsetTargetXY,
-//       offsetUnitsX, offsetUnitsY, offsetUnitsXY,
-//       preserveX, preserveY
-//     } = this.translationOptions;
-
-//     let translateX: number;
-//     let translateY: number;
-    
-//     // get the bounding boxes of our DOM element and the target element
-//     // TODO: Find better spot for visibility override
-//     this.domElem.classList.value += ` wbfk-override-hidden`;
-//     this.targetElem.classList.value += ` wbfk-override-hidden`;
-//     const rectThis = this.domElem.getBoundingClientRect();
-//     const rectTarget = this.targetElem.getBoundingClientRect();
-//     this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
-//     this.targetElem.classList.value = this.targetElem.classList.value.replace(` wbfk-override-hidden`, '');
-//     // the displacement will start as the difference between the target element's position and our element's position...
-//     // ...plus any offset within the target itself
-//     offsetTargetX = offsetTargetXY ?? offsetTargetX;
-//     offsetTargetY = offsetTargetXY ?? offsetTargetY;
-//     translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
-//     translateX += offsetTargetX * rectTarget.width;
-//     translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
-//     translateY += offsetTargetY * rectTarget.height;
-//     offsetX = offsetXY ?? offsetX;
-//     offsetY = offsetXY ?? offsetY;
-//     offsetUnitsX = offsetUnitsXY ?? offsetUnitsX;
-//     offsetUnitsY = offsetUnitsXY ?? offsetUnitsY;
-    
-//     return [
-//       // forward
-//       [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
-//                             calc(${translateY}px + ${offsetY}${offsetUnitsY})`
-//       }],
-
-//       // backward
-//       [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
-//                             calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
-//       }],
-//     ];
-//   }
-// }
 
 // TODO: Create util
 function mergeArrays<T>(...arrays: T[][]): Array<T> {
