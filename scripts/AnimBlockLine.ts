@@ -68,6 +68,7 @@ export class FreeLine extends HTMLElement {
     // `
 
     // <link rel="preload" href="/scripts/TestUsability/line-styles.css" as="style" />
+
     const htmlString = `
     <style>
       :host {
@@ -133,20 +134,26 @@ export class FreeLine extends HTMLElement {
         <g class="free-line__body">
           <mask id="${maskId}">
             <g class="mask-group">
+              <marker id="${markerId}-start-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
+                <path d="M0,0 L0,8 L6,4 L0,0" />
+              </marker>
               <marker id="${markerId}-end-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                 <path d="M0,0 L0,8 L6,4 L0,0" />
               </marker>
 
-              <line marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask mask-line" stroke="white" />
+              <line marker-start="url(#${markerId}-start-mask)" marker-end="url(#${markerId}-end-mask)" class="free-line__line free-line__line--mask mask-line" stroke="white" />
             </g>
           </mask>
 
-          <g mask="url(#${maskId})">
-            <marker id="${markerId}-end-visible" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
+          <g mask="url(#${maskId})" class="layer-group">
+            <marker id="${markerId}-start-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
+              <path d="M0,0 L0,8 L6,4 L0,0" />
+            </marker>
+            <marker id="${markerId}-end-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
               <path d="M0,0 L0,8 L6,4 L0,0" />
             </marker>
 
-            <line marker-end="url(#${markerId}-end-visible)" class="free-line__line free-line__line--visible main-line" pathLength="1" />
+            <line marker-start="url(#${markerId}-start-layer)" marker-end="url(#${markerId}-end-layer)" class="free-line__line free-line__line--layer main-line" pathLength="1" />
           </g>
         </g>
       </svg>
@@ -154,13 +161,12 @@ export class FreeLine extends HTMLElement {
 
     const template = document.createElement('template');
     template.innerHTML = htmlString;
-    // console.log(template.innerHTML);
     const element = template.content.cloneNode(true);
-    shadow.append(element); // TODO: Fix Node error
+    shadow.append(element);
     
     this.svg = shadow.querySelector('svg') as SVGSVGElement;
     this.gBody = shadow.querySelector('.free-line__body') as SVGGElement;
-    this.visibleLine = this.gBody.querySelector('.free-line__line--visible') as SVGLineElement;
+    this.visibleLine = this.gBody.querySelector('.free-line__line--layer') as SVGLineElement;
     this.maskLine = this.gBody.querySelector('.free-line__line--mask') as SVGLineElement;
   }
 
