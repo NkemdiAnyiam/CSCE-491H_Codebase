@@ -255,13 +255,13 @@ export class SetConnectorBlock extends AnimBlock {
     // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
 
     if (!connectorElem) {
-      throw new Error('Connector must not be undefined');
+      throw new Error('Connector element must not be null');
     }
     if (!(startPoint?.[0] instanceof Element)) {
-      throw new Error(`Start point element must not be undefined`); // TODO: Improve error message
+      throw new Error(`Start point element must not be null`); // TODO: Improve error message
     }
     if (!(endPoint?.[0] instanceof Element)) {
-      throw new Error(`End point element must not be undefined`); // TODO: Improve error message
+      throw new Error(`End point element must not be null`); // TODO: Improve error message
     }
 
     // TODO: Validate offsets?
@@ -312,7 +312,7 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
     if (!connectorElem) {
-      throw new Error('Connector must not be undefined');
+      throw new Error('Connector element must not be null');
     }
     super(connectorElem, animName, behaviorGroup);
     this.connectorElem = connectorElem;
@@ -342,7 +342,7 @@ export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfr
   constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
     if (!connectorElem) {
-      throw new Error('Connector must not be undefined');
+      throw new Error('Connector element must not be null');
     }
     super(connectorElem, animName, behaviorGroup);
     this.connectorElem = connectorElem;

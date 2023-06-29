@@ -160,7 +160,7 @@ export const presetTranslations = {
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {
       if (!targetElem) {
-        throw new Error(`Target for ~move-to must not be undefined`); // TODO: Improve error message
+        throw new Error(`Target for ~move-to must not be null`); // TODO: Improve error message
       }
 
       let {

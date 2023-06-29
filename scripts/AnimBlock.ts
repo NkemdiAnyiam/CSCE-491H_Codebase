@@ -103,7 +103,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   constructor(domElem: Element | null, public animName: string, public behaviorGroup: TBehavior) {
     if (!domElem) {
-      throw new Error(`Element must not be undefined`); // TODO: Improve error message
+      throw new Error(`Element must not be null`); // TODO: Improve error message
     }
 
     this.domElem = domElem;
