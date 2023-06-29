@@ -162,12 +162,12 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
       const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`)!;
-      const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`)!;
+      const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`);
       
       // get row's header data to animate
-      const rowSJNum = row.querySelector('.time-graph__SJ-num')!;
-      const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted')!;
-      const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted')!;
+      const rowSJNum = row.querySelector('.time-graph__SJ-num');
+      const rowUnsortedLetter = row.querySelector('.time-graph__job-letter--unsorted');
+      const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
       
       animSequence.addManyBlocks([
         Translation(jobBarEl, '~move-to', [startCell], {blocksNext: false}),
@@ -245,12 +245,12 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   // DEMONSTRATE HOW TO FILL OUT THE C ARRAY
   /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
-  const cBar = document.querySelector('.time-graph__c-bar')!; // vertical bar
+  const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
   // const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
     const jobBarEl = job.getJobBar();
     // get j array block corresponding to current job bar
-    const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`)!;
+    const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
     // Find job bar corresponding to the job that's compatible with the current job (if it exists)
     const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`) as HTMLElement;
     // get the c array entry corresponding to the current job
@@ -302,7 +302,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
       // Then point arrow from bottom of cbar to current c-array entry
       else {
         animSequence.addManyBlocks([
-          Translation(cBar, '~move-to', [timeGraphEl!, {alignmentX: 'left', preserveY: true}]),
+          Translation(cBar, '~move-to', [timeGraphEl, {alignmentX: 'left', preserveY: true}]),
         ]);
         // animSequence2.addOneBlock(new AnimBlockLine(timeGraphArrowEl, '~wipe', ['top'], cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false}));
       }

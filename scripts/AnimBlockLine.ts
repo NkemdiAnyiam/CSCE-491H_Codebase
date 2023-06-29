@@ -229,8 +229,11 @@ export class Connector extends HTMLElement {
 customElements.define('wbfk-connector', Connector);
 
 export class SetConnectorBlock extends AnimBlock {
+  connectorElem: Connector;
   previousStartPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   previousEndPoint?: [endElem: Element, leftOffset: number, topOffset: number];
+  startPoint: [startElem: Element, leftOffset: number, topOffset: number];
+  endPoint: [endElem: Element, leftOffset: number, topOffset: number];
 
   connectorConfig: ConnectorConfig = {} as ConnectorConfig;
   previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
@@ -243,14 +246,17 @@ export class SetConnectorBlock extends AnimBlock {
   }
   
   constructor(
-    public connectorElem: Connector,
-    public startPoint: [startElem: Element, leftOffset: number, topOffset: number],
-    public endPoint: [endElem: Element, leftOffset: number, topOffset: number],
+    connectorElem: Connector | null,
+    startPoint: [startElem: Element | null, leftOffset: number, topOffset: number],
+    endPoint: [endElem: Element | null, leftOffset: number, topOffset: number],
     connectorConfig: Partial<ConnectorConfig> = {},
     /*animName: string, behaviorGroup: TBehavior*/
     ) {
     // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
 
+    if (!connectorElem) {
+      throw new Error('Connector must not be undefined');
+    }
     if (!(startPoint?.[0] instanceof Element)) {
       throw new Error(`Start point element must not be undefined`); // TODO: Improve error message
     }
@@ -265,6 +271,10 @@ export class SetConnectorBlock extends AnimBlock {
         return [[], []];
       },
     });
+
+    this.connectorElem = connectorElem;
+    this.startPoint = startPoint as [startElem: Element, leftOffset: number, topOffset: number];
+    this.endPoint = endPoint as [endElem: Element, leftOffset: number, topOffset: number];
 
     this.connectorConfig = this.applyLineConfig(connectorConfig);
   }
@@ -293,13 +303,19 @@ export class SetConnectorBlock extends AnimBlock {
 }
 
 export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  connectorElem: Connector;
+
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
-  constructor(public connectorElem: Connector, public animName: string, behaviorGroup: TBehavior) {
+  constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
+    if (!connectorElem) {
+      throw new Error('Connector must not be undefined');
+    }
     super(connectorElem, animName, behaviorGroup);
+    this.connectorElem = connectorElem;
   }
 
   protected _onStartForward(): void {
@@ -317,13 +333,19 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 }
 
 export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+  connectorElem: Connector;
+
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 
-  constructor(public connectorElem: Connector, public animName: string, behaviorGroup: TBehavior) {
+  constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
+    if (!connectorElem) {
+      throw new Error('Connector must not be undefined');
+    }
     super(connectorElem, animName, behaviorGroup);
+    this.connectorElem = connectorElem;
   }
 
   protected _onStartForward(): void {

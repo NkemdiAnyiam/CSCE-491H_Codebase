@@ -103,33 +103,33 @@ class _WebFlik {
       },
     } satisfies {
       Entrance: <AnimName extends AnimationNameIn<CombinedEntranceBank>>(
-        domElem: Element,
+        domElem: Element | null,
         animName: AnimName,
         ...params: BlockInitParams<EntranceBlock<CombinedEntranceBank[AnimName]>>
       ) => EntranceBlock<CombinedEntranceBank[AnimName]>;
 
       Exit: <AnimName extends AnimationNameIn<CombinedExitBank>>(
-        domElem: Element,
+        domElem: Element | null,
         animName: AnimName,
         ...params: BlockInitParams<ExitBlock<CombinedExitBank[AnimName]>>
       ) => ExitBlock<CombinedExitBank[AnimName]>;
 
       Emphasis: <AnimName extends AnimationNameIn<CombinedEmphasisBank>>(
-        domElem: Element,
+        domElem: Element | null,
         animName: AnimName,
         ...params: BlockInitParams<EmphasisBlock<CombinedEmphasisBank[AnimName]>>
       ) => EmphasisBlock<CombinedEmphasisBank[AnimName]>;
 
       Translation: <AnimName extends AnimationNameIn<CombinedTranslationBank>>(
-        domElem: Element,
+        domElem: Element | null,
         animName: AnimName,
         ...params: BlockInitParams<TranslationBlock<CombinedTranslationBank[AnimName]>>
       ) => TranslationBlock<CombinedTranslationBank[AnimName]>;
 
       SetConnector: (
         connectorElem: Connector,
-        startPoint: [startElem: Element, leftOffset: number, topOffset: number],
-        endPoint: [endElem: Element, leftOffset: number, topOffset: number]
+        startPoint: [startElem: Element | null, leftOffset: number, topOffset: number],
+        endPoint: [endElem: Element | null, leftOffset: number, topOffset: number]
       ) => SetConnectorBlock;
 
       DrawConnector: <AnimName extends AnimationNameIn<CombinedDrawConnectorBank>>(

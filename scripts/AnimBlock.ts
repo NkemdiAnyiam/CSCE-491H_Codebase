@@ -97,14 +97,16 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   config: AnimBlockConfig = {} as AnimBlockConfig;
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
   animArgs: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
+  domElem: Element;
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
-  constructor(public domElem: Element, public animName: string, public behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, public animName: string, public behaviorGroup: TBehavior) {
     if (!domElem) {
       throw new Error(`Element must not be undefined`); // TODO: Improve error message
     }
 
+    this.domElem = domElem;
     this.id = AnimBlock.id++;
   }
 
@@ -288,7 +290,7 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
     };
   }
 
-  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
     super(domElem, animName, behaviorGroup);
   }
@@ -313,7 +315,7 @@ export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavio
     };
   }
 
-  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid exit animation name ${animName}`); }
     super(domElem, animName, behaviorGroup);
   }
@@ -336,7 +338,7 @@ export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
     return {};
   }
 
-  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name ${animName}`); }
     super(domElem, animName, behaviorGroup);
   }
@@ -353,7 +355,7 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
     };
   }
 
-  constructor(domElem: Element, animName: string, behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
     if (!behaviorGroup) { throw new Error(`Invalid translation animation name ${animName}`); }
     super(domElem, animName, behaviorGroup);
   }

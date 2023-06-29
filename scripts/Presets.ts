@@ -158,7 +158,11 @@ export const presetTranslations = {
   },
 
   ['~move-to']: {
-    generateKeyframes(targetElem: Element, translationOptions: Partial<TElem> = {}) {
+    generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {
+      if (!targetElem) {
+        throw new Error(`Target for ~move-to must not be undefined`); // TODO: Improve error message
+      }
+
       let {
         alignmentX = 'left', alignmentY = 'top',
         offsetX, offsetY, offsetXY,
