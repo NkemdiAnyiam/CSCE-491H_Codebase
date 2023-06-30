@@ -306,7 +306,10 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
-    return {};
+    return {
+      classesToRemoveOnStart: ['wbfk-hidden'],
+      commitStyles: false,
+    };
   }
 
   constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
@@ -336,7 +339,10 @@ export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfr
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
-    return {};
+    return {
+      classesToAddOnFinish: ['wbfk-hidden'],
+      commitStyles: false,
+    };
   }
 
   constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
