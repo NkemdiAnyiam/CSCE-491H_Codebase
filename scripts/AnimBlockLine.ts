@@ -15,11 +15,17 @@ export class Connector extends HTMLElement {
   private lineLayer: SVGLineElement;
   private lineMask: SVGLineElement;
   private gBody: SVGGElement;
+  private mask: SVGMaskElement;
 
   startPoint?: [startElem: Element, leftOffset: number, topOffset: number];
   endPoint?: [endElem: Element, leftOffset: number, topOffset: number];
   tracking: boolean = false;
   private trackingTimeout?: NodeJS.Timer;
+
+  get x1(): number { return this.lineLayer.x1.baseVal.value; }
+  get x2(): number { return this.lineLayer.x2.baseVal.value; }
+  get y1(): number { return this.lineLayer.y1.baseVal.value; }
+  get y2(): number { return this.lineLayer.y2.baseVal.value; }
 
   set x1(val: number) {
     this.lineLayer.x1.baseVal.value = val;
@@ -58,16 +64,17 @@ export class Connector extends HTMLElement {
 
     // <link rel="preload" href="/scripts/TestUsability/line-styles.css" as="style" />
 
+    // TODO: Improve marker sizing configuration
     const htmlString = `
     <style>
       :host {
-        display: inline-block;
-        color: black;
-        stroke-linecap: round;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: initial;
         line-height: 0 !important;
         overflow: visible !important;
-        stroke-width: 2;
-        /* visibility: hidden; */
+        visibility: hidden !important;
       }
 
       :host(.markers-hidden) marker {
@@ -75,15 +82,8 @@ export class Connector extends HTMLElement {
       }
       
       .connector__svg {
-        visibility: hidden;
-        width: auto;
-        height: auto;
-        position: absolute;
-        top: 0;
-        left: 0;
-        /* pointer-events: none; */
+        visibility: hidden !important;
         overflow: visible !important;
-        z-index: 1000;
       }
       
       .connector__g-body {
@@ -91,13 +91,16 @@ export class Connector extends HTMLElement {
       }
       
       .connector__mask-group {
-        color: white !important;
-        stroke: currentColor !important;
-        fill: currentColor !important;
+        stroke: white !important;
+        fill: white !important;
       }
       
       .connector__layer-group {
         
+      }
+
+      .connector__line {
+        fill: none;
       }
       
       .connector__line--mask {
@@ -105,22 +108,17 @@ export class Connector extends HTMLElement {
       }
       
       .connector__line--layer {
-        stroke: currentColor !important;
         stroke-dasharray: 1 !important;
       }
       
       marker {
-        fill: currentColor !important;
+        stroke: none;
       }
-      
-      /*marker.hidden {
-        visibility: hidden;
-      }*/
     </style>
 
       <svg class="connector__svg">
         <g class="connector__g-body">
-          <mask id="${maskId}">
+          <mask id="${maskId}" maskUnits="userSpaceOnUse">
             <g class="connector__mask-group">
               ${
                 this.useStartMarker ?
@@ -180,6 +178,7 @@ export class Connector extends HTMLElement {
     this.gBody = shadow.querySelector('.connector__g-body') as SVGGElement;
     this.lineLayer = this.gBody.querySelector('.connector__line--layer') as SVGLineElement;
     this.lineMask = this.gBody.querySelector('.connector__line--mask') as SVGLineElement;
+    this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
   updateEndpoints = () => {
@@ -211,10 +210,19 @@ export class Connector extends HTMLElement {
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    this.x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + connectorLeftOffset;
-    this.y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + connectorTopOffset;
-    this.x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + connectorLeftOffset;
-    this.y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + connectorTopOffset;
+    const x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + connectorLeftOffset;
+    const y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + connectorTopOffset;
+    const x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + connectorLeftOffset;
+    const y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + connectorTopOffset;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    // TODO: Document
+    this.mask.width.baseVal.valueAsString = `${Math.abs(x2 - x1) + 50}`;
+    this.mask.x.baseVal.valueAsString = `${Math.min(x1, x2) - 25}`;
+    this.mask.height.baseVal.valueAsString = `${Math.abs(y2 - y1) + 50}`;
+    this.mask.y.baseVal.valueAsString = `${Math.min(y1, y2) - 25}`;
   }
 
   setTrackingInterval = () => {

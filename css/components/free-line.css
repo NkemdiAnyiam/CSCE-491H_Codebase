@@ -20,6 +20,14 @@
   stroke-linecap: round;
 }
 
+wbfk-connector {
+  stroke: currentColor;
+  fill: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  z-index: 1000;
+}
+
 .free-line--bullet-connector .free-line__line {
   stroke: var(--color-red);
 }

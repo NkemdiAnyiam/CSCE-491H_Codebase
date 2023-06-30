@@ -79,7 +79,7 @@ function setUpFreeLinesArrows() {
 
 // creates animation sequences for the data display
 function animateDataDisplay(dataDisplay, jobScheduler) {
-  const timeGraphEl = document.querySelector('.time-graph');
+  const timeGraphEl = document.querySelector('.time-graph')!;
   const jobsUnsorted = jobScheduler.getJobsUnsorted();
   const jobsSorted = jobScheduler.getJobs();
 
@@ -98,7 +98,6 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence();
     animSequence.setDescription(`Describe that we're about to move bars onto graph`);
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_placeBars, '~wipe-from-bottom', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0] ],
       SetConnector(connector_placeBars, [textbox_placeBars, 0.5, 1], [jobsUnsorted[0].getJobBar(), 0.5, 0]),
       DrawConnector(connector_placeBars, '~trace', ['from-end']),
       Entrance(textbox_placeBars, '~fade-in', [], {blocksPrev: false}),
@@ -190,7 +189,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   const cArray = arrayGroup_j_c.querySelector('.array--c');
   const jArray1 = arrayGroup_j_c.querySelector('.array--j');
   const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box');
-  const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .free-line');
+  const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbfk-connector');
   const textP_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
   const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
@@ -217,6 +216,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain what c array will be used for');
     animSequence.addManyBlocks([
       // [ 'line', freeLine_cArray, '~wipe', ['left'], null, [0, 0.5], cArray, [1, 0.5] ],
+      SetConnector(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
+      DrawConnector(freeLine_cArray, '~trace', ['from-end']),
       Exit(textP_cArray_explain, '~fade-out', [], {duration: 250}),
       Entrance(textP_cArray_refArray, '~fade-in', [], {duration: 250}),
     ]);
@@ -232,10 +233,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
     animSequence.addManyBlocks([
       Exit(textbox_cArray, '~fade-out', [], {blocksNext: false}),
-      SetConnector(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
-      // DrawLine(freeLine_cArray, '~trace', ['from-end']),
+      EraseConnector(freeLine_cArray, '~trace', ['from-end']),
       // [ 'line', freeLine_cArray, '~wipe', ['left'], null, [0, 0.5], cArray, [1, 0.5] ],
-      // DrawLine(freeLine_cArray, [thing, 0, 0.5], [cArray, 1, 0.5], '~wipe', ['from-start'])
     ]);
     animTimeline.addOneSequence(animSequence);
   }
@@ -246,7 +245,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
-  // const timeGraphArrowEl = timeGraphEl.querySelector('.free-line'); // arrow connecting c entry and compatible job's row header
+  const timeGraphArrowEl = timeGraphEl.querySelector('wbkf-connector'); // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
     const jobBarEl = job.getJobBar();
     // get j array block corresponding to current job bar
@@ -333,6 +332,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
         animSequence.addManyBlocks([
           Emphasis(compatibleJobBarEl, '~un-highlight', [], {blocksNext: false}),
           // [ 'line', timeGraphArrowEl, '~wipe', ['top'], rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]
+          SetLine(timeGraphArrowEl,)
         ]);
       }
       else {
