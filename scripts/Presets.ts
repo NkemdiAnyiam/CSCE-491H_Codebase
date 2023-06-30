@@ -145,14 +145,10 @@ export const presetTranslations = {
       
       return [
         // forward
-        [{transform: `translate(calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}),
-                              calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`
-        }],
+        [{translate: `calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}) calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`}],
   
         // backward
-        [{transform: `translate(calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}),
-                              calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`
-        }],
+        [{translate: `calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}) calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`}],
       ];
     },
   },
@@ -198,14 +194,11 @@ export const presetTranslations = {
       
       return [
         // forward
-        [{transform: `translate(calc(${translateX}px + ${offsetX}${offsetUnitsX}),
-                              calc(${translateY}px + ${offsetY}${offsetUnitsY})`
-        }],
+        // TODO: Support returning singular Keyframe instead of Keyframe[]
+        [{translate: `calc(${translateX}px + ${offsetX}${offsetUnitsX}) calc(${translateY}px + ${offsetY}${offsetUnitsY})`}],
 
         // backward
-        [{transform: `translate(calc(${-translateX}px + ${-offsetX}${offsetUnitsX}),
-                              calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`
-        }],
+        [{translate: `calc(${-translateX}px + ${-offsetX}${offsetUnitsX}) calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`}],
       ];
     },
     config: {
