@@ -201,9 +201,6 @@ export const presetTranslations = {
         [{translate: `calc(${-translateX}px + ${-offsetX}${offsetUnitsX}) calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`}],
       ];
     },
-    config: {
-      regenerateKeyframesOnStart: true,
-    },
   },
 } satisfies IKeyframesBank<TranslationBlock>; 
 

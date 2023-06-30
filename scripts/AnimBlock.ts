@@ -11,7 +11,7 @@ type CustomKeyframeEffectOptions = {
   classesToAddOnStart: string[];
   classesToRemoveOnFinish: string[];
   classesToRemoveOnStart: string[]; // TODO: Consider order of addition/removal
-  regenerateKeyframesOnStart: boolean;
+  pregenerateKeyframes: boolean;
 }
 
 export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -65,12 +65,14 @@ export class AnimTimelineAnimation extends Animation {
   setForwardFrames(frames: Keyframe[]) {
     this.forwardEffect.setKeyframes(frames);
   }
-  setBackwardFrames(frames: Keyframe[]) {
+  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean) {
     this.backwardEffect.setKeyframes(frames);
+    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
-  setFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[]) {
+  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean) {
     this.forwardEffect.setKeyframes(forwardFrames);
     this.backwardEffect.setKeyframes(backwardFrames);
+    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
   constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
     super();
@@ -111,11 +113,13 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   }
 
    initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}) {
-    this.config = this.mergeConfigs(userConfig, this.behaviorGroup.config ?? {});
     this.animArgs = animArgs;
+    this.config = this.mergeConfigs(userConfig, this.behaviorGroup.config ?? {});
 
     // TODO: Handle case where only one keyframe is provided
-    let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...animArgs); // TODO: extract generateKeyframes
+    let [forwardFrames, backwardFrames] = this.config.pregenerateKeyframes ?
+      this.behaviorGroup.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
+      [[], []];
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: this.config.duration,
@@ -151,10 +155,12 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      if (this.config.regenerateKeyframesOnStart) {
-        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs);
-        this.animation.setFrames(forwardFrames, backwardFrames ?? [...forwardFrames].reverse());
+      if (!this.config.pregenerateKeyframes) {
+        // TODO: Handle case where only one keyframe is provided
+        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+        this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
       }
+      
       this.animate(this.animation.forward, 'forward')
         .then(() => resolve());
     });
@@ -239,7 +245,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       commitStyles: true,
       composite: 'replace',
       easing: 'linear',
-      regenerateKeyframesOnStart: false,
+      pregenerateKeyframes: false,
 
       // subclass defaults take priority
       ...this.defaultConfig,
@@ -287,6 +293,7 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
     // TODO: Consider commitStyles for false by default
     return {
       commitStyles: false,
+      pregenerateKeyframes: true,
     };
   }
 
@@ -312,6 +319,7 @@ export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavio
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitStyles: false,
+      pregenerateKeyframes: true,
     };
   }
 

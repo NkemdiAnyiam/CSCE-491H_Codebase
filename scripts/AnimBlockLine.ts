@@ -250,6 +250,7 @@ export class SetConnectorBlock extends AnimBlock {
     return {
       duration: 0,
       commitStyles: false,
+      pregenerateKeyframes: true,
     };
   }
   
@@ -317,6 +318,7 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     return {
       classesToRemoveOnStart: ['wbfk-hidden'],
       commitStyles: false,
+      pregenerateKeyframes: true,
     };
   }
 
@@ -350,6 +352,7 @@ export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfr
     return {
       classesToAddOnFinish: ['wbfk-hidden'],
       commitStyles: false,
+      pregenerateKeyframes: true,
     };
   }
 
