@@ -362,6 +362,6 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
 }
 
 // TODO: Create util
-function mergeArrays<T>(...arrays: T[][]): Array<T> {
-  return Array.from(new Set([...arrays.flat()]));
+function mergeArrays<T>(...arrays: Array<T>[]): Array<T> {
+  return Array.from(new Set(new Array<T>().concat(...arrays)));
 }

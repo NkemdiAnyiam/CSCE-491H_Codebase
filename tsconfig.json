@@ -15,7 +15,6 @@
     "lib": [
       "ES6",
       "DOM",
-      "ES2019"
     ],                                        /* Specify a set of bundled library declaration files that describe the target runtime environment. */
     // "jsx": "preserve",                                /* Specify what JSX code is generated. */
     // "experimentalDecorators": true,                   /* Enable experimental support for legacy experimental decorators. */
