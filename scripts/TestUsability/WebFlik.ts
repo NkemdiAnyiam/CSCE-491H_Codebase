@@ -2,11 +2,11 @@ import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, Tr
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
-export type KeyframeBehaviorGroup = Readonly<{
+export type KeyframesBankEntry = Readonly<{
   generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
   config?: Partial<AnimBlockConfig>;
 }>
-export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<string, KeyframeBehaviorGroup>> & (T extends void ? {} : ThisType<T>);
+export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<string, KeyframesBankEntry>> & (T extends void ? {} : ThisType<T>);
 
 // export interface Obj {
 //   Entrances?: IKeyframesBank<EntranceBlock>
@@ -18,7 +18,7 @@ export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // TODO: Handle undo-- prefixes
 export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
-  [key in keyof TBank as TBank[key] extends KeyframeBehaviorGroup ? key : never]: TBank[key];
+  [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];
 }, string>;
 
 type BlockInitParams<
@@ -61,14 +61,14 @@ class _WebFlik {
   ) /* TODO: Add coherent return type */ {
     type TogglePresets<TUserBank, TPresetBank> = Readonly<TUserBank & (IncludePresets extends true ? TPresetBank : {})>;
 
+    const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
+
     type CombinedEntranceBank = TogglePresets<UserEntranceBank, typeof presetEntrances>;
     type CombinedExitBank = TogglePresets<UserExitBank, typeof presetExits>;
     type CombinedEmphasisBank = TogglePresets<UserEmphasisBank, typeof presetEmphases>;
     type CombinedTranslationBank = TogglePresets<UserTranslationBank, typeof presetTranslations>;
     type CombinedDrawConnectorBank = typeof presetConnectorEntrances;
     type CombinedEraseConnectorBank = typeof presetConnectorExits;
-
-    const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
     
     // Add the keyframes groups to the static banks of the block classes
     const combinedEntranceBank = combineBanks(presetEntrances, Entrances) as CombinedEntranceBank;
@@ -143,15 +143,7 @@ class _WebFlik {
         animName: AnimName,
         ...params: BlockInitParams<EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>>
       ) => EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>;
-    }
-    // satisfies {
-    //   // Entrance: AnimBlockCreator<typeof EntranceBlock<CombinedEntranceBank>>;
-    //   Exit: AnimBlockCreator<typeof ExitBlock<CombinedExitBank>>;
-    //   Emphasis: AnimBlockCreator<typeof EmphasisBlock<CombinedEmphasisBank>>;
-    //   Translate: AnimBlockCreator<typeof TranslateBlock>;
-    //   TargetedTranslate: AnimBlockCreator<typeof TargetedTranslateBlock>;
-    // //   DrawLine: AnimBlockCreator<typeof DrawLine<CombinedDrawLineBank>>
-    // };
+    };
   }
 }
 

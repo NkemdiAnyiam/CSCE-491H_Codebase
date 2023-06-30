@@ -1,5 +1,5 @@
 import { AnimSequence } from "./AnimSequence.js";
-import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
+import { AnimationNameIn, IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -88,7 +88,7 @@ export class AnimTimelineAnimation extends Animation {
   set sequenceID(id: number) { this._sequenceID = id; }
 }
 
-export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> {
+export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> {
   static id: number = 0;
 
   parentSequence?: AnimSequence; // TODO: replace with own dynamic list of running animations
@@ -98,12 +98,12 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   id: number;
   config: AnimBlockConfig = {} as AnimBlockConfig;
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
-  animArgs: Parameters<TBehavior['generateKeyframes']> = {} as Parameters<TBehavior['generateKeyframes']>;
+  animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
-  constructor(domElem: Element | null, public animName: string, public behaviorGroup: TBehavior) {
+  constructor(domElem: Element | null, public animName: string, public bankEntry: TBankEntry) {
     if (!domElem) {
       throw new Error(`Element must not be null`); // TODO: Improve error message
     }
@@ -112,13 +112,13 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     this.id = AnimBlock.id++;
   }
 
-   initialize(animArgs: Parameters<TBehavior['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}) {
+   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}) {
     this.animArgs = animArgs;
-    this.config = this.mergeConfigs(userConfig, this.behaviorGroup.config ?? {});
+    this.config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
 
     // TODO: Handle case where only one keyframe is provided
     let [forwardFrames, backwardFrames] = this.config.pregenerateKeyframes ?
-      this.behaviorGroup.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
+      this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
       [[], []];
 
     const keyframeOptions: KeyframeEffectOptions = {
@@ -157,7 +157,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     return new Promise(resolve => {
       if (!this.config.pregenerateKeyframes) {
         // TODO: Handle case where only one keyframe is provided
-        let [forwardFrames, backwardFrames] = this.behaviorGroup.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+        let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
         this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
       }
       
@@ -235,7 +235,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     });
   }
 
-  private mergeConfigs(userConfig: Partial<AnimBlockConfig>, behaviorGroupConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
+  private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
     return {
       // pure defaults
       blocksNext: true,
@@ -251,7 +251,7 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       ...this.defaultConfig,
 
       // config defined in animation bank take priority
-      ...behaviorGroupConfig,
+      ...bankEntryConfig,
 
       // custom config take priority
       ...userConfig,
@@ -259,32 +259,32 @@ export abstract class AnimBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
       // mergeable properties
       classesToAddOnStart: mergeArrays(
         this.defaultConfig.classesToAddOnStart ?? [],
-        behaviorGroupConfig.classesToAddOnStart ?? [],
+        bankEntryConfig.classesToAddOnStart ?? [],
         userConfig.classesToAddOnStart ?? [],
       ),
 
       classesToRemoveOnStart: mergeArrays(
         this.defaultConfig.classesToRemoveOnStart ?? [],
-        behaviorGroupConfig.classesToRemoveOnStart ?? [],
+        bankEntryConfig.classesToRemoveOnStart ?? [],
         userConfig.classesToRemoveOnStart ?? [],
       ),
 
       classesToAddOnFinish: mergeArrays(
         this.defaultConfig.classesToAddOnFinish ?? [],
-        behaviorGroupConfig.classesToAddOnFinish ?? [],
+        bankEntryConfig.classesToAddOnFinish ?? [],
         userConfig.classesToAddOnFinish ?? [],
       ),
 
       classesToRemoveOnFinish: mergeArrays(
         this.defaultConfig.classesToRemoveOnFinish ?? [],
-        behaviorGroupConfig.classesToRemoveOnFinish ?? [],
+        bankEntryConfig.classesToRemoveOnFinish ?? [],
         userConfig.classesToRemoveOnFinish ?? [],
       ),
     };
   }
 }
 
-export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   // TODO: remove
   AAADummyEntranceProp = 'Ent';
   ZZZDummyEntranceProp = 'rance';
@@ -297,9 +297,9 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
     };
   }
 
-  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid entrance animation name ${animName}`); }
-    super(domElem, animName, behaviorGroup);
+  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid entrance animation name ${animName}`); }
+    super(domElem, animName, bankEntry);
   }
 
   protected _onStartForward(): void {
@@ -311,7 +311,7 @@ export class EntranceBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
   }
 }
 
-export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   // TODO: remove
   AAADummyExitProp = 'Ex';
   ZZZDummyExitProp = 'it';
@@ -323,9 +323,9 @@ export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavio
     };
   }
 
-  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid exit animation name ${animName}`); }
-    super(domElem, animName, behaviorGroup);
+  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid exit animation name ${animName}`); }
+    super(domElem, animName, bankEntry);
   }
 
   protected _onFinishForward(): void {
@@ -337,7 +337,7 @@ export class ExitBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehavio
   }
 }
 
-export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   // TODO: remove
   AAADummyEmphasisProp = 'Emph';
   ZZZDummyEmphasisProp = 'asis';
@@ -346,13 +346,13 @@ export class EmphasisBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBeh
     return {};
   }
 
-  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid emphasis animation name ${animName}`); }
-    super(domElem, animName, behaviorGroup);
+  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid emphasis animation name ${animName}`); }
+    super(domElem, animName, bankEntry);
   }
 }
 
-export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   // TODO: remove
   AAADummyEmphasisProp = 'Trans';
   ZZZDummyEmphasisProp = 'lation';
@@ -363,9 +363,9 @@ export class TranslationBlock<TBehavior extends KeyframeBehaviorGroup = Keyframe
     };
   }
 
-  constructor(domElem: Element | null, animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid translation animation name ${animName}`); }
-    super(domElem, animName, behaviorGroup);
+  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
+    super(domElem, animName, bankEntry);
   }
 }
 

@@ -1,6 +1,6 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
-import { IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
+import { IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 

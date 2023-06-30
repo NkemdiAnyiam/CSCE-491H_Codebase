@@ -1,6 +1,6 @@
 import { AnimBlock, AnimBlockConfig, AnimTimelineAnimation, EntranceBlock } from "./AnimBlock.js";
 import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
-import { AnimationNameIn, IKeyframesBank, KeyframeBehaviorGroup } from "./TestUsability/WebFlik.js";
+import { AnimationNameIn, IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 type ConnectorConfig = {
   trackEndpoints: boolean;
@@ -311,7 +311,7 @@ export class SetConnectorBlock extends AnimBlock {
   }
 }
 
-export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -322,12 +322,12 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
+  constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
     if (!connectorElem) {
       throw new Error('Connector element must not be null');
     }
-    super(connectorElem, animName, behaviorGroup);
+    super(connectorElem, animName, bankEntry);
     this.connectorElem = connectorElem;
   }
 
@@ -345,7 +345,7 @@ export class DrawConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfra
   }
 }
 
-export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = KeyframeBehaviorGroup> extends AnimBlock<TBehavior> {
+export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -356,12 +356,12 @@ export class EraseConnectorBlock<TBehavior extends KeyframeBehaviorGroup = Keyfr
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, behaviorGroup: TBehavior) {
-    if (!behaviorGroup) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
+  constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
+    if (!bankEntry) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
     if (!connectorElem) {
       throw new Error('Connector element must not be null');
     }
-    super(connectorElem, animName, behaviorGroup);
+    super(connectorElem, animName, bankEntry);
     this.connectorElem = connectorElem;
   }
 
