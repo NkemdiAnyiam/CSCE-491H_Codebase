@@ -54,12 +54,12 @@ type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
 export class AnimTimelineAnimation extends Animation {
   // TODO: improve syntax
-  get forward(): AnimTimelineAnimation {
-    this.effect = this.forwardEffect;
+  get forward() {
+    this.effect = new KeyframeEffect(this.forwardEffect.target, this.forwardEffect.getKeyframes(), {...this.forwardEffect.getTiming(), composite: this.forwardEffect.composite});
     return this;
   }
-  get backward(): AnimTimelineAnimation {
-    this.effect = this.backwardEffect;
+  get backward() {
+    this.effect = new KeyframeEffect(this.backwardEffect.target, this.backwardEffect.getKeyframes(), {...this.backwardEffect.getTiming(), composite: this.backwardEffect.composite});
     return this;
   }
   setForwardFrames(frames: Keyframe[]) {
