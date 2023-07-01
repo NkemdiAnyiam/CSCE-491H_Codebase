@@ -1,5 +1,5 @@
 import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock } from "../AnimBlock.js";
-import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock } from "../AnimBlockLine.js";
+import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
 export type KeyframesBankEntry = Readonly<{
@@ -92,8 +92,8 @@ class _WebFlik {
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
       },// TODO: Add optional lineOptions
-      SetConnector: function(connectorElem: Connector, startPoint, endPoint) {
-        return new SetConnectorBlock(connectorElem, startPoint, endPoint).initialize([]);
+      SetConnector: function(connectorElem, startPoint, endPoint, connectorConfig = {} as ConnectorConfig) {
+        return new SetConnectorBlock(connectorElem, startPoint, endPoint, connectorConfig).initialize([]);
       },
       DrawConnector: function(connectorElem, animName, ...params) {
         return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank[animName]).initialize(...params);
@@ -129,7 +129,8 @@ class _WebFlik {
       SetConnector: (
         connectorElem: Connector,
         startPoint: [startElem: Element | null, leftOffset: number, topOffset: number],
-        endPoint: [endElem: Element | null, leftOffset: number, topOffset: number]
+        endPoint: [endElem: Element | null, leftOffset: number, topOffset: number],
+        connectorConfig: ConnectorConfig
       ) => SetConnectorBlock;
 
       DrawConnector: <AnimName extends AnimationNameIn<CombinedDrawConnectorBank>>(

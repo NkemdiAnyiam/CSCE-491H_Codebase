@@ -2,7 +2,7 @@ import { AnimBlock, AnimBlockConfig, AnimTimelineAnimation, EntranceBlock } from
 import { AnimBlockLineUpdater } from "./AnimBlockLineUpdater.js";
 import { AnimationNameIn, IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
-type ConnectorConfig = {
+export type ConnectorConfig = {
   trackEndpoints: boolean;
 };
 
