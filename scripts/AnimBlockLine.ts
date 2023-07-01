@@ -263,9 +263,8 @@ export class SetConnectorBlock extends AnimBlock {
     ) {
     // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
 
-    if (!connectorElem) {
-      throw new Error('Connector element must not be null');
-    }
+    if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
     if (!(startPoint?.[0] instanceof Element)) {
       throw new Error(`Start point element must not be null`); // TODO: Improve error message
     }
@@ -318,21 +317,26 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return {
       classesToRemoveOnStart: ['wbfk-hidden'],
       commitStyles: false,
-      pregenerateKeyframes: true,
+      // pregenerateKeyframes: true,
     };
   }
 
   constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
     if (!bankEntry) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
-    if (!connectorElem) {
-      throw new Error('Connector element must not be null');
-    }
+    if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
+
     super(connectorElem, animName, bankEntry);
     this.connectorElem = connectorElem;
   }
 
-  protected _onStartForward(): void {
+  stepForward(): Promise<void> {
     this.connectorElem.updateEndpoints();
+    return super.stepForward();
+  }
+
+  protected _onStartForward(): void {
+    // this.connectorElem.updateEndpoints();
     this.domElem.classList.remove('wbfk-hidden');
     if (this.connectorElem.tracking) {
       this.connectorElem.setTrackingInterval();
@@ -352,15 +356,15 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     return {
       classesToAddOnFinish: ['wbfk-hidden'],
       commitStyles: false,
-      pregenerateKeyframes: true,
+      // pregenerateKeyframes: true,
     };
   }
 
   constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
     if (!bankEntry) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
-    if (!connectorElem) {
-      throw new Error('Connector element must not be null');
-    }
+    if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
+
     super(connectorElem, animName, bankEntry);
     this.connectorElem = connectorElem;
   }
@@ -369,8 +373,12 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     this.connectorElem.clearTrackingInterval();
   }
 
-  protected _onStartBackward(): void {
+  stepBackward(): Promise<void> {
     this.connectorElem.updateEndpoints();
+    return super.stepBackward();
+  }
+
+  protected _onStartBackward(): void {
     if (this.connectorElem.tracking) {
       this.connectorElem.setTrackingInterval();
     }

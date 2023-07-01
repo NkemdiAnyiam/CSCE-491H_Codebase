@@ -207,7 +207,7 @@ export const presetTranslations = {
 export const presetConnectorEntrances = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
+    generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
       switch(fromPoint) {
         case 'from-start':
           return [[
@@ -221,8 +221,32 @@ export const presetConnectorEntrances = {
             {strokeDashoffset: 0},
           ]];
 
+        case 'from-top':
+          return [[
+            {strokeDashoffset: this.connectorElem.y1 <= this.connectorElem.y2 ? 1 : -1},
+            {strokeDashoffset: 0},
+          ]];
+
+        case 'from-bottom':
+          return [[
+            {strokeDashoffset: this.connectorElem.y1 >= this.connectorElem.y2 ? 1 : -1},
+            {strokeDashoffset: 0},
+          ]];
+
+        case 'from-left':
+          return [[
+            {strokeDashoffset: this.connectorElem.x1 <= this.connectorElem.x2 ? 1 : -1},
+            {strokeDashoffset: 0},
+          ]];
+
+        case 'from-right':
+          return [[
+            {strokeDashoffset: this.connectorElem.x1 >= this.connectorElem.x2 ? 1 : -1},
+            {strokeDashoffset: 0},
+          ]];
+
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
     config: {
@@ -230,6 +254,7 @@ export const presetConnectorEntrances = {
     }
   },
 
+  // TODO: handle markers
   [`~fade-in`]: {
     generateKeyframes: () => [[
       {opacity: '0'},
@@ -241,22 +266,46 @@ export const presetConnectorEntrances = {
 export const presetConnectorExits = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-start' | 'from-end' = 'from-start') {
+    generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
       switch(fromPoint) {
         case 'from-start':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: 1},
-          ]];
-
-        case 'from-end':
           return [[
             {strokeDashoffset: 0},
             {strokeDashoffset: -1},
           ]];
 
+        case 'from-end':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: 1},
+          ]];
+
+        case 'from-top':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: this.connectorElem.y1 <= this.connectorElem.y2 ? -1 : 1},
+          ]];
+
+        case 'from-bottom':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: this.connectorElem.y1 >= this.connectorElem.y2 ? -1 : 1},
+          ]];
+
+        case 'from-left':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: this.connectorElem.x1 <= this.connectorElem.x2 ? -1 : 1},
+          ]];
+
+        case 'from-right':
+          return [[
+            {strokeDashoffset: 0},
+            {strokeDashoffset: this.connectorElem.x1 >= this.connectorElem.x2 ? -1 : 1},
+          ]];
+
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start' or 'from-end'`);
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
     config: {
