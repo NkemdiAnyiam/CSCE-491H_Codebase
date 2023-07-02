@@ -205,53 +205,49 @@ export const presetTranslations = {
 } satisfies IKeyframesBank<TranslationBlock>; 
 
 export const presetConnectorEntrances = {
-  // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
     generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
+      const markerIdPrefix = this.connectorElem.markerIdPrefix;
+
+      // using CSS variables to control marker-end or marker-start with easing step-end
+      // makes it possible to instantly hide a marker and re-reveal it at the end
+      const fromStartFrames = [
+        {['--marker-end']: `url(#${markerIdPrefix}-end-layer--hide-by-invalidating)`, easing: 'step-end'},
+        {strokeDashoffset: 1, offset: 0},
+        {strokeDashoffset: 0, offset: 1},
+        {['--marker-end']: `url(#${markerIdPrefix}-end-layer)`},
+      ];
+
+      const fromEndFrames = [
+        {['--marker-start']: `url(#${markerIdPrefix}-start-layer--hide-by-invalidating)`, easing: 'step-end'},
+        {strokeDashoffset: -1, offset: 0},
+        {strokeDashoffset: 0, offset: 1},
+        {['--marker-start']: `url(#${markerIdPrefix}-start-layer)`},
+      ];
+
       switch(fromPoint) {
         case 'from-start':
-          return [[
-            {strokeDashoffset: 1},
-            {strokeDashoffset: 0},
-          ]];
+          return [fromStartFrames];
 
         case 'from-end':
-          return [[
-            {strokeDashoffset: -1},
-            {strokeDashoffset: 0},
-          ]];
+          return [fromEndFrames];
 
         case 'from-top':
-          return [[
-            {strokeDashoffset: this.connectorElem.y1 <= this.connectorElem.y2 ? 1 : -1},
-            {strokeDashoffset: 0},
-          ]];
+          return [this.connectorElem.y1 <= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
 
         case 'from-bottom':
-          return [[
-            {strokeDashoffset: this.connectorElem.y1 >= this.connectorElem.y2 ? 1 : -1},
-            {strokeDashoffset: 0},
-          ]];
+          return [this.connectorElem.y1 >= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
 
         case 'from-left':
-          return [[
-            {strokeDashoffset: this.connectorElem.x1 <= this.connectorElem.x2 ? 1 : -1},
-            {strokeDashoffset: 0},
-          ]];
+          return [this.connectorElem.x1 <= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
 
         case 'from-right':
-          return [[
-            {strokeDashoffset: this.connectorElem.x1 >= this.connectorElem.x2 ? 1 : -1},
-            {strokeDashoffset: 0},
-          ]];
+          return [this.connectorElem.x1 >= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
 
         default:
           throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
-    config: {
-      classesToRemoveOnFinish: ['markers-hidden'],
-    }
   },
 
   // TODO: handle markers
@@ -267,50 +263,45 @@ export const presetConnectorExits = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
     generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
+      const markerIdPrefix = this.connectorElem.markerIdPrefix;
+
+      const fromStartFrames = [
+        {['--marker-start']: `url(#${markerIdPrefix}-start-layer)`, easing: 'step-start'},
+        {strokeDashoffset: 0, offset: 0},
+        {strokeDashoffset: -1, offset: 1},
+        {['--marker-start']: `url(#${markerIdPrefix}-start-layer--hide-by-invalidating)`},
+      ];
+
+      const fromEndFrames = [
+        {['--marker-end']: `url(#${markerIdPrefix}-end-layer)`, easing: 'step-start'},
+        {strokeDashoffset: 0, offset: 0},
+        {strokeDashoffset: 1, offset: 1},
+        {['--marker-end']: `url(#${markerIdPrefix}-end-layer--hide-by-invalidating)`},
+      ];
+
       switch(fromPoint) {
         case 'from-start':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: -1},
-          ]];
+          return [fromStartFrames];
 
         case 'from-end':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: 1},
-          ]];
+          return [fromEndFrames];
 
         case 'from-top':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: this.connectorElem.y1 <= this.connectorElem.y2 ? -1 : 1},
-          ]];
+          return [this.connectorElem.y1 <= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
 
         case 'from-bottom':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: this.connectorElem.y1 >= this.connectorElem.y2 ? -1 : 1},
-          ]];
+          return [this.connectorElem.y1 >= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
 
         case 'from-left':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: this.connectorElem.x1 <= this.connectorElem.x2 ? -1 : 1},
-          ]];
+          return [this.connectorElem.x1 <= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
 
         case 'from-right':
-          return [[
-            {strokeDashoffset: 0},
-            {strokeDashoffset: this.connectorElem.x1 >= this.connectorElem.x2 ? -1 : 1},
-          ]];
+          return [this.connectorElem.x1 >= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
 
         default:
           throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
-    config: {
-      classesToAddOnStart: ['markers-hidden'],
-    }
   },
 
   [`~fade-out`]: {
