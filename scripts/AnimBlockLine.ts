@@ -11,36 +11,36 @@ export class Connector extends HTMLElement {
 
   private connectorId: number = 0;
   readonly markerIdPrefix: string;
-  useEndMarker: boolean;
-  useStartMarker: boolean;
+  useMarkerB: boolean;
+  useMarkerA: boolean;
   private lineLayer: SVGLineElement;
   private lineMask: SVGLineElement;
   private gBody: SVGGElement;
   private mask: SVGMaskElement;
 
-  startPoint?: [startElem: Element, leftOffset: number, topOffset: number];
-  endPoint?: [endElem: Element, leftOffset: number, topOffset: number];
+  pointA?: [elemA: Element, leftOffset: number, topOffset: number];
+  pointB?: [elemB: Element, leftOffset: number, topOffset: number];
   tracking: boolean = false;
   private trackingTimeout?: NodeJS.Timer;
 
-  get x1(): number { return this.lineLayer.x1.baseVal.value; }
-  get x2(): number { return this.lineLayer.x2.baseVal.value; }
-  get y1(): number { return this.lineLayer.y1.baseVal.value; }
-  get y2(): number { return this.lineLayer.y2.baseVal.value; }
+  get ax(): number { return this.lineLayer.x1.baseVal.value; }
+  get bx(): number { return this.lineLayer.x2.baseVal.value; }
+  get ay(): number { return this.lineLayer.y1.baseVal.value; }
+  get by(): number { return this.lineLayer.y2.baseVal.value; }
 
-  set x1(val: number) {
+  set ax(val: number) {
     this.lineLayer.x1.baseVal.value = val;
     this.lineMask.x1.baseVal.value = val;
   }
-  set x2(val: number) {
+  set bx(val: number) {
     this.lineLayer.x2.baseVal.value = val;
     this.lineMask.x2.baseVal.value = val;
   }
-  set y1(val: number) {
+  set ay(val: number) {
     this.lineLayer.y1.baseVal.value = val;
     this.lineMask.y1.baseVal.value = val;
   }
-  set y2(val: number) {
+  set by(val: number) {
     this.lineLayer.y2.baseVal.value = val;
     this.lineMask.y2.baseVal.value = val;
   }
@@ -59,8 +59,8 @@ export class Connector extends HTMLElement {
     const markerIdPrefix = `markerArrow--${this.connectorId}`;
     this.markerIdPrefix = markerIdPrefix;
     const maskId = `mask--${this.connectorId}`;
-    this.useEndMarker = this.hasAttribute('end-marker');
-    this.useStartMarker = this.hasAttribute('start-marker');
+    this.useMarkerA = this.hasAttribute('a-marker');
+    this.useMarkerB = this.hasAttribute('b-marker');
     const markerWidth = 5;
     const markerHeight = 7;
 
@@ -70,8 +70,8 @@ export class Connector extends HTMLElement {
     const htmlString = `
     <style>
       :host {
-        --marker-end: url(#${markerIdPrefix}-end-layer);
-        --marker-start: url(#${markerIdPrefix}-start-layer);
+        --a-marker: url(#${markerIdPrefix}-a--layer);
+        --b-marker: url(#${markerIdPrefix}-b--layer);
         position: absolute;
         top: 0;
         left: 0;
@@ -109,8 +109,8 @@ export class Connector extends HTMLElement {
       
       .connector__line--layer {
         stroke-dasharray: 1 !important;
-        marker-end: var(--marker-end);
-        marker-start: var(--marker-start);
+        marker-start: var(--a-marker);
+        marker-end: var(--b-marker);
       }
       
       marker {
@@ -123,23 +123,23 @@ export class Connector extends HTMLElement {
           <mask id="${maskId}" maskUnits="userSpaceOnUse">
             <g class="connector__mask-group">
               ${
-                this.useStartMarker ?
-                `<marker id="${markerIdPrefix}-start-mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
+                this.useMarkerA ?
+                `<marker id="${markerIdPrefix}-a--mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
                   <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
                 ''
               }
               ${
-                this.useEndMarker ?
-                `<marker id="${markerIdPrefix}-end-mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
+                this.useMarkerB ?
+                `<marker id="${markerIdPrefix}-b--mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
                   <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
                 ''
               }
 
               <line
-                ${this.useStartMarker ? `marker-start="url(#${markerIdPrefix}-start-mask)"` : ''}
-                ${this.useEndMarker ? `marker-end="url(#${markerIdPrefix}-end-mask)"` : ''}
+                ${this.useMarkerA ? `marker-start="url(#${markerIdPrefix}-a--mask)"` : ''}
+                ${this.useMarkerB ? `marker-end="url(#${markerIdPrefix}-b--mask)"` : ''}
                 class="connector__line connector__line--mask"
               />
             </g>
@@ -147,15 +147,15 @@ export class Connector extends HTMLElement {
 
           <g mask="url(#${maskId})" class="connector__layer-group">
             ${
-              this.useStartMarker ?
-              `<marker id="${markerIdPrefix}-start-layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
+              this.useMarkerA ?
+              `<marker id="${markerIdPrefix}-a--layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
                 <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
               ''
             }
             ${
-              this.useEndMarker ?
-              `<marker id="${markerIdPrefix}-end-layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
+              this.useMarkerB ?
+              `<marker id="${markerIdPrefix}-b--layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
                 <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
               ''
@@ -182,23 +182,23 @@ export class Connector extends HTMLElement {
   }
 
   updateEndpoints = () => {
-    if (!this.startPoint || !this.endPoint) { return; }
+    if (!this.pointA || !this.pointB) { return; }
 
     // to properly place the endpoints, we need the positions of their bounding boxes
-    // get the bounding rectangles for starting reference element, ending reference element, and parent element
+    // get the bounding rectangles for A reference element, B reference element, and parent element
     // TODO: Use offsetParent to account for direct parent beieng statically positioned
     const svgParentElement = this.parentElement!;
     
     // the class is appended without classList.add() so that multiple applications
     // of the class do not interfere with each other upon removal
     // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
-    this.startPoint[0].classList.value += ` wbfk-override-hidden`;
-    this.endPoint[0].classList.value += ` wbfk-override-hidden`;
-    const {left: startLeft, right: startRight, top: startTop, bottom: startBottom} = this.startPoint[0].getBoundingClientRect();
-    const {left: endLeft, right: endRight, top: endTop, bottom: endBottom} = this.endPoint[0].getBoundingClientRect();
+    this.pointA[0].classList.value += ` wbfk-override-hidden`;
+    this.pointB[0].classList.value += ` wbfk-override-hidden`;
+    const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = this.pointA[0].getBoundingClientRect();
+    const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = this.pointB[0].getBoundingClientRect();
     const {left: parentLeft, top: parentTop} = svgParentElement.getBoundingClientRect();
-    this.startPoint[0].classList.value = this.startPoint[0].classList.value.replace(` wbfk-override-hidden`, '');
-    this.endPoint[0].classList.value = this.endPoint[0].classList.value.replace(` wbfk-override-hidden`, '');
+    this.pointA[0].classList.value = this.pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
+    this.pointB[0].classList.value = this.pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the parent element's current top and left from the offset
@@ -208,21 +208,21 @@ export class Connector extends HTMLElement {
     const connectorLeftOffset = -parentLeft - Number.parseFloat(getComputedStyle(svgParentElement).borderLeftWidth);
     const connectorTopOffset = -parentTop - Number.parseFloat(getComputedStyle(svgParentElement).borderTopWidth);
 
-    // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the start and end reference elements
+    // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    const x1 = (1 - this.startPoint[1]) * startLeft + (this.startPoint[1]) * startRight + connectorLeftOffset;
-    const y1 = (1 - this.startPoint[2]) * startTop + (this.startPoint[2]) * startBottom + connectorTopOffset;
-    const x2 = (1 - this.endPoint[1]) * endLeft + (this.endPoint[1]) * endRight + connectorLeftOffset;
-    const y2 = (1 - this.endPoint[2]) * endTop + (this.endPoint[2]) * endBottom + connectorTopOffset;
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
+    const ax = (1 - this.pointA[1]) * aLeft + (this.pointA[1]) * aRight + connectorLeftOffset;
+    const ay = (1 - this.pointA[2]) * aTop + (this.pointA[2]) * aBottom + connectorTopOffset;
+    const bx = (1 - this.pointB[1]) * bLeft + (this.pointB[1]) * bRight + connectorLeftOffset;
+    const by = (1 - this.pointB[2]) * bTop + (this.pointB[2]) * bBottom + connectorTopOffset;
+    this.ax = ax;
+    this.ay = ay;
+    this.bx = bx;
+    this.by = by;
     // TODO: Document
-    this.mask.width.baseVal.valueAsString = `${Math.abs(x2 - x1) + 50}`;
-    this.mask.x.baseVal.valueAsString = `${Math.min(x1, x2) - 25}`;
-    this.mask.height.baseVal.valueAsString = `${Math.abs(y2 - y1) + 50}`;
-    this.mask.y.baseVal.valueAsString = `${Math.min(y1, y2) - 25}`;
+    this.mask.width.baseVal.valueAsString = `${Math.abs(bx - ax) + 50}`;
+    this.mask.x.baseVal.valueAsString = `${Math.min(ax, bx) - 25}`;
+    this.mask.height.baseVal.valueAsString = `${Math.abs(by - ay) + 50}`;
+    this.mask.y.baseVal.valueAsString = `${Math.min(ay, by) - 25}`;
   }
 
   setTrackingInterval = () => {
@@ -238,10 +238,10 @@ customElements.define('wbfk-connector', Connector);
 
 export class SetConnectorBlock extends AnimBlock {
   connectorElem: Connector;
-  previousStartPoint?: [startElem: Element, leftOffset: number, topOffset: number];
-  previousEndPoint?: [endElem: Element, leftOffset: number, topOffset: number];
-  startPoint: [startElem: Element, leftOffset: number, topOffset: number];
-  endPoint: [endElem: Element, leftOffset: number, topOffset: number];
+  previousPointA?: [elemA: Element, leftOffset: number, topOffset: number];
+  previousPointB?: [elemB: Element, leftOffset: number, topOffset: number];
+  pointA: [elemA: Element, leftOffset: number, topOffset: number];
+  pointB: [elemB: Element, leftOffset: number, topOffset: number];
 
   connectorConfig: ConnectorConfig = {} as ConnectorConfig;
   previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
@@ -256,8 +256,8 @@ export class SetConnectorBlock extends AnimBlock {
   
   constructor(
     connectorElem: Connector | null,
-    startPoint: [startElem: Element | null, leftOffset: number, topOffset: number],
-    endPoint: [endElem: Element | null, leftOffset: number, topOffset: number],
+    pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
+    pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     connectorConfig: Partial<ConnectorConfig> = {},
     /*animName: string, behaviorGroup: TBehavior*/
     ) {
@@ -265,11 +265,11 @@ export class SetConnectorBlock extends AnimBlock {
 
     if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
-    if (!(startPoint?.[0] instanceof Element)) {
-      throw new Error(`Start point element must not be null`); // TODO: Improve error message
+    if (!(pointA?.[0] instanceof Element)) {
+      throw new Error(`Point A element must not be null`); // TODO: Improve error message
     }
-    if (!(endPoint?.[0] instanceof Element)) {
-      throw new Error(`End point element must not be null`); // TODO: Improve error message
+    if (!(pointB?.[0] instanceof Element)) {
+      throw new Error(`Point B element must not be null`); // TODO: Improve error message
     }
 
     // TODO: Validate offsets?
@@ -281,24 +281,24 @@ export class SetConnectorBlock extends AnimBlock {
     });
 
     this.connectorElem = connectorElem;
-    this.startPoint = startPoint as [startElem: Element, leftOffset: number, topOffset: number];
-    this.endPoint = endPoint as [endElem: Element, leftOffset: number, topOffset: number];
+    this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];
+    this.pointB = pointB as [elemB: Element, leftOffset: number, topOffset: number];
 
     this.connectorConfig = this.applyLineConfig(connectorConfig);
   }
 
   protected _onStartForward(): void {
-    this.previousStartPoint = this.connectorElem.startPoint;
-    this.previousEndPoint = this.connectorElem.endPoint;
+    this.previousPointA = this.connectorElem.pointA;
+    this.previousPointB = this.connectorElem.pointB;
     this.previousConnectorConfig.trackEndpoints = this.connectorElem.tracking;
-    this.connectorElem.startPoint = this.startPoint;
-    this.connectorElem.endPoint = this.endPoint;
+    this.connectorElem.pointA = this.pointA;
+    this.connectorElem.pointB = this.pointB;
     this.connectorElem.tracking = this.connectorConfig.trackEndpoints;
   }
 
   protected _onStartBackward(): void {
-    this.connectorElem.startPoint = this.previousStartPoint;
-    this.connectorElem.endPoint = this.previousEndPoint;
+    this.connectorElem.pointA = this.previousPointA;
+    this.connectorElem.pointB = this.previousPointB;
     this.connectorElem.tracking = this.previousConnectorConfig.trackEndpoints;
   }
 

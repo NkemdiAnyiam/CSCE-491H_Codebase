@@ -206,46 +206,46 @@ export const presetTranslations = {
 
 export const presetConnectorEntrances = {
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
+    generateKeyframes(fromPoint: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
 
       // using CSS variables to control marker-end or marker-start with easing step-end
       // makes it possible to instantly hide a marker and re-reveal it at the end
-      const fromStartFrames = [
-        {['--marker-end']: `url(#${markerIdPrefix}-end-layer--hide-by-invalidating)`, easing: 'step-end'},
+      const fromAFrames = [
+        {['--b-marker']: `url(#${markerIdPrefix}-b--layer--hide-by-invalidating)`, easing: 'step-end'},
         {strokeDashoffset: 1, offset: 0},
         {strokeDashoffset: 0, offset: 1},
-        {['--marker-end']: `url(#${markerIdPrefix}-end-layer)`},
+        {['--b-marker']: `url(#${markerIdPrefix}-b--layer)`},
       ];
 
-      const fromEndFrames = [
-        {['--marker-start']: `url(#${markerIdPrefix}-start-layer--hide-by-invalidating)`, easing: 'step-end'},
+      const fromBFrames = [
+        {['--a-marker']: `url(#${markerIdPrefix}-a--layer--hide-by-invalidating)`, easing: 'step-end'},
         {strokeDashoffset: -1, offset: 0},
         {strokeDashoffset: 0, offset: 1},
-        {['--marker-start']: `url(#${markerIdPrefix}-start-layer)`},
+        {['--a-marker']: `url(#${markerIdPrefix}-a--layer)`},
       ];
 
       switch(fromPoint) {
-        case 'from-start':
-          return [fromStartFrames];
+        case 'from-A':
+          return [fromAFrames];
 
-        case 'from-end':
-          return [fromEndFrames];
+        case 'from-B':
+          return [fromBFrames];
 
         case 'from-top':
-          return [this.connectorElem.y1 <= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ay <= this.connectorElem.by ? fromAFrames : fromBFrames];
 
         case 'from-bottom':
-          return [this.connectorElem.y1 >= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ay >= this.connectorElem.by ? fromAFrames : fromBFrames];
 
         case 'from-left':
-          return [this.connectorElem.x1 <= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ax <= this.connectorElem.bx ? fromAFrames : fromBFrames];
 
         case 'from-right':
-          return [this.connectorElem.x1 >= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ax >= this.connectorElem.bx ? fromAFrames : fromBFrames];
 
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
   },
@@ -262,44 +262,44 @@ export const presetConnectorEntrances = {
 export const presetConnectorExits = {
   // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-start' | 'from-end' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-start') {
+    generateKeyframes(fromPoint: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
 
       const fromStartFrames = [
-        {['--marker-start']: `url(#${markerIdPrefix}-start-layer)`, easing: 'step-start'},
+        {['--a-marker']: `url(#${markerIdPrefix}-a--layer)`, easing: 'step-start'},
         {strokeDashoffset: 0, offset: 0},
         {strokeDashoffset: -1, offset: 1},
-        {['--marker-start']: `url(#${markerIdPrefix}-start-layer--hide-by-invalidating)`},
+        {['--a-marker']: `url(#${markerIdPrefix}-a--layer--hide-by-invalidating)`},
       ];
 
       const fromEndFrames = [
-        {['--marker-end']: `url(#${markerIdPrefix}-end-layer)`, easing: 'step-start'},
+        {['--b-marker']: `url(#${markerIdPrefix}-b--layer)`, easing: 'step-start'},
         {strokeDashoffset: 0, offset: 0},
         {strokeDashoffset: 1, offset: 1},
-        {['--marker-end']: `url(#${markerIdPrefix}-end-layer--hide-by-invalidating)`},
+        {['--b-marker']: `url(#${markerIdPrefix}-b--layer--hide-by-invalidating)`},
       ];
 
       switch(fromPoint) {
-        case 'from-start':
+        case 'from-A':
           return [fromStartFrames];
 
-        case 'from-end':
+        case 'from-B':
           return [fromEndFrames];
 
         case 'from-top':
-          return [this.connectorElem.y1 <= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ay <= this.connectorElem.by ? fromStartFrames : fromEndFrames];
 
         case 'from-bottom':
-          return [this.connectorElem.y1 >= this.connectorElem.y2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ay >= this.connectorElem.by ? fromStartFrames : fromEndFrames];
 
         case 'from-left':
-          return [this.connectorElem.x1 <= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ax <= this.connectorElem.bx ? fromStartFrames : fromEndFrames];
 
         case 'from-right':
-          return [this.connectorElem.x1 >= this.connectorElem.x2 ? fromStartFrames : fromEndFrames];
+          return [this.connectorElem.ax >= this.connectorElem.bx ? fromStartFrames : fromEndFrames];
 
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-start', 'from-end', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
   },

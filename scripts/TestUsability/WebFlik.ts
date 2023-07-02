@@ -92,8 +92,8 @@ class _WebFlik {
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
       },// TODO: Add optional lineOptions
-      SetConnector: function(connectorElem, startPoint, endPoint, connectorConfig = {} as ConnectorConfig) {
-        return new SetConnectorBlock(connectorElem, startPoint, endPoint, connectorConfig).initialize([]);
+      SetConnector: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
+        return new SetConnectorBlock(connectorElem, pointA, pointB, connectorConfig).initialize([]);
       },
       DrawConnector: function(connectorElem, animName, ...params) {
         return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank[animName]).initialize(...params);
@@ -128,8 +128,8 @@ class _WebFlik {
 
       SetConnector: (
         connectorElem: Connector,
-        startPoint: [startElem: Element | null, leftOffset: number, topOffset: number],
-        endPoint: [endElem: Element | null, leftOffset: number, topOffset: number],
+        pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
+        pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
         connectorConfig: ConnectorConfig
       ) => SetConnectorBlock;
 
