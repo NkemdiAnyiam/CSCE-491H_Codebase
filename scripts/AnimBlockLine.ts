@@ -59,6 +59,8 @@ export class Connector extends HTMLElement {
     const maskId = `mask--${this.connectorId}`;
     this.useEndMarker = this.hasAttribute('end-marker');
     this.useStartMarker = this.hasAttribute('start-marker');
+    const markerWidth = 5;
+    const markerHeight = 7;
 
     this.classList.add('markers-hidden'); // TODO: Find better solution
 
@@ -122,15 +124,15 @@ export class Connector extends HTMLElement {
             <g class="connector__mask-group">
               ${
                 this.useStartMarker ?
-                `<marker id="${markerId}-start-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
-                  <path d="M0,0 L0,8 L6,4 L0,0" />
+                `<marker id="${markerId}-start-mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
+                  <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
                 ''
               }
               ${
                 this.useEndMarker ?
-                `<marker id="${markerId}-end-mask" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-                  <path d="M0,0 L0,8 L6,4 L0,0" />
+                `<marker id="${markerId}-end-mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
+                  <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
                 ''
               }
@@ -146,15 +148,15 @@ export class Connector extends HTMLElement {
           <g mask="url(#${maskId})" class="connector__layer-group">
             ${
               this.useStartMarker ?
-              `<marker id="${markerId}-start-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto-start-reverse">
-                <path d="M0,0 L0,8 L6,4 L0,0" />
+              `<marker id="${markerId}-start-layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
+                <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
               ''
             }
             ${
               this.useEndMarker ?
-              `<marker id="${markerId}-end-layer" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
-                <path d="M0,0 L0,8 L6,4 L0,0" />
+              `<marker id="${markerId}-end-layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
+                <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
               ''
             }
