@@ -21,6 +21,7 @@ export class Connector extends HTMLElement {
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
   tracking: boolean = false;
+  private currentlyTracking = false;
   private trackingTimeout?: NodeJS.Timer;
 
   get ax(): number { return this.lineLayer.x1.baseVal.value; }
@@ -181,8 +182,11 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = () => {
-    if (!this.pointA || !this.pointB) { return; }
+  updateEndpoints = (usingTimeout = false) => {
+    if (usingTimeout && !this.currentlyTracking) { return; }
+    const pointA = this.pointA;
+    const pointB = this.pointB;
+    if (!pointA || !pointB) { return; }
 
     // to properly place the endpoints, we need the positions of their bounding boxes
     // get the bounding rectangles for A reference element, B reference element, and parent element
@@ -192,13 +196,13 @@ export class Connector extends HTMLElement {
     // the class is appended without classList.add() so that multiple applications
     // of the class do not interfere with each other upon removal
     // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
-    this.pointA[0].classList.value += ` wbfk-override-hidden`;
-    this.pointB[0].classList.value += ` wbfk-override-hidden`;
-    const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = this.pointA[0].getBoundingClientRect();
-    const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = this.pointB[0].getBoundingClientRect();
+    pointA[0].classList.value += ` wbfk-override-hidden`;
+    pointB[0].classList.value += ` wbfk-override-hidden`;
+    const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = pointA[0].getBoundingClientRect();
+    const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = pointB[0].getBoundingClientRect();
     const {left: parentLeft, top: parentTop} = svgParentElement.getBoundingClientRect();
-    this.pointA[0].classList.value = this.pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
-    this.pointB[0].classList.value = this.pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
+    pointA[0].classList.value = pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
+    pointB[0].classList.value = pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the parent element's current top and left from the offset
@@ -210,10 +214,10 @@ export class Connector extends HTMLElement {
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    const ax = (1 - this.pointA[1]) * aLeft + (this.pointA[1]) * aRight + connectorLeftOffset;
-    const ay = (1 - this.pointA[2]) * aTop + (this.pointA[2]) * aBottom + connectorTopOffset;
-    const bx = (1 - this.pointB[1]) * bLeft + (this.pointB[1]) * bRight + connectorLeftOffset;
-    const by = (1 - this.pointB[2]) * bTop + (this.pointB[2]) * bBottom + connectorTopOffset;
+    const ax = (1 - pointA[1]) * aLeft + (pointA[1]) * aRight + connectorLeftOffset;
+    const ay = (1 - pointA[2]) * aTop + (pointA[2]) * aBottom + connectorTopOffset;
+    const bx = (1 - pointB[1]) * bLeft + (pointB[1]) * bRight + connectorLeftOffset;
+    const by = (1 - pointB[2]) * bTop + (pointB[2]) * bBottom + connectorTopOffset;
     this.ax = ax;
     this.ay = ay;
     this.bx = bx;
@@ -226,10 +230,12 @@ export class Connector extends HTMLElement {
   }
 
   setTrackingInterval = () => {
-    this.trackingTimeout = setInterval(this.updateEndpoints, 4);
+    this.trackingTimeout = setInterval(this.updateEndpoints, 4, true);
+    this.currentlyTracking = true;
   }
 
   clearTrackingInterval = () => {
+    this.currentlyTracking = false;
     clearInterval(this.trackingTimeout);
   }
 }
