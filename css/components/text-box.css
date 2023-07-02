@@ -8,8 +8,8 @@
   top: 0;
 }
 
-.text-box-line-group.line-front .free-line {
-  z-index: 1002;
+.text-box-line-group.line-front wbfk-connector {
+  z-index: 1002 !important;
 }
 
 .text-box {

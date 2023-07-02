@@ -154,9 +154,10 @@
                     Our next step is to figure out the optimal (maximum) weight we can obtain from these jobs without having any of them overlap.
                   </p>
                 </div>
-                <svg class="free-line">
+                <!-- <svg class="free-line">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="wbfk-hidden"></wbfk-connector>
               </div>
   
               <!-- Text box: show naive -->
@@ -185,9 +186,10 @@
                     and calling <span class="OPT-related">OPT(<span class="fill--last-SJ-num SJ-related">X</span>)</span>.
                   </p>
                 </div>
-                <svg class="free-line">
+                <!-- <svg class="free-line">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="wbfk-hidden"></wbfk-connector>
               </div>
   
               <!-- Text box: explain naive 1 -->
@@ -202,9 +204,10 @@
                     possibly also be in the chain is one that doesn't overlap, i.e. <span class="SJ-related">job j</span>'s nearest <span class="c-related">compatible job</span>.
                   </p>
                 </div>
-                <svg class="free-line">
+                <!-- <svg class="free-line">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="wbfk-hidden"></wbfk-connector>
               </div>
   
               <!-- Text box: explain naive 2 -->
@@ -216,9 +219,10 @@
                     the job behind it, <span class="SJ-related">job j</span> - 1.
                   </p>
                 </div>
-                <svg class="free-line">
+                <!-- <svg class="free-line">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="wbfk-hidden"></wbfk-connector>
               </div>
   
               <!-- Text box: explain naive bad -->
@@ -229,23 +233,25 @@
                     In other words, we might solve the same <span class="OPT-related">OPT(X)</span> multiple times, which is incredibly inefficient.
                   </p>
                 </div>
-                <svg class="free-line">
+                <!-- <svg class="free-line">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="wbfk-hidden"></wbfk-connector>
               </div>
             </div>
           </div>
   
           <div class="time-graph">
   
-            <svg class="free-line free-line--arrow c-related">
+            <!-- <svg class="free-line free-line--arrow c-related">
               <defs>
                 <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                   <path d="M0,0 L0,8 L6,4 L0,0" />
                 </marker>
               </defs>
               <line class="free-line__line wbfk-hidden" />
-            </svg>
+            </svg> -->
+            <wbfk-connector class="c-related wbfk-hidden" end-marker></wbfk-connector>
             <div class="time-graph__c-bar wbfk-hidden"></div>
             
             <div class="time-graph__job-bars">
@@ -337,7 +343,7 @@
                       </p>
                     </div>
 
-                    <wbkf-connector class="wbfk-hidden"></wbkf-connector>
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                     <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
                     </svg> -->
@@ -371,9 +377,10 @@
                         If we have 0 jobs, of course the optimal weight would be 0, so our base case is that <span class="M-related">M[0]</span> = 0.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
   
                   <!-- Text box: show memoized algorithm -->
@@ -400,9 +407,10 @@
                         and find the maximum weight we can achieve from jobs A&mdash;<span class="fill--last-job-letter">X</span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
                 </div>
                 <div class="array__array-block array__array-block--header">M[j]</div>
@@ -435,9 +443,10 @@
                         The optimal weight we can achieve from our time graph is <span class="fill--comp-final">X</span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
                   
                   <!-- Text box: Formula container -->
@@ -456,9 +465,10 @@
                         and fill in the entry in the <span class="M-related">M array</span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
                   
                   <!-- Text box: Computation 1 -->
@@ -474,9 +484,10 @@
                         the beginning through <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-1">X</span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
   
   
@@ -491,9 +502,10 @@
                         The <span class="c-related">compatible job</span> was <span class="c-related">job <span class="fill--c-entry">X</span></span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
   
                   <!-- Text Box: OPT 1 -->
@@ -509,9 +521,10 @@
                         Let's add this to <span class="SJ-related">job <span class="SJ-num">X</span></span>'s <span class="weight-related">weight <span class="fill--weight">X</span></span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
   
   
@@ -528,9 +541,10 @@
                         <span class="SJ-related">job <span class="SJ-num">X</span></span> is <span class="fill--comp-2">X</span>.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
   
                   <!-- Text Box: OPT 2 -->
@@ -542,56 +556,62 @@
                         Let's do that now.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
                 </div>
   
                 <!-- Line for M array block -->
-                <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
+                <!-- <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--M-access-to-M-block M-related wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for c array block -->
-                <svg class="free-line free-line--arrow free-line--c-access-to-c-block c-related">
+                <!-- <svg class="free-line free-line--arrow free-line--c-access-to-c-block c-related">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--c-access-to-c-block c-related wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for pointing down tree -->
-                <svg class="free-line free-line--arrow free-line--down-tree">
+                <!-- <svg class="free-line free-line--arrow free-line--down-tree">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--down-tree wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for pointing up tree -->
-                <svg class="free-line free-line--arrow free-line--up-tree">
+                <!-- <svg class="free-line free-line--arrow free-line--up-tree">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--up-tree wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for connecting bullets -->
-                <svg class="free-line free-line--bullet-connector free-line--dotted">
+                <!-- <svg class="free-line free-line--bullet-connector free-line--dotted">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--bullet-connector free-line--dotted wbfk-hidden"></wbfk-connector>
   
                 <!-- BULLET -->
                 <div class="job-card-bullet"></div>
@@ -693,36 +713,40 @@
                         Let's pass this back up the tree.
                       </p>
                     </div>
-                    <svg class="free-line">
+                    <!-- <svg class="free-line">
                       <line class="free-line__line wbfk-hidden" />
-                    </svg>
+                    </svg> -->
+                    <wbfk-connector class="wbfk-hidden"></wbfk-connector>
                   </div>
                 </div>
   
                 <!-- Line for M array block -->
-                <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
+                <!-- <svg class="free-line free-line--arrow free-line--M-access-to-M-block M-related">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--M-access-to-M-block M-related wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for pointing up tree -->
-                <svg class="free-line free-line--arrow free-line--up-tree">
+                <!-- <svg class="free-line free-line--arrow free-line--up-tree">
                   <defs>
                     <marker id="markerArrow" markerWidth="6" markerHeight="8" refX="5" refY="4" orient="auto">
                       <path d="M0,0 L0,8 L6,4 L0,0" />
                     </marker>
                   </defs>
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--up-tree wbfk-hidden" end-marker></wbfk-connector>
   
                 <!-- Line for connecting siblings -->
-                <svg class="free-line free-line--bullet-connector free-line--dotted">
+                <!-- <svg class="free-line free-line--bullet-connector free-line--dotted">
                   <line class="free-line__line wbfk-hidden" />
-                </svg>
+                </svg> -->
+                <wbfk-connector class="free-line--bullet-connector free-line--dotted wbfk-hidden"></wbfk-connector>
   
                 <!-- SJ NUM LABEL -->
                 <div class="job-card-SJ-num-label">

@@ -6,6 +6,7 @@ import { AnimBlock } from './AnimBlock.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 import { WebFlik } from './TestUsability/WebFlik.js';
+import { Connector } from './AnimBlockLine.js';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
 // (\s*)(\[ 'line)
@@ -111,9 +112,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Move job bars onto time graph in unsorted order');
-    // animSequence.addOneBlock(new AnimBlockLine(freeLine_placeBars, '~wipe-to-top', null, [0.5, 1], jobsUnsorted[0].getJobBar(), [0.5, 0], {blocksNext: false}));
     animSequence.addOneBlock(
-      EraseConnector(connector_placeBars, '~trace', ['from-start'], {blocksNext: false})
+      EraseConnector(connector_placeBars, '~trace', ['from-end'], {blocksNext: false})
     );
     jobsUnsorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
@@ -215,7 +215,6 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Explain what c array will be used for');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_cArray, '~wipe', ['left'], null, [0, 0.5], cArray, [1, 0.5] ],
       SetConnector(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
       DrawConnector(freeLine_cArray, '~trace', ['from-end']),
       Exit(textP_cArray_explain, '~fade-out', [], {duration: 250}),
@@ -233,8 +232,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
     animSequence.addManyBlocks([
       Exit(textbox_cArray, '~fade-out', [], {blocksNext: false}),
-      EraseConnector(freeLine_cArray, '~trace', ['from-end']),
-      // [ 'line', freeLine_cArray, '~wipe', ['left'], null, [0, 0.5], cArray, [1, 0.5] ],
+      EraseConnector(freeLine_cArray, '~trace', ['from-start']),
     ]);
     animTimeline.addOneSequence(animSequence);
   }
@@ -245,7 +243,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
-  const timeGraphArrowEl = timeGraphEl.querySelector('wbkf-connector'); // arrow connecting c entry and compatible job's row header
+  const timeGraphArrowEl = timeGraphEl.querySelector('wbfk-connector') as Connector; // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
     const jobBarEl = job.getJobBar();
     // get j array block corresponding to current job bar
@@ -295,15 +293,21 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
           Translation(cBar, '~move-to', [compatibleJobBarEl, {alignmentX: 'right', preserveY: true}]),
           Emphasis(compatibleJobBarEl, '~highlight', []),
         ]);
-        // animSequence2.addOneBlock(new AnimBlockLine(timeGraphArrowEl, '~wipe', ['top'], rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false}));
+        animSequence2.addManyBlocks([
+            SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
+            DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {blocksPrev: false}),
+        ]);
       }
-      // If not compatible job exists, move cbar to left of time graph
+      // If no compatible job exists, move cbar to left of time graph
       // Then point arrow from bottom of cbar to current c-array entry
       else {
         animSequence.addManyBlocks([
           Translation(cBar, '~move-to', [timeGraphEl, {alignmentX: 'left', preserveY: true}]),
         ]);
-        // animSequence2.addOneBlock(new AnimBlockLine(timeGraphArrowEl, '~wipe', ['top'], cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false}));
+        animSequence2.addManyBlocks([
+          SetConnector(timeGraphArrowEl, [cBar, 0, 1], [cBlock, 0.5, 0]),
+          DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {blocksPrev: false}),
+        ]);
       }
 
       animSequence.addManyBlocks([
@@ -331,13 +335,11 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
       if (compatibleJobBarEl) {
         animSequence.addManyBlocks([
           Emphasis(compatibleJobBarEl, '~un-highlight', [], {blocksNext: false}),
-          // [ 'line', timeGraphArrowEl, '~wipe', ['top'], rowSJNum, [1, 0.5], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]
-          SetLine(timeGraphArrowEl,)
         ]);
       }
-      else {
-        // animSequence.addOneBlock([ 'line', timeGraphArrowEl, '~wipe', ['top'], cBar, [0, 1], cBlock, [0.5, 0], {blocksPrev: false, blocksNext: false} ]);
-      }
+      animSequence.addManyBlocks([
+        EraseConnector(timeGraphArrowEl, '~trace', ['from-bottom'], {blocksNext: false, blocksPrev: false}),
+      ]);
       animSequence.addManyBlocks([
         Exit(textbox_fillCArray, '~fade-out', [], {blocksPrev: false, blocksNext: false}),
         // [ 'std', textP_fillCArray_continueOn, '~fade-out', [], {duration: 0}], // TODO: This being here and having to add blocksNext: false above needs to be considered
@@ -352,7 +354,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
 
   const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
-  const freeLine_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .free-line');
+  const freeLine_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbfk-connector') as Connector;
   const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box');
   const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
   const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
@@ -379,14 +381,15 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setTag('show naive');
     animSequence.addManyBlocks([
       Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}], {duration: 0}),
-      // [ 'line', freeLine_showNaive, '~wipe', ['top'], textbox_finishedCArray, [0.5, 1], null, [0.5, 0] ],
+      SetConnector(freeLine_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
+      DrawConnector(freeLine_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
     ]);
     animTimeline.addOneSequence(animSequence);
   }
 
   const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
-  const freeLine_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .free-line');
+  const freeLine_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 wbfk-connector') as Connector;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS PART OF OPTIMAL SEQUENCE
   /****************************************************** */
@@ -397,14 +400,15 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.addManyBlocks([
       Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: -1.0, offsetX: 10, offsetUnitsX: 'rem'}], {duration: 0}),
       Emphasis(algorithm_term1, '~highlight', []),
-      // [ 'line', freeLine_explainNaive1, '~wipe', ['top'], algorithm_term1, [0.5, 1], null, [0.5, 0] ],
+      SetConnector(freeLine_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
+      DrawConnector(freeLine_explainNaive1, '~trace', ['from-top']),
       Entrance(textbox_explainNaive1, '~fade-in', []),
     ]);
     animTimeline.addOneSequence(animSequence);
   }
 
   const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
-  const freeLine_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .free-line');
+  const freeLine_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 wbfk-connector') as Connector;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS **NOT** PART OF OPTIMAL SEQUENCE
   /****************************************************** */
@@ -415,7 +419,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.addManyBlocks([
       Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: 1.0, offsetX: -10, offsetUnitsX: 'rem', alignmentX: 'right'}], {duration: 0}),
       Emphasis(algorithm_term2, '~highlight', []),
-      // [ 'line', freeLine_explainNaive2, '~wipe', ['top'], algorithm_term2, [0.5, 1], null, [0.5, 0] ],
+      SetConnector(freeLine_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
+      DrawConnector(freeLine_explainNaive2, '~trace', ['from-top']),
       Entrance(textbox_explainNaive2, '~fade-in', []),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -431,8 +436,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.addManyBlocks([
       Exit(textbox_explainNaive1, '~fade-out', [], {blocksNext: false}),
       Exit(textbox_explainNaive2, '~fade-out', [], {blocksNext: false, blocksPrev: false}),
-      // [ 'line', freeLine_explainNaive1, '~wipe', ['top'], algorithm_term1, [0.5, 1], null, [0.5, 0], {blocksNext: false} ],
-      // [ 'line', freeLine_explainNaive2, '~wipe', ['top'], algorithm_term2, [0.5, 1], null, [0.5, 0], {blocksNext: false, blocksPrev: false} ],
+      EraseConnector(freeLine_explainNaive1, '~trace', ['from-bottom'], {blocksNext: false}),
+      EraseConnector(freeLine_explainNaive2, '~trace', ['from-bottom'], {blocksNext: false, blocksPrev: false}),
       Emphasis(algorithm_term1, '~un-highlight', [], {blocksNext: false}),
       Emphasis(algorithm_term2, '~un-highlight', [], {blocksPrev: false}),
     ]);
@@ -441,7 +446,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
 
   const textbox_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .text-box');
-  const freeLine_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .free-line');
+  const freeLine_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad wbfk-connector') as Connector;
   /****************************************************** */
   // EXPLAIN WHY NAIVE APPROACH IS BAD
   /****************************************************** */
@@ -450,7 +455,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain why naive approach is bad');
     animSequence.addManyBlocks([
       Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}], {duration: 0}),
-      // [ 'line', freeLine_explainNaiveBad, '~wipe', ['top'], textbox_showNaive, [0.5, 1], null, [0.5, 0] ],
+      SetConnector(freeLine_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
+      DrawConnector(freeLine_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', [], {blocksPrev: false}),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -474,7 +480,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   const MArray = arrayGroup_j_M.querySelector('.array--M');
   const jArray2 = arrayGroup_j_M.querySelector('.array--j');
   const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box');
-  const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .free-line');
+  const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbfk-connector') as Connector;
   const textP_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
   const textP_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
@@ -502,7 +508,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Explain what M array will be used for');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_MArray, '~wipe', ['left'], null, [0, 0.5], MArray, [1, 0.5] ],
+      SetConnector(freeLine_MArray, [textbox_MArray, 0, 0.5], [MArray, 1, 0.5]),
+      DrawConnector(freeLine_MArray, '~trace', ['from-end']),
       Exit( textP_MArray_explain, '~fade-out', [], {duration: 250}),
       Entrance( textP_MArray_refArray, '~fade-in', [], {duration: 250}),
       Exit(arrayBlank_M_0, '~fade-out', []),
@@ -513,7 +520,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
 
   const textbox_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .text-box');
-  const freeLine_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .free-line');
+  const freeLine_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized wbfk-connector') as Connector;
   /****************************************************** */
   // SHOW MEMOIZED ALGORITHM
   /****************************************************** */
@@ -521,8 +528,9 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Show memoized algorithm');
     animSequence.addManyBlocks([
-      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetX: 20, offsetUnitsX: 'rem', preserveY: true}], {duration: 0}), // TODO: Fix unit
-      // [ 'line', freeLine_showMemoized, '~wipe', ['left'], textbox_MArray, [1, 0.5], null, [0, 0.5] ],
+      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetX: 6.25, offsetUnitsX: 'rem', preserveY: true}], {duration: 0}),
+      SetConnector(freeLine_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
+      DrawConnector(freeLine_showMemoized, '~trace', ['from-start']),
       Entrance( textbox_showMemoized, '~fade-in', []),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -546,26 +554,29 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 };
 
 // recursively creates animation sequences for the job card tree
-function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
+function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: Element, aboveBullet: Element): any;
+function animateJobCard(jobCard: HTMLElement | null): any;
+function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSequence, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
+  if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum);
   const jobCardContent = jobCard.querySelector('.job-card-content');
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as Connector;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
   const textP_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
   const textP_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
 
-  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
+  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block') as Connector;
 
 
   const arrowContainer = jobCard.querySelector('.arrow-container');
   const formulaContainer = jobCard.querySelector('.formula-container');
   const formulaComputation = jobCard.querySelector('.formula-computation');
   const formulaResult = jobCard.querySelector('.formula-result');
-  const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .free-line');
+  const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbfk-connector') as Connector;
   const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
   const textP_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
   const textP_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
@@ -574,7 +585,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
 
   const computation1 = jobCard.querySelector('.computation--1');
   const computationResult1 = computation1.querySelector('.computation-result');
-  const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .free-line');
+  const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbfk-connector') as Connector;
   const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box');
   const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
   const textP_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
@@ -582,15 +593,15 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
   const cAccessContainer = jobCard.querySelector('.c-access-container');
   const cAccess = jobCard.querySelector('.c-access');
   const cEntry = jobCard.querySelector('.c-entry');
-  const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access .free-line');
+  const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbfk-connector') as Connector;
   const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box');
   const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
   const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
-  const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block');
+  const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block') as Connector;
   const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
   const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
-  const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .free-line');
+  const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbfk-connector') as Connector;
   const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box');
   const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--find');
   const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--found');
@@ -599,11 +610,11 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
   const computation2 = jobCard.querySelector('.computation--2');
   const computationResult2 = computation2.querySelector('.computation-result');
   const OPTExpression2 = computation2.querySelector('.OPT-expression');
-  const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .free-line');
+  const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbfk-connector') as Connector;
   const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box');
   const textP_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
   const textP_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
-  const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .free-line');
+  const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbfk-connector') as Connector;
   const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
   const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
   const nextSJNum = computation2.querySelector('.next-SJ-num');
@@ -619,8 +630,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
   const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
 
 
-  const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
-  const freeLine_downTree = jobCard.querySelector('.free-line--down-tree');
+  const freeLine_upTree = jobCard.querySelector('.free-line--up-tree') as Connector;
+  const freeLine_downTree = jobCard.querySelector('.free-line--down-tree') as Connector;
   const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
 
@@ -634,21 +645,24 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.addManyBlocks([
       Entrance(jobCard, '~fade-in', [], {blocksNext: parentArrowDown ? false : true}), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
     ]);
-    if (parentArrowDown) {
+    if (parentArrowDown && parentArrowSource) {
       animSequence.addManyBlocks([
-        // [ 'line', parentArrowDown, '~wipe', ['top'], parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
+        SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
+        DrawConnector(parentArrowDown, '~trace', ['from-start'], {blocksPrev: false}),
       ]);
     }
     if (aboveBullet) {
-      const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
+      const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector') as Connector;
       animSequence.addManyBlocks([
-        // [ 'line', freeLine_bulletConnector, '~wipe', ['top'], aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
+        SetConnector(freeLine_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
+        DrawConnector(freeLine_bulletConnector, '~trace', ['from-start']),
       ]);
     }
     animSequence.addManyBlocks([
       Entrance(MAccess, '~fade-in', []),
       Emphasis(MAccessContainer, '~highlight', [], {blocksNext: false, blocksPrev: false}),
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccess, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_MAccess, [MAccess, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),
+      DrawConnector(freeLine_MAccess, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -663,6 +677,10 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
     // animSequence.addOneBlock([ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
+    animSequence.addManyBlocks([
+      SetConnector(freeLine_toMBlock,  [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      DrawConnector(freeLine_toMBlock, '~trace', ['from-start']),
+    ]);
 
     animTimeline.addOneSequence(animSequence);
   }
@@ -675,15 +693,16 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on formula container');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      EraseConnector(freeLine_toMBlock, '~trace', ['from-end']),
       Exit(textbox_MAccess, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccess, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_MAccess, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', []),
 
       Entrance(arrowContainer, '~wipe', ['right']),
       Entrance(formulaComputation, '~fade-in', [], {blocksPrev: false}),
       Emphasis(formulaComputation, '~highlight', [], {blocksNext: false}),
-      // [ 'line', freeLine_formulaComputation, '~wipe', ['bottom'], formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_formulaComputation, [formulaComputation, 0.1, 0.2], [textbox_formulaComputation, 0.5, 1]),
+      DrawConnector(freeLine_formulaComputation, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_formulaComputation, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -699,11 +718,12 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Focus on computation 1');
     animSequence.addManyBlocks([
       Exit(textbox_formulaComputation, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_formulaComputation, '~wipe', ['bottom'], formulaComputation, [0.1, 0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_formulaComputation, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(formulaComputation, '~un-highlight', [], {blocksPrev: false}),
 
       Emphasis(computationExpression1, '~highlight', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation1, '~wipe', ['bottom'], computation1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_computation1, [computation1, 0.5, -0.2], [textbox_computation1, 0.5, 1]),
+      DrawConnector(freeLine_computation1, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_computation1, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -719,11 +739,12 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Focus on c access');
     animSequence.addManyBlocks([
       Exit(textbox_computation1, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation1, '~wipe', ['bottom'], computation1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_computation1, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(computationExpression1, '~un-highlight', [], {blocksNext: false, blocksPrev: false}),
   
       Emphasis(cAccessContainer, '~highlight', [], {blocksPrev: false}),
-      // [ 'line', freeLine_cAccess, '~wipe', ['bottom'], cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
+      DrawConnector(freeLine_cAccess, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_cAccess, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -738,7 +759,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to c array entry');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_toCBlock, '~wipe', ['right'], cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
+      SetConnector(freeLine_toCBlock, [cAccessContainer, 0, 0.5], [cBlock, 0.9, 0.5], {trackEndpoints: true}),
+      DrawConnector(freeLine_toCBlock, '~trace', ['from-start'], {blocksPrev: false}),
     ]);
 
     animTimeline.addOneSequence(animSequence);
@@ -752,12 +774,18 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Reverse arrow and replace c access with value');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_toCBlock, '~fade-out', [], cAccessContainer, [0, 0.5], cBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      // [ 'line', freeLine_toCBlock, '~wipe', ['left'], cBlock, [0.9, 0.5], cAccessContainer, [-0.1, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      // [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+      EraseConnector(freeLine_toCBlock, '~fade-out', []),
+      SetConnector(freeLine_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5]),
+      DrawConnector(freeLine_toCBlock, '~trace', ['from-start']),
+      // TODO: Address SetConnector update dilemma. The commented out code won't work, so I stopped writing it partway through
+      // EraseConnector(freeLine_cAccess, '~fade-out', [], {duration: 0}),
+      // SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
+      // DrawConnector(freeLine_cAccess, '~fade-in', [], {duration: 0}),
       Exit(cAccess, '~wipe', ['left'], {blocksPrev: false}),
       Entrance(cEntry, '~wipe', ['right'], {blocksNext: false}),
-      // [ 'line', freeLine_cAccess, 'updateEndpoints', cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+
+      // SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1]),
+      // DrawConnector(freeLine_cAccess, '~fade-in', [], {duration: 0}),
       Exit(textP_cAccess_find, '~fade-out', [], { duration: 250 }),
       Entrance(textP_cAccess_found, '~fade-in', [], { duration: 250 }),
     ]);
@@ -774,16 +802,17 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Focus on OPT expression 1 as a whole');
     animSequence.addManyBlocks([
       // hide arrow for c block
-      // [ 'line', freeLine_toCBlock, '~fade-out', [], cBlock, [0.9, 0.5], cAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      EraseConnector(freeLine_toCBlock, '~fade-out', []),
   
       // remove c access text
       Exit(textbox_cAccess, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_cAccess, '~wipe', ['bottom'], cAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_cAccess, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(cAccessContainer, '~un-highlight', [], {blocksPrev: false}),
   
       // enter OPT expression 1 text
       Emphasis(OPTExpressionContainer1, '~highlight', [], {blocksPrev: false, blocksNext: false}),
-      // [ 'line', freeLine_OPTExpression1, '~wipe', ['bottom'], OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_OPTExpression1, [OPTExpressionContainer1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
+      DrawConnector(freeLine_OPTExpression1, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_OPTExpression1, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -799,7 +828,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addManyBlocks([
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_OPTExpression1, '~wipe', ['bottom'], cAccessContainer, [0.5, -0.2], null, [0.5, 1] ],
+      EraseConnector(freeLine_OPTExpression1, '~trace', ['from-start']),
     ]);
     let animSequence;
     // generate animation sequences for first child job/stub
@@ -812,12 +841,14 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
     animSequence.setTag('OPT point 1');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_fromSourceEl1, '~wipe', ['bottom'], sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1.1] ],
+      SetConnector(freeLine_fromSourceEl1, [sourceEl_OPT1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
+      DrawConnector(freeLine_fromSourceEl1, '~trace', ['from-start']),
       Exit(OPTExpression1, '~wipe', ['left'], {blocksPrev: false}),
       Entrance(OPTResult1, '~wipe', ['right'], {blocksNext: false}),
       Exit(textP_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
       Entrance(textP_OPTExpression1_found, '~fade-in', [], { duration: 250 }),
-      // [ 'line', freeLine_OPTExpression1, '~wipe', ['bottom'], OPTResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_OPTExpression1, [OPTResult1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
+      DrawConnector(freeLine_OPTExpression1, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_OPTExpression1, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -832,9 +863,9 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_fromSourceEl1, '~fade-out', [], sourceEl_OPT1, [0.5, -0.2], OPTExpressionContainer1, [0, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_fromSourceEl1, '~fade-out', [], {blocksNext: false}),
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksPrev: false, blocksNext: false}),
-      // [ 'line', freeLine_OPTExpression1, '~wipe', ['bottom'], OPTExpressionContainer1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_OPTExpression1, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(OPTExpressionContainer1, '~un-highlight', [], {blocksPrev: false}),
   
       Exit(textP_computation1_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
@@ -842,7 +873,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
       Exit(computationExpression1, '~wipe', ['left'],),
       Entrance(computationResult1, '~wipe', ['right'],),
       Emphasis(computationResult1, '~highlight', [], {blocksPrev: false, blocksNext: false}),
-      // [ 'line', freeLine_computation1, '~wipe', ['bottom'], computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_computation1, [computationResult1, 0.5, -0.2], [textbox_computation1, 0.5, 1]),
+      DrawConnector(freeLine_computation1, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_computation1, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -859,11 +891,12 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setTag('focus comp 2');
     animSequence.addManyBlocks([
       Exit(textbox_computation1, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation1, '~wipe', ['bottom'], computationResult1, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_computation1, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(computationResult1, '~un-highlight', [], {blocksPrev: false}),
 
       Emphasis(computation2, '~highlight', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_computation2, [computation2, 0.5, -0.2], [textbox_computation2, 0.5, 1]),
+      DrawConnector(freeLine_computation2, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_computation2, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -879,12 +912,13 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setDescription('Replace subtraction with result; then focus on OPT expression 2');
     animSequence.addManyBlocks([
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_computation2, '~trace', ['from-end'], {blocksNext: false}),
   
       Exit(nextSJNumExpression, '~wipe', ['left']),
       Entrance(nextSJNum, '~wipe', ['right']),
   
-      // [ 'line', freeLine_OPTExpression2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_OPTExpression2, [computation2, 0.5, -0.2], [textbox_OPTExpression2, 0.5, 1]),
+      DrawConnector(freeLine_OPTExpression2, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_OPTExpression2, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -900,7 +934,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSeqPassDown = new AnimSequence();
     animSeqPassDown.addManyBlocks([
       Exit(textbox_OPTExpression2, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_OPTExpression2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1] ],
+      EraseConnector(freeLine_OPTExpression2, '~trace', ['from-end']),
     ]);
     let animSequence;
     // create animation sequences for second child card/stub
@@ -912,7 +946,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     /****************************************************** */
     animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_fromSourceEl2, '~wipe', ['bottom'], sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1.1] ],
+      SetConnector(freeLine_fromSourceEl2, [sourceEl_OPT2, 0.5, -0.2], [computation2, 0, 1.1]),
+      DrawConnector(freeLine_fromSourceEl2, '~trace', ['from-start']),
 
       Exit(textP_computation2_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
       Entrance(textP_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
@@ -922,7 +957,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
       Entrance(computationResult2, '~wipe', ['right'], {blocksNext: false}),
       Emphasis(computationResult2, '~highlight', [], {blocksPrev: false}),
 
-      // [ 'line', freeLine_computation2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_computation2, [computation2, 0.5, -0.2], [textbox_computation2, 0.5, 1]),
+      DrawConnector(freeLine_computation2, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_computation2, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -937,16 +973,17 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on whole formula container');
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_fromSourceEl2, '~fade-out', [], sourceEl_OPT2, [0.5, -0.2], computation2, [0, 1] ],
+      EraseConnector(freeLine_fromSourceEl2, '~fade-out', []),
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_computation2, '~wipe', ['bottom'], computation2, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_computation2, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(computationResult2, '~un-highlight', [], {blocksPrev: false}),
 
       
       Exit(textP_formulaComputation_find, '~fade-out', [], {duration: 0, blocksNext: false}),
       Entrance(textP_formulaComputation_max, '~fade-in', [], {duration: 0, blocksPrev: false}),
       Emphasis(formulaContainer, '~highlight', [], {blocksNext: false}),
-      // [ 'line', freeLine_formulaComputation, '~wipe', ['bottom'], formulaContainer, [0.5, 0], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
+      DrawConnector(freeLine_formulaComputation, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_formulaComputation, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -962,6 +999,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setTag('replace formula container contents');
     animSequence.setDescription('Replace formula container contents with final answer');
     animSequence.addManyBlocks([
+      // TODO: Address
       // [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
       Exit(formulaComputation, '~wipe', ['left'], {blocksPrev: false}),
@@ -987,7 +1025,7 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.addManyBlocks([
       // hide formula container
       Exit(textbox_formulaComputation, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_formulaComputation, '~wipe', ['bottom'], formulaContainer, [0.5, -0.2], null, [0.5, 1], {blocksNext: false} ],
+      EraseConnector(freeLine_formulaComputation, '~trace', ['from-end'], {blocksNext: false}),
       Emphasis(formulaContainer, '~un-highlight', [], {blocksNext: false}),
       Exit(formulaContainer, '~wipe', ['left']),
       Exit(arrowContainer, '~wipe', ['left']),
@@ -998,7 +1036,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
       Emphasis(MAccessContainer, '~highlight', []),
   
       // Visually update M array entry
-      // [ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
+      SetConnector(freeLine_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      DrawConnector(freeLine_toMBlock, '~trace', ['from-right']),
       Exit(MBlock_blank, '~fade-out', []),
       Entrance(MBlock_value, '~fade-in', []),
     ]);
@@ -1017,8 +1056,9 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
       // Add last text box
       Exit(textP_MAccess_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
       Entrance(textP_MAccess_solved, '~fade-in', [], {duration: 0, blocksPrev: false}),
-      // [ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, lineOptions: {trackEndpoints: true}} ],
+      EraseConnector(freeLine_toMBlock, '~trace', ['from-start']),
+      SetConnector(freeLine_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
+      DrawConnector(freeLine_MAccess, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -1035,8 +1075,8 @@ function animateJobCard(jobCard, parentAnimSequence, parentArrowDown, parentArro
     animSequence.setTag('finish a main card');
     animSequence.addManyBlocks([
       Exit(textbox_MAccess, '~fade-out', [], {blocksNext: false}),
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccessContainer, [0.1, 0.2], null, [0.5, 1] ],
-      // [ 'line', parentArrowDown, '~fade-out', [], parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
+      EraseConnector(freeLine_MAccess, '~trace', ['from-end']),
+      EraseConnector(parentArrowDown, '~fade-out', [], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
     ]);
 
@@ -1052,7 +1092,7 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access .free-line');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector');
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
   const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
   const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
@@ -1076,14 +1116,17 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
       Entrance(jobCard, '~fade-in', [], {blocksNext: false}),
     ]);
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_bulletConnector, '~wipe', ['top'], aboveBullet, [0.5, 0.5], jobCardBullet, [0.5, 0.5] ],
+      SetConnector(freeLine_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
+      DrawConnector(freeLine_bulletConnector, '~trace', ['from-start']),
     ]);
     animSequence.setDescription('Fade in job stub and M access');
     animSequence.addManyBlocks([
-      // [ 'line', parentArrowDown, '~wipe', ['top'], parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksPrev: false} ],
+      SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
+      DrawConnector(parentArrowDown, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(MAccess, '~fade-in', []),
       Emphasis(MAccessContainer, '~highlight', [], {blocksNext: false, blocksPrev: false}),
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false} ],
+      SetConnector(freeLine_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),
+      DrawConnector(freeLine_MAccess, '~trace', ['from-start'], {blocksPrev: false}),
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     ]);
 
@@ -1097,7 +1140,10 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
   {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point to M block array entry');
-    // animSequence.addOneBlock([ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
+    animSequence.addManyBlocks([
+      SetConnector(freeLine_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      DrawConnector(freeLine_toMBlock, '~trace', ['from-start']),
+    ]);
 
     animTimeline.addOneSequence(animSequence);
   }
@@ -1110,6 +1156,9 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
     const animSequence = new AnimSequence();
     animSequence.setDescription('Point back to M access from M block');
     animSequence.addManyBlocks([
+      EraseConnector(freeLine_toMBlock, '~fade-out', []),
+      SetConnector(freeLine_toMBlock, [MBlock, 0.9, 0.5], [MAccessContainer, 0, 0.5]),
+      DrawConnector(freeLine_toMBlock, '~trace', ['from-start']),
       // [ 'line', freeLine_toMBlock, '~fade-out', [], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
       // [ 'line', freeLine_toMBlock, '~wipe', ['left'], MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
       Exit(MAccess, '~wipe', ['left']),
@@ -1128,10 +1177,10 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
   {
     const animSequence = new AnimSequence();
     animSequence.addManyBlocks([
-      // [ 'line', freeLine_toMBlock, '~fade-out', [], MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {blocksNext: false, lineOptions: {trackEndpoints: true}} ],
-      // [ 'line', freeLine_MAccess, '~wipe', ['bottom'], MAccessContainer, [0.5, -0.2], null, [0.5, 1], {blocksPrev: false, blocksNext: false} ],
+      EraseConnector(freeLine_toMBlock, '~fade-out', [], {blocksNext: false}),
+      EraseConnector(freeLine_MAccess, '~trace', ['from-end'], {blocksPrev: false, blocksNext: false}),
       Exit(textbox_MAccess, '~fade-out', [], {blocksPrev: false}),
-      // [ 'line', parentArrowDown, '~fade-out', [], parentArrowSource, [0, 1], SJNumLabel, [0.5, -0.2], {blocksNext: false} ],
+      EraseConnector(parentArrowDown, '~fade-out', [], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
     ]);
   

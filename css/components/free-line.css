@@ -2,24 +2,6 @@
 /**************************** FREE LINE ****************************/
 /*****************************************************************/
 
-.free-line {
-  width: auto;
-  height: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  overflow:visible;
-  z-index: 1000;
-}
-
-.free-line__line {
-  stroke: currentColor;
-  stroke-width:2; 
-  marker-end:url(#markerArrow);
-  stroke-linecap: round;
-}
-
 wbfk-connector {
   stroke: currentColor;
   fill: currentColor;
@@ -28,15 +10,11 @@ wbfk-connector {
   z-index: 1000;
 }
 
-.free-line--bullet-connector .free-line__line {
+.free-line--bullet-connector {
   stroke: var(--color-red);
 }
 
-.free-line--dotted .free-line__line {
+.free-line--dotted {
   stroke-width:1;
   stroke-dasharray: 4;
-}
-
-.free-line marker path {
-  fill: currentColor;
 }
