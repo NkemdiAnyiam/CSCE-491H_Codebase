@@ -11,8 +11,8 @@ export class Connector extends HTMLElement {
 
   private connectorId: number = 0;
   readonly markerIdPrefix: string;
-  useMarkerB: boolean;
-  useMarkerA: boolean;
+  usesMarkerB: boolean;
+  usesMarkerA: boolean;
   private lineLayer: SVGLineElement;
   private lineMask: SVGLineElement;
   private gBody: SVGGElement;
@@ -20,9 +20,9 @@ export class Connector extends HTMLElement {
 
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
-  tracking: boolean = false;
-  private currentlyTracking = false;
-  private trackingTimeout?: NodeJS.Timer;
+  trackingEnabled: boolean = false;
+  private currentlyTracking: boolean = false;
+  private timeoutForTracking?: NodeJS.Timer;
 
   get ax(): number { return this.lineLayer.x1.baseVal.value; }
   get bx(): number { return this.lineLayer.x2.baseVal.value; }
@@ -60,8 +60,8 @@ export class Connector extends HTMLElement {
     const markerIdPrefix = `markerArrow--${this.connectorId}`;
     this.markerIdPrefix = markerIdPrefix;
     const maskId = `mask--${this.connectorId}`;
-    this.useMarkerA = this.hasAttribute('a-marker');
-    this.useMarkerB = this.hasAttribute('b-marker');
+    this.usesMarkerA = this.hasAttribute('a-marker');
+    this.usesMarkerB = this.hasAttribute('b-marker');
     const markerWidth = 5;
     const markerHeight = 7;
 
@@ -124,14 +124,14 @@ export class Connector extends HTMLElement {
           <mask id="${maskId}" maskUnits="userSpaceOnUse">
             <g class="connector__mask-group">
               ${
-                this.useMarkerA ?
+                this.usesMarkerA ?
                 `<marker id="${markerIdPrefix}-a--mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
                   <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
                 ''
               }
               ${
-                this.useMarkerB ?
+                this.usesMarkerB ?
                 `<marker id="${markerIdPrefix}-b--mask" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
                   <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
                 </marker>` :
@@ -139,8 +139,8 @@ export class Connector extends HTMLElement {
               }
 
               <line
-                ${this.useMarkerA ? `marker-start="url(#${markerIdPrefix}-a--mask)"` : ''}
-                ${this.useMarkerB ? `marker-end="url(#${markerIdPrefix}-b--mask)"` : ''}
+                ${this.usesMarkerA ? `marker-start="url(#${markerIdPrefix}-a--mask)"` : ''}
+                ${this.usesMarkerB ? `marker-end="url(#${markerIdPrefix}-b--mask)"` : ''}
                 class="connector__line connector__line--mask"
               />
             </g>
@@ -148,14 +148,14 @@ export class Connector extends HTMLElement {
 
           <g mask="url(#${maskId})" class="connector__layer-group">
             ${
-              this.useMarkerA ?
+              this.usesMarkerA ?
               `<marker id="${markerIdPrefix}-a--layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto-start-reverse">
                 <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
               ''
             }
             ${
-              this.useMarkerB ?
+              this.usesMarkerB ?
               `<marker id="${markerIdPrefix}-b--layer" markerWidth="${markerWidth}" markerHeight="${markerHeight}" refX="${markerWidth-1}" refY="${markerHeight/2}" orient="auto">
                 <path d="M0,0 L0,${markerHeight} L${markerWidth},${markerHeight/2} L0,0" />
               </marker>` :
@@ -230,13 +230,13 @@ export class Connector extends HTMLElement {
   }
 
   setTrackingInterval = () => {
-    this.trackingTimeout = setInterval(this.updateEndpoints, 4, true);
+    this.timeoutForTracking = setInterval(this.updateEndpoints, 4, true);
     this.currentlyTracking = true;
   }
 
   clearTrackingInterval = () => {
     this.currentlyTracking = false;
-    clearInterval(this.trackingTimeout);
+    clearInterval(this.timeoutForTracking);
   }
 }
 
@@ -255,8 +255,8 @@ export class SetConnectorBlock extends AnimBlock {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
-      commitStyles: false,
-      pregenerateKeyframes: true,
+      commitsStyles: false,
+      pregeneratesKeyframes: true,
     };
   }
   
@@ -296,21 +296,21 @@ export class SetConnectorBlock extends AnimBlock {
   protected _onStartForward(): void {
     this.previousPointA = this.connectorElem.pointA;
     this.previousPointB = this.connectorElem.pointB;
-    this.previousConnectorConfig.trackEndpoints = this.connectorElem.tracking;
+    this.previousConnectorConfig.trackEndpoints = this.connectorElem.trackingEnabled;
     this.connectorElem.pointA = this.pointA;
     this.connectorElem.pointB = this.pointB;
-    this.connectorElem.tracking = this.connectorConfig.trackEndpoints;
+    this.connectorElem.trackingEnabled = this.connectorConfig.trackEndpoints;
   }
 
   protected _onStartBackward(): void {
     this.connectorElem.pointA = this.previousPointA;
     this.connectorElem.pointB = this.previousPointB;
-    this.connectorElem.tracking = this.previousConnectorConfig.trackEndpoints;
+    this.connectorElem.trackingEnabled = this.previousConnectorConfig.trackEndpoints;
   }
 
   applyLineConfig(connectorConfig: Partial<ConnectorConfig>): ConnectorConfig {
     return {
-      trackEndpoints: this.connectorElem.tracking,
+      trackEndpoints: this.connectorElem.trackingEnabled,
       ...connectorConfig,
     };
   }
@@ -322,7 +322,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       classesToRemoveOnStart: ['wbfk-hidden'],
-      commitStyles: false,
+      commitsStyles: false,
       // pregenerateKeyframes: true,
     };
   }
@@ -344,7 +344,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onStartForward(): void {
     // this.connectorElem.updateEndpoints();
     this.domElem.classList.remove('wbfk-hidden');
-    if (this.connectorElem.tracking) {
+    if (this.connectorElem.trackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
   }
@@ -361,7 +361,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       classesToAddOnFinish: ['wbfk-hidden'],
-      commitStyles: false,
+      commitsStyles: false,
       // pregenerateKeyframes: true,
     };
   }
@@ -385,7 +385,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
   }
 
   protected _onStartBackward(): void {
-    if (this.connectorElem.tracking) {
+    if (this.connectorElem.trackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
   }

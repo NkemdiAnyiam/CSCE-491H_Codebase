@@ -5,13 +5,13 @@ import { AnimationNameIn, IKeyframesBank, KeyframesBankEntry } from "./TestUsabi
 type CustomKeyframeEffectOptions = {
   blocksNext: boolean;
   blocksPrev: boolean;
-  commitStyles: boolean;
+  commitsStyles: boolean;
   composite: 'replace' | 'add' | 'accumulate';
   classesToAddOnFinish: string[];
   classesToAddOnStart: string[];
   classesToRemoveOnFinish: string[];
   classesToRemoveOnStart: string[]; // TODO: Consider order of addition/removal
-  pregenerateKeyframes: boolean;
+  pregeneratesKeyframes: boolean;
 }
 
 export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
@@ -117,13 +117,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
 
     // TODO: Handle case where only one keyframe is provided
-    let [forwardFrames, backwardFrames] = this.config.pregenerateKeyframes ?
+    let [forwardFrames, backwardFrames] = this.config.pregeneratesKeyframes ?
       this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
       [[], []];
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: this.config.duration,
-      fill: this.config.commitStyles ? 'forwards' : 'none',
+      fill: this.config.commitsStyles ? 'forwards' : 'none',
       easing: this.config.easing,
       composite: this.config.composite,
     };
@@ -155,7 +155,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   stepForward(): Promise<void> {
     return new Promise(resolve => {
-      if (!this.config.pregenerateKeyframes) {
+      if (!this.config.pregeneratesKeyframes) {
         // TODO: Handle case where only one keyframe is provided
         let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
         this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
@@ -203,7 +203,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return animation.finished.then(() => {
       // CHANGE NOTE: Move hidden class stuff here
       // TODO: Account for case where parent is hidden
-      if (this.config.commitStyles) {
+      if (this.config.commitsStyles) {
         try {
           animation.commitStyles(); // actually applies the styles to the element
         }
@@ -242,10 +242,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       blocksPrev: true,
       duration: 500,
       playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
-      commitStyles: true,
+      commitsStyles: true,
       composite: 'replace',
       easing: 'linear',
-      pregenerateKeyframes: false,
+      pregeneratesKeyframes: false,
 
       // subclass defaults take priority
       ...this.defaultConfig,
@@ -292,8 +292,8 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     // TODO: Consider commitStyles for false by default
     return {
-      commitStyles: false,
-      pregenerateKeyframes: true,
+      commitsStyles: false,
+      pregeneratesKeyframes: true,
     };
   }
 
@@ -318,8 +318,8 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
-      commitStyles: false,
-      pregenerateKeyframes: true,
+      commitsStyles: false,
+      pregeneratesKeyframes: true,
     };
   }
 
