@@ -1,5 +1,5 @@
 import { Connector } from "../AnimBlockLine";
-import { IKeyframesBank, WebFlik } from "./WebFlik";
+import { WebFlik } from "./WebFlik";
 
 const {
   Entrance,
@@ -15,7 +15,7 @@ const {
     },
     [`pinwheel`]: {
       generateKeyframes(numSpins: number, direction: 'clockwise' | 'counter-clockwise') {
-        const thing = this.AAADummyEntranceProp;
+        const thing = this.animName;
         return [[], []]
       },
     }
@@ -40,7 +40,7 @@ const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500, blocksPrev: false});
 Entrance(someHtmlElement, '~wipe', ['left']);
 SetConnector(new Connector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
-DrawConnector(new Connector(), '~trace', ['from-start'])
+DrawConnector(new Connector(), '~trace', ['from-A'])
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])

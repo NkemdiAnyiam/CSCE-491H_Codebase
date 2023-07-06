@@ -1,5 +1,5 @@
 import { AnimSequence } from "./AnimSequence.js";
-import { AnimationNameIn, IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -285,12 +285,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 }
 
 export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  // TODO: remove
-  AAADummyEntranceProp = 'Ent';
-  ZZZDummyEntranceProp = 'rance';
-
   protected get defaultConfig(): Partial<AnimBlockConfig> {
-    // TODO: Consider commitStyles for false by default
     return {
       commitsStyles: false,
       pregeneratesKeyframes: true,
@@ -312,10 +307,6 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  // TODO: remove
-  AAADummyExitProp = 'Ex';
-  ZZZDummyExitProp = 'it';
-
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -338,10 +329,6 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
 }
 
 export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  // TODO: remove
-  AAADummyEmphasisProp = 'Emph';
-  ZZZDummyEmphasisProp = 'asis';
-
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
@@ -353,10 +340,6 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  // TODO: remove
-  AAADummyEmphasisProp = 'Trans';
-  ZZZDummyEmphasisProp = 'lation';
-
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',

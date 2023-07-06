@@ -1,6 +1,6 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
-import { IKeyframesBank, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { IKeyframesBank } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
@@ -43,14 +43,6 @@ export const presetEntrances = {
           throw new Error(`Invalid direction ${fromDirection} used in ~wipe. Must be 'top', 'right', 'bottom', or 'left'`);
       }
     }
-  },
-
-  // TODO: Remove dummy animation
-  ['~to-spec']: {
-    generateKeyframes(larg: number, bool?: boolean) {
-      console.log(larg);
-      return [[], []]
-    },
   },
 
   // invalidProperty: 5,
@@ -250,7 +242,6 @@ export const presetConnectorEntrances = {
     },
   },
 
-  // TODO: handle markers
   [`~fade-in`]: {
     generateKeyframes: () => [[
       {opacity: '0'},
@@ -260,7 +251,6 @@ export const presetConnectorEntrances = {
 } satisfies IKeyframesBank<DrawConnectorBlock>;
 
 export const presetConnectorExits = {
-  // TODO: Utilize appropriate classes to handle marker
   [`~trace`]: {
     generateKeyframes(fromPoint: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;

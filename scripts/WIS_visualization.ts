@@ -1,8 +1,6 @@
 import { setupPlaybackControls } from './playbackControls.js';
 import { JobScheduler } from './JobScheduler.js';
 import { SceneCreator } from './SceneCreator.js';
-import { AnimBlock } from './AnimBlock.js';
-// import { AnimBlockLine } from './AnimBlockLine.js';
 import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 import { WebFlik } from './TestUsability/WebFlik.js';
