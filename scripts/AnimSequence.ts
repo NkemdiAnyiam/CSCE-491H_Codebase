@@ -1,5 +1,4 @@
 import { AnimBlock, AnimTimelineAnimation } from "./AnimBlock.js";
-import { AnimBlockLine } from "./AnimBlockLine.js";
 
 type AnimSequenceOptions = {
   description: string;

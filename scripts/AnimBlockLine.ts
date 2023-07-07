@@ -64,8 +64,6 @@ export class Connector extends HTMLElement {
     const markerWidth = 5;
     const markerHeight = 7;
 
-    // <link rel="preload" href="/scripts/TestUsability/line-styles.css" as="style" />
-
     // TODO: Improve marker sizing configuration
     const htmlString = `
     <style>
