@@ -168,9 +168,9 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
       
       animSequence.addManyBlocks([
         Translation(jobBarEl, '~move-to', [startCell], {blocksNext: false}),
-        Exit(rowUnsortedLetter, '~wipe', ['left'], {blocksPrev: false, duration: 250}),
-        Entrance(rowSJNum, '~wipe', ['right'], {blocksNext: false, blocksPrev: false, duration: 250}),
-        Entrance(rowSortedLetter, '~wipe', ['right'], {blocksPrev: false, duration: 250}),
+        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {blocksPrev: false, duration: 250}),
+        Entrance(rowSJNum, '~wipe', ['from-right'], {blocksNext: false, blocksPrev: false, duration: 250}),
+        Entrance(rowSortedLetter, '~wipe', ['from-right'], {blocksPrev: false, duration: 250}),
       ]);
     });
 
@@ -198,8 +198,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain what a compatible job is');
     animSequence.addManyBlocks([
       Exit(textbox_placeBars, '~fade-out', []),
-      Entrance(jArray1, '~wipe', ['left']),
-      Entrance(cArray, '~wipe', ['left'], {blocksPrev: false}),
+      Entrance(jArray1, '~wipe', ['from-left']),
+      Entrance(cArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_cArray, '~fade-in', [], {blocksPrev: false}),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -267,7 +267,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
         Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
         Emphasis(jobBarEl, '~highlight', [], {blocksNext: false}),
         Emphasis(jBlock, '~highlight', [], {blocksNext: false, blocksPrev: false}),
-        Entrance(cBar, '~wipe', ['top'], {blocksPrev: false}),
+        Entrance(cBar, '~wipe', ['from-top'], {blocksPrev: false}),
         Entrance(textP_fillCArray_forJobX, '~fade-in', [], {duration: 0, blocksNext: false}),
         Entrance(textbox_fillCArray, '~fade-in', []),
       ]);
@@ -315,8 +315,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     
       // "Update" current c-array entry
       animSequence2.addManyBlocks([
-        Exit(cEntryBlank, '~wipe', ['left'], {blocksPrev: false, blocksNext: false}),
-        Entrance(cEntryValue, '~wipe', ['right'], {blocksPrev: false}),
+        Exit(cEntryBlank, '~wipe', ['from-right'], {blocksPrev: false, blocksNext: false}),
+        Entrance(cEntryValue, '~wipe', ['from-right'], {blocksPrev: false}),
         Exit(textP_fillCArray_resultJobX, '~fade-out', [], {duration: 250, blocksPrev: false}),
         Entrance(textP_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
       ]);
@@ -489,8 +489,8 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain memoization');
     animSequence.setTag('introduce memoization');
     animSequence.addManyBlocks([
-      Entrance(jArray2, '~wipe', ['left']),
-      Entrance(MArray, '~wipe', ['left'], {blocksPrev: false}),
+      Entrance(jArray2, '~wipe', ['from-left']),
+      Entrance(MArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_MArray, '~fade-in', []),
     ]);
     animTimeline.addOneSequence(animSequence);
@@ -545,7 +545,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Hide M array text explanation boxes');
     animSequence.addManyBlocks([
       Exit(MArrayTextBoxes, '~fade-out', []),
-      Entrance(dataDisplayBorder, '~wipe', ['top']),
+      Entrance(dataDisplayBorder, '~wipe', ['from-top']),
     ]);
     animTimeline.addOneSequence(animSequence);
   }
@@ -696,7 +696,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       EraseConnector(freeLine_MAccess, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', []),
 
-      Entrance(arrowContainer, '~wipe', ['right']),
+      Entrance(arrowContainer, '~wipe', ['from-right']),
       Entrance(formulaComputation, '~fade-in', [], {blocksPrev: false}),
       Emphasis(formulaComputation, '~highlight', [], {blocksNext: false}),
       SetConnector(freeLine_formulaComputation, [formulaComputation, 0.1, 0.2], [textbox_formulaComputation, 0.5, 1]),
@@ -779,8 +779,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       // EraseConnector(freeLine_cAccess, '~fade-out', [], {duration: 0}),
       // SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
       // DrawConnector(freeLine_cAccess, '~fade-in', [], {duration: 0}),
-      Exit(cAccess, '~wipe', ['left'], {blocksPrev: false}),
-      Entrance(cEntry, '~wipe', ['right'], {blocksNext: false}),
+      Exit(cAccess, '~wipe', ['from-right'], {blocksPrev: false}),
+      Entrance(cEntry, '~wipe', ['from-right'], {blocksNext: false}),
 
       // SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1]),
       // DrawConnector(freeLine_cAccess, '~fade-in', [], {duration: 0}),
@@ -841,8 +841,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     animSequence.addManyBlocks([
       SetConnector(freeLine_fromSourceEl1, [sourceEl_OPT1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
       DrawConnector(freeLine_fromSourceEl1, '~trace', ['from-A']),
-      Exit(OPTExpression1, '~wipe', ['left'], {blocksPrev: false}),
-      Entrance(OPTResult1, '~wipe', ['right'], {blocksNext: false}),
+      Exit(OPTExpression1, '~wipe', ['from-right'], {blocksPrev: false}),
+      Entrance(OPTResult1, '~wipe', ['from-right'], {blocksNext: false}),
       Exit(textP_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
       Entrance(textP_OPTExpression1_found, '~fade-in', [], { duration: 250 }),
       SetConnector(freeLine_OPTExpression1, [OPTResult1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
@@ -868,8 +868,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   
       Exit(textP_computation1_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
       Entrance(textP_computation1_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
-      Exit(computationExpression1, '~wipe', ['left'],),
-      Entrance(computationResult1, '~wipe', ['right'],),
+      Exit(computationExpression1, '~wipe', ['from-right'],),
+      Entrance(computationResult1, '~wipe', ['from-right'],),
       Emphasis(computationResult1, '~highlight', [], {blocksPrev: false, blocksNext: false}),
       SetConnector(freeLine_computation1, [computationResult1, 0.5, -0.2], [textbox_computation1, 0.5, 1]),
       DrawConnector(freeLine_computation1, '~trace', ['from-A'], {blocksPrev: false}),
@@ -912,8 +912,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_computation2, '~trace', ['from-B'], {blocksNext: false}),
   
-      Exit(nextSJNumExpression, '~wipe', ['left']),
-      Entrance(nextSJNum, '~wipe', ['right']),
+      Exit(nextSJNumExpression, '~wipe', ['from-right']),
+      Entrance(nextSJNum, '~wipe', ['from-right']),
   
       SetConnector(freeLine_OPTExpression2, [computation2, 0.5, -0.2], [textbox_OPTExpression2, 0.5, 1]),
       DrawConnector(freeLine_OPTExpression2, '~trace', ['from-A'], {blocksPrev: false}),
@@ -951,8 +951,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Entrance(textP_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
 
       Emphasis(computation2, '~un-highlight', [], {blocksNext: false}),
-      Exit(OPTExpression2, '~wipe', ['left'], {blocksPrev: false}),
-      Entrance(computationResult2, '~wipe', ['right'], {blocksNext: false}),
+      Exit(OPTExpression2, '~wipe', ['from-right'], {blocksPrev: false}),
+      Entrance(computationResult2, '~wipe', ['from-right'], {blocksNext: false}),
       Emphasis(computationResult2, '~highlight', [], {blocksPrev: false}),
 
       SetConnector(freeLine_computation2, [computation2, 0.5, -0.2], [textbox_computation2, 0.5, 1]),
@@ -1000,8 +1000,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       // TODO: Address
       // [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
-      Exit(formulaComputation, '~wipe', ['left'], {blocksPrev: false}),
-      Entrance(formulaResult, '~wipe', ['right'], {blocksNext: false}),
+      Exit(formulaComputation, '~wipe', ['from-right'], {blocksPrev: false}),
+      Entrance(formulaResult, '~wipe', ['from-right'], {blocksNext: false}),
 
       // [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
   
@@ -1025,12 +1025,12 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Exit(textbox_formulaComputation, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_formulaComputation, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(formulaContainer, '~un-highlight', [], {blocksNext: false}),
-      Exit(formulaContainer, '~wipe', ['left']),
-      Exit(arrowContainer, '~wipe', ['left']),
+      Exit(formulaContainer, '~wipe', ['from-right']),
+      Exit(arrowContainer, '~wipe', ['from-right']),
   
       // Visually update M access to final answer
-      Exit(MAccess, '~wipe', ['left']),
-      Entrance(MEntry, '~wipe', ['right']),
+      Exit(MAccess, '~wipe', ['from-right']),
+      Entrance(MEntry, '~wipe', ['from-right']),
       Emphasis(MAccessContainer, '~highlight', []),
   
       // Visually update M array entry
@@ -1159,8 +1159,8 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
       DrawConnector(freeLine_toMBlock, '~trace', ['from-A']),
       // [ 'line', freeLine_toMBlock, '~fade-out', [], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
       // [ 'line', freeLine_toMBlock, '~wipe', ['left'], MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      Exit(MAccess, '~wipe', ['left']),
-      Entrance(MEntry, '~wipe', ['right']),
+      Exit(MAccess, '~wipe', ['from-right']),
+      Entrance(MEntry, '~wipe', ['from-right']),
       Exit(textbox_MAccess_p1, '~fade-out', [], {duration: 250, blocksNext: false}),
       Entrance(textbox_MAccess_p2, '~fade-in', [], {duration: 250, blocksNext: false}),
     ]);

@@ -13,34 +13,34 @@ export const presetEntrances = {
   },
 
   [`~wipe`]: {
-    generateKeyframes(fromDirection: 'top' | 'right' | 'bottom' | 'left' = 'bottom') {
-      switch(fromDirection) {
-        case 'top':
-          return [[
-            {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
-            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-          ]];
-
-        case 'right':
-          return [[
-            {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
-            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
-          ]];
-
-        case 'bottom':
+    generateKeyframes(direction: 'from-bottom' | 'from-left' | 'from-top' | 'from-right' = 'from-bottom') {
+      switch(direction) {
+        case 'from-bottom':
           return [[
             {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
-        case 'left':
+        case 'from-left':
           return [[
             {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
           ]];
 
+        case 'from-top':
+          return [[
+            {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+          ]];
+
+        case 'from-right':
+          return [[
+            {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
+            {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
+          ]];
+
         default:
-          throw new Error(`Invalid direction ${fromDirection} used in ~wipe. Must be 'top', 'right', 'bottom', or 'left'`);
+          throw new Error(`Invalid direction ${direction} used in ~wipe. Must be 'from-top', 'from-right', 'from-bottom', or 'from-left'`);
       }
     }
   },
@@ -58,34 +58,34 @@ export const presetExits = {
   },
   
   [`~wipe`]: {
-    generateKeyframes(toDirection: 'top' | 'right' | 'bottom' | 'left' = 'top') {
-      switch(toDirection) {
-        case 'top':
+    generateKeyframes(direction: 'from-bottom' | 'from-left' | 'from-top' | 'from-right' = 'from-bottom') {
+      switch(direction) {
+        case 'from-bottom':
           return [[
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
             {clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)'},
           ]];
 
-        case 'right':
+        case 'from-left':
           return [[
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
             {clipPath: 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)'},
           ]];
 
-        case 'bottom':
+        case 'from-top':
           return [[
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
             {clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)'},
           ]];
 
-        case 'left':
+        case 'from-right':
           return [[
             {clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'},
             {clipPath: 'polygon(0 0, 0 0, 0 100%, 0 100%)'},
           ]];
 
         default:
-          throw new Error(`Invalid direction ${toDirection} used in ~wipe. Must be 'top', 'right', 'bottom', or 'left'`);
+          throw new Error(`Invalid direction ${direction} used in ~wipe. Must be 'from-top', 'from-right', 'from-bottom', or 'from-left'`);
       }
     }
   },
@@ -198,7 +198,7 @@ export const presetTranslations = {
 
 export const presetConnectorEntrances = {
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
+    generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
 
       // using CSS variables to control marker-end or marker-start with easing step-end
@@ -217,7 +217,7 @@ export const presetConnectorEntrances = {
         {['--a-marker']: `url(#${markerIdPrefix}-a--layer)`},
       ];
 
-      switch(fromPoint) {
+      switch(direction) {
         case 'from-A':
           return [fromAFrames];
 
@@ -237,7 +237,7 @@ export const presetConnectorEntrances = {
           return [this.connectorElem.ax >= this.connectorElem.bx ? fromAFrames : fromBFrames];
 
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new Error(`Invalid direction ${direction} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
   },
@@ -252,7 +252,7 @@ export const presetConnectorEntrances = {
 
 export const presetConnectorExits = {
   [`~trace`]: {
-    generateKeyframes(fromPoint: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
+    generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
 
       const fromStartFrames = [
@@ -269,7 +269,7 @@ export const presetConnectorExits = {
         {['--b-marker']: `url(#${markerIdPrefix}-b--layer--hide-by-invalidating)`},
       ];
 
-      switch(fromPoint) {
+      switch(direction) {
         case 'from-A':
           return [fromStartFrames];
 
@@ -289,7 +289,7 @@ export const presetConnectorExits = {
           return [this.connectorElem.ax >= this.connectorElem.bx ? fromStartFrames : fromEndFrames];
 
         default:
-          throw new Error(`Invalid direction ${fromPoint} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new Error(`Invalid direction ${direction} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
   },

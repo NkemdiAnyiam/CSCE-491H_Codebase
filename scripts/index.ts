@@ -34,8 +34,8 @@ const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_mult
 const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
 const toggleSequence = new AnimSequence([
-  Exit(jobForm_multiInput, '~wipe', ['left'], { duration: 250 }),
-  Entrance(jobForm_textarea, '~wipe', ['right'], { duration: 250 }),
+  Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
+  Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),
 ]);
 
 function swapForm(e) {
