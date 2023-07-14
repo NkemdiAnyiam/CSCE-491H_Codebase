@@ -640,20 +640,21 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     const animSequence = parentAnimSequence ?? new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Fade in job card and M access');
     animSequence.setTag('start');
-    animSequence.addManyBlocks([
-      Entrance(jobCard, '~fade-in', [], {blocksNext: parentArrowDown ? false : true}), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
-    ]);
-    if (parentArrowDown && parentArrowSource) {
-      animSequence.addManyBlocks([
-        SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-        DrawConnector(parentArrowDown, '~trace', ['from-A'], {blocksPrev: false}),
-      ]);
-    }
-    if (aboveBullet) {
+    if (parentArrowDown && parentArrowSource && aboveBullet) {
       const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector') as Connector;
       animSequence.addManyBlocks([
+        // TODO: need to address the fact that jobCard needs to be revealed first or SJNumLabel's position won't be available below
+        Entrance(jobCard, '~fade-in', [], {blocksNext: false}), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
+        SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
+        DrawConnector(parentArrowDown, '~trace', ['from-A'], {blocksPrev: false}), // TODO: blocksPrev: false is problematic for set/draw
+        // TODO: should really let bullet connector be drawn at the same time
         SetConnector(freeLine_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
         DrawConnector(freeLine_bulletConnector, '~trace', ['from-A']),
+      ]);
+    }
+    else {
+      animSequence.addManyBlocks([
+        Entrance(jobCard, '~fade-in', []), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
       ]);
     }
     animSequence.addManyBlocks([
@@ -820,7 +821,9 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   /****************************************************** */
   // RECURSION 1
   /****************************************************** */
-  let sourceEl_OPT1, freeLine_fromSourceEl1; // pointing up from child
+  const jobCardChild1Content = jobCardChild1.querySelector('.job-card-content');
+  const freeLine_upFromChild1 = jobCardChild1Content.querySelector('.free-line--up-tree') as Connector;
+  const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
     const animSeqPassDown = new AnimSequence();
     // add blocks to hide text about OPT expression before recursion
@@ -828,9 +831,9 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_OPTExpression1, '~trace', ['from-A']),
     ]);
-    let animSequence;
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     // generate animation sequences for first child job/stub
-    [animSequence, sourceEl_OPT1, freeLine_fromSourceEl1] = jobCardChild1.classList.contains('job-card--stub') ?
+    jobCardChild1.classList.contains('job-card--stub') ?
       animateJobStub(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet) :
       animateJobCard(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet);
     /****************************************************** */
@@ -839,8 +842,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
     animSequence.setTag('OPT point 1');
     animSequence.addManyBlocks([
-      SetConnector(freeLine_fromSourceEl1, [sourceEl_OPT1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
-      DrawConnector(freeLine_fromSourceEl1, '~trace', ['from-A']),
+      SetConnector(freeLine_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
+      DrawConnector(freeLine_upFromChild1, '~trace', ['from-A']),
       Exit(OPTExpression1, '~wipe', ['from-right'], {blocksPrev: false}),
       Entrance(OPTResult1, '~wipe', ['from-right'], {blocksNext: false}),
       Exit(textP_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
@@ -861,7 +864,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     const animSequence = new AnimSequence();
     animSequence.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
     animSequence.addManyBlocks([
-      EraseConnector(freeLine_fromSourceEl1, '~fade-out', [], {blocksNext: false}),
+      EraseConnector(freeLine_upFromChild1, '~fade-out', [], {blocksNext: false}),
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksPrev: false, blocksNext: false}),
       EraseConnector(freeLine_OPTExpression1, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(OPTExpressionContainer1, '~un-highlight', [], {blocksPrev: false}),
@@ -927,16 +930,18 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   /****************************************************** */
   // RECURSION 2
   /****************************************************** */
-  let sourceEl_OPT2, freeLine_fromSourceEl2; // pointing up from child
+  const jobCardChild2Content = jobCardChild1.querySelector('.job-card-content');
+  const freeLine_upFromChild2 = jobCardChild2Content.querySelector('.free-line--up-tree') as Connector;
+  const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
     const animSeqPassDown = new AnimSequence();
     animSeqPassDown.addManyBlocks([
       Exit(textbox_OPTExpression2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_OPTExpression2, '~trace', ['from-B']),
     ]);
-    let animSequence;
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     // create animation sequences for second child card/stub
-    [animSequence, sourceEl_OPT2, freeLine_fromSourceEl2] = jobCardChild2.classList.contains('job-card--stub') ?
+    jobCardChild2.classList.contains('job-card--stub') ?
       animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet')) :
       animateJobCard(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet'));
     /****************************************************** */
@@ -944,8 +949,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     /****************************************************** */
     animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
     animSequence.addManyBlocks([
-      SetConnector(freeLine_fromSourceEl2, [sourceEl_OPT2, 0.5, -0.2], [computation2, 0, 1.1]),
-      DrawConnector(freeLine_fromSourceEl2, '~trace', ['from-A']),
+      SetConnector(freeLine_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
+      DrawConnector(freeLine_upFromChild2, '~trace', ['from-A']),
 
       Exit(textP_computation2_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
       Entrance(textP_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
@@ -971,7 +976,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     const animSequence = new AnimSequence();
     animSequence.setDescription('Focus on whole formula container');
     animSequence.addManyBlocks([
-      EraseConnector(freeLine_fromSourceEl2, '~fade-out', []),
+      EraseConnector(freeLine_upFromChild2, '~fade-out', []),
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_computation2, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(computationResult2, '~un-highlight', [], {blocksPrev: false}),
@@ -1069,7 +1074,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   /****************************************************** */
   if (parentArrowDown) {
     // just for hiding the last text box before moving back up the tree
-    const animSequence = new AnimSequence();
+    const animSequence = new AnimSequence(null, {continueNext: true});
+    animSequence.setDescription('If this is child block, hide parent arrow and unhighlight M access');
     animSequence.setTag('finish a main card');
     animSequence.addManyBlocks([
       Exit(textbox_MAccess, '~fade-out', [], {blocksNext: false}),
@@ -1078,7 +1084,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
     ]);
 
-    return [animSequence, MAccessContainer, freeLine_upTree];
+    animTimeline.addOneSequence(animSequence);
   }
 };
 
@@ -1110,15 +1116,12 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
   /****************************************************** */
   {
     const animSequence = parentAnimSequence;
-    animSequence.addManyBlocks([
-      Entrance(jobCard, '~fade-in', [], {blocksNext: false}),
-    ]);
-    animSequence.addManyBlocks([
-      SetConnector(freeLine_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
-      DrawConnector(freeLine_bulletConnector, '~trace', ['from-A']),
-    ]);
     animSequence.setDescription('Fade in job stub and M access');
     animSequence.addManyBlocks([
+      Entrance(jobCard, '~fade-in', [], {blocksNext: false}),
+      SetConnector(freeLine_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
+      // TODO: Pretty sure blocksPrev should be false here?
+      DrawConnector(freeLine_bulletConnector, '~trace', ['from-A']),
       SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
       DrawConnector(parentArrowDown, '~trace', ['from-A'], {blocksPrev: false}),
       Entrance(MAccess, '~fade-in', []),
@@ -1173,15 +1176,16 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
   // RETURN BLOCK THAT INITIALLY HIDES REMAINING STUFF AND POINTS TO PARENT
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
+    const animSequence = new AnimSequence(null, {continueNext: true});
+    animSequence.setDescription('Hide parent arrow and unhighlight M access');
     animSequence.addManyBlocks([
       EraseConnector(freeLine_toMBlock, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_MAccess, '~trace', ['from-B'], {blocksPrev: false, blocksNext: false}),
       Exit(textbox_MAccess, '~fade-out', [], {blocksPrev: false}),
       EraseConnector(parentArrowDown, '~fade-out', [], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
-    ]);
-  
-    return [animSequence, MAccessContainer, freeLine_upTree];
+    ]);  
+
+    animTimeline.addOneSequence(animSequence);
   }
 };
