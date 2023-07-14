@@ -17,6 +17,7 @@ export class Connector extends HTMLElement {
   private gBody: SVGGElement;
   private mask: SVGMaskElement;
 
+  // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
   trackingEnabled: boolean = false;

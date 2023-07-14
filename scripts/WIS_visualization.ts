@@ -378,7 +378,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain naive approach to finding max weight');
     animSequence.setTag('show naive');
     animSequence.addManyBlocks([
-      Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}], {duration: 0}),
+      Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
       SetConnector(freeLine_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       DrawConnector(freeLine_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
@@ -396,7 +396,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain possibility that job is part of optimal sequence');
     animSequence.setTag('explain naive');
     animSequence.addManyBlocks([
-      Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: -1.0, offsetX: 10, offsetUnitsX: 'rem'}], {duration: 0}),
+      Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: -1.0, offsetSelfX: '10rem'}], {duration: 0}),
       Emphasis(algorithm_term1, '~highlight', []),
       SetConnector(freeLine_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
       DrawConnector(freeLine_explainNaive1, '~trace', ['from-top']),
@@ -415,7 +415,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animSequence.setDescription('Explain possibility that job is NOT part of optimal sequence');
     animSequence.setTag('explain naive');
     animSequence.addManyBlocks([
-      Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem', offsetTargetX: 1.0, offsetX: -10, offsetUnitsX: 'rem', alignmentX: 'right'}], {duration: 0}),
+      Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: 1.0, offsetSelfX: '-10rem', alignmentX: 'right'}], {duration: 0}),
       Emphasis(algorithm_term2, '~highlight', []),
       SetConnector(freeLine_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
       DrawConnector(freeLine_explainNaive2, '~trace', ['from-top']),
@@ -452,7 +452,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Explain why naive approach is bad');
     animSequence.addManyBlocks([
-      Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetY: 10, offsetUnitsY: 'rem'}], {duration: 0}),
+      Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
       SetConnector(freeLine_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       DrawConnector(freeLine_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', [], {blocksPrev: false}),
@@ -526,7 +526,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     const animSequence = new AnimSequence();
     animSequence.setDescription('Show memoized algorithm');
     animSequence.addManyBlocks([
-      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetX: 6.25, offsetUnitsX: 'rem', preserveY: true}], {duration: 0}),
+      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetSelfX: '6.25rem', preserveY: true}], {duration: 0}),
       SetConnector(freeLine_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       DrawConnector(freeLine_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),
@@ -831,7 +831,6 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_OPTExpression1, '~trace', ['from-A']),
     ]);
-    const animSequence = new AnimSequence(null, {continuePrev: true});
     // generate animation sequences for first child job/stub
     jobCardChild1.classList.contains('job-card--stub') ?
       animateJobStub(jobCardChild1, animSeqPassDown, freeLine_downTree, OPTExpressionContainer1, jobCardBullet) :
@@ -839,6 +838,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     /****************************************************** */
     // REPLACE OPT1 EXPRESSION WITH ANSWER, CHANGE TEXT BOX TEXT
     /****************************************************** */
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
     animSequence.setTag('OPT point 1');
     animSequence.addManyBlocks([
@@ -939,7 +939,6 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
       Exit(textbox_OPTExpression2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_OPTExpression2, '~trace', ['from-B']),
     ]);
-    const animSequence = new AnimSequence(null, {continuePrev: true});
     // create animation sequences for second child card/stub
     jobCardChild2.classList.contains('job-card--stub') ?
       animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet')) :
@@ -947,6 +946,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     /****************************************************** */
     // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
     /****************************************************** */
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
     animSequence.addManyBlocks([
       SetConnector(freeLine_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),

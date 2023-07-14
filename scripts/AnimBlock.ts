@@ -18,37 +18,29 @@ export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' 
 // TODO: validate duration and playbackRate?
 
 type TOffset = {
-  offsetX: number; // determines offset to apply to the respective positional property
-  offsetY: number; // determines offset to apply to the respective positional property
-  offsetXY?: number; // overrides offsetX and offsetY
-  offsetUnitsX: CssLengthUnit;
-  offsetUnitsY: CssLengthUnit;
-  offsetUnitsXY?: CssLengthUnit; // overrides offsetUnitsX and offsetUnitsY
+  offsetSelfX: CssLength; // determines offset to apply to the respective positional property
+  offsetSelfY: CssLength; // determines offset to apply to the respective positional property
 }
 
-// TODO: individual X/Y should override XY, not the other way around
-// TODO: Potentially allow strings in the format of <number><CssLengthUnit>
+// CHANGE NOTE: Use strings in the format of <number><CssLengthUnit> and remove XY things
 export interface TNoElem extends TOffset {
-  translateX: number;
-  translateY: number;
-  translateXY?: number; // overrides translateX and translateY
-  unitsX: CssLengthUnit;
-  unitsY: CssLengthUnit;
-  unitsXY?: CssLengthUnit; // overrides unitsX and unitsY
+  translateX: CssLength;
+  translateY: CssLength;
 }
 
+// TODO: make offset targets CssLengths
 export interface TElem extends TOffset {
   // targetElem: Element; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
   offsetTargetX: number; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)
   offsetTargetY: number; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
-  offsetTargetXY?: number; // overrides offsetTargetX and offsetTargetY
   preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
 }
 
 type CssLengthUnit = | 'px' | 'rem' | '%';
+type CssLength = `${number}${CssLengthUnit}`;
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 

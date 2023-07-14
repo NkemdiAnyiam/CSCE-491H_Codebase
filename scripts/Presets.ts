@@ -4,6 +4,11 @@ import { IKeyframesBank } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
+
+const negate = (str: string) => {
+  return str[0] === '-' ? str.slice(1) : `-${str}`;
+}
+
 export const presetEntrances = {
   [`~fade-in`]: {
     generateKeyframes: () => [[
@@ -119,28 +124,19 @@ export const presetEmphases = {
 export const presetTranslations = {
   ['~translate']: {
     generateKeyframes: (translationOptions: Partial<TNoElem>): [Keyframe[], Keyframe[]] => {
-      let {
-        translateX, translateY, translateXY,
-        unitsX, unitsY, unitsXY,
-        offsetX, offsetY, offsetXY,
-        offsetUnitsX, offsetUnitsY, offsetUnitsXY,
+      const {
+        translateX = '0px',
+        translateY = '0px',
+        offsetSelfX = '0px',
+        offsetSelfY = '0px',
       } = translationOptions;
-  
-      translateX = translateXY ?? translateX ?? 0;
-      translateY = translateXY ?? translateY ?? 0;
-      unitsX = unitsXY ?? unitsX ?? 'px';
-      unitsY = unitsXY ?? unitsY ?? 'px';
-      offsetX = offsetXY ?? offsetX ?? 0;
-      offsetY = offsetXY ?? offsetY ?? 0;
-      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX ?? 'px';
-      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY ?? 'px';
       
       return [
         // forward
-        [{translate: `calc(${translateX}${unitsX} + ${offsetX}${offsetUnitsX}) calc(${translateY}${unitsY} + ${offsetY}${offsetUnitsY})`}],
+        [{translate: `calc(${translateX} + ${offsetSelfX}) calc(${translateY} + ${offsetSelfY})`}],
   
         // backward
-        [{translate: `calc(${-translateX}${unitsX} + ${-offsetX}${offsetUnitsX}) calc(${-translateY}${unitsY} + ${-offsetY}${offsetUnitsY})`}],
+        [{translate: `calc(${negate(translateX)} + ${negate(offsetSelfX)}) calc(${negate(translateY)} + ${negate(offsetSelfY)})`}],
       ];
     },
   },
@@ -151,16 +147,16 @@ export const presetTranslations = {
         throw new Error(`Target for ~move-to must not be null`); // TODO: Improve error message
       }
 
-      let {
-        alignmentX = 'left', alignmentY = 'top',
-        offsetX, offsetY, offsetXY,
-        offsetTargetX, offsetTargetY, offsetTargetXY,
-        offsetUnitsX, offsetUnitsY, offsetUnitsXY,
-        preserveX = false, preserveY = false,
+      const {
+        alignmentX = 'left',
+        alignmentY = 'top',
+        offsetSelfX = '0px',
+        offsetSelfY = '0px',
+        offsetTargetX = 0,
+        offsetTargetY = 0,
+        preserveX = false,
+        preserveY = false,
       } = translationOptions;
-
-      let translateX: number;
-      let translateY: number;
       
       // get the bounding boxes of our DOM element and the target element
       // TODO: Find better spot for visibility override
@@ -172,25 +168,19 @@ export const presetTranslations = {
       targetElem.classList.value = targetElem.classList.value.replace(` wbfk-override-hidden`, '');
 
       // the displacement will start as the difference between the target element's position and our element's position...
-      // ...plus any offset within the target itself
-      offsetTargetX = offsetTargetXY ?? offsetTargetX ?? 0;
-      offsetTargetY = offsetTargetXY ?? offsetTargetY ?? 0;
-      translateX = preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX];
-      translateX += offsetTargetX * rectTarget.width;
-      translateY = preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY];
-      translateY += offsetTargetY * rectTarget.height;
-      offsetX = offsetXY ?? offsetX ?? 0;
-      offsetY = offsetXY ?? offsetY ?? 0;
-      offsetUnitsX = offsetUnitsXY ?? offsetUnitsX ?? 'px';
-      offsetUnitsY = offsetUnitsXY ?? offsetUnitsY ?? 'px';
+      // ...plus any offset with respect to the target
+      const translateX: number = (preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX])
+        + offsetTargetX * rectTarget.width;
+      const translateY: number = (preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY])
+        + offsetTargetY * rectTarget.height;
       
       return [
         // forward
         // TODO: Support returning singular Keyframe instead of Keyframe[]
-        [{translate: `calc(${translateX}px + ${offsetX}${offsetUnitsX}) calc(${translateY}px + ${offsetY}${offsetUnitsY})`}],
+        [{translate: `calc(${translateX}px + ${offsetSelfX}) calc(${translateY}px + ${offsetSelfY})`}],
 
         // backward
-        [{translate: `calc(${-translateX}px + ${-offsetX}${offsetUnitsX}) calc(${-translateY}px + ${-offsetY}${offsetUnitsY})`}],
+        [{translate: `calc(${-translateX}px + ${negate(offsetSelfX)}) calc(${-translateY}px + ${negate(offsetSelfY)})`}],
       ];
     },
   },
