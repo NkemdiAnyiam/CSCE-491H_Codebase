@@ -89,7 +89,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(connector_placeBars, '~trace', ['from-B']),
       Entrance(textbox_placeBars, '~fade-in', [], {blocksPrev: false}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   /****************************************************** */
@@ -112,7 +112,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(textP_placeBars_unorder, '~fade-out', [], {duration: 250}),
       Entrance(textP_placeBars_unorder2, '~fade-in', [], {duration: 250}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -132,7 +132,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       animSequence.addBlocks(Translation(jobBarEl, '~move-to', [jobBarsInitialArea], {blocksNext: false, blocksPrev: false}));
     });
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -167,7 +167,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Entrance(textP_placeBars_ordered, '~fade-in', [], {duration: 250}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -190,7 +190,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Entrance(cArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_cArray, '~fade-in', [], {blocksPrev: false}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -206,7 +206,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(textP_cArray_explain, '~fade-out', [], {duration: 250}),
       Entrance(textP_cArray_refArray, '~fade-in', [], {duration: 250}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -220,7 +220,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(textbox_cArray, '~fade-out', [], {blocksNext: false}),
       EraseConnector(freeLine_cArray, '~trace', ['from-A']),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -260,7 +260,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Entrance(textbox_fillCArray, '~fade-in', []),
       );
 
-      animTimeline.addOneSequence(animSequence);
+      animTimeline.addSequences(animSequence);
     }
 
 
@@ -309,8 +309,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Entrance(textP_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
       );
     
-      animTimeline.addOneSequence(animSequence);
-      animTimeline.addOneSequence(animSequence2);
+      animTimeline.addSequences(animSequence);
+      animTimeline.addSequences(animSequence2);
     }
 
 
@@ -334,7 +334,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Emphasis(jBlock, '~un-highlight', [], {blocksPrev: false}),
         Exit(textP_fillCArray_continueOn, '~fade-out', [], {duration: 0}),
       );
-      animTimeline.addOneSequence(animSequence);
+      animTimeline.addSequences(animSequence);
     }
   });
 
@@ -354,7 +354,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     animSequence.addBlocks(
       Entrance(textbox_finishedCArray, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -371,7 +371,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(freeLine_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
@@ -390,7 +390,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(freeLine_explainNaive1, '~trace', ['from-top']),
       Entrance(textbox_explainNaive1, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
@@ -409,7 +409,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(freeLine_explainNaive2, '~trace', ['from-top']),
       Entrance(textbox_explainNaive2, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   /****************************************************** */
@@ -427,7 +427,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Emphasis(algorithm_term1, '~un-highlight', [], {blocksNext: false}),
       Emphasis(algorithm_term2, '~un-highlight', [], {blocksPrev: false}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -445,7 +445,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(freeLine_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', [], {blocksPrev: false}),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -459,7 +459,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     animSequence.addBlocks(
       Exit(naiveAlgorithmText, '~fade-out', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   const arrayGroup_j_M = dataDisplay.querySelector('.array-group--j-and-M') as HTMLElement;
@@ -481,7 +481,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Entrance(MArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_MArray, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   const arrayBlock_M_0 = MArray.querySelector('.array__array-block--0') as HTMLElement;
@@ -501,7 +501,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(arrayBlank_M_0, '~fade-out', []),
       Entrance(arrayValue_M_0, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -519,7 +519,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       DrawConnector(freeLine_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -535,7 +535,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(MArrayTextBoxes, '~fade-out', []),
       Entrance(dataDisplayBorder, '~wipe', ['from-top']),
     );
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 };
 
@@ -654,7 +654,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -670,7 +670,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       DrawConnector(freeLine_toMBlock, '~trace', ['from-A']),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -694,7 +694,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_formulaComputation, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -715,7 +715,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_computation1, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -736,7 +736,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_cAccess, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -751,7 +751,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       DrawConnector(freeLine_toCBlock, '~trace', ['from-A'], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -778,7 +778,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textP_cAccess_found, '~fade-in', [], { duration: 250 }),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -804,7 +804,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_OPTExpression1, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
   /****************************************************** */
@@ -842,7 +842,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_OPTExpression1, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
   
 
@@ -868,7 +868,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_computation1, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -890,7 +890,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_computation2, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -912,7 +912,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_OPTExpression2, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -954,7 +954,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_computation2, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
   
 
@@ -979,7 +979,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_formulaComputation, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1003,7 +1003,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textP_formulaComputation_found, '~fade-in', [], { duration: 250 }),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1034,7 +1034,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(MBlock_value, '~fade-in', []),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1054,7 +1054,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1073,7 +1073,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 };
 
@@ -1121,7 +1121,7 @@ function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, 
       Entrance(textbox_MAccess, '~fade-in', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1136,7 +1136,7 @@ function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, 
       DrawConnector(freeLine_toMBlock, '~trace', ['from-A']),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
   
 
@@ -1158,7 +1158,7 @@ function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, 
       Entrance(textbox_MAccess_p2, '~fade-in', [], {duration: 250, blocksNext: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 
 
@@ -1176,6 +1176,6 @@ function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, 
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
     );
 
-    animTimeline.addOneSequence(animSequence);
+    animTimeline.addSequences(animSequence);
   }
 };

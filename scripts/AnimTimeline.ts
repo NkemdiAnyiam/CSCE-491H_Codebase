@@ -22,16 +22,11 @@ export class AnimTimeline {
 
   get numSequences() { return this.animSequences.length; }
 
-  constructor(animSequences: AnimSequence[] | AnimSequence | null = null, options: Partial<AnimTimelineOptions> = {}) {
+  constructor(animSequences: AnimSequence[] | null = null, options: Partial<AnimTimelineOptions> = {}) {
     this.id = AnimTimeline.id++;
 
     if (animSequences) {
-      if (animSequences instanceof Array) {
-        this.addManySequences(animSequences);
-      }
-      else {
-        this.addOneSequence(animSequences);
-      }
+      this.addSequences(...animSequences);
     }
 
     this.options = {
@@ -40,14 +35,12 @@ export class AnimTimeline {
     };
   }
 
-  addOneSequence(animSequence: AnimSequence) {
+  addSequences(...animSequences: AnimSequence[]) {
+    animSequences.forEach(animSequence => {
       animSequence.parentTimeline = this;
       animSequence.setID(this.id);
-      this.animSequences.push(animSequence);
-  }
-
-  addManySequences(animSequences: AnimSequence[]) {
-    animSequences.forEach(animSequence => this.addOneSequence(animSequence));
+    });
+    this.animSequences.push(...animSequences);
   }
 
   setPlaybackRate(rate: number) {
