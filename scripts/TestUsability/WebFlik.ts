@@ -3,7 +3,7 @@ import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, 
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
 export type KeyframesBankEntry = Readonly<{
-  generateKeyframes(...args: any[]): [forward: Keyframe[], backward?: Keyframe[]];
+  generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
   config?: Partial<AnimBlockConfig>;
 }>
 export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<string, KeyframesBankEntry>> & (T extends void ? {} : ThisType<T>);
