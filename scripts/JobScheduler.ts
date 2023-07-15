@@ -1,3 +1,5 @@
+import { Job } from "./Job";
+
 export class TreeNode {
   data;
   children = [];
@@ -8,115 +10,110 @@ export class TreeNode {
 }
 
 export class JobScheduler {
-  _maxTime = 11;
-  // _greatestTime = -1;
-  _c = [];
-  _M = [];
+  maxTime = 11;
+  private c: number[] = [];
+  private M: number[] = [];
   _treeRootNode = new TreeNode();
-  // static nextCardNum = 1;
+  private jobsUnsorted: Job[];
+  private jobsSorted: Job[] = [];
 
-  constructor(jobs = []) {
-    this._jobs = [...jobs];
-    this._n_jobs = jobs.length;
+  constructor(jobs: Job[] = []) {
+    this.jobsUnsorted = [...jobs];
     this._treeRootNode.isRoot = true;
   }
 
   getRootNode() { return this._treeRootNode; }
-  getNumJobs() { return this._n_jobs; }
-  getMaxTime() { return this._maxTime; }
-  // getGreatestTime() { return this._greatestTime; }
-  getJobs() { return [...this._jobs]; }
-  getJobsUnsorted() { return [...this._jobsUnsorted]; }
-  getC(index) { return this._c[index]; }
-  getM(index) { return this._M[index]; }
+  getNumJobs() { return this.jobsSorted.length; }
+  getMaxTime() { return this.maxTime; }
+  getJobs() { return [...this.jobsSorted]; }
+  getJobsUnsorted() { return [...this.jobsUnsorted]; }
+  getC(index: number) { return this.c[index]; }
+  getM(index: number) { return this.M[index]; }
 
-  addJob(job) { 
+  public addJob(job: Job): void { 
     if (job.getFinish() < 0) { throw new Error(`Error: Invalid job finish time "${job.getFinish()}". Finish time must be > 0`); }
-    if (job.getFinish() > this._maxTime) { throw new Error(`Error: Invalid job finish time "${job.getFinish()}". Finish time must be < ${this._maxTime}`); }
-    this._jobs.push(job);
-    this._n_jobs++;
-    // this._greatestTime = Math.max(this._greatestTime, job.getFinish());
+    if (job.getFinish() > this.maxTime) { throw new Error(`Error: Invalid job finish time "${job.getFinish()}". Finish time must be < ${this.maxTime}`); }
+    this.jobsUnsorted.push(job);
   }
 
-  addJobs(jobs) {
+  public addJobs(jobs: Job[]): void {
     jobs.forEach(job => this.addJob(job));
   }
 
-  performWISAlgorithm() {
-    this._jobsUnsorted = [...this._jobs];
-    this._sortJobsByFinish();
-    this._setCompatibleJobNums();
-    this._initializeM();
-
-    this._computeOPT(this.getNumJobs(), null);
+  private sortJobsByFinish(): Job[] {
+    const jobFinishComparator = (job1: Job, job2: Job) => job1.getFinish() < job2.getFinish() ? -1 : 1;
+    
+    const jobsSorted = [...this.jobsUnsorted].sort(jobFinishComparator);
+    return jobsSorted;
   }
 
-  jobFinishComparator(job1, job2) {
-    if (job1.getFinish() < job2.getFinish()) { return -1; }
-    else { return 1; }
-  }
-
-  _sortJobsByFinish() {
-    this._jobs.sort(this.jobFinishComparator);
-    this._jobs.forEach((job, index) => job.setSortedJobNum(index + 1));
-  }
-
-  _setCompatibleJobNums() {
-    this._c.push(null);
-    this._jobs.forEach(job => {
-      const compatibleJobNum = job.findCompatibleJobNum(this._jobs);
-      this._c.push(compatibleJobNum);
+  private setCompatibleJobNums(): void {
+    this.c.push(NaN);
+    this.jobsSorted.forEach(job => {
+      let compatibleJobNum = 0;
+      for(let currIdx = job.getSortedJobNum() - 2; currIdx >= 0; --currIdx) {
+        const potentialCompJob = this.jobsSorted[currIdx];
+        if (potentialCompJob.getFinish() <= job.getStart()) {
+          compatibleJobNum = potentialCompJob.getSortedJobNum();
+          break;
+        }
+      }
+      job.setCompatibleJobNum(compatibleJobNum);
+      this.c.push(compatibleJobNum);
     });
   }
 
-  _initializeM() {
-    this._M[0] = 0;
-    for (let i = 1; i <= this._n_jobs; ++i) {
-      this._M[i] = null;
-    }
+  public performWISAlgorithm(): void {
+    this.jobsSorted = this.sortJobsByFinish();
+    this.jobsSorted.forEach((job, index) => job.setSortedJobNum(index + 1));
+    this.setCompatibleJobNums();
+    this.M = [0, ...new Array(this.jobsSorted.length).fill(NaN)];
+    this.computeOPT(this.getNumJobs(), null);
   }
 
-  _computeOPT(j, parentNode) {
+  private computeOPT(j: number, parentNode): number {
     const treeNode = parentNode ? new TreeNode() : this._treeRootNode;
     parentNode?.addChild(treeNode);
 
-    if (this._M[j] === null) {
+    if (Number.isNaN(this.M[j])) {
+      // assuming this job is part of optimal set
+      const computationResult1 = this.jobsSorted[j-1].getWeight() + this.computeOPT(this.c[j], treeNode);
+       // assuming this job is NOT part of optimal set
+      const computationResult2 = this.computeOPT(j - 1, treeNode);
 
-      const computationResult1 = this._jobs[j-1].getWeight() + this._computeOPT(this._c[j], treeNode); // assuming this job is part of optimal set
-      const computationResult2 = this._computeOPT(j - 1, treeNode); // assuming this job is NOT part of optimal set
-
-      this._M[j] = Math.max(computationResult1, computationResult2); // choosing the best option between the 2 possibilities
+       // choosing the best option between the 2 possibilities
+      this.M[j] = Math.max(computationResult1, computationResult2);
 
       treeNode.data = {
-        job: this._jobs[j-1],
+        job: this.jobsSorted[j-1],
         computationResult1: computationResult1,
         computationResult2: computationResult2,
-        MEntry: this._M[j],
+        MEntry: this.M[j],
       };
     }
     else {
       treeNode.isLeaf = true;
       treeNode.data = {
-        job: this._jobs[j-1],
-        MEntry: this._M[j],
+        job: this.jobsSorted[j-1],
+        MEntry: this.M[j],
       };
     }
 
-    return this._M[j];
+    return this.M[j];
   }
 
-  toStr() {
+  toStr(): string {
     let thisString = ``;
-    thisString += `c array:\n\t${this._c}\n`;
-    thisString += `M array:\n\t${this._M}\n`;
+    thisString += `c array:\n\t${this.c}\n`;
+    thisString += `M array:\n\t${this.M}\n`;
     thisString += `Jobs:\n`
-    this._jobs.forEach(job => {
+    this.jobsSorted.forEach(job => {
       thisString += `\t${job.toStr()}\n`;
     });
     return thisString;
   }
   
- print() {
+ print(): void {
     console.log(this.toStr());
   }
 }

@@ -1,47 +1,33 @@
 export class Job {
-  static _currJobLetter = 'A';
-  static resetCurrJobLetter() { Job._currJobLetter = 'A'; }
+  private static currJobLetter = 'A';
 
-  _sortedJobNum = -1;
-  _compatibleJobNum = -1;
+  private jobLetter: string;
+  private sortedJobNum = -1;
+  private compatibleJobNum = -1;
 
-  constructor(start, finish, weight) {
-    this._jobLetter = Job._currJobLetter;
-    Job._currJobLetter = String.fromCharCode( Job._currJobLetter.charCodeAt(0) + 1 );
-    this._start = start;
-    this._finish = finish;
-    this._weight = weight;
+  constructor(private start: number, private finish: number, private weight: number) {
+    this.jobLetter = Job.currJobLetter;
+    Job.currJobLetter = String.fromCharCode( Job.currJobLetter.charCodeAt(0) + 1 );
   }
 
-  getJobLetter() { return this._jobLetter; }
-  getStart() { return this._start; }
-  getFinish() { return this._finish; }
-  getDuration() { return this._finish - this._start; }
-  getWeight() { return this._weight; }
-  getSortedJobNum() { return this._sortedJobNum; }
-  getCompatibleJobNum() { return this._compatibleJobNum; }
+  getJobLetter() { return this.jobLetter; }
+  getStart() { return this.start; }
+  getFinish() { return this.finish; }
+  getDuration() { return this.finish - this.start; }
+  getWeight() { return this.weight; }
+  getSortedJobNum() { return this.sortedJobNum; }
+  getCompatibleJobNum() { return this.compatibleJobNum; }
   getJobBar() { return this._jobBarEl; }
 
-  setSortedJobNum(sortedJobNum) { this._sortedJobNum = sortedJobNum; }
+  setCompatibleJobNum(compatibleJobNum: number) { this.compatibleJobNum = compatibleJobNum; }
+  setSortedJobNum(sortedJobNum: number) { this.sortedJobNum = sortedJobNum; }
   setJobBar(jobBarEl) { this._jobBarEl = jobBarEl; }
 
-  findCompatibleJobNum(jobs) {
-    this._compatibleJobNum = 0;
-    for(let currIdx = this._sortedJobNum - 2; currIdx >= 0; --currIdx) {
-      if (jobs[currIdx]._finish <= this._start) {
-        this._compatibleJobNum = jobs[currIdx].getSortedJobNum();
-        break;
-      }
-    }
-    
-    return this._compatibleJobNum;
+  toStr(): string {
+    return `jobLetter: ${this.jobLetter}; sortedNum: ${this.sortedJobNum}, start: ${this.start}, finish: ${this.finish}, weight: ${this.weight}`;
   }
 
-  toStr() {
-    return `jobLetter: ${this._jobLetter}; sortedNum: ${this._sortedJobNum}, start: ${this._start}, finish: ${this._finish}, weight: ${this._weight}`;
-  }
-
-  print() {
+  print(): void {
     console.log(this.toStr());
   }
 }
