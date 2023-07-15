@@ -5,12 +5,14 @@ import { AnimSequence } from './AnimSequence.js';
 import { AnimTimeline } from "./AnimTimeline.js";
 import { WebFlik } from './TestUsability/WebFlik.js';
 import { Connector } from './AnimBlockLine.js';
+import { Job } from './Job.js';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
 // (\s*)(\[ 'line)
 
 
-const dataDisplay = document.querySelector('.data-display');
+// TODO: Put somewhere better
+const dataDisplay = document.querySelector('.data-display') as HTMLElement;
 const animTimeline = new AnimTimeline(null, {debugMode: true});
 
 const {
@@ -23,7 +25,7 @@ const {
   EraseConnector,
 } = WebFlik.createBanks({});
 
-export function generateVisualization (jobsUnsorted) {
+export function generateVisualization (jobsUnsorted: Job[]) {
   // fade-in visualization screen
   (function() {
     const fadeinVisualization = Entrance(document.querySelector('.visualization'), '~fade-in', [], {duration: 375});
@@ -50,41 +52,27 @@ export function generateVisualization (jobsUnsorted) {
   sceneCreator.generateScene();
 
   setUpDataDisplayScroll(dataDisplay);
-  setUpFreeLinesArrows();
   animateDataDisplay(dataDisplay, jobScheduler);
-  animateJobCard(document.querySelector('.job-card')); // naturally starts at the root job card
+  animateJobCard(document.querySelector('.job-card') as HTMLElement); // naturally starts at the root job card
   setupPlaybackControls(animTimeline);
 };
 
 // allows the data display (left view with the time graph and arrays) to scroll horizontally
-function setUpDataDisplayScroll (dataDisplay) {
-  document.addEventListener('scroll', function(e) {
+function setUpDataDisplayScroll (dataDisplay: HTMLElement) {
+  document.addEventListener('scroll', function() {
     dataDisplay.style.left = `${-window.scrollX}px`;
   });
 };
 
-// sets up the markers for free lines that are arrows
-function setUpFreeLinesArrows() {
-  const freeLineArrows = [...document.querySelectorAll('.free-line--arrow')];
-  freeLineArrows.forEach((freeLine, i) => {
-    const line = freeLine.querySelector('.free-line__line');
-    const marker = freeLine.querySelector('marker');
-
-    const id = `markerArrow--${i}`;
-    marker.id = id;
-    line.style.markerEnd = `url(#${id})`;
-  });
-};
-
 // creates animation sequences for the data display
-function animateDataDisplay(dataDisplay, jobScheduler) {
+function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler) {
   const timeGraphEl = document.querySelector('.time-graph')!;
   const jobsUnsorted = jobScheduler.getJobsUnsorted();
   const jobsSorted = jobScheduler.getJobs();
 
 
-  const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box');
-  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-connector');
+  const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box') as HTMLElement;
+  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-connector') as Connector;
   const textP_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
   const textP_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
   const textP_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
@@ -117,7 +105,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
       const jobBarEl = job.getJobBar();
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
-      const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"]  .time-graph__cell--${jobBarEl.dataset.start}`) as HTMLElement;
+      const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"] .time-graph__cell--${jobBarEl.dataset.start}`) as HTMLElement;
       animSequence.addOneBlock(Translation(jobBarEl, '~move-to', [startCell]));
     });
     animSequence.addManyBlocks([
@@ -183,11 +171,11 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   }
 
 
-  const arrayGroup_j_c = dataDisplay.querySelector('.array-group--j-and-c');
-  const cArray = arrayGroup_j_c.querySelector('.array--c');
+  const arrayGroup_j_c = dataDisplay.querySelector('.array-group--j-and-c') as HTMLElement;
+  const cArray = arrayGroup_j_c.querySelector('.array--c') as HTMLElement;
   const jArray1 = arrayGroup_j_c.querySelector('.array--j');
-  const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box');
-  const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbfk-connector');
+  const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box') as HTMLElement;
+  const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbfk-connector') as Connector;
   const textP_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
   const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
@@ -239,7 +227,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
   /****************************************************** */
   // DEMONSTRATE HOW TO FILL OUT THE C ARRAY
   /****************************************************** */
-  const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box');
+  const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box') as HTMLElement;
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
   const timeGraphArrowEl = timeGraphEl.querySelector('wbfk-connector') as Connector; // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
@@ -249,7 +237,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     // Find job bar corresponding to the job that's compatible with the current job (if it exists)
     const compatibleJobBarEl = document.querySelector(`.time-graph__job-bar[data-sjnum="${jobBarEl.dataset.compatiblejobnum}"]`) as HTMLElement;
     // get the c array entry corresponding to the current job
-    const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`);
+    const cBlock = cArray.querySelector(`.array__array-block--${jobBarEl.dataset.sjnum}`) as HTMLElement;
     const cEntryValue = cBlock.querySelector(`.array__array-entry--value`);
     const cEntryBlank = cBlock.querySelector(`.array__array-entry--blank`);
     let row;
@@ -353,7 +341,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 
   const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
   const freeLine_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbfk-connector') as Connector;
-  const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box');
+  const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box') as HTMLElement;
   const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
   const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
   /****************************************************** */
@@ -474,10 +462,10 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animTimeline.addOneSequence(animSequence);
   }
 
-  const arrayGroup_j_M = dataDisplay.querySelector('.array-group--j-and-M');
-  const MArray = arrayGroup_j_M.querySelector('.array--M');
+  const arrayGroup_j_M = dataDisplay.querySelector('.array-group--j-and-M') as HTMLElement;
+  const MArray = arrayGroup_j_M.querySelector('.array--M') as HTMLElement;
   const jArray2 = arrayGroup_j_M.querySelector('.array--j');
-  const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box');
+  const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box') as HTMLElement;
   const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbfk-connector') as Connector;
   const textP_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
   const textP_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
@@ -496,7 +484,7 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
     animTimeline.addOneSequence(animSequence);
   }
 
-  const arrayBlock_M_0 = MArray.querySelector('.array__array-block--0');
+  const arrayBlock_M_0 = MArray.querySelector('.array__array-block--0') as HTMLElement;
   const arrayBlank_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--blank');
   const arrayValue_M_0 = arrayBlock_M_0.querySelector('.array__array-entry--value');
   /****************************************************** */
@@ -552,18 +540,19 @@ function animateDataDisplay(dataDisplay, jobScheduler) {
 };
 
 // recursively creates animation sequences for the job card tree
-function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: Element, aboveBullet: Element): any;
-function animateJobCard(jobCard: HTMLElement | null): any;
-function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSequence, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
+function animateJobCard(jobCard: HTMLElement, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: Element, aboveBullet: Element): any;
+function animateJobCard(jobCard: HTMLElement): any;
+function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
   if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
-  const SJNum = Number.parseInt(jobCard.dataset.sjnum);
-  const jobCardContent = jobCard.querySelector('.job-card-content');
+  // TODO: Add error-checking?
+  const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
+  const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
   const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as Connector;
-  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
+  const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box') as HTMLElement;
   const textP_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
   const textP_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
 
@@ -575,16 +564,16 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   const formulaComputation = jobCard.querySelector('.formula-computation');
   const formulaResult = jobCard.querySelector('.formula-result');
   const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbfk-connector') as Connector;
-  const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box');
+  const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box') as HTMLElement;
   const textP_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
   const textP_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
   const textP_formulaComputation_found = textbox_formulaComputation.querySelector('.text-box__paragraph--found');
 
 
-  const computation1 = jobCard.querySelector('.computation--1');
+  const computation1 = jobCard.querySelector('.computation--1') as HTMLElement;
   const computationResult1 = computation1.querySelector('.computation-result');
   const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbfk-connector') as Connector;
-  const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box');
+  const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box') as HTMLElement;
   const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
   const textP_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
   const textP_computation1_summary = textbox_computation1.querySelector('.text-box__paragraph--summary');
@@ -592,24 +581,24 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   const cAccess = jobCard.querySelector('.c-access');
   const cEntry = jobCard.querySelector('.c-entry');
   const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbfk-connector') as Connector;
-  const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box');
+  const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box') as HTMLElement;
   const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
   const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
   const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block') as Connector;
-  const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container');
+  const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container') as HTMLElement;
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
   const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
   const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbfk-connector') as Connector;
-  const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box');
-  const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--find');
-  const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box-line-group--OPT-expression-1 .text-box__paragraph--found');
+  const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box') as HTMLElement;
+  const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box__paragraph--find');
+  const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box__paragraph--found');
 
 
-  const computation2 = jobCard.querySelector('.computation--2');
+  const computation2 = jobCard.querySelector('.computation--2') as HTMLElement;
   const computationResult2 = computation2.querySelector('.computation-result');
-  const OPTExpression2 = computation2.querySelector('.OPT-expression');
+  const OPTExpression2 = computation2.querySelector('.OPT-expression') as HTMLElement;
   const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbfk-connector') as Connector;
-  const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box');
+  const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box') as HTMLElement;
   const textP_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
   const textP_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
   const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbfk-connector') as Connector;
@@ -618,8 +607,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   const nextSJNum = computation2.querySelector('.next-SJ-num');
 
 
-  const jobCardChild1 = [...jobCard.querySelector('.job-card-children').children][0];
-  const jobCardChild2 = [...jobCard.querySelector('.job-card-children').children][1];
+  const jobCardChild1 = [...(jobCard.querySelector('.job-card-children') as HTMLElement).children][0] as HTMLElement;
+  const jobCardChild2 = [...(jobCard.querySelector('.job-card-children') as HTMLElement).children][1] as HTMLElement;
 
 
   const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`)!;
@@ -630,7 +619,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
 
   const freeLine_upTree = jobCard.querySelector('.free-line--up-tree') as Connector;
   const freeLine_downTree = jobCard.querySelector('.free-line--down-tree') as Connector;
-  const jobCardBullet = jobCard.querySelector('.job-card-bullet');
+  const jobCardBullet = jobCard.querySelector('.job-card-bullet') as HTMLElement;
 
 
   /****************************************************** */
@@ -677,7 +666,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     animSequence.setDescription('Point to M block array entry');
     // animSequence.addOneBlock([ 'line', freeLine_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
     animSequence.addManyBlocks([
-      SetConnector(freeLine_toMBlock,  [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      SetConnector(freeLine_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
       DrawConnector(freeLine_toMBlock, '~trace', ['from-A']),
     ]);
 
@@ -821,7 +810,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   /****************************************************** */
   // RECURSION 1
   /****************************************************** */
-  const jobCardChild1Content = jobCardChild1.querySelector('.job-card-content');
+  const jobCardChild1Content = jobCardChild1.querySelector('.job-card-content') as HTMLElement;
   const freeLine_upFromChild1 = jobCardChild1Content.querySelector('.free-line--up-tree') as Connector;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
@@ -930,7 +919,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   /****************************************************** */
   // RECURSION 2
   /****************************************************** */
-  const jobCardChild2Content = jobCardChild1.querySelector('.job-card-content');
+  const jobCardChild2Content = jobCardChild1.querySelector('.job-card-content') as HTMLElement;
   const freeLine_upFromChild2 = jobCardChild2Content.querySelector('.free-line--up-tree') as Connector;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
@@ -941,8 +930,8 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
     ]);
     // create animation sequences for second child card/stub
     jobCardChild2.classList.contains('job-card--stub') ?
-      animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet')) :
-      animateJobCard(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet'));
+      animateJobStub(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement) :
+      animateJobCard(jobCardChild2, animSeqPassDown, freeLine_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement);
     /****************************************************** */
     // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
     /****************************************************** */
@@ -994,7 +983,7 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
   }
 
 
-  /****************************************************** */  
+  /****************************************************** */
   // REPLACE FORMULA CONTAINER CONTENTS WITH FINAL ANSWER
   /****************************************************** */
   {
@@ -1089,24 +1078,25 @@ function animateJobCard(jobCard: HTMLElement | null, parentAnimSequence?: AnimSe
 };
 
 // terminal function that creates the animation sequences for job stubs (which are leaves of the job card tree)
-function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArrowSource, aboveBullet) {
-  const SJNum = Number.parseInt(jobCard.dataset.sjnum);
-  const jobCardContent = jobCard.querySelector('.job-card-content');
+function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
+  if (!jobCard) { throw new Error('jobCard in animateJobStub() must not be null'); }
+  const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
+  const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector');
+  const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as Connector;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
   const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
   const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
-  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block');
+  const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block') as Connector;
 
 
   const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
 
   
-  const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector');
+  const freeLine_bulletConnector = jobCard.querySelector('.free-line--bullet-connector') as Connector;
   const freeLine_upTree = jobCard.querySelector('.free-line--up-tree');
   const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
@@ -1184,7 +1174,7 @@ function animateJobStub(jobCard, parentAnimSequence, parentArrowDown, parentArro
       Exit(textbox_MAccess, '~fade-out', [], {blocksPrev: false}),
       EraseConnector(parentArrowDown, '~fade-out', [], {blocksNext: false}),
       Emphasis(MAccessContainer, '~un-highlight', [], {blocksPrev: false}),
-    ]);  
+    ]);
 
     animTimeline.addOneSequence(animSequence);
   }
