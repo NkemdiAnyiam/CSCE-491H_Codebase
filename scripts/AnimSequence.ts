@@ -18,12 +18,11 @@ export class AnimSequence {
   animBlocks: AnimBlock[] = []; // array of animBlocks
   options: AnimSequenceOptions;
 
-  constructor(animBlocks: AnimBlock[] | AnimBlock | null = null, options: Partial<AnimSequenceOptions> = {}) {
+  constructor(animBlocks: AnimBlock[] | null = null, options: Partial<AnimSequenceOptions> = {}) {
     this.id = AnimSequence.id++;
 
     if (animBlocks) {
-      if (animBlocks instanceof Array) { this.addManyBlocks(animBlocks); }
-      else { this.addOneBlock(animBlocks); }
+      this.addBlocks(...animBlocks);
     }
 
     this.options = {
@@ -51,14 +50,9 @@ export class AnimSequence {
     });
   }
 
-
-  // TODO: return 'this' after pushing blocks to support chaining
-  addOneBlock(animBlock: AnimBlock) {
-    this.animBlocks.push(animBlock);
-  }
-
-  addManyBlocks(animBlocks: AnimBlock[]) {
-    animBlocks.forEach(animBlock => this.addOneBlock(animBlock));
+  addBlocks(...animBlocks: AnimBlock[]) {
+    // animBlocks.forEach(animBlock => this.addOneBlock(animBlock));
+    this.animBlocks.push(...animBlocks);
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
