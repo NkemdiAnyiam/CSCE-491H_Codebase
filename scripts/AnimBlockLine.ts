@@ -5,6 +5,7 @@ export type ConnectorConfig = {
   trackEndpoints: boolean;
 };
 
+// CHANGE NOTE: Completely get rid of obsolete AnimBlockLineUpdater
 export class Connector extends HTMLElement {
   static staticId: number = 0;
 
