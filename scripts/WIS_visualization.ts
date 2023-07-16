@@ -819,7 +819,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addBlocks(
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
-      EraseConnector(connector_OPTExpression1, '~trace', ['from-A']),
+      EraseConnector(connector_OPTExpression1, '~trace', ['from-B']),
     );
     // generate animation sequences for first child job/stub
     jobCardChild1.classList.contains('job-card--stub') ?
