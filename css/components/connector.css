@@ -10,11 +10,11 @@ wbfk-connector {
   z-index: 1000;
 }
 
-.free-line--bullet-connector {
+.connector--bullet-connector {
   stroke: var(--color-red);
 }
 
-.free-line--dotted {
+.connector--dotted {
   stroke-width:1;
   stroke-dasharray: 4;
 }
