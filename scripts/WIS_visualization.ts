@@ -541,9 +541,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 };
 
 // recursively creates animation sequences for the job card tree
-function animateJobCard(jobCard: HTMLElement, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: Element, aboveBullet: Element): any;
+function animateJobCard(jobCard: HTMLElement, parentArrowDown: Connector, parentArrowSource: Element, aboveBullet: Element): any;
 function animateJobCard(jobCard: HTMLElement): any;
-function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
+function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
   if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
   // TODO: Add error-checking?
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
@@ -627,7 +627,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   // FADE IN JOB CARD AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = parentAnimSequence ?? new AnimSequence(null, {continuePrev: true});
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Fade in job card and M access');
     animSequence.setTag('start');
     if (parentArrowDown && parentArrowSource && aboveBullet) {
@@ -815,16 +815,17 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = new AnimSequence();
+    const animSeqPassDown = new AnimSequence(null, {continueNext: true});
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addBlocks(
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_OPTExpression1, '~trace', ['from-B']),
     );
+    animTimeline.addSequences(animSeqPassDown);
     // generate animation sequences for first child job/stub
     jobCardChild1.classList.contains('job-card--stub') ?
-      animateJobStub(jobCardChild1, animSeqPassDown, connector_downTree, OPTExpressionContainer1, jobCardBullet) :
-      animateJobCard(jobCardChild1, animSeqPassDown, connector_downTree, OPTExpressionContainer1, jobCardBullet);
+      animateJobStub(jobCardChild1, connector_downTree, OPTExpressionContainer1, jobCardBullet) :
+      animateJobCard(jobCardChild1, connector_downTree, OPTExpressionContainer1, jobCardBullet);
     /****************************************************** */
     // REPLACE OPT1 EXPRESSION WITH ANSWER, CHANGE TEXT BOX TEXT
     /****************************************************** */
@@ -924,15 +925,16 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = new AnimSequence();
+    const animSeqPassDown = new AnimSequence(null, {continueNext: true});
     animSeqPassDown.addBlocks(
       Exit(textbox_OPTExpression2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_OPTExpression2, '~trace', ['from-B']),
     );
+    animTimeline.addSequences(animSeqPassDown);
     // create animation sequences for second child card/stub
     jobCardChild2.classList.contains('job-card--stub') ?
-      animateJobStub(jobCardChild2, animSeqPassDown, connector_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement) :
-      animateJobCard(jobCardChild2, animSeqPassDown, connector_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement);
+      animateJobStub(jobCardChild2, connector_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement) :
+      animateJobCard(jobCardChild2, connector_downTree, OPTExpression2, jobCardChild1.querySelector('.job-card-bullet') as HTMLElement);
     /****************************************************** */
     // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
     /****************************************************** */
@@ -1079,7 +1081,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
 };
 
 // terminal function that creates the animation sequences for job stubs (which are leaves of the job card tree)
-function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, parentArrowDown: Connector, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
+function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
   if (!jobCard) { throw new Error('jobCard in animateJobStub() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
   const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
@@ -1106,7 +1108,7 @@ function animateJobStub(jobCard: HTMLElement, parentAnimSequence: AnimSequence, 
   // FADE IN JOB STUB AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = parentAnimSequence;
+    const animSequence = new AnimSequence(null, {continuePrev: true});
     animSequence.setDescription('Fade in job stub and M access');
     animSequence.addBlocks(
       Entrance(jobCard, '~fade-in', [], {blocksNext: false}),
