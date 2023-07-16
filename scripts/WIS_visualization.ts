@@ -73,10 +73,10 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
   const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box') as HTMLElement;
   const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-connector') as Connector;
-  const textP_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
-  const textP_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
-  const textP_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
-  const textP_placeBars_ordered = textbox_placeBars.querySelector('.text-box__paragraph--ordered');
+  const paragraph_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
+  const paragraph_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
+  const paragraph_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
+  const paragraph_placeBars_ordered = textbox_placeBars.querySelector('.text-box__paragraph--ordered');
 
   /****************************************************** */
   // DESCRIBE THAT WE'RE ABOUT TO MOVE BARS ONTO GRAPH
@@ -109,8 +109,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       animSequence.addBlocks(Translation(jobBarEl, '~move-to', [startCell]));
     });
     animSequence.addBlocks(
-      Exit(textP_placeBars_unorder, '~fade-out', [], {duration: 250}),
-      Entrance(textP_placeBars_unorder2, '~fade-in', [], {duration: 250}),
+      Exit(paragraph_placeBars_unorder, '~fade-out', [], {duration: 250}),
+      Entrance(paragraph_placeBars_unorder2, '~fade-in', [], {duration: 250}),
     );
     animTimeline.addSequences(animSequence);
   }
@@ -123,8 +123,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const animSequence = new AnimSequence();
     animSequence.setDescription('Move job bars back off of the time graph');
     animSequence.addBlocks(
-      Exit(textP_placeBars_unorder2, '~fade-out', [], {duration: 250}),
-      Entrance(textP_placeBars_order, '~fade-in', [], {duration: 250}),
+      Exit(paragraph_placeBars_unorder2, '~fade-out', [], {duration: 250}),
+      Entrance(paragraph_placeBars_order, '~fade-in', [], {duration: 250}),
     );
     const jobBarsInitialArea = document.querySelector('.time-graph__job-bars') as HTMLElement;
     jobsUnsorted.forEach((job) => {
@@ -163,8 +163,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     });
 
     animSequence.addBlocks(
-      Exit(textP_placeBars_order, '~fade-out', [], {duration: 250}),
-      Entrance(textP_placeBars_ordered, '~fade-in', [], {duration: 250}),
+      Exit(paragraph_placeBars_order, '~fade-out', [], {duration: 250}),
+      Entrance(paragraph_placeBars_ordered, '~fade-in', [], {duration: 250}),
     );
 
     animTimeline.addSequences(animSequence);
@@ -176,8 +176,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const jArray1 = arrayGroup_j_c.querySelector('.array--j');
   const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box') as HTMLElement;
   const freeLine_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbfk-connector') as Connector;
-  const textP_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
-  const textP_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
+  const paragraph_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
+  const paragraph_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
   // EXPLAIN WHAT A COMPATIBLE JOB IS
   /****************************************************** */
@@ -203,8 +203,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     animSequence.addBlocks(
       SetConnector(freeLine_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
       DrawConnector(freeLine_cArray, '~trace', ['from-B']),
-      Exit(textP_cArray_explain, '~fade-out', [], {duration: 250}),
-      Entrance(textP_cArray_refArray, '~fade-in', [], {duration: 250}),
+      Exit(paragraph_cArray_explain, '~fade-out', [], {duration: 250}),
+      Entrance(paragraph_cArray_refArray, '~fade-in', [], {duration: 250}),
     );
     animTimeline.addSequences(animSequence);
   }
@@ -243,9 +243,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     let row;
     let rowSJNum;
 
-    const textP_fillCArray_forJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--for-job-${jobBarEl.dataset.sjnum}`);
-    const textP_fillCArray_resultJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--result-job-${jobBarEl.dataset.sjnum}`);
-    const textP_fillCArray_continueOn = textbox_fillCArray.querySelector(`.text-box__paragraph--continue-on`);
+    const paragraph_fillCArray_forJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--for-job-${jobBarEl.dataset.sjnum}`);
+    const paragraph_fillCArray_resultJobX = textbox_fillCArray.querySelector(`.text-box__paragraph--result-job-${jobBarEl.dataset.sjnum}`);
+    const paragraph_fillCArray_continueOn = textbox_fillCArray.querySelector(`.text-box__paragraph--continue-on`);
 
     // MOVE CBAR TO CURRENT JOB BAR, UNHIDE IT, AND HIGHLIGHT CURRENT JOB BAR AND J ARRAY BLOCK
     {
@@ -256,7 +256,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Emphasis(jobBarEl, '~highlight', [], {blocksNext: false}),
         Emphasis(jBlock, '~highlight', [], {blocksNext: false, blocksPrev: false}),
         Entrance(cBar, '~wipe', ['from-top'], {blocksPrev: false}),
-        Entrance(textP_fillCArray_forJobX, '~fade-in', [], {duration: 0, blocksNext: false}),
+        Entrance(paragraph_fillCArray_forJobX, '~fade-in', [], {duration: 0, blocksNext: false}),
         Entrance(textbox_fillCArray, '~fade-in', []),
       );
 
@@ -298,16 +298,16 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       }
 
       animSequence.addBlocks(
-        Exit(textP_fillCArray_forJobX, '~fade-out', [], {duration: 250}),
-        Entrance(textP_fillCArray_resultJobX, '~fade-in', [], {duration: 250}),
+        Exit(paragraph_fillCArray_forJobX, '~fade-out', [], {duration: 250}),
+        Entrance(paragraph_fillCArray_resultJobX, '~fade-in', [], {duration: 250}),
       )
     
       // "Update" current c-array entry
       animSequence2.addBlocks(
         Exit(cEntryBlank, '~wipe', ['from-right'], {blocksPrev: false, blocksNext: false}),
         Entrance(cEntryValue, '~wipe', ['from-right'], {blocksPrev: false}),
-        Exit(textP_fillCArray_resultJobX, '~fade-out', [], {duration: 250, blocksPrev: false}),
-        Entrance(textP_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
+        Exit(paragraph_fillCArray_resultJobX, '~fade-out', [], {duration: 250, blocksPrev: false}),
+        Entrance(paragraph_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
       );
     
       animTimeline.addSequences(animSequence);
@@ -329,11 +329,11 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       );
       animSequence.addBlocks(
         Exit(textbox_fillCArray, '~fade-out', [], {blocksPrev: false, blocksNext: false}),
-        // [ 'std', textP_fillCArray_continueOn, '~fade-out', [], {duration: 0}], // TODO: This being here and having to add blocksNext: false above needs to be considered
+        // [ 'std', paragraph_fillCArray_continueOn, '~fade-out', [], {duration: 0}], // TODO: This being here and having to add blocksNext: false above needs to be considered
         Exit(cBar, '~fade-out', [], {blocksNext: false, blocksPrev: false}),
         Emphasis(jobBarEl, '~un-highlight', [], {blocksPrev: false, blocksNext: false}),
         Emphasis(jBlock, '~un-highlight', [], {blocksPrev: false}),
-        Exit(textP_fillCArray_continueOn, '~fade-out', [], {duration: 0}),
+        Exit(paragraph_fillCArray_continueOn, '~fade-out', [], {duration: 0}),
       );
       animTimeline.addSequences(animSequence);
     }
@@ -468,8 +468,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const jArray2 = arrayGroup_j_M.querySelector('.array--j');
   const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box') as HTMLElement;
   const freeLine_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbfk-connector') as Connector;
-  const textP_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
-  const textP_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
+  const paragraph_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
+  const paragraph_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
   // EXPLAIN MEMOIZATION
   /****************************************************** */
@@ -497,8 +497,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     animSequence.addBlocks(
       SetConnector(freeLine_MArray, [textbox_MArray, 0, 0.5], [MArray, 1, 0.5]),
       DrawConnector(freeLine_MArray, '~trace', ['from-B']),
-      Exit( textP_MArray_explain, '~fade-out', [], {duration: 250}),
-      Entrance( textP_MArray_refArray, '~fade-in', [], {duration: 250}),
+      Exit( paragraph_MArray_explain, '~fade-out', [], {duration: 250}),
+      Entrance( paragraph_MArray_refArray, '~fade-in', [], {duration: 250}),
       Exit(arrayBlank_M_0, '~fade-out', []),
       Entrance(arrayValue_M_0, '~fade-in', []),
     );
@@ -554,8 +554,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const MEntry = jobCard.querySelector('.M-entry');
   const freeLine_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as Connector;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box') as HTMLElement;
-  const textP_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
-  const textP_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
+  const paragraph_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
+  const paragraph_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
 
   const freeLine_toMBlock = jobCard.querySelector('.free-line--M-access-to-M-block') as Connector;
 
@@ -566,9 +566,9 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const formulaResult = jobCard.querySelector('.formula-result');
   const freeLine_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbfk-connector') as Connector;
   const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box') as HTMLElement;
-  const textP_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
-  const textP_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
-  const textP_formulaComputation_found = textbox_formulaComputation.querySelector('.text-box__paragraph--found');
+  const paragraph_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
+  const paragraph_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
+  const paragraph_formulaComputation_found = textbox_formulaComputation.querySelector('.text-box__paragraph--found');
 
 
   const computation1 = jobCard.querySelector('.computation--1') as HTMLElement;
@@ -576,23 +576,23 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const freeLine_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbfk-connector') as Connector;
   const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box') as HTMLElement;
   const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
-  const textP_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
-  const textP_computation1_summary = textbox_computation1.querySelector('.text-box__paragraph--summary');
+  const paragraph_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
+  const paragraph_computation1_summary = textbox_computation1.querySelector('.text-box__paragraph--summary');
   const cAccessContainer = jobCard.querySelector('.c-access-container');
   const cAccess = jobCard.querySelector('.c-access');
   const cEntry = jobCard.querySelector('.c-entry');
   const freeLine_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbfk-connector') as Connector;
   const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box') as HTMLElement;
-  const textP_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
-  const textP_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
+  const paragraph_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
+  const paragraph_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
   const freeLine_toCBlock = jobCard.querySelector('.free-line--c-access-to-c-block') as Connector;
   const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container') as HTMLElement;
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
   const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
   const freeLine_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbfk-connector') as Connector;
   const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box') as HTMLElement;
-  const textP_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box__paragraph--find');
-  const textP_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box__paragraph--found');
+  const paragraph_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box__paragraph--find');
+  const paragraph_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box__paragraph--found');
 
 
   const computation2 = jobCard.querySelector('.computation--2') as HTMLElement;
@@ -600,8 +600,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const OPTExpression2 = computation2.querySelector('.OPT-expression') as HTMLElement;
   const freeLine_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbfk-connector') as Connector;
   const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box') as HTMLElement;
-  const textP_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
-  const textP_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
+  const paragraph_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
+  const paragraph_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
   const freeLine_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbfk-connector') as Connector;
   const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
   const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
@@ -775,8 +775,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
 
       // SetConnector(freeLine_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1]),
       // DrawConnector(freeLine_cAccess, '~fade-in', [], {duration: 0}),
-      Exit(textP_cAccess_find, '~fade-out', [], { duration: 250 }),
-      Entrance(textP_cAccess_found, '~fade-in', [], { duration: 250 }),
+      Exit(paragraph_cAccess_find, '~fade-out', [], { duration: 250 }),
+      Entrance(paragraph_cAccess_found, '~fade-in', [], { duration: 250 }),
     );
 
     animTimeline.addSequences(animSequence);
@@ -836,8 +836,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       DrawConnector(freeLine_upFromChild1, '~trace', ['from-A']),
       Exit(OPTExpression1, '~wipe', ['from-right'], {blocksPrev: false}),
       Entrance(OPTResult1, '~wipe', ['from-right'], {blocksNext: false}),
-      Exit(textP_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
-      Entrance(textP_OPTExpression1_found, '~fade-in', [], { duration: 250 }),
+      Exit(paragraph_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
+      Entrance(paragraph_OPTExpression1_found, '~fade-in', [], { duration: 250 }),
       SetConnector(freeLine_OPTExpression1, [OPTResult1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
       DrawConnector(freeLine_OPTExpression1, '~trace', ['from-A'], {blocksPrev: false}),
       Entrance(textbox_OPTExpression1, '~fade-in', [], {blocksPrev: false}),
@@ -859,8 +859,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       EraseConnector(freeLine_OPTExpression1, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(OPTExpressionContainer1, '~un-highlight', [], {blocksPrev: false}),
   
-      Exit(textP_computation1_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(textP_computation1_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_computation1_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
+      Entrance(paragraph_computation1_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
       Exit(computationExpression1, '~wipe', ['from-right'],),
       Entrance(computationResult1, '~wipe', ['from-right'],),
       Emphasis(computationResult1, '~highlight', [], {blocksPrev: false, blocksNext: false}),
@@ -942,8 +942,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       SetConnector(freeLine_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       DrawConnector(freeLine_upFromChild2, '~trace', ['from-A']),
 
-      Exit(textP_computation2_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(textP_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_computation2_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
+      Entrance(paragraph_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
 
       Emphasis(computation2, '~un-highlight', [], {blocksNext: false}),
       Exit(OPTExpression2, '~wipe', ['from-right'], {blocksPrev: false}),
@@ -972,8 +972,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
       Emphasis(computationResult2, '~un-highlight', [], {blocksPrev: false}),
 
       
-      Exit(textP_formulaComputation_find, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(textP_formulaComputation_max, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_formulaComputation_find, '~fade-out', [], {duration: 0, blocksNext: false}),
+      Entrance(paragraph_formulaComputation_max, '~fade-in', [], {duration: 0, blocksPrev: false}),
       Emphasis(formulaContainer, '~highlight', [], {blocksNext: false}),
       SetConnector(freeLine_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(freeLine_formulaComputation, '~trace', ['from-A'], {blocksPrev: false}),
@@ -1000,8 +1000,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
 
       // [ 'line', freeLine_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
   
-      Exit(textP_formulaComputation_max, '~fade-out', [], { duration: 250 }),
-      Entrance(textP_formulaComputation_found, '~fade-in', [], { duration: 250 }),
+      Exit(paragraph_formulaComputation_max, '~fade-out', [], { duration: 250 }),
+      Entrance(paragraph_formulaComputation_found, '~fade-in', [], { duration: 250 }),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1047,8 +1047,8 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
     animSequence.setDescription('Remove arrow pointing from M block and show final text box');
     animSequence.addBlocks(
       // Add last text box
-      Exit(textP_MAccess_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(textP_MAccess_solved, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_MAccess_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
+      Entrance(paragraph_MAccess_solved, '~fade-in', [], {duration: 0, blocksPrev: false}),
       EraseConnector(freeLine_toMBlock, '~trace', ['from-A']),
       SetConnector(freeLine_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(freeLine_MAccess, '~trace', ['from-A'], {blocksPrev: false}),
