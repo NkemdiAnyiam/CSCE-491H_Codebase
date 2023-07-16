@@ -66,7 +66,7 @@ function setUpDataDisplayScroll (dataDisplay: HTMLElement) {
 
 // creates animation sequences for the data display
 function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler) {
-  const timeGraphEl = document.querySelector('.time-graph')!;
+  const timeGraphEl = document.querySelector('.time-graph') as HTMLElement;
   const jobsUnsorted = jobScheduler.getJobsUnsorted();
   const jobsSorted = jobScheduler.getJobs();
 
@@ -146,7 +146,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       const jobBarEl = job.getJobBar();
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
-      const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`)!;
+      const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`) as HTMLElement;
       const startCell = row.querySelector(`.time-graph__cell--${jobBarEl.dataset.start}`);
       
       // get row's header data to animate
@@ -273,7 +273,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       // If the compatible job exists, Move cbar to compatible job bar and highlight it
       // Then point arrow from compatible row header to current c-array entry
       if (compatibleJobBarEl) {
-        row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`)!;
+        row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`) as HTMLElement;
         rowSJNum = row.querySelector('.time-graph__SJ-num');
         animSequence.addBlocks(
           Translation(cBar, '~move-to', [compatibleJobBarEl, {alignmentX: 'right', preserveY: true}]),
@@ -612,7 +612,7 @@ function animateJobCard(jobCard: HTMLElement, parentAnimSequence?: AnimSequence,
   const jobCardChild2 = [...(jobCard.querySelector('.job-card-children') as HTMLElement).children][1] as HTMLElement;
 
 
-  const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`)!;
+  const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`) as HTMLElement;
   const MBlock_blank = MBlock.querySelector(`.array__array-entry--blank`);
   const MBlock_value = MBlock.querySelector(`.array__array-entry--value`);
   const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
