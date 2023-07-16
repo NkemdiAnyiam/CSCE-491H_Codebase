@@ -1,10 +1,11 @@
 import { AnimBlock, AnimTimelineAnimation } from "./AnimBlock.js";
+import { AnimTimeline } from "./AnimTimeline.js";
 
 type AnimSequenceOptions = {
   description: string;
   tag: string;
-  continueNext: boolean; // TODO: rename to autoNext
-  continuePrev: boolean;
+  continueNext: boolean; // TODO: rename to autoPlayNext
+  continuePrev: boolean; // TODO: rename to autoRewindPrev
 };
 
 export class AnimSequence {
@@ -12,7 +13,7 @@ export class AnimSequence {
   
   id: number;
   timelineID: number = NaN; // set to match the id of the AnimTimeline to which it belongs
-  parentTimeline: any; // pointer to parent AnimTimeline // TODO: fix annotation
+  parentTimeline?: AnimTimeline; // pointer to parent AnimTimeline
   description: string = '<blank sequence description>';
   tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   animBlocks: AnimBlock[] = []; // array of animBlocks
@@ -43,26 +44,30 @@ export class AnimSequence {
   setTag(tag: string) { this.tag = tag; }
   setID(id: number) {
     this.timelineID = id;
-    this.animBlocks.forEach(animBlock => {
+    for (const animBlock of this.animBlocks) {
       animBlock.setID(this.id, this.timelineID);
       animBlock.parentTimeline = this.parentTimeline;
       animBlock.parentSequence = this;
-    });
+    }
   }
 
   addBlocks(...animBlocks: AnimBlock[]) {
-    // animBlocks.forEach(animBlock => this.addOneBlock(animBlock));
+    // CHANGE NOTE: remove addOneBlock()
     this.animBlocks.push(...animBlocks);
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
+  // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
   async play() {
-    for (let i = 0; i < this.animBlocks.length; ++i) {
+    const animBlocks = this.animBlocks;
+    const numBlocks = animBlocks.length;
+    for (let i = 0; i < numBlocks; ++i) {
+      const currAnimBlock = animBlocks[i];
       // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      if (i === this.animBlocks.length - 1 || this.animBlocks[i].getBlocksNext())
-        { await this.animBlocks[i].stepForward(); }
+      if (i === numBlocks - 1 || currAnimBlock.getBlocksNext())
+        { await currAnimBlock.stepForward(); }
       else
-        { this.animBlocks[i].stepForward(); }
+        { currAnimBlock.stepForward(); }
     }
 
     return Promise.resolve(this.options.continueNext);
@@ -70,11 +75,14 @@ export class AnimSequence {
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
   async rewind() {
-    for (let i = this.animBlocks.length - 1; i >= 0; --i) {
-      if (i === 0 || this.animBlocks[i].getBlocksPrev())
-        { await this.animBlocks[i].stepBackward(); }
+    const animBlocks = this.animBlocks;
+    const numBlocks = animBlocks.length;
+    for (let i = numBlocks - 1; i >= 0; --i) {
+      const currAnimBlock = animBlocks[i];
+      if (i === 0 || currAnimBlock.getBlocksPrev())
+        { await currAnimBlock.stepBackward(); }
       else
-        { this.animBlocks[i].stepBackward(); }
+        { currAnimBlock.stepBackward(); }
     }
 
     return Promise.resolve(this.options.continuePrev);
@@ -84,8 +92,9 @@ export class AnimSequence {
   skipCurrentAnimations() {
     // get all currently running animations (if animations are currently running, we need to force them to finish)
     const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
+    const numAnimations = allAnimations.length;
     // an animation "belongs" to this sequence if its sequence id matches
-    for (let i = 0; i < allAnimations.length; ++i) {
+    for (let i = 0; i < numAnimations; ++i) {
       // an animation "belongs" to this sequence if its ids match
       if (allAnimations[i].sequenceID === this.id) { allAnimations[i].finish(); }
     }

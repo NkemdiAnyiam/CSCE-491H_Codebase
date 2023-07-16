@@ -36,16 +36,17 @@ export class AnimTimeline {
   }
 
   addSequences(...animSequences: AnimSequence[]) {
-    animSequences.forEach(animSequence => {
+    for(const animSequence of this.animSequences) {
       animSequence.parentTimeline = this;
       animSequence.setID(this.id);
-    });
+    };
     this.animSequences.push(...animSequences);
   }
 
   setPlaybackRate(rate: number) {
     this.playbackRate = rate;
-    this.updateCurrentAnimationsRates(rate);
+    // set playback rates of currently running animations so that they don't continue to run at regular speed
+    this.doForCurrentAnimations((animation: Animation) => animation.playbackRate = rate);
   }
   getPlaybackRate() { return this.playbackRate; }
 
@@ -156,11 +157,6 @@ export class AnimTimeline {
   // tells the current AnimSequence to instantly finish its animations
   skipCurrentAnimations() { this.animSequences[this.nextSeqIndex].skipCurrentAnimations(); }
 
-  // used to set playback rate of currently running animations so that they don't unintuitively run at regular speed
-  updateCurrentAnimationsRates(rate: number) {
-    this.doForCurrentAnimations((animation: Animation) => animation.playbackRate = rate);
-  }
-
   // pauses or unpauses playback
   togglePause(isPaused?: boolean) {
     this.isPaused = isPaused ?? !this.isPaused;
@@ -178,8 +174,9 @@ export class AnimTimeline {
   doForCurrentAnimations(operation: (animation: Animation) => void) {
     // get all currently running animations
     const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
+    const numAnimations = allAnimations.length;
     // an animation "belongs" to this timeline if its timeline id matches
-    for (let i = 0; i < allAnimations.length; ++i) {
+    for (let i = 0; i < numAnimations; ++i) {
       if (allAnimations[i].timelineID === this.id) { operation(allAnimations[i]); }
     }
   }

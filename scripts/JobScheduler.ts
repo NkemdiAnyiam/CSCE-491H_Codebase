@@ -37,7 +37,7 @@ export class JobScheduler {
   }
 
   public addJobs(jobs: Job[]): void {
-    jobs.forEach(job => this.addJob(job));
+    for (const job of jobs) { this.addJob(job); }
   }
 
   private sortJobsByFinish(): Job[] {
@@ -49,7 +49,7 @@ export class JobScheduler {
 
   private setCompatibleJobNums(): void {
     this.c.push(NaN);
-    this.jobsSorted.forEach(job => {
+    for (const job of this.jobsSorted) {
       let compatibleJobNum = 0;
       for(let currIdx = job.getSortedJobNum() - 2; currIdx >= 0; --currIdx) {
         const potentialCompJob = this.jobsSorted[currIdx];
@@ -60,7 +60,7 @@ export class JobScheduler {
       }
       job.setCompatibleJobNum(compatibleJobNum);
       this.c.push(compatibleJobNum);
-    });
+    }
   }
 
   public performWISAlgorithm(): void {
@@ -107,9 +107,9 @@ export class JobScheduler {
     thisString += `c array:\n\t${this.c}\n`;
     thisString += `M array:\n\t${this.M}\n`;
     thisString += `Jobs:\n`
-    this.jobsSorted.forEach(job => {
+    for (const job of this.jobsSorted) {
       thisString += `\t${job.toStr()}\n`;
-    });
+    }
     return thisString;
   }
   

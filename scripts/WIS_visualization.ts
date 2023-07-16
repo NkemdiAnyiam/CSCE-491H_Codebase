@@ -281,6 +281,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         );
         animSequence2.addBlocks(
             SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
+            // TODO: No reason for blocksPrev to be false
             DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {blocksPrev: false}),
         );
       }
