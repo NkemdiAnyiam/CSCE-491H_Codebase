@@ -10,11 +10,38 @@ const negate = (str: string) => {
 }
 
 export const presetEntrances = {
+  [`~appear`]: {
+    generateKeyframes() {
+      return [[]]
+    },
+    config: {
+      duration: 0,
+    }
+  },
+
   [`~fade-in`]: {
     generateKeyframes: () => [[
       {opacity: '0'},
       {opacity: '1'},
     ]],
+  },
+
+  [`~pinwheel`]: {
+    generateKeyframes(numSpins: number, direction: 'clockwise' | 'counterclockwise') {
+      // TODO: tweak starting scale and reconsider modifying opaticy
+      return [[
+        {
+          rotate: `z 0deg`,
+          scale: 0,
+          opacity: 0,
+        },
+        {
+          rotate: `z ${360 * numSpins * (direction === 'clockwise' ? 1 : -1)}deg`,
+          scale: 1,
+          opacity: 1,
+        },
+      ]]
+    },
   },
 
   [`~wipe`]: {
@@ -55,6 +82,15 @@ export const presetEntrances = {
 
 
 export const presetExits = {
+  [`~disappear`]: {
+    generateKeyframes() {
+      return [[]]
+    },
+    config: {
+      duration: 0,
+    }
+  },
+
   [`~fade-out`]: {
     generateKeyframes: () => [[
       {opacity: '1'},
@@ -120,26 +156,9 @@ export const presetEmphases = {
   },
 } satisfies IKeyframesBank<EmphasisBlock>;
 
+
 // TODO: Implement composite: accumulates somewhewre
 export const presetTranslations = {
-  ['~translate']: {
-    generateKeyframes: (translationOptions: Partial<TNoElem>): [Keyframe[], Keyframe[]] => {
-      const {
-        translateX = '0px',
-        translateY = '0px',
-        offsetSelfX = '0px',
-        offsetSelfY = '0px',
-      } = translationOptions;
-      
-      return [
-        // forward
-        [{translate: `calc(${translateX} + ${offsetSelfX}) calc(${translateY} + ${offsetSelfY})`}],
-  
-        // backward
-        [{translate: `calc(${negate(translateX)} + ${negate(offsetSelfX)}) calc(${negate(translateY)} + ${negate(offsetSelfY)})`}],
-      ];
-    },
-  },
 
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {
@@ -184,9 +203,35 @@ export const presetTranslations = {
       ];
     },
   },
+
+  ['~translate']: {
+    generateKeyframes: (translationOptions: Partial<TNoElem>): [Keyframe[], Keyframe[]] => {
+      const {
+        translateX = '0px',
+        translateY = '0px',
+        offsetSelfX = '0px',
+        offsetSelfY = '0px',
+      } = translationOptions;
+      
+      return [
+        // forward
+        [{translate: `calc(${translateX} + ${offsetSelfX}) calc(${translateY} + ${offsetSelfY})`}],
+  
+        // backward
+        [{translate: `calc(${negate(translateX)} + ${negate(offsetSelfX)}) calc(${negate(translateY)} + ${negate(offsetSelfY)})`}],
+      ];
+    },
+  },
 } satisfies IKeyframesBank<TranslationBlock>; 
 
 export const presetConnectorEntrances = {
+  [`~fade-in`]: {
+    generateKeyframes: () => [[
+      {opacity: '0'},
+      {opacity: '1'},
+    ]],
+  },
+
   [`~trace`]: {
     generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
@@ -231,16 +276,16 @@ export const presetConnectorEntrances = {
       }
     },
   },
-
-  [`~fade-in`]: {
-    generateKeyframes: () => [[
-      {opacity: '0'},
-      {opacity: '1'},
-    ]],
-  },
 } satisfies IKeyframesBank<DrawConnectorBlock>;
 
 export const presetConnectorExits = {
+  [`~fade-out`]: {
+    generateKeyframes: () => [[
+      {opacity: '1'},
+      {opacity: '0'},
+    ]],
+  },
+
   [`~trace`]: {
     generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
@@ -282,12 +327,5 @@ export const presetConnectorExits = {
           throw new Error(`Invalid direction ${direction} used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
       }
     },
-  },
-
-  [`~fade-out`]: {
-    generateKeyframes: () => [[
-      {opacity: '1'},
-      {opacity: '0'},
-    ]],
   },
 } satisfies IKeyframesBank<EraseConnectorBlock>;
