@@ -64,7 +64,7 @@ export class AnimSequence {
     for (let i = 0; i < numBlocks; ++i) {
       const currAnimBlock = animBlocks[i];
       // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      if (i === numBlocks - 1 || currAnimBlock.getBlocksNext())
+      if (i === numBlocks - 1 || currAnimBlock.blocksNext)
         { await currAnimBlock.stepForward(); }
       else
         { currAnimBlock.stepForward(); }
@@ -79,7 +79,7 @@ export class AnimSequence {
     const numBlocks = animBlocks.length;
     for (let i = numBlocks - 1; i >= 0; --i) {
       const currAnimBlock = animBlocks[i];
-      if (i === 0 || currAnimBlock.getBlocksPrev())
+      if (i === 0 || currAnimBlock.blocksPrev)
         { await currAnimBlock.stepBackward(); }
       else
         { currAnimBlock.stepBackward(); }

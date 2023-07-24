@@ -95,6 +95,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
+  get blocksNext() { return this.config.blocksNext; }
+  get blocksPrev() { return this.config.blocksPrev; }
+
   constructor(domElem: Element | null, public animName: string, public bankEntry: TBankEntry) {
     if (!domElem) {
       throw new Error(`Element must not be null`); // TODO: Improve error message
@@ -136,9 +139,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     return this;
   }
-
-  getBlocksNext() { return this.config.blocksNext; }
-  getBlocksPrev() { return this.config.blocksPrev; }
 
   setID(idSeq: number, idTimeline: number) {
     [this.sequenceID, this.timelineID] = [idSeq, idTimeline];
