@@ -45,32 +45,6 @@ type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
 export class AnimTimelineAnimation extends Animation {
-  // TODO: improve syntax
-  get forward() {
-    this.effect = new KeyframeEffect(this.forwardEffect.target, this.forwardEffect.getKeyframes(), {...this.forwardEffect.getTiming(), composite: this.forwardEffect.composite});
-    return this;
-  }
-  get backward() {
-    this.effect = new KeyframeEffect(this.backwardEffect.target, this.backwardEffect.getKeyframes(), {...this.backwardEffect.getTiming(), composite: this.backwardEffect.composite});
-    return this;
-  }
-  setForwardFrames(frames: Keyframe[]) {
-    this.forwardEffect.setKeyframes(frames);
-  }
-  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean) {
-    this.backwardEffect.setKeyframes(frames);
-    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
-  }
-  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean) {
-    this.forwardEffect.setKeyframes(forwardFrames);
-    this.backwardEffect.setKeyframes(backwardFrames);
-    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
-  }
-  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
-    super();
-    if (forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
-    if (forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
-  }
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
 
@@ -78,6 +52,40 @@ export class AnimTimelineAnimation extends Animation {
   set timelineID(id: number) { this._timelineID = id; }
   get sequenceID(): number { return this._sequenceID; }
   set sequenceID(id: number) { this._sequenceID = id; }
+
+  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
+    super();
+    if (forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
+    if (forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
+  }
+  
+  setForwardFrames(frames: Keyframe[]) {
+    this.forwardEffect.setKeyframes(frames);
+  }
+
+  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean) {
+    this.backwardEffect.setKeyframes(frames);
+    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
+  }
+
+  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean) {
+    this.forwardEffect.setKeyframes(forwardFrames);
+    this.backwardEffect.setKeyframes(backwardFrames);
+    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
+  }
+
+  loadKeyframeEffect(direction: 'forward' | 'backward') {
+    switch(direction) {
+      case "forward":
+        this.effect = new KeyframeEffect(this.forwardEffect.target, this.forwardEffect.getKeyframes(), {...this.forwardEffect.getTiming(), composite: this.forwardEffect.composite});
+        break;
+      case "backward":
+        this.effect = new KeyframeEffect(this.backwardEffect.target, this.backwardEffect.getKeyframes(), {...this.backwardEffect.getTiming(), composite: this.backwardEffect.composite});
+        break;
+      default:
+        throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+    }
+   }
 }
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> {
@@ -146,23 +154,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   stepForward(): Promise<void> {
-    return new Promise(resolve => {
-      if (!this.config.pregeneratesKeyframes) {
-        // TODO: Handle case where only one keyframe is provided
-        let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
-        this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
-      }
-      
-      this.animate(this.animation.forward, 'forward')
-        .then(() => resolve());
-    });
+    return this.animate('forward');
   }
 
   stepBackward(): Promise<void> {
-    return new Promise(resolve => {
-      this.animate(this.animation.backward, 'backward')
-        .then(() => resolve());
-    });
+    return this.animate('backward');
   }
 
   // TODO: Figure out good way to implement XNOR
@@ -171,19 +167,36 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onStartBackward(): void {};
   protected _onFinishBackward(): void {};
 
-  protected animate(animation: Animation, direction: 'forward' | 'backward'): Promise<void> {
+  protected animate(direction: 'forward' | 'backward'): Promise<void> {
+    const animation = this.animation;
+
     switch(direction) {
       case 'forward':
         this.domElem.classList.add(...this.config.classesToAddOnStart);
         this.domElem.classList.remove(...this.config.classesToRemoveOnStart);
         this._onStartForward();
+
+        // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward...
+        // can function properly.
+        if (!this.config.pregeneratesKeyframes) {
+          // TODO: Handle case where only one keyframe is provided
+          let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+          this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+        }
+
         break;
+
       case 'backward':
         this._onStartBackward();
         this.domElem.classList.add(...this.config.classesToRemoveOnFinish);
         this.domElem.classList.remove(...this.config.classesToAddOnFinish);
         break;
+
+      default:
+        throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
     }
+
+    animation.loadKeyframeEffect(direction);
 
     // set playback rate
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
