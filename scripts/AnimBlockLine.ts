@@ -188,28 +188,29 @@ export class Connector extends HTMLElement {
     if (!pointA || !pointB) { return; }
 
     // to properly place the endpoints, we need the positions of their bounding boxes
-    // get the bounding rectangles for A reference element, B reference element, and parent element
-    // TODO: Use offsetParent to account for direct parent beieng statically positioned
-    const svgParentElement = this.parentElement!;
     
-    // the class is appended without classList.add() so that multiple applications
-    // of the class do not interfere with each other upon removal
+    // CHANGE NOTE: Use offsetParent instead of direct parent to properly get nearest positioned ancestor
+    const offsetParent = this.offsetParent!;
+
+    // The x and y coordinates of the line need to be with respect to the top left of document
+    // Thus, we must subtract the offsetParent element's current top and left from the total offset
+    // But because elements start in their parent's Content box (which excludes the border) instead of the Fill area,...
+    // (which includes the border), our element's top and left are offset by the offsetParent element's border width with...
+    // ...respect to the actual bounding box of the offsetParent. Therefore, we must subtract the offsetParent's border thicknesses as well.
+    const {left: offsetParentLeft, top: offsetParentTop} = offsetParent.getBoundingClientRect();
+    const connectorLeftOffset = -offsetParentLeft - Number.parseFloat(getComputedStyle(offsetParent).borderLeftWidth);
+    const connectorTopOffset = -offsetParentTop - Number.parseFloat(getComputedStyle(offsetParent).borderTopWidth);
+
+    // get the bounding rectangles for A reference element and B reference element
     // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
+    // the override class is appended without classList.add() so that multiple applications...
+    // of the class do not interfere with each other upon removal
     pointA[0].classList.value += ` wbfk-override-hidden`;
     pointB[0].classList.value += ` wbfk-override-hidden`;
     const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = pointA[0].getBoundingClientRect();
     const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = pointB[0].getBoundingClientRect();
-    const {left: parentLeft, top: parentTop} = svgParentElement.getBoundingClientRect();
     pointA[0].classList.value = pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
     pointB[0].classList.value = pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
-
-    // The x and y coordinates of the line need to be with respect to the top left of document
-    // Thus, we must subtract the parent element's current top and left from the offset
-    // But because elements start in their parent's Content box (which excludes the border) instead of the Fill area,...
-    // ...(which includes the border), our element's top and left are offset by the parent element's border width with...
-    // ...respect to the actual bounding box of the parent. Therefore, we must subtract the parent's border thicknesses as well.
-    const connectorLeftOffset = -parentLeft - Number.parseFloat(getComputedStyle(svgParentElement).borderLeftWidth);
-    const connectorTopOffset = -parentTop - Number.parseFloat(getComputedStyle(svgParentElement).borderTopWidth);
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
@@ -320,7 +321,6 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
-      classesToRemoveOnStart: ['wbfk-hidden'],
       commitsStyles: false,
       // pregenerateKeyframes: true,
     };
@@ -335,22 +335,17 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.connectorElem = connectorElem;
   }
 
-  stepForward(): Promise<void> {
-    this.connectorElem.updateEndpoints();
-    return super.stepForward();
-  }
-
   protected _onStartForward(): void {
-    // this.connectorElem.updateEndpoints();
     this.domElem.classList.remove('wbfk-hidden');
+    this.connectorElem.updateEndpoints();
     if (this.connectorElem.trackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
   }
 
   protected _onFinishBackward(): void {
-    this.domElem.classList.add('wbfk-hidden');
     this.connectorElem.clearTrackingInterval();
+    this.domElem.classList.add('wbfk-hidden');
   }
 }
 
@@ -359,7 +354,6 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
-      classesToAddOnFinish: ['wbfk-hidden'],
       commitsStyles: false,
       // pregenerateKeyframes: true,
     };
@@ -375,17 +369,18 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
   }
 
   protected _onStartForward(): void {
-    this.connectorElem.clearTrackingInterval();
-  }
-
-  stepBackward(): Promise<void> {
-    this.connectorElem.updateEndpoints();
-    return super.stepBackward();
+    this.connectorElem.clearTrackingInterval(); // TODO: Consider clearing in _onFinishForward()
   }
 
   protected _onStartBackward(): void {
+    this.domElem.classList.remove('wbfk-hidden');
+    this.connectorElem.updateEndpoints();
     if (this.connectorElem.trackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
+  }
+
+  protected _onFinishForward(): void {
+    this.domElem.classList.add('wbfk-hidden');
   }
 }
