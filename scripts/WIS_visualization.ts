@@ -764,7 +764,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     animSequence.setDescription('Reverse arrow and replace c access with value');
     animSequence.addBlocks(
       EraseConnector(connector_toCBlock, '~fade-out', []),
-      SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5]),
+      SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5], {trackEndpoints: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A']),
       // TODO: Address SetConnector update dilemma. The commented out code won't work, so I stopped writing it partway through
       // EraseConnector(connector_cAccess, '~fade-out', [], {duration: 0}),
