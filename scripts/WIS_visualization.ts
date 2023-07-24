@@ -256,7 +256,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Emphasis(jobBarEl, '~highlight', [], {blocksNext: false}),
         Emphasis(jBlock, '~highlight', [], {blocksNext: false, blocksPrev: false}),
         Entrance(cBar, '~wipe', ['from-top'], {blocksPrev: false}),
-        Entrance(paragraph_fillCArray_forJobX, '~fade-in', [], {duration: 0, blocksNext: false}),
+        Entrance(paragraph_fillCArray_forJobX, '~appear', [], {blocksNext: false}), // TODO: No need for blocksNext now
         Entrance(textbox_fillCArray, '~fade-in', []),
       );
 
@@ -333,7 +333,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Exit(cBar, '~fade-out', [], {blocksNext: false, blocksPrev: false}),
         Emphasis(jobBarEl, '~un-highlight', [], {blocksPrev: false, blocksNext: false}),
         Emphasis(jBlock, '~un-highlight', [], {blocksPrev: false}),
-        Exit(paragraph_fillCArray_continueOn, '~fade-out', [], {duration: 0}),
+        Exit(paragraph_fillCArray_continueOn, '~disappear', []),
       );
       animTimeline.addSequences(animSequence);
     }
@@ -860,8 +860,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       EraseConnector(connector_OPTExpression1, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(OPTExpressionContainer1, '~un-highlight', [], {blocksPrev: false}),
   
-      Exit(paragraph_computation1_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(paragraph_computation1_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_computation1_intro, '~disappear', [], {blocksNext: false}), // TODO: blocksNext no longer necessary
+      Entrance(paragraph_computation1_summary, '~appear', [], {blocksPrev: false}), // TODO: blocksPrev no longer necessary
       Exit(computationExpression1, '~wipe', ['from-right'],),
       Entrance(computationResult1, '~wipe', ['from-right'],),
       Emphasis(computationResult1, '~highlight', [], {blocksPrev: false, blocksNext: false}),
@@ -944,8 +944,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       SetConnector(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       DrawConnector(connector_upFromChild2, '~trace', ['from-A']),
 
-      Exit(paragraph_computation2_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(paragraph_computation2_summary, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_computation2_intro, '~disappear', [], {blocksNext: false}), // TODO: blocksNext no longer necessary
+      Entrance(paragraph_computation2_summary, '~appear', [], {blocksPrev: false}), // TODO: blocksPrev no longer necessary
 
       Emphasis(computation2, '~un-highlight', [], {blocksNext: false}),
       Exit(OPTExpression2, '~wipe', ['from-right'], {blocksPrev: false}),
@@ -974,8 +974,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Emphasis(computationResult2, '~un-highlight', [], {blocksPrev: false}),
 
       
-      Exit(paragraph_formulaComputation_find, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(paragraph_formulaComputation_max, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_formulaComputation_find, '~disappear', [], {blocksNext: false}), // TODO: blocksNext no longer necessary
+      Entrance(paragraph_formulaComputation_max, '~appear', [], {blocksPrev: false}),  // TODO: blocksPrev no longer necessary
       Emphasis(formulaContainer, '~highlight', [], {blocksNext: false}),
       SetConnector(connector_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(connector_formulaComputation, '~trace', ['from-A'], {blocksPrev: false}),
@@ -1049,8 +1049,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     animSequence.setDescription('Remove arrow pointing from M block and show final text box');
     animSequence.addBlocks(
       // Add last text box
-      Exit(paragraph_MAccess_intro, '~fade-out', [], {duration: 0, blocksNext: false}),
-      Entrance(paragraph_MAccess_solved, '~fade-in', [], {duration: 0, blocksPrev: false}),
+      Exit(paragraph_MAccess_intro, '~disappear', [], {blocksNext: false}), // TODO: blocksNext no longer necessary
+      Entrance(paragraph_MAccess_solved, '~appear', [], {blocksPrev: false}), // TODO: blocksPrev no longer necessary
       EraseConnector(connector_toMBlock, '~trace', ['from-A']),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(connector_MAccess, '~trace', ['from-A'], {blocksPrev: false}),
