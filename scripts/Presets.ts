@@ -223,7 +223,7 @@ export const presetTranslations = {
   },
 
   ['~translate']: {
-    generateKeyframes: (translationOptions: Partial<TNoElem>): [Keyframe[], Keyframe[]] => {
+    generateKeyframes: (translationOptions: Partial<TNoElem> = {}): [Keyframe[], Keyframe[]] => {
       const {
         translateX = '0px',
         translateY = '0px',
