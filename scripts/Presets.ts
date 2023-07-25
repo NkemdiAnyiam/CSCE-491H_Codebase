@@ -19,6 +19,7 @@ export const presetEntrances = {
     }
   },
 
+  // TODO: Rename to just 'fade'
   [`~fade-in`]: {
     generateKeyframes: () => [[
       {opacity: '0'},
@@ -27,7 +28,7 @@ export const presetEntrances = {
   },
 
   [`~pinwheel`]: {
-    generateKeyframes(numSpins: number, direction: 'clockwise' | 'counterclockwise') {
+    generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'counterclockwise') {
       // TODO: tweak starting scale and reconsider modifying opaticy
       return [[
         {
@@ -97,6 +98,24 @@ export const presetExits = {
       {opacity: '0'},
     ]],
   },
+
+  [`~pinwheel`]: {
+    generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'clockwise') {
+      // TODO: tweak starting scale and reconsider modifying opacity
+      return [[
+        {
+          rotate: `z 0deg`,
+          scale: 1,
+          opacity: 1,
+        },
+        {
+          rotate: `z ${360 * numSpins * (direction === 'clockwise' ? 1 : -1)}deg`,
+          scale: 0,
+          opacity: 0,
+        },
+      ]]
+    },
+  },
   
   [`~wipe`]: {
     generateKeyframes(direction: 'from-bottom' | 'from-left' | 'from-top' | 'from-right' = 'from-bottom') {
@@ -159,7 +178,6 @@ export const presetEmphases = {
 
 // TODO: Implement composite: accumulates somewhewre
 export const presetTranslations = {
-
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {
       if (!targetElem) {
