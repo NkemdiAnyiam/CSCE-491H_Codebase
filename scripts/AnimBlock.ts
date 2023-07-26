@@ -59,22 +59,22 @@ export class AnimTimelineAnimation extends Animation {
     if (forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
   }
   
-  setForwardFrames(frames: Keyframe[]) {
+  setForwardFrames(frames: Keyframe[]): void {
     this.forwardEffect.setKeyframes(frames);
   }
 
-  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean) {
+  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean): void {
     this.backwardEffect.setKeyframes(frames);
     this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
 
-  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean) {
+  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
     this.forwardEffect.setKeyframes(forwardFrames);
     this.backwardEffect.setKeyframes(backwardFrames);
     this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
 
-  loadKeyframeEffect(direction: 'forward' | 'backward') {
+  loadKeyframeEffect(direction: 'forward' | 'backward'): void {
     switch(direction) {
       case "forward":
         this.effect = new KeyframeEffect(this.forwardEffect.target, this.forwardEffect.getKeyframes(), {...this.forwardEffect.getTiming(), composite: this.forwardEffect.composite});
@@ -115,7 +115,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
   }
 
-   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}) {
+   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
     this.config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
 
@@ -148,7 +148,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return this;
   }
 
-  setID(idSeq: number, idTimeline: number) {
+  setID(idSeq: number, idTimeline: number): void {
     [this.sequenceID, this.timelineID] = [idSeq, idTimeline];
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }

@@ -51,14 +51,14 @@ export class AnimSequence {
     }
   }
 
-  addBlocks(...animBlocks: AnimBlock[]) {
-    // CHANGE NOTE: remove addOneBlock()
+  addBlocks(...animBlocks: AnimBlock[]): void {
+    // CHANGE NOTE: removed addOneBlock()
     this.animBlocks.push(...animBlocks);
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
   // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
-  async play() {
+  async play(): Promise<boolean> {
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
     for (let i = 0; i < numBlocks; ++i) {
@@ -70,11 +70,11 @@ export class AnimSequence {
         { currAnimBlock.stepForward(); }
     }
 
-    return Promise.resolve(this.options.continueNext);
+    return this.options.continueNext;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
-  async rewind() {
+  async rewind(): Promise<boolean> {
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
     for (let i = numBlocks - 1; i >= 0; --i) {
@@ -85,11 +85,11 @@ export class AnimSequence {
         { currAnimBlock.stepBackward(); }
     }
 
-    return Promise.resolve(this.options.continuePrev);
+    return this.options.continuePrev;
   }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping
-  skipCurrentAnimations() {
+  skipCurrentAnimations(): void {
     // get all currently running animations (if animations are currently running, we need to force them to finish)
     const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
     const numAnimations = allAnimations.length;

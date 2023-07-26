@@ -68,55 +68,55 @@ export class Connector extends HTMLElement {
 
     // TODO: Improve marker sizing configuration
     const htmlString = `
-    <style>
-      :host {
-        --a-marker: url(#${markerIdPrefix}-a--layer);
-        --b-marker: url(#${markerIdPrefix}-b--layer);
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: initial;
-        line-height: 0 !important;
-        overflow: visible !important;
-        visibility: hidden !important;
-      }
-      
-      .connector__svg {
-        visibility: hidden !important;
-        overflow: visible !important;
-      }
-      
-      .connector__g-body {
-        visibility: initial;
-      }
-      
-      .connector__mask-group {
-        stroke: white !important;
-        fill: white !important;
-      }
-      
-      .connector__layer-group {
+      <style>
+        :host {
+          --a-marker: url(#${markerIdPrefix}-a--layer);
+          --b-marker: url(#${markerIdPrefix}-b--layer);
+          position: absolute;
+          top: 0;
+          left: 0;
+          display: initial;
+          line-height: 0 !important;
+          overflow: visible !important;
+          visibility: hidden !important;
+        }
         
-      }
+        .connector__svg {
+          visibility: hidden !important;
+          overflow: visible !important;
+        }
+        
+        .connector__g-body {
+          visibility: initial;
+        }
+        
+        .connector__mask-group {
+          stroke: white !important;
+          fill: white !important;
+        }
+        
+        .connector__layer-group {
+          
+        }
 
-      .connector__line {
-        fill: none;
-      }
-      
-      .connector__line--mask {
-        stroke-dashoffset: 0 !important;
-      }
-      
-      .connector__line--layer {
-        stroke-dasharray: 1 !important;
-        marker-start: var(--a-marker);
-        marker-end: var(--b-marker);
-      }
-      
-      marker {
-        stroke: none;
-      }
-    </style>
+        .connector__line {
+          fill: none;
+        }
+        
+        .connector__line--mask {
+          stroke-dashoffset: 0 !important;
+        }
+        
+        .connector__line--layer {
+          stroke-dasharray: 1 !important;
+          marker-start: var(--a-marker);
+          marker-end: var(--b-marker);
+        }
+        
+        marker {
+          stroke: none;
+        }
+      </style>
 
       <svg class="connector__svg">
         <g class="connector__g-body">
@@ -181,7 +181,7 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = (usingTimeout = false) => {
+  updateEndpoints = (usingTimeout = false): void => {
     if (usingTimeout && !this.currentlyTracking) { return; }
     const pointA = this.pointA;
     const pointB = this.pointB;
@@ -229,12 +229,13 @@ export class Connector extends HTMLElement {
     this.mask.y.baseVal.valueAsString = `${Math.min(ay, by) - 25}`;
   }
 
-  setTrackingInterval = () => {
+  // TODO: No reason for these to be arrow functions
+  setTrackingInterval = (): void => {
     this.timeoutForTracking = setInterval(this.updateEndpoints, 4, true);
     this.currentlyTracking = true;
   }
 
-  clearTrackingInterval = () => {
+  clearTrackingInterval = (): void => {
     this.currentlyTracking = false;
     clearInterval(this.timeoutForTracking);
   }
