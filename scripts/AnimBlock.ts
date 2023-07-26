@@ -115,7 +115,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
   }
 
-   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
+  initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
     this.config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
 
