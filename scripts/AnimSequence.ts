@@ -61,14 +61,27 @@ export class AnimSequence {
   async play(): Promise<boolean> {
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
+    let parallelBlocks: Promise<void>[] = [];
     for (let i = 0; i < numBlocks; ++i) {
       const currAnimBlock = animBlocks[i];
-      // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      if (i === numBlocks - 1 || currAnimBlock.blocksNext)
-        { await currAnimBlock.stepForward(); }
-      else
-        { currAnimBlock.stepForward(); }
+      const prevAnimBlock = animBlocks[i - 1];
+      if (i === 0 || prevAnimBlock?.blocksNext === false) {
+        parallelBlocks.push(currAnimBlock.stepForward());
+      }
+      else {
+        await Promise.all(parallelBlocks);
+        parallelBlocks = [currAnimBlock.stepForward()];
+      }
+
+
+      // // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
+      // if (i === numBlocks - 1 || currAnimBlock.getBlocksNext())
+      //   { await currAnimBlock.stepForward(); }
+      // else
+      //   { currAnimBlock.stepForward(); }
     }
+
+    await Promise.all(parallelBlocks);
 
     return this.options.continueNext;
   }
@@ -77,15 +90,51 @@ export class AnimSequence {
   async rewind(): Promise<boolean> {
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
+    let parallelBlocks: Promise<void>[] = [];
     for (let i = numBlocks - 1; i >= 0; --i) {
       const currAnimBlock = animBlocks[i];
-      if (i === 0 || currAnimBlock.blocksPrev)
-        { await currAnimBlock.stepBackward(); }
-      else
-        { currAnimBlock.stepBackward(); }
+      const nextAnimBlock = animBlocks[i + 1];
+      if (i === numBlocks - 1 || nextAnimBlock?.blocksPrev === false) {
+        parallelBlocks.push(currAnimBlock.stepBackward());
+      }
+      else {
+        await Promise.all(parallelBlocks);
+        parallelBlocks = [currAnimBlock.stepBackward()];
+      }
+
+
+      // if (i === 0 || currAnimBlock.getBlocksPrev())
+      //   { await currAnimBlock.stepBackward(); }
+      // else
+      //   { currAnimBlock.stepBackward(); }
     }
 
+    await Promise.all(parallelBlocks);
+
     return this.options.continuePrev;
+  }
+
+  commit(): void {
+    let maxFinishTime = 0;
+    const animBlocks = this.animBlocks;
+    const numBlocks = animBlocks.length;
+
+    for (let i = 0; i < numBlocks; ++i) {
+      const currAnimBlock = animBlocks[i];
+      const prevBlock = animBlocks[i-1];
+      const currStartTime = animBlocks[i-1]?.blocksNext ? prevBlock?.startTime ?? 0 : maxFinishTime;
+
+      currAnimBlock.startTime = currStartTime + currAnimBlock.delay;
+      currAnimBlock.finishTime = currAnimBlock.startTime + +currAnimBlock.duration;
+
+      maxFinishTime = Math.max(currAnimBlock.finishTime + currAnimBlock.endDelay, maxFinishTime);
+
+      const comparator = function(funcA: Function, funcB: Function): -1 | 1 {
+        return funcA.time <= funcB.time ? -1 : 1;
+      };
+
+      this.funcs.sort(comparator);
+    }
   }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping

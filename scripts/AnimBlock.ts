@@ -14,7 +14,8 @@ type CustomKeyframeEffectOptions = {
   pregeneratesKeyframes: boolean;
 }
 
-export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate'>> & CustomKeyframeEffectOptions;
+// TODO: fix issue of duration and other should-be numeric values being allowed in string form
+export type AnimBlockConfig = Required<Pick<KeyframeEffectOptions, | 'duration' | 'easing' | 'playbackRate' | 'delay' | 'endDelay'>> & CustomKeyframeEffectOptions;
 // TODO: validate duration and playbackRate?
 
 type TOffset = {
@@ -44,19 +45,45 @@ type CssLength = `${number}${CssLengthUnit}`;
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
+// TODO: rename type
+type Opt = {
+  target: Element | null;
+  keyframes: Keyframe[] | PropertyIndexedKeyframes | null;
+  options?: number | KeyframeEffectOptions | undefined;
+  delaySettings?: [delay: number, endDelay: number];
+};
+
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
+  private forwardEffect: KeyframeEffect;
+  private delaySegment: KeyframeEffect | null;
+  private endDelaySegment: KeyframeEffect | null;
+  direction: 'forward' | 'backward' = 'forward';
+
+  finished_delayPeriod: Promise<void> = new Promise(_ => {});
+  finished_activePeriod: Promise<void> = new Promise(_ => {});
+  finished_endDelayPeriod: Promise<void> = new Promise(_ => {});
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
   get sequenceID(): number { return this._sequenceID; }
   set sequenceID(id: number) { this._sequenceID = id; }
 
-  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
+  constructor(forwardEffects: Opt, private backwardEffect: KeyframeEffect) {
     super();
-    if (forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
-    if (forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
+
+    const {
+      target, keyframes, options, delaySettings
+    } = forwardEffects;
+
+    this.forwardEffect = new KeyframeEffect(target, keyframes, options);
+    this.delaySegment = delaySettings?.[0] ? new KeyframeEffect(target, [], { duration: 0, delay: delaySettings[0] }) : null;
+    this.endDelaySegment = delaySettings?.[1] ? new KeyframeEffect( target, [], { duration: 0, delay: delaySettings[1] }) : null;
+
+    if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
+    // TODO: check for undefined as well
+    if (this.forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
   }
   
   setForwardFrames(frames: Keyframe[]): void {
@@ -74,6 +101,66 @@ export class AnimTimelineAnimation extends Animation {
     this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
 
+  setDirection(direction: 'forward' | 'backward') { this.direction = direction; }
+
+  play_delayPeriod(): void {
+    this.finished_delayPeriod = new Promise(resolve => {
+      (async () => {
+        const delaySegment = this.delaySegment;
+        if (delaySegment) {
+          super.effect = new KeyframeEffect(delaySegment.target, [], {...delaySegment.getTiming()});
+          super.play();
+          await super.finished;
+          super.cancel();
+        }
+
+        resolve();
+        this.finished_delayPeriod = new Promise(_ => {});
+      })();
+    });
+  }
+
+  play_activePeriod(): void {
+    this.finished_activePeriod = new Promise(resolve => {
+      (async () => {
+        const forwardEffect = this.forwardEffect;
+        super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming()});
+        super.play();
+        await super.finished;
+
+        resolve();
+        this.finished_activePeriod = new Promise(_ => {});
+      })();
+    });
+  }
+
+  play_endDelayPeriod(): void {
+    this.finished_endDelayPeriod = new Promise(resolve => {
+      (async () => {
+        const endDelaySegment = this.endDelaySegment;
+        if (endDelaySegment) {
+          super.effect = new KeyframeEffect(endDelaySegment.target, [], {...endDelaySegment.getTiming()});
+          super.play();
+          await super.finished;
+          super.cancel();
+        }
+
+        resolve();
+        this.finished_endDelayPeriod = new Promise(_ => {});
+      })();
+    });
+  }
+
+  async play(): Promise<void> {
+    const forwardEffect = this.forwardEffect;
+    super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming()});
+    super.play();
+    await super.finished;
+    super.cancel();
+
+    // resolve_delayPeriod();
+  }
+
   loadKeyframeEffect(direction: 'forward' | 'backward'): void {
     switch(direction) {
       case "forward":
@@ -85,7 +172,7 @@ export class AnimTimelineAnimation extends Animation {
       default:
         throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
-   }
+  }
 }
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> {
@@ -101,10 +188,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
 
-  protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
+  startTime: number = NaN;
+  finishTime: number = NaN;
 
-  get blocksNext() { return this.config.blocksNext; }
-  get blocksPrev() { return this.config.blocksPrev; }
+  protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
   constructor(domElem: Element | null, public animName: string, public bankEntry: TBankEntry) {
     if (!domElem) {
@@ -115,29 +202,37 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
   }
 
+  get blocksNext() { return this.config.blocksNext; }
+  get blocksPrev() { return this.config.blocksPrev; }
+  get delay() { return this.config.delay; }
+  get endDelay() { return this.config.endDelay; }
+  get duration() { return this.config.duration; }
+
   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
-    this.config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
+    const config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
+    this.config = config;
 
     // TODO: Handle case where only one keyframe is provided
-    let [forwardFrames, backwardFrames] = this.config.pregeneratesKeyframes ?
+    let [forwardFrames, backwardFrames] = config.pregeneratesKeyframes ?
       this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
       [[], []];
 
     const keyframeOptions: KeyframeEffectOptions = {
-      duration: this.config.duration,
-      fill: this.config.commitsStyles ? 'forwards' : 'none',
-      easing: this.config.easing,
-      composite: this.config.composite,
+      duration: config.duration,
+      fill: config.commitsStyles ? 'forwards' : 'none',
+      easing: config.easing,
+      composite: config.composite,
     };
 
     // TODO: Add playbackRate
     this.animation = new AnimTimelineAnimation(
-      new KeyframeEffect(
-        this.domElem,
-        forwardFrames,
-        keyframeOptions,
-      ),
+      {
+        target: this.domElem,
+        keyframes: forwardFrames,
+        options: keyframeOptions,
+        delaySettings: [config.delay, config.endDelay],
+      },
       new KeyframeEffect(
         this.domElem,
         backwardFrames ?? [...forwardFrames],
@@ -161,17 +256,30 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return this.animate('backward');
   }
 
+  // finish = {
+  //   const func = () => {
+  //     this.animation.finish()
+  //   };
+  //   func.time = 
+  //   return func;
+  // }
+
   // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
   protected _onFinishForward(): void {};
   protected _onStartBackward(): void {};
   protected _onFinishBackward(): void {};
 
-  protected animate(direction: 'forward' | 'backward'): Promise<void> {
+  protected async animate(direction: 'forward' | 'backward'): Promise<void> {
     const animation = this.animation;
-
+    animation.setDirection(direction);
+    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
+    
     switch(direction) {
       case 'forward':
+        animation.play_delayPeriod();
+        await animation.finished_delayPeriod;
+
         this.domElem.classList.add(...this.config.classesToAddOnStart);
         this.domElem.classList.remove(...this.config.classesToRemoveOnStart);
         this._onStartForward();
@@ -197,47 +305,45 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     }
 
     animation.loadKeyframeEffect(direction);
-
-    // set playback rate
-    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
 
     // return Promise that fulfills when the animation is completed
-    return animation.finished.then(() => {
-      // CHANGE NOTE: Move hidden class stuff here
-      // TODO: Account for case where parent is hidden
-      if (this.config.commitsStyles) {
-        try {
-          animation.commitStyles(); // actually applies the styles to the element
-        }
-        catch (err) {
-          console.warn(err); // TODO: Make more specific
-          this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
-          animation.commitStyles();
-          this.domElem.classList.remove('wbfk-override-hidden');
-        }
+    animation.play_activePeriod();
+    await animation.finished_activePeriod;
+    // CHANGE NOTE: Move hidden class stuff here
+    // TODO: Account for case where parent is hidden
+    if (this.config.commitsStyles) {
+      try {
+        animation.commitStyles(); // actually applies the styles to the element
       }
-      
-      switch(direction) {
-        case 'forward':
-          this.domElem.classList.add(...this.config.classesToAddOnFinish);
-          this.domElem.classList.remove(...this.config.classesToRemoveOnFinish);
-          this._onFinishForward();
-          break;
-        case 'backward':
-          this._onFinishBackward();
-          this.domElem.classList.add(...this.config.classesToRemoveOnStart);
-          this.domElem.classList.remove(...this.config.classesToAddOnStart);
-          break;
+      catch (err) {
+        console.warn(err); // TODO: Make more specific
+        this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
+        animation.commitStyles();
+        this.domElem.classList.remove('wbfk-override-hidden');
       }
-      
-      // prevents animations from jumping backward in their execution when duration or playback rate is modified
-      animation.cancel();
-      // // prevents clipping out nested absolutely-positioned elements outside the bounding box
-      // if (isEntering) { this.domElem.style.removeProperty('clip-path'); }
-    });
+    }
+    
+    switch(direction) {
+      case 'forward':
+        this.domElem.classList.add(...this.config.classesToAddOnFinish);
+        this.domElem.classList.remove(...this.config.classesToRemoveOnFinish);
+        this._onFinishForward();
+        break;
+      case 'backward':
+        this._onFinishBackward();
+        this.domElem.classList.add(...this.config.classesToRemoveOnStart);
+        this.domElem.classList.remove(...this.config.classesToAddOnStart);
+        break;
+    }
+    
+    // prevents animations from jumping backward in their execution when duration or playback rate is modified
+    animation.cancel();
+
+    animation.play_endDelayPeriod();
+    await animation.finished_endDelayPeriod;
   }
 
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
@@ -251,6 +357,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       composite: 'replace',
       easing: 'linear',
       pregeneratesKeyframes: false,
+      delay: 0,
+      endDelay: 0,
 
       // subclass defaults take priority
       ...this.defaultConfig,
