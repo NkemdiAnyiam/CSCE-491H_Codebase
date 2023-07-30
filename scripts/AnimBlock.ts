@@ -76,10 +76,10 @@ export class AnimTimelineAnimation extends Animation {
     this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
   }
 
-  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
-    this.forwardEffect.setKeyframes(forwardFrames);
-    this.backwardEffect.setKeyframes(backwardFrames);
-    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
+  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror: boolean = false): void {
+    this.setForwardFrames(forwardFrames);
+    (super.effect as KeyframeEffect).setKeyframes(forwardFrames);
+    this.setBackwardFrames(backwardFrames, backwardIsMirror);
   }
 
   setDirection(direction: 'forward' | 'backward') { this.direction = direction; }
@@ -145,10 +145,13 @@ export class AnimTimelineAnimation extends Animation {
   loadKeyframeEffect(direction: 'forward' | 'backward'): void {
     switch(direction) {
       case "forward":
-        this.effect = new KeyframeEffect(this.forwardEffect.target, this.forwardEffect.getKeyframes(), {...this.forwardEffect.getTiming(), composite: this.forwardEffect.composite});
+        // TODO: Might be able to just do super.effect = this.forwardEffect without encountering Firefox bug. Test later
+        const forwardEffect = this.forwardEffect;
+        super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming(), composite: forwardEffect.composite});
         break;
       case "backward":
-        this.effect = new KeyframeEffect(this.backwardEffect.target, this.backwardEffect.getKeyframes(), {...this.backwardEffect.getTiming(), composite: this.backwardEffect.composite});
+        const backwardEffect = this.backwardEffect;
+        super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
         break;
       default:
         throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
@@ -195,9 +198,15 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.config = config;
 
     // TODO: Handle case where only one keyframe is provided
+    // The fontFeatureSettings part handles a very strange Firefox bug that causes animations to run without any visual changes...
+    // when the animation is finished, setKeyframes() is called, and the animation continues after extending the runtime using...
+    // endDelay. It appears that the bug only occurs when the keyframes field contains nothing that will actually affect the...
+    // styling of the element (for example, adding {['fake-field']: 'bla'} will not fix it), but I obviously do not want to...
+    // add anything that will actually affect the style of the element, so I decided to use fontFeatureSettings and set it to...
+    // the default value to make it as unlikely as possible that anything the user does is obstructed.
     let [forwardFrames, backwardFrames] = config.pregeneratesKeyframes ?
       this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
-      [[], []];
+      [[{fontFeatureSettings: 'normal'}], []]; // TODO: maybe use 'default' instead
 
     const keyframeOptions: KeyframeEffectOptions = {
       duration: config.duration,
@@ -253,6 +262,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected async animate(direction: 'forward' | 'backward'): Promise<void> {
     const animation = this.animation;
     animation.setDirection(direction);
+    animation.loadKeyframeEffect(direction);
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     
     switch(direction) {
@@ -283,8 +293,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       default:
         throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
     }
-
-    animation.loadKeyframeEffect(direction);
     
     // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
