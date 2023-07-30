@@ -45,20 +45,9 @@ type CssLength = `${number}${CssLengthUnit}`;
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
-// TODO: rename type
-type Opt = {
-  target: Element | null;
-  keyframes: Keyframe[] | PropertyIndexedKeyframes | null;
-  options?: number | KeyframeEffectOptions | undefined;
-  delaySettings?: [delay: number, endDelay: number];
-};
-
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
-  private forwardEffect: KeyframeEffect;
-  private delaySegment: KeyframeEffect | null;
-  private endDelaySegment: KeyframeEffect | null;
   direction: 'forward' | 'backward' = 'forward';
 
   finished_delayPeriod: Promise<void> = new Promise(_ => {});
@@ -70,16 +59,8 @@ export class AnimTimelineAnimation extends Animation {
   get sequenceID(): number { return this._sequenceID; }
   set sequenceID(id: number) { this._sequenceID = id; }
 
-  constructor(forwardEffects: Opt, private backwardEffect: KeyframeEffect) {
+  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
     super();
-
-    const {
-      target, keyframes, options, delaySettings
-    } = forwardEffects;
-
-    this.forwardEffect = new KeyframeEffect(target, keyframes, options);
-    this.delaySegment = delaySettings?.[0] ? new KeyframeEffect(target, [], { duration: 0, delay: delaySettings[0] }) : null;
-    this.endDelaySegment = delaySettings?.[1] ? new KeyframeEffect( target, [], { duration: 0, delay: delaySettings[1] }) : null;
 
     if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
     // TODO: check for undefined as well
@@ -227,12 +208,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     // TODO: Add playbackRate
     this.animation = new AnimTimelineAnimation(
-      {
-        target: this.domElem,
-        keyframes: forwardFrames,
-        options: keyframeOptions,
-        delaySettings: [config.delay, config.endDelay],
-      },
+      new KeyframeEffect(
+        this.domElem,
+        forwardFrames,
+        keyframeOptions,
+      ),
       new KeyframeEffect(
         this.domElem,
         backwardFrames ?? [...forwardFrames],
