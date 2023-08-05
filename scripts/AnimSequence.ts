@@ -114,6 +114,7 @@ export class AnimSequence {
     return this.options.continuePrev;
   }
 
+  // TODO: Complete this method
   commit(): void {
     let maxFinishTime = 0;
     const animBlocks = this.animBlocks;
@@ -129,11 +130,11 @@ export class AnimSequence {
 
       maxFinishTime = Math.max(currAnimBlock.finishTime + currAnimBlock.endDelay, maxFinishTime);
 
-      const comparator = function(funcA: Function, funcB: Function): -1 | 1 {
-        return funcA.time <= funcB.time ? -1 : 1;
-      };
+      // const comparator = function(funcA: Function, funcB: Function): -1 | 1 {
+      //   return funcA.time <= funcB.time ? -1 : 1;
+      // };
 
-      this.funcs.sort(comparator);
+      // this.funcs.sort(comparator);
     }
   }
 
