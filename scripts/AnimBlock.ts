@@ -45,19 +45,37 @@ type CssLength = `${number}${CssLengthUnit}`;
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
+
+
+
+type AwaitedTime = [
+  endDelay: number,
+  resolvers: ((value: void | PromiseLike<void>) => void)[],
+  // true when awaiting delay/endDelay periods but the awaited delay/endDelay duration is 0
+  skipPlay?: boolean,
+  message?: string,
+];
+
+type FinishPromises = {
+  delayPeriod: Promise<void>;
+  activePeriod: Promise<void>;
+  endDelayPeriod: Promise<void>;
+}
+
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
   direction: 'forward' | 'backward' = 'forward';
   private isFirstTime = true;
   private inProgress = false;
-  // finished_delayPeriod: Promise<void> = new Promise(_ => {});
-  // finished_activePeriod: Promise<void> = new Promise(_ => {});
-  // finished_endDelayPeriod: Promise<void> = new Promise(_ => {});
-  resolve_delayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveDelayPeriod() was called before assigning resolve'); };
-  resolve_activePeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveActivePeriod() was called before assigning resolve'); };
-  resolve_endDelayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveEndDelayPeriod() was called before assigning resolve'); };
-  forwardFinishes = {
+  // holds list of stopping points and resolvers to control segmentation of animation...
+  // to help with Promises-based sequencing
+  private awaitedTimes: AwaitedTime[] = [];
+  private resolve_delayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveDelayPeriod() was called before assigning resolve'); };
+  private resolve_activePeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveActivePeriod() was called before assigning resolve'); };
+  private resolve_endDelayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveEndDelayPeriod() was called before assigning resolve'); };
+  // TODO: Prevent outside modifications
+  forwardFinishes: FinishPromises = {
     delayPeriod: new Promise<void>(resolve => {this.resolve_delayPeriod = resolve}),
     activePeriod: new Promise<void>(resolve => {this.resolve_activePeriod = resolve}),
     endDelayPeriod: new Promise<void>(resolve => {this.resolve_endDelayPeriod = resolve}),
@@ -74,14 +92,84 @@ export class AnimTimelineAnimation extends Animation {
     if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
     // TODO: check for undefined as well
     if (this.forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
+    
+    super.effect = forwardEffect;
+    this.resetPromises();
   }
 
-  resetPromises(): void {
+  private resetPromises(): void {
     this.forwardFinishes = {
       delayPeriod: new Promise<void>(resolve => {this.resolve_delayPeriod = resolve}),
       activePeriod: new Promise<void>(resolve => {this.resolve_activePeriod = resolve}),
       endDelayPeriod: new Promise<void>(resolve => {this.resolve_endDelayPeriod = resolve}),
     };
+
+    const { delay, duration, endDelay } = (super.effect as KeyframeEffect).getTiming();
+    this.awaitedTimes = [
+      [ -(duration as number), [this.resolve_delayPeriod], (delay as number) === 0, 'Finished delay period' ],
+      [ 0, [this.resolve_activePeriod], false, 'Finished active period' ],
+      [ endDelay as number, [this.resolve_endDelayPeriod], (endDelay as number) === 0, 'Finished endDelay period' ],
+    ];
+  }
+  
+  // TODO: May have to await loading keyframes if not pregenerated
+  async play(): Promise<void> {
+    // if animation is already in progress and is just paused, resume the animation directly
+    // TODO: This needs to handle the possibility of play() being called twice in a row
+    if (this.inProgress) { 
+      super.play();
+      return;
+    }
+    this.inProgress = true;
+
+    // if this is the first time, then all 'finished'-like promises should be valid to wait for...
+    // because the promises should only be reset if the animation leaves the final ultimated finished state
+    if (!this.isFirstTime) { this.resetPromises(); }
+    else { this.isFirstTime = false; }
+
+    const effect = super.effect!;
+    const awaitedTimes = this.awaitedTimes;
+
+    // use length directly because entries could be added after loops is already entered
+    for (let i = 0; i < awaitedTimes.length; ++i) {
+      const [ endDelay, resolvers, bypassPlay, message ] = awaitedTimes[i];
+
+      if (!bypassPlay) {
+        // set animation to stop at a certain time using endDelay
+        effect.updateTiming({ endDelay });
+        super.play();
+        await super.finished;
+      }
+
+      // fulfill all promises that depended on the above time
+      for (const resolver of resolvers) { resolver(); }
+      if (message) { console.log(message); }
+    }
+
+    this.inProgress = false;
+  }
+
+  awaitTime(localTime: number): Promise<void> {
+    const { duration, delay } = super.effect!.getTiming();
+    if (localTime < 0) { throw new Error(`Invalid awaitTime() value ${localTime}; value must be >= 0`); }
+    // to await animation reaching currentTime in its running, we must use...
+    // the equivalent endDelay, which is localTime - (duration + delay)
+    const endDelay = localTime - ((duration as number) + (delay as number));
+
+    return new Promise(resolve => {
+      const awaitedTimes = this.awaitedTimes;
+      for (let i = 0; i < awaitedTimes.length; ++i) {
+        const currAwaitedTime = awaitedTimes[i];
+        if (endDelay < currAwaitedTime[0]) {
+          awaitedTimes.splice(i, 0, [endDelay, [resolve]]);
+          break;
+        }
+        else if (endDelay === currAwaitedTime[0]) { 
+          currAwaitedTime[1].push(resolve);
+          break;
+        }
+      }
+    });
   }
   
   setForwardFrames(frames: Keyframe[]): void {
@@ -99,101 +187,6 @@ export class AnimTimelineAnimation extends Animation {
     this.setBackwardFrames(backwardFrames, backwardIsMirror);
   }
 
-  setDirection(direction: 'forward' | 'backward') { this.direction = direction; }
-
-  // play_delayPeriod(): void {
-  //   this.finished_delayPeriod = new Promise(resolve => {
-  //     (async () => {
-  //       const delaySegment = this.delaySegment;
-  //       if (delaySegment) {
-  //         super.effect = new KeyframeEffect(delaySegment.target, [], {...delaySegment.getTiming()});
-  //         super.play();
-  //         await super.finished;
-  //         super.cancel();
-  //       }
-
-  //       resolve();
-  //       this.finished_delayPeriod = new Promise(_ => {});
-  //     })();
-  //   });
-  // }
-
-  // play_activePeriod(): void {
-  //   this.finished_activePeriod = new Promise(resolve => {
-  //     (async () => {
-  //       const forwardEffect = this.forwardEffect;
-  //       super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming()});
-  //       super.play();
-  //       await super.finished;
-
-  //       resolve();
-  //       this.finished_activePeriod = new Promise(_ => {});
-  //     })();
-  //   });
-  // }
-
-  // play_endDelayPeriod(): void {
-  //   this.finished_endDelayPeriod = new Promise(resolve => {
-  //     (async () => {
-  //       const endDelaySegment = this.endDelaySegment;
-  //       if (endDelaySegment) {
-  //         super.effect = new KeyframeEffect(endDelaySegment.target, [], {...endDelaySegment.getTiming()});
-  //         super.play();
-  //         await super.finished;
-  //         super.cancel();
-  //       }
-
-  //       resolve();
-  //       this.finished_endDelayPeriod = new Promise(_ => {});
-  //     })();
-  //   });
-  // }
-
-  // TODO: May have to await loading keyframes if not pregenerated
-  async play(): Promise<void> {
-    if (this.inProgress) { 
-      super.play();
-      return;
-    }
-    this.inProgress = true;
-    if (!this.isFirstTime) { this.resetPromises(); }
-    else { this.isFirstTime = false; }
-
-    const effect = super.effect!;
-    const {
-      endDelay: originalEndDelay,
-      delay,
-      duration,
-    } = effect.getTiming();
-
-    // TODO: Fix the weird duration type
-    // DELAY PERIOD
-    if (delay as number > 0) {
-      effect.updateTiming({endDelay: -(duration as number)}); // end at beginning of active duration
-      super.play();
-      await super.finished;
-    }
-    this.resolve_delayPeriod();
-    console.log('Finished delay period');
-
-    // ACTIVE PERIOD
-    effect.updateTiming({endDelay: 0});
-    super.play();
-    await super.finished;
-    this.resolve_activePeriod();
-    console.log('Finished active period');
-
-    // ENDDELAY PERIOD
-    if (originalEndDelay as number > 0) {
-      effect.updateTiming({endDelay: originalEndDelay});
-      super.play();
-      await super.finished;
-    }
-    this.resolve_endDelayPeriod();
-    console.log('Finished endDelay period');
-    this.inProgress = false;
-  }
-
   loadKeyframeEffect(direction: 'forward' | 'backward'): void {
     switch(direction) {
       case "forward":
@@ -209,6 +202,8 @@ export class AnimTimelineAnimation extends Animation {
         throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
   }
+
+  setDirection(direction: 'forward' | 'backward') { this.direction = direction; }
 }
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> {
@@ -384,7 +379,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     await animation.forwardFinishes.endDelayPeriod;
     animation.cancel();
-    // console.log(animation.effect);
   }
 
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
