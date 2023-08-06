@@ -154,7 +154,20 @@ export class AnimTimelineAnimation extends Animation {
     this.inProgress = false;
   }
 
+  async finish(): Promise<void> {
+    // all the side-effects of custom play() need to be in motion before calling super.finish()
+    if (!this.inProgress) { this.play(); }
+
+    // we must await super.finished each time because of segmentation
+    while (this.inProgress) {
+      super.finish();
+      await super.finished;
+    }
+  }
+
   awaitTime(localTime: number): Promise<void> {
+    // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
+    // past localTime. In such cases, the returned promise should be immediately resolved
     const { duration, delay } = super.effect!.getTiming();
     if (localTime < 0) { throw new Error(`Invalid awaitTime() value ${localTime}; value must be >= 0`); }
     // to await animation reaching currentTime in its running, we must use...
@@ -319,11 +332,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.loadKeyframeEffect(direction);
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
-    animation.play();
+    skipping ? animation.finish() : animation.play();
     
     switch(direction) {
       case 'forward':
-        skipping && animation.finish();
         await animation.forwardFinishes.delayPeriod;
         // await animation.finished_delayPeriod;
 
