@@ -140,6 +140,11 @@ export class AnimTimelineAnimation extends Animation {
         super.play();
         await super.finished;
       }
+      else {
+        // this allows outside operations like awaitTime() to push more resolvers to the queue...
+        // before the next loop iteration
+        await Promise.resolve();
+      }
 
       // fulfill all promises that depended on the above time
       for (const resolver of resolvers) { resolver(); }
