@@ -115,11 +115,13 @@ export class AnimTimelineAnimation extends Animation {
   // TODO: May have to await loading keyframes if not pregenerated
   async play(): Promise<void> {
     // if animation is already in progress and is just paused, resume the animation directly
-    // TODO: This needs to handle the possibility of play() being called twice in a row
-    if (this.inProgress) { 
+    if (super.playState === 'paused') { 
       super.play();
       return;
     }
+    
+    // if play() is called while already playing, return
+    if (this.inProgress) { return; }
     this.inProgress = true;
 
     // if this is the first time, then all 'finished'-like promises should be valid to wait for...
