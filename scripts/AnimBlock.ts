@@ -370,7 +370,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     // this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
 
-    if (skipping) { await Promise.all(this.adjecentForefinishers); }
+    if (this.adjecentForefinishers.length > 0) { await Promise.all(this.adjecentForefinishers); }
     await animation.forwardFinishes.activePeriod;
     this.adjecentForefinishers = [];
     // CHANGE NOTE: Move hidden class stuff here
