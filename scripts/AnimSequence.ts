@@ -66,6 +66,7 @@ export class AnimSequence {
       const currAnimBlock = animBlocks[i];
       const prevAnimBlock = animBlocks[i - 1];
       if (i === 0 || prevAnimBlock?.blocksNext === false) {
+        if (prevAnimBlock) { await prevAnimBlock.animation.forwardFinishes.delayPeriod; }
         parallelBlocks.push(currAnimBlock.stepForward());
       }
       else {
