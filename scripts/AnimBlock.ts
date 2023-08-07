@@ -239,8 +239,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
 
-  startTime: number = NaN;
-  finishTime: number = NaN;
+  activeStartTime: number = NaN;
+  activeFinishTime: number = NaN;
 
   adjecentForefinishers: Promise<void>[] = [];
 

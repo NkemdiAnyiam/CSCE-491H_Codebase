@@ -74,7 +74,7 @@ export class AnimSequence {
         }
         
         const nextBlock = animBlocks[i + 1];
-        if (nextBlock && nextBlock.finishTime < currAnimBlock.finishTime)
+        if (nextBlock && nextBlock.activeFinishTime < currAnimBlock.activeFinishTime)
           { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
         else if (nextBlock)
           { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
@@ -139,12 +139,12 @@ export class AnimSequence {
       const startsWithPrev = !animBlocks[i-1]?.blocksNext;
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
-      const currStartTime = startsWithPrev ? prevBlock?.startTime ?? 0 : maxFinishTime;
+      const currStartTime = startsWithPrev ? prevBlock?.activeStartTime ?? 0 : maxFinishTime;
 
-      currAnimBlock.startTime = currStartTime + currAnimBlock.delay;
-      currAnimBlock.finishTime = currAnimBlock.startTime + +currAnimBlock.duration;
+      currAnimBlock.activeStartTime = currStartTime + currAnimBlock.delay;
+      currAnimBlock.activeFinishTime = currAnimBlock.activeStartTime + +currAnimBlock.duration;
 
-      maxFinishTime = Math.max(currAnimBlock.finishTime + currAnimBlock.endDelay, maxFinishTime);
+      maxFinishTime = Math.max(currAnimBlock.activeFinishTime + currAnimBlock.endDelay, maxFinishTime);
 
       // const comparator = function(funcA: Function, funcB: Function): -1 | 1 {
       //   return funcA.time <= funcB.time ? -1 : 1;
