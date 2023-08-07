@@ -19,6 +19,8 @@ export class AnimSequence {
   animBlocks: AnimBlock[] = []; // array of animBlocks
   options: AnimSequenceOptions;
 
+  // private groupings: Promise<void>[][] = [];
+
   constructor(animBlocks: AnimBlock[] | null = null, options: Partial<AnimSequenceOptions> = {}) {
     this.id = AnimSequence.id++;
 
@@ -59,6 +61,7 @@ export class AnimSequence {
   // plays each animBlock contained in this AnimSequence instance in sequential order
   // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
   async play(): Promise<boolean> {
+    this.commit();
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
     let parallelBlocks: Promise<void>[] = [];
@@ -66,10 +69,20 @@ export class AnimSequence {
       const currAnimBlock = animBlocks[i];
       const prevAnimBlock = animBlocks[i - 1];
       if (i === 0 || prevAnimBlock?.blocksNext === false) {
-        if (prevAnimBlock) { await prevAnimBlock.animation.forwardFinishes.delayPeriod; }
+        if (prevAnimBlock) {
+          await prevAnimBlock.animation.forwardFinishes.delayPeriod;
+        }
+        
+        const nextBlock = animBlocks[i + 1];
+        if (nextBlock && nextBlock.finishTime < currAnimBlock.finishTime)
+          { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
+        else if (nextBlock)
+          { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
+          
         parallelBlocks.push(currAnimBlock.stepForward());
       }
       else {
+        // this.groupings.push(parallelBlocks);
         await Promise.all(parallelBlocks);
         parallelBlocks = [currAnimBlock.stepForward()];
       }
@@ -82,6 +95,7 @@ export class AnimSequence {
       //   { currAnimBlock.stepForward(); }
     }
 
+    // this.groupings.push(parallelBlocks);
     await Promise.all(parallelBlocks);
 
     return this.options.continueNext;
@@ -122,9 +136,10 @@ export class AnimSequence {
     const numBlocks = animBlocks.length;
 
     for (let i = 0; i < numBlocks; ++i) {
+      const startsWithPrev = !animBlocks[i-1]?.blocksNext;
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
-      const currStartTime = animBlocks[i-1]?.blocksNext ? prevBlock?.startTime ?? 0 : maxFinishTime;
+      const currStartTime = startsWithPrev ? prevBlock?.startTime ?? 0 : maxFinishTime;
 
       currAnimBlock.startTime = currStartTime + currAnimBlock.delay;
       currAnimBlock.finishTime = currAnimBlock.startTime + +currAnimBlock.duration;

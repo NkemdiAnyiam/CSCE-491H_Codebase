@@ -106,8 +106,8 @@ export class AnimTimelineAnimation extends Animation {
 
     const { delay, duration, endDelay } = (super.effect as KeyframeEffect).getTiming();
     this.awaitedTimes = [
-      [ -(duration as number), [this.resolve_delayPeriod], (delay as number) === 0, 'Finished delay period' ],
-      [ 0, [this.resolve_activePeriod], false, 'Finished active period' ],
+      [ -(duration as number), [this.resolve_delayPeriod], (delay as number) === 0, 'Finished delay period ' + delay, ],
+      [ 0, [this.resolve_activePeriod], false, 'Finished active period ' + duration ],
       [ endDelay as number, [this.resolve_endDelayPeriod], (endDelay as number) === 0, 'Finished endDelay period' ],
     ];
   }
@@ -150,7 +150,7 @@ export class AnimTimelineAnimation extends Animation {
 
       // fulfill all promises that depended on the above time
       for (const resolver of resolvers) { resolver(); }
-      if (message) { console.log(message); }
+      // if (message) { console.log(message); }
     }
 
     this.inProgress = false;
@@ -241,6 +241,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   startTime: number = NaN;
   finishTime: number = NaN;
+
+  adjecentForefinishers: Promise<void>[] = [];
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
@@ -368,7 +370,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     // this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
 
+    if (skipping) { await Promise.all(this.adjecentForefinishers); }
     await animation.forwardFinishes.activePeriod;
+    this.adjecentForefinishers = [];
     // CHANGE NOTE: Move hidden class stuff here
     // TODO: Account for case where parent is hidden
     if (this.config.commitsStyles) {
