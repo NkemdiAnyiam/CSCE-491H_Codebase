@@ -19,7 +19,8 @@ export class AnimSequence {
   animBlocks: AnimBlock[] = []; // array of animBlocks
   options: AnimSequenceOptions;
 
-  // private groupings: Promise<void>[][] = [];
+  private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
+  private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
 
   constructor(animBlocks: AnimBlock[] | null = null, options: Partial<AnimSequenceOptions> = {}) {
     this.id = AnimSequence.id++;
@@ -62,6 +63,21 @@ export class AnimSequence {
   // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
   async play(): Promise<boolean> {
     this.commit();
+    const activeGroupings = this.animBlockGroupings_activeFinishOrder;
+    const endDelayGroupings = this.animBlockGroupings_endDelayFinishOrder;
+    const totalLength = activeGroupings.length;
+
+    for (let i = 0; i < totalLength; ++i) {
+      const activeGrouping = activeGroupings[i];
+      const endDelayGrouping = endDelayGroupings[i];
+      const groupingLength = activeGrouping.length;
+
+      for (let j = 1; j < groupingLength; ++j) {
+        activeGrouping[j].animation.awaitActiveForefinisher(activeGrouping[j-1].animation.forwardFinishes.activePeriod);
+        endDelayGrouping[j].animation.awaitEndDelayForefinisher(endDelayGrouping[j-1].animation.forwardFinishes.endDelayPeriod);
+      }
+    }
+
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
     let parallelBlocks: Promise<void>[] = [];
@@ -73,16 +89,15 @@ export class AnimSequence {
           await prevAnimBlock.animation.forwardFinishes.delayPeriod;
         }
         
-        const nextBlock = animBlocks[i + 1];
-        if (nextBlock && nextBlock.activeFinishTime < currAnimBlock.activeFinishTime)
-          { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
-        else if (nextBlock)
-          { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
+        // const nextBlock = animBlocks[i + 1];
+        // if (nextBlock && nextBlock.activeFinishTime < currAnimBlock.activeFinishTime)
+        //   { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
+        // else if (nextBlock)
+        //   { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
           
         parallelBlocks.push(currAnimBlock.stepForward());
       }
       else {
-        // this.groupings.push(parallelBlocks);
         await Promise.all(parallelBlocks);
         parallelBlocks = [currAnimBlock.stepForward()];
       }
@@ -95,7 +110,6 @@ export class AnimSequence {
       //   { currAnimBlock.stepForward(); }
     }
 
-    // this.groupings.push(parallelBlocks);
     await Promise.all(parallelBlocks);
 
     return this.options.continueNext;
@@ -126,32 +140,93 @@ export class AnimSequence {
 
     await Promise.all(parallelBlocks);
 
+
+
+    // const groupings = this.animBlockGroupings_finishOrder;
+    // const numGroupings = groupings.length;
+    // for (let i = numGroupings - 1; i >= 0; --i) {
+    //   const currGrouping = groupings[i];
+    //   const currGroupingLength = currGrouping.length;
+    //   for (let j = currGroupingLength - 1; j >= 0; --j) {
+    //     const currAnimBlock = currGrouping[j];
+    //     const prevAnimBlock = currGrouping[j - 1];
+    //     const nextAnimBlock = currGrouping[j + 1];
+
+    //     if (nextAnimBlock) {
+    //       const trueFinishTime = currAnimBlock.activeFinishTime + currAnimBlock.endDelay;
+    //       const otherTrueStartTime = nextAnimBlock.activeStartTime - nextAnimBlock.delay;
+    //       if (trueFinishTime > otherTrueStartTime) {
+    //         const otherTrueFinishTime = nextAnimBlock.activeFinishTime + nextAnimBlock.endDelay;
+    //         await nextAnimBlock.animation.awaitTime(otherTrueFinishTime - trueFinishTime);
+    //       }
+    //       else {
+    //         await nextAnimBlock.animation.forwardFinishes.endDelayPeriod;
+    //       }
+    //     }
+    //   }
+    // }
+
     return this.options.continuePrev;
   }
 
   // TODO: Complete this method
   commit(): void {
+    const activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => {
+      const a = blockA.activeFinishTime;
+      const b = blockB.activeFinishTime;
+      if (a < b) { return -1; }
+      if (b < a) { return 1; }
+      return 0;
+    };
+
+    const endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => {
+      const a = blockA.activeFinishTime + blockA.endDelay;
+      const b = blockB.activeFinishTime + blockB.endDelay;
+      if (a < b) { return -1; }
+      if (b < a) { return 1; }
+      return 0;
+    };
+
     let maxFinishTime = 0;
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
+    this.animBlockGroupings_activeFinishOrder = [];
+    this.animBlockGroupings_endDelayFinishOrder = [];
+    let currActiveGrouping: AnimBlock[] = [];
+    let currEndDelayGrouping: AnimBlock[] = [];
 
     for (let i = 0; i < numBlocks; ++i) {
       const startsWithPrev = !animBlocks[i-1]?.blocksNext;
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
-      const currStartTime = startsWithPrev ? prevBlock?.activeStartTime ?? 0 : maxFinishTime;
+      let currStartTime: number;
+      if (startsWithPrev || i === 0) {
+        currActiveGrouping.push(currAnimBlock);
+        currEndDelayGrouping.push(currAnimBlock);
+
+        currStartTime = prevBlock?.activeStartTime ?? 0;
+      }
+      else {
+        currActiveGrouping.sort(activeFinishComparator);
+        currEndDelayGrouping.sort(endDelayFinishComparator);
+        this.animBlockGroupings_activeFinishOrder.push(currActiveGrouping);
+        this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
+        currActiveGrouping = [currAnimBlock];
+        currEndDelayGrouping = [currAnimBlock];
+
+        currStartTime = maxFinishTime;
+      }
 
       currAnimBlock.activeStartTime = currStartTime + currAnimBlock.delay;
       currAnimBlock.activeFinishTime = currAnimBlock.activeStartTime + +currAnimBlock.duration;
 
       maxFinishTime = Math.max(currAnimBlock.activeFinishTime + currAnimBlock.endDelay, maxFinishTime);
-
-      // const comparator = function(funcA: Function, funcB: Function): -1 | 1 {
-      //   return funcA.time <= funcB.time ? -1 : 1;
-      // };
-
-      // this.funcs.sort(comparator);
     }
+
+    currActiveGrouping.sort(activeFinishComparator);
+    currEndDelayGrouping.sort(endDelayFinishComparator);
+    this.animBlockGroupings_activeFinishOrder.push(currActiveGrouping);
+    this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
   }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping

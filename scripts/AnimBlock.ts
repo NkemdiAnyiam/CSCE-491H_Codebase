@@ -51,6 +51,7 @@ type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 type AwaitedTime = [
   endDelay: number,
   resolvers: ((value: void | PromiseLike<void>) => void)[],
+  awaiteds: Promise<any>[],
   // true when awaiting delay/endDelay periods but the awaited delay/endDelay duration is 0
   skipPlay?: boolean,
   message?: string,
@@ -106,9 +107,9 @@ export class AnimTimelineAnimation extends Animation {
 
     const { delay, duration, endDelay } = (super.effect as KeyframeEffect).getTiming();
     this.awaitedTimes = [
-      [ -(duration as number), [this.resolve_delayPeriod], (delay as number) === 0, 'Finished delay period ' + delay, ],
-      [ 0, [this.resolve_activePeriod], false, 'Finished active period ' + duration ],
-      [ endDelay as number, [this.resolve_endDelayPeriod], (endDelay as number) === 0, 'Finished endDelay period' ],
+      [ -(duration as number), [() => this.onDelayFinish(), this.resolve_delayPeriod], [], (delay as number) === 0, 'Finished delay period ' + delay, ],
+      [ 0, [() => this.onActiveFinish(), this.resolve_activePeriod], [], false, 'Finished active period ' + duration ],
+      [ endDelay as number, [() => this.onEndDelayFinish(), this.resolve_endDelayPeriod], [], (endDelay as number) === 0, 'Finished endDelay period' ],
     ];
   }
   
@@ -134,7 +135,7 @@ export class AnimTimelineAnimation extends Animation {
 
     // use length directly because entries could be added after loops is already entered
     for (let i = 0; i < awaitedTimes.length; ++i) {
-      const [ endDelay, resolvers, bypassPlay, message ] = awaitedTimes[i];
+      const [ endDelay, resolvers, awaiteds, bypassPlay, message ] = awaitedTimes[i];
 
       if (!bypassPlay) {
         // set animation to stop at a certain time using endDelay
@@ -143,12 +144,13 @@ export class AnimTimelineAnimation extends Animation {
         await super.finished;
       }
       else {
-        // this allows outside operations like awaitTime() to push more resolvers to the queue...
+        // this allows outside operations like blockUntil() to push more resolvers to the queue...
         // before the next loop iteration
         await Promise.resolve();
       }
 
       // fulfill all promises that depended on the above time
+      if (awaiteds.length > 0) { await Promise.all(awaiteds); }
       for (const resolver of resolvers) { resolver(); }
       // if (message) { console.log(message); }
     }
@@ -167,11 +169,15 @@ export class AnimTimelineAnimation extends Animation {
     }
   }
 
-  awaitTime(localTime: number): Promise<void> {
+  onDelayFinish: Function = () => {};
+  onActiveFinish: Function = () => {};
+  onEndDelayFinish: Function = () => {};
+
+  blockUntil(localTime: number): Promise<void> {
     // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
     // past localTime. In such cases, the returned promise should be immediately resolved
     const { duration, delay } = super.effect!.getTiming();
-    if (localTime < 0) { throw new Error(`Invalid awaitTime() value ${localTime}; value must be >= 0`); }
+    if (localTime < 0) { throw new Error(`Invalid blockUntil() value ${localTime}; value must be >= 0`); }
     // to await animation reaching currentTime in its running, we must use...
     // the equivalent endDelay, which is localTime - (duration + delay)
     const endDelay = localTime - ((duration as number) + (delay as number));
@@ -181,7 +187,7 @@ export class AnimTimelineAnimation extends Animation {
       for (let i = 0; i < awaitedTimes.length; ++i) {
         const currAwaitedTime = awaitedTimes[i];
         if (endDelay < currAwaitedTime[0]) {
-          awaitedTimes.splice(i, 0, [endDelay, [resolve]]);
+          awaitedTimes.splice(i, 0, [endDelay, [resolve], []]);
           break;
         }
         else if (endDelay === currAwaitedTime[0]) { 
@@ -190,6 +196,31 @@ export class AnimTimelineAnimation extends Animation {
         }
       }
     });
+  }
+
+  awaitActiveForefinisher(...promises: Promise<any>[]): void {
+    // TODO: may need to check if the animation is in the 'finished' state
+    const awaitedTimes = this.awaitedTimes;
+    for (let i = 0; i < awaitedTimes.length; ++i) {
+      const currAwaitedTime = awaitedTimes[i];
+      if (currAwaitedTime[0] === 0) { 
+        currAwaitedTime[2].push(...promises);
+        break;
+      }
+    }
+  }
+
+  awaitEndDelayForefinisher(...promises: Promise<any>[]): void {
+    // TODO: may need to check if the animation is in the 'finished' state
+    const { endDelay } = super.effect!.getTiming();
+    const awaitedTimes = this.awaitedTimes;
+    for (let i = 0; i < awaitedTimes.length; ++i) {
+      const currAwaitedTime = awaitedTimes[i];
+      if (currAwaitedTime[0] === endDelay) {
+        currAwaitedTime[2].push(...promises);
+        break;
+      }
+    }
   }
   
   setForwardFrames(frames: Keyframe[]): void {
@@ -241,8 +272,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   activeStartTime: number = NaN;
   activeFinishTime: number = NaN;
-
-  adjecentForefinishers: Promise<void>[] = [];
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
@@ -316,14 +345,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return this.animate('backward');
   }
 
-  // finish = {
-  //   const func = () => {
-  //     this.animation.finish()
-  //   };
-  //   func.time = 
-  //   return func;
-  // }
-
   // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
   protected _onFinishForward(): void {};
@@ -338,70 +359,76 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     skipping ? animation.finish() : animation.play();
     
-    switch(direction) {
-      case 'forward':
-        await animation.forwardFinishes.delayPeriod;
-        // await animation.finished_delayPeriod;
-
-        this.domElem.classList.add(...this.config.classesToAddOnStart);
-        this.domElem.classList.remove(...this.config.classesToRemoveOnStart);
-        this._onStartForward();
-
-        // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
-        // can function properly.
-        if (!this.config.pregeneratesKeyframes) {
-          // TODO: Handle case where only one keyframe is provided
-          let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
-          this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
-        }
-
-        break;
-
-      case 'backward':
-        this._onStartBackward();
-        this.domElem.classList.add(...this.config.classesToRemoveOnFinish);
-        this.domElem.classList.remove(...this.config.classesToAddOnFinish);
-        break;
-
-      default:
-        throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
-    }
+    animation.onDelayFinish = () => {
+      switch(direction) {
+        case 'forward':
+          this.domElem.classList.add(...this.config.classesToAddOnStart);
+          this.domElem.classList.remove(...this.config.classesToRemoveOnStart);
+          this._onStartForward();
+  
+          // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
+          // can function properly.
+          if (!this.config.pregeneratesKeyframes) {
+            // TODO: Handle case where only one keyframe is provided
+            let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+            this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+          }
+  
+          break;
+  
+        case 'backward':
+          this._onStartBackward();
+          this.domElem.classList.add(...this.config.classesToRemoveOnFinish);
+          this.domElem.classList.remove(...this.config.classesToAddOnFinish);
+          break;
+  
+        default:
+          throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
+      }
+    };
     
     // // if in skip mode, finish the animation instantly. Otherwise, play through it normally
     // this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
 
-    if (this.adjecentForefinishers.length > 0) { await Promise.all(this.adjecentForefinishers); }
-    await animation.forwardFinishes.activePeriod;
-    this.adjecentForefinishers = [];
-    // CHANGE NOTE: Move hidden class stuff here
-    // TODO: Account for case where parent is hidden
-    if (this.config.commitsStyles) {
-      try {
-        animation.commitStyles(); // actually applies the styles to the element
+    animation.onActiveFinish = () => {
+      // console.log('A', this.domElem);
+      // CHANGE NOTE: Move hidden class stuff here
+      // TODO: Account for case where parent is hidden
+      if (this.config.commitsStyles) {
+        try {
+          animation.commitStyles(); // actually applies the styles to the element
+        }
+        catch (err) {
+          console.warn(err); // TODO: Make more specific
+          this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
+          animation.commitStyles();
+          this.domElem.classList.remove('wbfk-override-hidden');
+        }
       }
-      catch (err) {
-        console.warn(err); // TODO: Make more specific
-        this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
-        animation.commitStyles();
-        this.domElem.classList.remove('wbfk-override-hidden');
+      
+      switch(direction) {
+        case 'forward':
+          this.domElem.classList.add(...this.config.classesToAddOnFinish);
+          this.domElem.classList.remove(...this.config.classesToRemoveOnFinish);
+          this._onFinishForward();
+          break;
+        case 'backward':
+          this._onFinishBackward();
+          this.domElem.classList.add(...this.config.classesToRemoveOnStart);
+          this.domElem.classList.remove(...this.config.classesToAddOnStart);
+          break;
       }
-    }
+    };
+
+    let resolver: (value: void | PromiseLike<void>) => void = () => {};
     
-    switch(direction) {
-      case 'forward':
-        this.domElem.classList.add(...this.config.classesToAddOnFinish);
-        this.domElem.classList.remove(...this.config.classesToRemoveOnFinish);
-        this._onFinishForward();
-        break;
-      case 'backward':
-        this._onFinishBackward();
-        this.domElem.classList.add(...this.config.classesToRemoveOnStart);
-        this.domElem.classList.remove(...this.config.classesToAddOnStart);
-        break;
-    }
-    
-    await animation.forwardFinishes.endDelayPeriod;
-    animation.cancel();
+    animation.onEndDelayFinish = () => {
+      // console.log('E', this.domElem);
+      animation.cancel();
+      resolver();
+    };
+
+    return new Promise<void>(resolve => resolver = resolve);
   }
 
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
