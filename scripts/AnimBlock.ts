@@ -325,7 +325,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       new KeyframeEffect(
         this.domElem,
         backwardFrames ?? [...forwardFrames],
-        {...keyframeOptions, direction: backwardFrames ? 'normal' : 'reverse'},
+        {
+          ...keyframeOptions,
+          direction: backwardFrames ? 'normal' : 'reverse',
+          delay: keyframeOptions.endDelay,
+          endDelay: keyframeOptions.delay,
+        },
       )
     );
 
