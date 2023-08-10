@@ -261,7 +261,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   static id: number = 0;
 
   parentSequence?: AnimSequence; // TODO: replace with own dynamic list of running animations
-  parentTimeline?: any; // TODO: specify annotation
+  parentTimeline?: AnimTimeline;
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
@@ -363,6 +363,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     skipping ? animation.finish() : animation.play();
+    this.parentTimeline?.currentAnimations.set(this.id, this.animation);
     
     animation.onDelayFinish = () => {
       switch(direction) {
@@ -430,6 +431,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.onEndDelayFinish = () => {
       // console.log('E', this.domElem);
       animation.cancel();
+      this.parentTimeline?.currentAnimations.delete(this.id);
       resolver();
     };
 

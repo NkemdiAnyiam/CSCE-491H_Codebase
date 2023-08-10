@@ -19,6 +19,7 @@ export class AnimTimeline {
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
   options: AnimTimelineOptions;
+  currentAnimations: Map<number, AnimTimelineAnimation> = new Map();
 
   get numSequences() { return this.animSequences.length; }
 
@@ -169,12 +170,8 @@ export class AnimTimeline {
 
   // get all currently running animations that belong to this timeline and perform operation() with them
   doForCurrentAnimations(operation: (animation: Animation) => void): void {
-    // get all currently running animations
-    const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
-    const numAnimations = allAnimations.length;
-    // an animation "belongs" to this timeline if its timeline id matches
-    for (let i = 0; i < numAnimations; ++i) {
-      if (allAnimations[i].timelineID === this.id) { operation(allAnimations[i]); }
+    for (const animation of this.currentAnimations.values()) {
+      operation(animation);
     }
   }
 }
