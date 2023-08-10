@@ -41,10 +41,12 @@ const toggleSequence = new AnimSequence([
 function swapForm(e) {
   const toggleButton = e.target;
   disableButton(toggleButton); // disable currently pressed button
+  // disable both forms for the transition
+  disableForm_MI();
+  disableForm_TA();
 
   // switch from multi-input form to textarea form
   if (toggleButton === toggleFormButton_toTA) {
-    disableForm_MI(); // disable multi-input form
     toggleSequence.play().then(() => { // play animation to swap forms
       enableForm_TA(); // enable textarea form
       enableButton(toggleFormButton_toMI); // enable button to switch back to multi-input form
@@ -52,7 +54,6 @@ function swapForm(e) {
   }
   // switch from textarea form to multi-input form
   if (toggleButton === toggleFormButton_toMI) {
-    disableForm_TA();
     toggleSequence.rewind().then(() => {
       enableForm_MI();
       enableButton(toggleFormButton_toTA);
