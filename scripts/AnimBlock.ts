@@ -293,6 +293,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
     const config = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
+    config.duration = Math.max(config.duration as number, 0.01);
     this.config = config;
 
     // TODO: Handle case where only one keyframe is provided
