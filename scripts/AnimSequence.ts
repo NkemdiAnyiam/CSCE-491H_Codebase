@@ -21,6 +21,8 @@ export class AnimSequence {
 
   private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
+  private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
+  private animBlock_forwardGroupings: AnimBlock[][] = [[]];
 
   constructor(animBlocks: AnimBlock[] | null = null, options: Partial<AnimSequenceOptions> = {}) {
     this.id = AnimSequence.id++;
@@ -64,135 +66,144 @@ export class AnimSequence {
   async play(): Promise<boolean> {
     this.commit();
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
-    const endDelayGroupings = this.animBlockGroupings_endDelayFinishOrder;
-    const totalLength = activeGroupings.length;
+    const numGroupings = activeGroupings.length;
 
-    for (let i = 0; i < totalLength; ++i) {
+    for (let i = 0; i < numGroupings; ++i) {
       const activeGrouping = activeGroupings[i];
-      const endDelayGrouping = endDelayGroupings[i];
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.awaitActiveForefinisher(activeGrouping[j-1].animation.forwardFinishes.activePeriod);
-        endDelayGrouping[j].animation.awaitEndDelayForefinisher(endDelayGrouping[j-1].animation.forwardFinishes.endDelayPeriod);
+        activeGrouping[j].animation.awaitActiveForefinisher('forward', activeGrouping[j-1].animation.forwardFinishes.activePhase);
       }
     }
 
-    const animBlocks = this.animBlocks;
-    const numBlocks = animBlocks.length;
-    let parallelBlocks: Promise<void>[] = [];
-    for (let i = 0; i < numBlocks; ++i) {
-      const currAnimBlock = animBlocks[i];
-      const prevAnimBlock = animBlocks[i - 1];
-      if (i === 0 || prevAnimBlock?.blocksNext === false) {
-        if (prevAnimBlock) {
-          await prevAnimBlock.animation.forwardFinishes.delayPeriod;
-        }
+    // const animBlocks = this.animBlocks;
+    // const numBlocks = animBlocks.length;
+    // let parallelBlocks: Promise<void>[] = [];
+    // for (let i = 0; i < numBlocks; ++i) {
+    //   const currAnimBlock = animBlocks[i];
+    //   const prevAnimBlock = animBlocks[i - 1];
+    //   if (i === 0 || prevAnimBlock?.blocksNext === false) {
+    //     if (prevAnimBlock) {
+    //       await prevAnimBlock.animation.forwardFinishes.delayPeriod;
+    //     }
         
-        // const nextBlock = animBlocks[i + 1];
-        // if (nextBlock && nextBlock.activeFinishTime < currAnimBlock.activeFinishTime)
-        //   { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
-        // else if (nextBlock)
-        //   { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
+    //     // const nextBlock = animBlocks[i + 1];
+    //     // if (nextBlock && nextBlock.activeFinishTime < currAnimBlock.activeFinishTime)
+    //     //   { currAnimBlock.adjecentForefinishers.push(nextBlock.animation.forwardFinishes.activePeriod); }
+    //     // else if (nextBlock)
+    //     //   { nextBlock.adjecentForefinishers.push(currAnimBlock.animation.forwardFinishes.activePeriod); }
           
+    //     parallelBlocks.push(currAnimBlock.stepForward());
+    //   }
+    //   else {
+    //     await Promise.all(parallelBlocks);
+    //     parallelBlocks = [currAnimBlock.stepForward()];
+    //   }
+
+
+    //   // // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
+    //   // if (i === numBlocks - 1 || currAnimBlock.getBlocksNext())
+    //   //   { await currAnimBlock.stepForward(); }
+    //   // else
+    //   //   { currAnimBlock.stepForward(); }
+    // }
+
+    let parallelBlocks: Promise<void>[] = [];
+    for (let i = 0; i < this.animBlock_forwardGroupings.length; ++i) {
+      const grouping = this.animBlock_forwardGroupings[i];
+      parallelBlocks = [];
+      parallelBlocks.push(grouping[0].stepForward());
+      for (let j = 1; j < grouping.length; ++j) {
+        await grouping[j-1].animation.forwardFinishes.delayPhase;
+        const currAnimBlock = grouping[j];
         parallelBlocks.push(currAnimBlock.stepForward());
       }
-      else {
-        await Promise.all(parallelBlocks);
-        parallelBlocks = [currAnimBlock.stepForward()];
-      }
-
-
-      // // if the current animBlock blocks the next animBlock, we need to await the completion (this is intuitive)
-      // if (i === numBlocks - 1 || currAnimBlock.getBlocksNext())
-      //   { await currAnimBlock.stepForward(); }
-      // else
-      //   { currAnimBlock.stepForward(); }
+      await Promise.all(parallelBlocks);
     }
-
-    await Promise.all(parallelBlocks);
 
     return this.options.continueNext;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
   async rewind(): Promise<boolean> {
-    const animBlocks = this.animBlocks;
-    const numBlocks = animBlocks.length;
-    let parallelBlocks: Promise<void>[] = [];
-    for (let i = numBlocks - 1; i >= 0; --i) {
-      const currAnimBlock = animBlocks[i];
-      const nextAnimBlock = animBlocks[i + 1];
-      if (i === numBlocks - 1 || nextAnimBlock?.blocksPrev === false) {
-        parallelBlocks.push(currAnimBlock.stepBackward());
-      }
-      else {
-        await Promise.all(parallelBlocks);
-        parallelBlocks = [currAnimBlock.stepBackward()];
-      }
+    const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
+    const numGroupings = activeGroupings.length;
 
+    for (let i = 0; i < numGroupings; ++i) {
+      const activeGrouping = activeGroupings[i];
+      const groupingLength = activeGrouping.length;
 
-      // if (i === 0 || currAnimBlock.getBlocksPrev())
-      //   { await currAnimBlock.stepBackward(); }
-      // else
-      //   { currAnimBlock.stepBackward(); }
+      for (let j = 1; j < groupingLength; ++j) {
+          activeGrouping[j].animation.awaitActiveForefinisher('backward', activeGrouping[j-1].animation.backwardFinishes.activePhase);
+      }
     }
 
-    await Promise.all(parallelBlocks);
-
-
-
-    // const groupings = this.animBlockGroupings_finishOrder;
-    // const numGroupings = groupings.length;
-    // for (let i = numGroupings - 1; i >= 0; --i) {
-    //   const currGrouping = groupings[i];
-    //   const currGroupingLength = currGrouping.length;
-    //   for (let j = currGroupingLength - 1; j >= 0; --j) {
-    //     const currAnimBlock = currGrouping[j];
-    //     const prevAnimBlock = currGrouping[j - 1];
-    //     const nextAnimBlock = currGrouping[j + 1];
-
-    //     if (nextAnimBlock) {
-    //       const trueFinishTime = currAnimBlock.activeFinishTime + currAnimBlock.endDelay;
-    //       const otherTrueStartTime = nextAnimBlock.activeStartTime - nextAnimBlock.delay;
-    //       if (trueFinishTime > otherTrueStartTime) {
-    //         const otherTrueFinishTime = nextAnimBlock.activeFinishTime + nextAnimBlock.endDelay;
-    //         await nextAnimBlock.animation.awaitTime(otherTrueFinishTime - trueFinishTime);
-    //       }
-    //       else {
-    //         await nextAnimBlock.animation.forwardFinishes.endDelayPeriod;
-    //       }
-    //     }
+    // const animBlocks = this.animBlocks;
+    // const numBlocks = animBlocks.length;
+    // let parallelBlocks: Promise<void>[] = [];
+    // for (let i = numBlocks - 1; i >= 0; --i) {
+    //   const currAnimBlock = animBlocks[i];
+    //   const nextAnimBlock = animBlocks[i + 1];
+    //   if (i === numBlocks - 1 || nextAnimBlock?.blocksPrev === false) {
+    //     parallelBlocks.push(currAnimBlock.stepBackward());
     //   }
+    //   else {
+    //     await Promise.all(parallelBlocks);
+    //     parallelBlocks = [currAnimBlock.stepBackward()];
+    //   }
+
+
+    //   // if (i === 0 || currAnimBlock.getBlocksPrev())
+    //   //   { await currAnimBlock.stepBackward(); }
+    //   // else
+    //   //   { currAnimBlock.stepBackward(); }
     // }
+
+    // await Promise.all(parallelBlocks);
+
+    
+    let parallelBlocks: Promise<void>[] = [];
+    const groupings = this.animBlockGroupings_endDelayFinishOrder;
+    const groupingsLength = groupings.length;
+    for (let i = groupingsLength - 1; i >= 0; --i) {
+      const grouping = groupings[i];
+      const groupingLength = grouping.length;
+      parallelBlocks = [];
+      parallelBlocks.push(grouping[groupingLength - 1].stepBackward());
+      for (let j = groupingLength - 2; j >= 0; --j) {
+        const currAnimBlock = grouping[j];
+        const nextAnimBlock = grouping[j + 1];
+        if (currAnimBlock.fullFinishTime > nextAnimBlock.fullStartTime) {
+          await nextAnimBlock.animation.blockUntil('backward', nextAnimBlock.fullFinishTime - currAnimBlock.fullFinishTime);
+        }
+        else {
+          await nextAnimBlock.animation.backwardFinishes.endDelayPhase;
+        }
+
+        parallelBlocks.push(currAnimBlock.stepBackward());
+      }
+      await Promise.all(parallelBlocks);
+    }
 
     return this.options.continuePrev;
   }
 
   // TODO: Complete this method
   commit(): void {
-    const activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => {
-      const a = blockA.activeFinishTime;
-      const b = blockB.activeFinishTime;
-      if (a < b) { return -1; }
-      if (b < a) { return 1; }
-      return 0;
-    };
-
-    const endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => {
-      const a = blockA.activeFinishTime + blockA.endDelay;
-      const b = blockB.activeFinishTime + blockB.endDelay;
-      if (a < b) { return -1; }
-      if (b < a) { return 1; }
-      return 0;
-    };
+    const activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
+    const activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
+    const endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime
 
     let maxFinishTime = 0;
     const animBlocks = this.animBlocks;
     const numBlocks = animBlocks.length;
+    this.animBlock_forwardGroupings = [[]];
+    this.animBlockGroupings_backwardActiveFinishOrder = [];
     this.animBlockGroupings_activeFinishOrder = [];
     this.animBlockGroupings_endDelayFinishOrder = [];
-    let currActiveGrouping: AnimBlock[] = [];
+    let currActiveBackwardFinishGrouping: AnimBlock[] = [];
+    let currActiveFinishGrouping: AnimBlock[] = [];
     let currEndDelayGrouping: AnimBlock[] = [];
 
     for (let i = 0; i < numBlocks; ++i) {
@@ -200,32 +211,43 @@ export class AnimSequence {
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
       let currStartTime: number;
+
       if (startsWithPrev || i === 0) {
-        currActiveGrouping.push(currAnimBlock);
+        // currActiveBackwardFinishGrouping.push(currAnimBlock);
+        currActiveFinishGrouping.push(currAnimBlock);
         currEndDelayGrouping.push(currAnimBlock);
 
         currStartTime = prevBlock?.activeStartTime ?? 0;
       }
       else {
-        currActiveGrouping.sort(activeFinishComparator);
+        this.animBlock_forwardGroupings.push([]);
+        currActiveFinishGrouping.sort(activeFinishComparator);
         currEndDelayGrouping.sort(endDelayFinishComparator);
-        this.animBlockGroupings_activeFinishOrder.push(currActiveGrouping);
+        currActiveBackwardFinishGrouping = [...currEndDelayGrouping].reverse();
+        currActiveBackwardFinishGrouping.sort(activeBackwardFinishComparator);
+        this.animBlockGroupings_backwardActiveFinishOrder.push(currActiveBackwardFinishGrouping);
+        this.animBlockGroupings_activeFinishOrder.push(currActiveFinishGrouping);
         this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
-        currActiveGrouping = [currAnimBlock];
+        currActiveBackwardFinishGrouping = [currAnimBlock];
+        currActiveFinishGrouping = [currAnimBlock];
         currEndDelayGrouping = [currAnimBlock];
 
         currStartTime = maxFinishTime;
       }
 
-      currAnimBlock.activeStartTime = currStartTime + currAnimBlock.delay;
-      currAnimBlock.activeFinishTime = currAnimBlock.activeStartTime + +currAnimBlock.duration;
+      this.animBlock_forwardGroupings[this.animBlock_forwardGroupings.length - 1].push(currAnimBlock);
 
-      maxFinishTime = Math.max(currAnimBlock.activeFinishTime + currAnimBlock.endDelay, maxFinishTime);
+      currAnimBlock.fullStartTime = currStartTime;
+
+      maxFinishTime = Math.max(currAnimBlock.fullFinishTime, maxFinishTime);
     }
 
-    currActiveGrouping.sort(activeFinishComparator);
+    currActiveFinishGrouping.sort(activeFinishComparator);
     currEndDelayGrouping.sort(endDelayFinishComparator);
-    this.animBlockGroupings_activeFinishOrder.push(currActiveGrouping);
+    currActiveBackwardFinishGrouping = [...currEndDelayGrouping].reverse();
+    currActiveBackwardFinishGrouping.sort(activeBackwardFinishComparator);
+    this.animBlockGroupings_backwardActiveFinishOrder.push(currActiveBackwardFinishGrouping);
+    this.animBlockGroupings_activeFinishOrder.push(currActiveFinishGrouping);
     this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
   }
 

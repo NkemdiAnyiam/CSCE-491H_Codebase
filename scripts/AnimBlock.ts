@@ -1,4 +1,5 @@
 import { AnimSequence } from "./AnimSequence.js";
+import { AnimTimeline } from "./AnimTimeline.js";
 import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
@@ -58,29 +59,30 @@ type AwaitedTime = [
 ];
 
 type FinishPromises = {
-  delayPeriod: Promise<void>;
-  activePeriod: Promise<void>;
-  endDelayPeriod: Promise<void>;
+  delayPhase: Promise<void>;
+  activePhase: Promise<void>;
+  endDelayPhase: Promise<void>;
 }
 
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
   direction: 'forward' | 'backward' = 'forward';
-  private isFirstTime = true;
   private inProgress = false;
   // holds list of stopping points and resolvers to control segmentation of animation...
   // to help with Promises-based sequencing
-  private awaitedTimes: AwaitedTime[] = [];
-  private resolve_delayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveDelayPeriod() was called before assigning resolve'); };
-  private resolve_activePeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveActivePeriod() was called before assigning resolve'); };
-  private resolve_endDelayPeriod: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveEndDelayPeriod() was called before assigning resolve'); };
+  private awaitedForwardTimes: AwaitedTime[] = [];
+  private awaitedBackwardTimes: AwaitedTime[] = [];
+  private resolveForward_delayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_delayPhase() was called before assigning resolve'); };
+  private resolveForward_activePhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_activePhase() was called before assigning resolve'); };
+  private resolveForward_endDelayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_endDelayPhase() was called before assigning resolve'); };
   // TODO: Prevent outside modifications
-  forwardFinishes: FinishPromises = {
-    delayPeriod: new Promise<void>(resolve => {this.resolve_delayPeriod = resolve}),
-    activePeriod: new Promise<void>(resolve => {this.resolve_activePeriod = resolve}),
-    endDelayPeriod: new Promise<void>(resolve => {this.resolve_endDelayPeriod = resolve}),
-  };
+  forwardFinishes: FinishPromises = {} as FinishPromises;
+  private resolveBackward_delayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_delayPhase() was called before assigning resolve'); };
+  private resolveBackward_activePhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_activePhase() was called before assigning resolve'); };
+  private resolveBackward_endDelayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_endDelayPhase() was called before assigning resolve'); };
+  backwardFinishes: FinishPromises = {} as FinishPromises;
+  phaseIsFinishable = false;
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
@@ -95,28 +97,59 @@ export class AnimTimelineAnimation extends Animation {
     if (this.forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
     
     super.effect = forwardEffect;
-    this.resetPromises();
+    this.resetPromises('both');
   }
 
-  private resetPromises(): void {
-    this.forwardFinishes = {
-      delayPeriod: new Promise<void>(resolve => {this.resolve_delayPeriod = resolve}),
-      activePeriod: new Promise<void>(resolve => {this.resolve_activePeriod = resolve}),
-      endDelayPeriod: new Promise<void>(resolve => {this.resolve_endDelayPeriod = resolve}),
+  private resetPromises(direction: 'forward' | 'backward' | 'both'): void {
+    const resetForwardPromises = () => {
+      this.forwardFinishes = {
+        delayPhase: new Promise<void>(resolve => {this.resolveForward_delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {this.resolveForward_activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {this.resolveForward_endDelayPhase = resolve}),
+      };
+
+      const { delay, duration, endDelay } = this.forwardEffect.getTiming();
+      this.awaitedForwardTimes = [
+        [ -(duration as number), [() => this.onDelayFinish(), this.resolveForward_delayPhase], [], (delay as number) === 0, 'Finished delay period F ' + delay, ],
+        [ 0, [() => this.onActiveFinish(), this.resolveForward_activePhase], [], false, 'Finished active period F ' + duration ],
+        [ endDelay as number, [() => this.onEndDelayFinish(), this.resolveForward_endDelayPhase], [], (endDelay as number) === 0, 'Finished endDelay period F' ],
+      ];
     };
 
-    const { delay, duration, endDelay } = (super.effect as KeyframeEffect).getTiming();
-    this.awaitedTimes = [
-      [ -(duration as number), [() => this.onDelayFinish(), this.resolve_delayPeriod], [], (delay as number) === 0, 'Finished delay period ' + delay, ],
-      [ 0, [() => this.onActiveFinish(), this.resolve_activePeriod], [], false, 'Finished active period ' + duration ],
-      [ endDelay as number, [() => this.onEndDelayFinish(), this.resolve_endDelayPeriod], [], (endDelay as number) === 0, 'Finished endDelay period' ],
-    ];
+    const resetBackwardPromises = () => {
+      this.backwardFinishes = {
+        delayPhase: new Promise<void>(resolve => {this.resolveBackward_delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {this.resolveBackward_activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {this.resolveBackward_endDelayPhase = resolve}),
+      };
+  
+      const { delay, duration, endDelay } = this.backwardEffect.getTiming();
+      this.awaitedBackwardTimes = [
+        [ -(duration as number), [() => this.onDelayFinish(), this.resolveBackward_delayPhase], [], (delay as number) === 0, 'Finished delay period B ' + delay, ],
+        [ 0, [() => this.onActiveFinish(), this.resolveBackward_activePhase], [], false, 'Finished active period B ' + duration ],
+        [ endDelay as number, [() => this.onEndDelayFinish(), this.resolveBackward_endDelayPhase], [], (endDelay as number) === 0, 'Finished endDelay period B' ],
+      ];
+    };
+
+    switch(direction) {
+      case "forward":
+        resetForwardPromises();
+        break;
+      case "backward":
+        resetBackwardPromises();
+        break;
+      case "both":
+        resetForwardPromises();
+        resetBackwardPromises();
+        break;
+      default: throw new Error(`Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
+    }
   }
   
   // TODO: May have to await loading keyframes if not pregenerated
   async play(): Promise<void> {
     // if animation is already in progress and is just paused, resume the animation directly
-    if (super.playState === 'paused') { 
+    if (super.playState === 'paused') {
       super.play();
       return;
     }
@@ -124,36 +157,70 @@ export class AnimTimelineAnimation extends Animation {
     // if play() is called while already playing, return
     if (this.inProgress) { return; }
     this.inProgress = true;
-
-    // if this is the first time, then all 'finished'-like promises should be valid to wait for...
-    // because the promises should only be reset if the animation leaves the final ultimated finished state
-    if (!this.isFirstTime) { this.resetPromises(); }
-    else { this.isFirstTime = false; }
-
+    
     const effect = super.effect!;
-    const awaitedTimes = this.awaitedTimes;
 
-    // use length directly because entries could be added after loops is already entered
-    for (let i = 0; i < awaitedTimes.length; ++i) {
-      const [ endDelay, resolvers, awaiteds, bypassPlay, message ] = awaitedTimes[i];
+    switch(this.direction) {
+      case "forward":
+        this.resetPromises('backward');
+        const awaitedForwardTimes = this.awaitedForwardTimes;
 
-      if (!bypassPlay) {
-        // set animation to stop at a certain time using endDelay
-        effect.updateTiming({ endDelay });
         super.play();
-        await super.finished;
-      }
-      else {
-        // this allows outside operations like blockUntil() to push more resolvers to the queue...
-        // before the next loop iteration
         await Promise.resolve();
-      }
+        // use length directly because entries could be added after loop is already entered
+        // TODO: May need to find a less breakable solution than the length thing
+        for (let i = 0; i < awaitedForwardTimes.length; ++i) {
+          const [ endDelay, resolvers, awaiteds, bypassPlay, message ] = awaitedForwardTimes[i];
 
-      // fulfill all promises that depended on the above time
-      if (awaiteds.length > 0) { await Promise.all(awaiteds); }
-      for (const resolver of resolvers) { resolver(); }
-      // if (message) { console.log(message); }
+          if (!bypassPlay) {
+            this.phaseIsFinishable = true;
+            // set animation to stop at a certain time using endDelay
+            effect.updateTiming({ endDelay });
+            await super.finished;
+          }
+          else {
+            // this allows outside operations like blockUntil() to push more resolvers to the queue...
+            // before the next loop iteration
+            this.phaseIsFinishable = false;
+            await Promise.resolve();
+          }
+
+          // await any blockers for the completion of this phase
+          if (awaiteds.length > 0) { await Promise.all(awaiteds); }
+          // fulfill all promises that depend on the completion of this phase
+          for (const resolver of resolvers) { resolver(); }
+          // if (message) { console.log(message); }
+        }
+        break;
+
+      case "backward":
+        this.resetPromises('forward');
+        const awaitedBackwardTimes = this.awaitedBackwardTimes;
+        super.play();
+
+        await Promise.resolve();
+        for (let i = 0; i < awaitedBackwardTimes.length; ++i) {
+          const [ endDelay, resolvers, awaiteds, bypassPlay, message ] = awaitedBackwardTimes[i];
+
+          if (!bypassPlay) {
+            this.phaseIsFinishable = true;
+            effect.updateTiming({ endDelay });
+            await super.finished;
+          }
+          else {
+            this.phaseIsFinishable = false;
+            await Promise.resolve();
+          }
+
+          if (awaiteds.length > 0) { await Promise.all(awaiteds); }
+          for (const resolver of resolvers) { resolver(); }
+          // if (message) { console.log(message); }
+        }
+        break;
+
+      default: throw new Error(`Invalid direction '${this.direction}' encountered in play(). Must be either 'forward' or 'backward'`);
     }
+    
 
     this.inProgress = false;
   }
@@ -164,8 +231,13 @@ export class AnimTimelineAnimation extends Animation {
 
     // we must await super.finished each time because of segmentation
     while (this.inProgress) {
-      super.finish();
-      await super.finished;
+      if (this.phaseIsFinishable) {
+        super.finish();
+        await super.finished;
+      }
+      else {
+        await Promise.resolve();
+      }
     }
   }
 
@@ -173,7 +245,8 @@ export class AnimTimelineAnimation extends Animation {
   onActiveFinish: Function = () => {};
   onEndDelayFinish: Function = () => {};
 
-  blockUntil(localTime: number): Promise<void> {
+  blockUntil(direction: 'forward' | 'backward', localTime: number): Promise<void> {
+    // TODO: check for out-of-bounds times
     // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
     // past localTime. In such cases, the returned promise should be immediately resolved
     const { duration, delay } = super.effect!.getTiming();
@@ -183,8 +256,9 @@ export class AnimTimelineAnimation extends Animation {
     const endDelay = localTime - ((duration as number) + (delay as number));
 
     return new Promise(resolve => {
-      const awaitedTimes = this.awaitedTimes;
-      for (let i = 0; i < awaitedTimes.length; ++i) {
+      const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+      const awaitedTimesLength = awaitedTimes.length;
+      for (let i = 0; i < awaitedTimesLength; ++i) {
         const currAwaitedTime = awaitedTimes[i];
         if (endDelay < currAwaitedTime[0]) {
           awaitedTimes.splice(i, 0, [endDelay, [resolve], []]);
@@ -198,29 +272,24 @@ export class AnimTimelineAnimation extends Animation {
     });
   }
 
-  awaitActiveForefinisher(...promises: Promise<any>[]): void {
+  awaitActiveForefinisher(direction: 'forward' | 'backward', ...promises: Promise<any>[]): void {
     // TODO: may need to check if the animation is in the 'finished' state
-    const awaitedTimes = this.awaitedTimes;
-    for (let i = 0; i < awaitedTimes.length; ++i) {
+    const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+    const awaitedTimesLength = awaitedTimes.length;
+    for (let i = 1; i < awaitedTimesLength; ++i) {
       const currAwaitedTime = awaitedTimes[i];
-      if (currAwaitedTime[0] === 0) { 
+      if (currAwaitedTime[0] === 0.01) { 
         currAwaitedTime[2].push(...promises);
         break;
       }
     }
   }
 
-  awaitEndDelayForefinisher(...promises: Promise<any>[]): void {
+  awaitEndDelayForefinisher(direction: 'forward' | 'backward', ...promises: Promise<any>[]): void {
     // TODO: may need to check if the animation is in the 'finished' state
-    const { endDelay } = super.effect!.getTiming();
-    const awaitedTimes = this.awaitedTimes;
-    for (let i = 0; i < awaitedTimes.length; ++i) {
-      const currAwaitedTime = awaitedTimes[i];
-      if (currAwaitedTime[0] === endDelay) {
-        currAwaitedTime[2].push(...promises);
-        break;
-      }
-    }
+    const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+    const currAwaitedTime = awaitedTimes[awaitedTimes.length - 1];
+    currAwaitedTime[2].push(...promises);
   }
   
   setForwardFrames(frames: Keyframe[]): void {
@@ -270,8 +339,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
 
-  activeStartTime: number = NaN;
-  activeFinishTime: number = NaN;
+  fullStartTime = NaN;
+  get activeStartTime() { return this.fullStartTime + +this.config.delay; }
+  get activeFinishTime() { return this.activeStartTime + +this.config.duration; }
+  get fullFinishTime() { return this.activeFinishTime + +this.config.endDelay; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
