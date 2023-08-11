@@ -25,7 +25,7 @@ export class AnimSequence {
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
 
   get autoplaysNextSequence() { return this.config.autoplaysNextSequence; }
-  get autoplay() { return this.config.autoplays; }
+  get autoplays() { return this.config.autoplays; }
 
   constructor(config: Partial<AnimSequenceConfig & {animBlocks: AnimBlock[]}>  = {}) {
     this.id = AnimSequence.id++;

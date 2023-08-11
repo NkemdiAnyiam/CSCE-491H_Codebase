@@ -21,7 +21,9 @@ export class AnimTimeline {
   config: AnimTimelineConfig;
   currentAnimations: Map<number, AnimTimelineAnimation> = new Map();
 
-  get numSequences() { return this.animSequences.length; }
+  get numSequences(): number { return this.animSequences.length; }
+  private get nextSequence(): AnimSequence { return this.animSequences[this.nextSeqIndex]; }
+  private get prevSequence(): AnimSequence | undefined { return this.animSequences[this.nextSeqIndex - 1]; }
 
   constructor(config: Partial<AnimTimelineConfig & {animSequences: AnimSequence[]}> = {}) {
     this.id = AnimTimeline.id++;
@@ -97,13 +99,13 @@ export class AnimTimeline {
   stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
 
-    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.nextSequence.getDescription()}`); }
 
     return new Promise(resolve => {
-      this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
+      this.nextSequence.play() // wait for the current AnimSequence to finish all of its animations
       .then(() => {
         ++this.nextSeqIndex;
-        resolve(!this.atEnd() && (this.animSequences[this.nextSeqIndex].autoplay || this.animSequences[this.nextSeqIndex - 1].autoplaysNextSequence));
+        resolve(!this.atEnd() && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
       });
     });
   }
@@ -113,12 +115,12 @@ export class AnimTimeline {
     --this.nextSeqIndex;
     this.currDirection = 'backward';
 
-    if (this.config.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.config.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.nextSequence.getDescription()}`); }
 
     return new Promise(resolve => {
-      this.animSequences[this.nextSeqIndex].rewind()
+      this.nextSequence.rewind()
       .then(() => {
-        resolve(!this.atBeginning() && (this.animSequences[this.nextSeqIndex].autoplay || this.animSequences[this.nextSeqIndex - 1].autoplaysNextSequence));
+        resolve(!this.atBeginning() && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
       });
     });
   }
@@ -157,7 +159,7 @@ export class AnimTimeline {
   }
 
   // tells the current AnimSequence to instantly finish its animations
-  skipCurrentAnimations(): void { this.animSequences[this.nextSeqIndex].skipCurrentAnimations(); }
+  skipCurrentAnimations(): void { this.nextSequence.skipCurrentAnimations(); }
 
   // pauses or unpauses playback
   togglePause(isPaused?: boolean): boolean {
