@@ -88,7 +88,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     .addBlocks(
       SetConnector(connector_placeBars, [textbox_placeBars, 0.5, 1], [jobsUnsorted[0].getJobBar(), 0.5, 0]),
       DrawConnector(connector_placeBars, '~trace', ['from-B']),
-      Entrance(textbox_placeBars, '~fade-in', [], {startsPrevBlock: true}),
+      Entrance(textbox_placeBars, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -134,7 +134,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const jobBarsInitialArea = document.querySelector('.time-graph__job-bars') as HTMLElement;
     jobsUnsorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
-      animSequence.addBlocks(Translation(jobBarEl, '~move-to', [jobBarsInitialArea], {startsNextBlock: true, startsPrevBlock: true}));
+      animSequence.addBlocks(Translation(jobBarEl, '~move-to', [jobBarsInitialArea], {startsNextBlock: true}));
     });
 
     animTimeline.addSequences(animSequence);
@@ -161,9 +161,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       
       animSequence.addBlocks(
         Translation(jobBarEl, '~move-to', [startCell], {startsNextBlock: true}),
-        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {startsPrevBlock: true, duration: 250}),
-        Entrance(rowSJNum, '~wipe', ['from-right'], {startsNextBlock: true, startsPrevBlock: true, duration: 250}),
-        Entrance(rowSortedLetter, '~wipe', ['from-right'], {startsPrevBlock: true, duration: 250}),
+        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250}),
+        Entrance(rowSJNum, '~wipe', ['from-right'], {startsNextBlock: true, duration: 250}),
+        Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250}),
       );
     });
 
@@ -193,8 +193,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     .addBlocks(
       Exit(textbox_placeBars, '~fade-out', []),
       Entrance(jArray1, '~wipe', ['from-left']),
-      Entrance(cArray, '~wipe', ['from-left'], {startsPrevBlock: true}),
-      Entrance(textbox_cArray, '~fade-in', [], {startsPrevBlock: true}),
+      Entrance(cArray, '~wipe', ['from-left']),
+      Entrance(textbox_cArray, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -268,8 +268,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       .addBlocks(
         Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
-        Emphasis(jBlock, '~highlight', [], {startsNextBlock: true, startsPrevBlock: true}),
-        Entrance(cBar, '~wipe', ['from-top'], {startsPrevBlock: true}),
+        Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
+        Entrance(cBar, '~wipe', ['from-top']),
         Entrance(paragraph_fillCArray_forJobX, '~appear', [], {startsNextBlock: true}), // TODO: No need for blocksNext now
         Entrance(textbox_fillCArray, '~fade-in', []),
       );
@@ -294,7 +294,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         animSequence2.addBlocks(
           SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
           // TODO: No reason for blocksPrev to be false
-          DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {startsPrevBlock: true}),
+          DrawConnector(timeGraphArrowEl, '~trace', ['from-top']),
         );
       }
       // If no compatible job exists, move cbar to left of time graph
@@ -305,7 +305,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         );
         animSequence2.addBlocks(
           SetConnector(timeGraphArrowEl, [cBar, 0, 1], [cBlock, 0.5, 0]),
-          DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {startsPrevBlock: true}),
+          DrawConnector(timeGraphArrowEl, '~trace', ['from-top']),
         );
       }
 
@@ -316,9 +316,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     
       // "Update" current c-array entry
       animSequence2.addBlocks(
-        Exit(cEntryBlank, '~wipe', ['from-right'], {startsPrevBlock: true, startsNextBlock: true}),
-        Entrance(cEntryValue, '~wipe', ['from-right'], {startsPrevBlock: true}),
-        Exit(paragraph_fillCArray_resultJobX, '~fade-out', [], {duration: 250, startsPrevBlock: true}),
+        Exit(cEntryBlank, '~wipe', ['from-right'], {startsNextBlock: true}),
+        Entrance(cEntryValue, '~wipe', ['from-right']),
+        Exit(paragraph_fillCArray_resultJobX, '~fade-out', [], {duration: 250}),
         Entrance(paragraph_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
       );
     
@@ -338,14 +338,14 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         );
       }
       animSequence.addBlocks(
-        EraseConnector(timeGraphArrowEl, '~trace', ['from-bottom'], {startsNextBlock: true, startsPrevBlock: true}),
+        EraseConnector(timeGraphArrowEl, '~trace', ['from-bottom'], {startsNextBlock: true}),
       );
       animSequence.addBlocks(
-        Exit(textbox_fillCArray, '~fade-out', [], {startsPrevBlock: true, startsNextBlock: true}),
+        Exit(textbox_fillCArray, '~fade-out', [], {startsNextBlock: true}),
         // [ 'std', paragraph_fillCArray_continueOn, '~fade-out', [], {duration: 0}], // TODO: This being here and having to add startNextBlock: true above needs to be considered
-        Exit(cBar, '~fade-out', [], {startsNextBlock: true, startsPrevBlock: true}),
-        Emphasis(jobBarEl, '~un-highlight', [], {startsPrevBlock: true, startsNextBlock: true}),
-        Emphasis(jBlock, '~un-highlight', [], {startsPrevBlock: true}),
+        Exit(cBar, '~fade-out', [], {startsNextBlock: true}),
+        Emphasis(jobBarEl, '~un-highlight', [], {startsNextBlock: true}),
+        Emphasis(jBlock, '~un-highlight', []),
         Exit(paragraph_fillCArray_continueOn, '~disappear', []),
       );
 
@@ -447,11 +447,11 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Exit(textbox_explainNaive1, '~fade-out', [], {startsNextBlock: true}),
-      Exit(textbox_explainNaive2, '~fade-out', [], {startsNextBlock: true, startsPrevBlock: true}),
+      Exit(textbox_explainNaive2, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_explainNaive1, '~trace', ['from-bottom'], {startsNextBlock: true}),
-      EraseConnector(connector_explainNaive2, '~trace', ['from-bottom'], {startsNextBlock: true, startsPrevBlock: true}),
+      EraseConnector(connector_explainNaive2, '~trace', ['from-bottom'], {startsNextBlock: true}),
       Emphasis(algorithm_term1, '~un-highlight', [], {startsNextBlock: true}),
-      Emphasis(algorithm_term2, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(algorithm_term2, '~un-highlight', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -472,7 +472,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
       SetConnector(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       DrawConnector(connector_explainNaiveBad, '~trace', ['from-top']),
-      Entrance(textbox_explainNaiveBad, '~fade-in', [], {startsPrevBlock: true}),
+      Entrance(textbox_explainNaiveBad, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -513,7 +513,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Entrance(jArray2, '~wipe', ['from-left']),
-      Entrance(MArray, '~wipe', ['from-left'], {startsPrevBlock: true}),
+      Entrance(MArray, '~wipe', ['from-left']),
       Entrance(textbox_MArray, '~fade-in', []),
     );
 
@@ -680,7 +680,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
         // TODO: need to address the fact that jobCard needs to be revealed first or SJNumLabel's position won't be available below
         Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
         SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-        DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsPrevBlock: true}), // TODO: startPrevBlock: true is problematic for set/draw
+        DrawConnector(parentArrowDown, '~trace', ['from-A']), // TODO: startPrevBlock: true is problematic for set/draw
         // TODO: should really let bullet connector be drawn at the same time
         SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
         DrawConnector(connector_bulletConnector, '~trace', ['from-A']),
@@ -693,10 +693,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     }
     animSequence.addBlocks(
       Entrance(MAccess, '~fade-in', []),
-      Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true, startsPrevBlock: true}),
+      Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_MAccess, [MAccess, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),
-      DrawConnector(connector_MAccess, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_MAccess, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_MAccess, '~trace', ['from-A']),
+      Entrance(textbox_MAccess, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -734,11 +734,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Emphasis(MAccessContainer, '~un-highlight', []),
 
       Entrance(arrowContainer, '~wipe', ['from-right']),
-      Entrance(formulaComputation, '~fade-in', [], {startsPrevBlock: true}),
+      Entrance(formulaComputation, '~fade-in', []),
       Emphasis(formulaComputation, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_formulaComputation, [formulaComputation, 0.1, 0.2], [textbox_formulaComputation, 0.5, 1]),
-      DrawConnector(connector_formulaComputation, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_formulaComputation, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_formulaComputation, '~trace', ['from-A']),
+      Entrance(textbox_formulaComputation, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -755,12 +755,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       Exit(textbox_formulaComputation, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_formulaComputation, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(formulaComputation, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(formulaComputation, '~un-highlight', []),
 
       Emphasis(computationExpression1, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_computation1, [computation1, 0.5, -0.2], [textbox_computation1, 0.5, 1]),
-      DrawConnector(connector_computation1, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_computation1, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_computation1, '~trace', ['from-A']),
+      Entrance(textbox_computation1, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -777,12 +777,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       Exit(textbox_computation1, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_computation1, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(computationExpression1, '~un-highlight', [], {startsNextBlock: true, startsPrevBlock: true}),
+      Emphasis(computationExpression1, '~un-highlight', [], {startsNextBlock: true}),
   
-      Emphasis(cAccessContainer, '~highlight', [], {startsPrevBlock: true}),
+      Emphasis(cAccessContainer, '~highlight', []),
       SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
-      DrawConnector(connector_cAccess, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_cAccess, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_cAccess, '~trace', ['from-A']),
+      Entrance(textbox_cAccess, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -798,7 +798,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     })
     .addBlocks(
       SetConnector(connector_toCBlock, [cAccessContainer, 0, 0.5], [cBlock, 0.9, 0.5], {trackEndpoints: true}),
-      DrawConnector(connector_toCBlock, '~trace', ['from-A'], {startsPrevBlock: true}),
+      DrawConnector(connector_toCBlock, '~trace', ['from-A']),
     );
 
     animTimeline.addSequences(animSequence);
@@ -820,7 +820,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       // EraseConnector(connector_cAccess, '~fade-out', [], {duration: 0}),
       // SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
       // DrawConnector(connector_cAccess, '~fade-in', [], {duration: 0}),
-      Exit(cAccess, '~wipe', ['from-right'], {startsPrevBlock: true}),
+      Exit(cAccess, '~wipe', ['from-right']),
       Entrance(cEntry, '~wipe', ['from-right'], {startsNextBlock: true}),
 
       // SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1]),
@@ -847,13 +847,13 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       // remove c access text
       Exit(textbox_cAccess, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_cAccess, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(cAccessContainer, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(cAccessContainer, '~un-highlight', []),
   
       // enter OPT expression 1 text
-      Emphasis(OPTExpressionContainer1, '~highlight', [], {startsPrevBlock: true, startsNextBlock: true}),
+      Emphasis(OPTExpressionContainer1, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_OPTExpression1, [OPTExpressionContainer1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
-      DrawConnector(connector_OPTExpression1, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_OPTExpression1, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_OPTExpression1, '~trace', ['from-A']),
+      Entrance(textbox_OPTExpression1, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -888,13 +888,13 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       SetConnector(connector_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
       DrawConnector(connector_upFromChild1, '~trace', ['from-A']),
-      Exit(OPTExpression1, '~wipe', ['from-right'], {startsPrevBlock: true}),
+      Exit(OPTExpression1, '~wipe', ['from-right']),
       Entrance(OPTResult1, '~wipe', ['from-right'], {startsNextBlock: true}),
       Exit(paragraph_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
       Entrance(paragraph_OPTExpression1_found, '~fade-in', [], { duration: 250 }),
       SetConnector(connector_OPTExpression1, [OPTResult1, 0.5, -0.2], [textbox_OPTExpression1, 0.5, 1]),
-      DrawConnector(connector_OPTExpression1, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_OPTExpression1, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_OPTExpression1, '~trace', ['from-A']),
+      Entrance(textbox_OPTExpression1, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -910,18 +910,18 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     })
     .addBlocks(
       EraseConnector(connector_upFromChild1, '~fade-out', [], {startsNextBlock: true}),
-      Exit(textbox_OPTExpression1, '~fade-out', [], {startsPrevBlock: true, startsNextBlock: true}),
+      Exit(textbox_OPTExpression1, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_OPTExpression1, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(OPTExpressionContainer1, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(OPTExpressionContainer1, '~un-highlight', []),
   
       Exit(paragraph_computation1_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_computation1_summary, '~appear', [], {startsPrevBlock: true}), // TODO: blocksPrev no longer necessary
+      Entrance(paragraph_computation1_summary, '~appear', []), // TODO: blocksPrev no longer necessary
       Exit(computationExpression1, '~wipe', ['from-right'],),
       Entrance(computationResult1, '~wipe', ['from-right'],),
-      Emphasis(computationResult1, '~highlight', [], {startsPrevBlock: true, startsNextBlock: true}),
+      Emphasis(computationResult1, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_computation1, [computationResult1, 0.5, -0.2], [textbox_computation1, 0.5, 1]),
-      DrawConnector(connector_computation1, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_computation1, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_computation1, '~trace', ['from-A']),
+      Entrance(textbox_computation1, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -939,12 +939,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       Exit(textbox_computation1, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_computation1, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(computationResult1, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(computationResult1, '~un-highlight', []),
 
       Emphasis(computation2, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_computation2, [computation2, 0.5, -0.2], [textbox_computation2, 0.5, 1]),
-      DrawConnector(connector_computation2, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_computation2, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_computation2, '~trace', ['from-A']),
+      Entrance(textbox_computation2, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -966,8 +966,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Entrance(nextSJNum, '~wipe', ['from-right']),
   
       SetConnector(connector_OPTExpression2, [computation2, 0.5, -0.2], [textbox_OPTExpression2, 0.5, 1]),
-      DrawConnector(connector_OPTExpression2, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_OPTExpression2, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_OPTExpression2, '~trace', ['from-A']),
+      Entrance(textbox_OPTExpression2, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1005,16 +1005,16 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       DrawConnector(connector_upFromChild2, '~trace', ['from-A']),
 
       Exit(paragraph_computation2_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_computation2_summary, '~appear', [], {startsPrevBlock: true}), // TODO: blocksPrev no longer necessary
+      Entrance(paragraph_computation2_summary, '~appear', []), // TODO: blocksPrev no longer necessary
 
       Emphasis(computation2, '~un-highlight', [], {startsNextBlock: true}),
-      Exit(OPTExpression2, '~wipe', ['from-right'], {startsPrevBlock: true}),
+      Exit(OPTExpression2, '~wipe', ['from-right']),
       Entrance(computationResult2, '~wipe', ['from-right'], {startsNextBlock: true}),
-      Emphasis(computationResult2, '~highlight', [], {startsPrevBlock: true}),
+      Emphasis(computationResult2, '~highlight', []),
 
       SetConnector(connector_computation2, [computation2, 0.5, -0.2], [textbox_computation2, 0.5, 1]),
-      DrawConnector(connector_computation2, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_computation2, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_computation2, '~trace', ['from-A']),
+      Entrance(textbox_computation2, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1032,15 +1032,15 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       EraseConnector(connector_upFromChild2, '~fade-out', []),
       Exit(textbox_computation2, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_computation2, '~trace', ['from-B'], {startsNextBlock: true}),
-      Emphasis(computationResult2, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(computationResult2, '~un-highlight', []),
 
       
       Exit(paragraph_formulaComputation_find, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_formulaComputation_max, '~appear', [], {startsPrevBlock: true}),  // TODO: blocksPrev no longer necessary
+      Entrance(paragraph_formulaComputation_max, '~appear', []),  // TODO: blocksPrev no longer necessary
       Emphasis(formulaContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
-      DrawConnector(connector_formulaComputation, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_formulaComputation, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_formulaComputation, '~trace', ['from-A']),
+      Entrance(textbox_formulaComputation, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1059,7 +1059,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       // TODO: Address
       // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
-      Exit(formulaComputation, '~wipe', ['from-right'], {startsPrevBlock: true}),
+      Exit(formulaComputation, '~wipe', ['from-right']),
       Entrance(formulaResult, '~wipe', ['from-right'], {startsNextBlock: true}),
 
       // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
@@ -1114,11 +1114,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       // Add last text box
       Exit(paragraph_MAccess_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_MAccess_solved, '~appear', [], {startsPrevBlock: true}), // TODO: blocksPrev no longer necessary
+      Entrance(paragraph_MAccess_solved, '~appear', []), // TODO: blocksPrev no longer necessary
       EraseConnector(connector_toMBlock, '~trace', ['from-A']),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
-      DrawConnector(connector_MAccess, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_MAccess, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_MAccess, '~trace', ['from-A']),
+      Entrance(textbox_MAccess, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1139,7 +1139,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Exit(textbox_MAccess, '~fade-out', [], {startsNextBlock: true}),
       EraseConnector(connector_MAccess, '~trace', ['from-B']),
       EraseConnector(parentArrowDown, '~fade-out', [], {startsNextBlock: true}),
-      Emphasis(MAccessContainer, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(MAccessContainer, '~un-highlight', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1184,12 +1184,12 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
       // TODO: Pretty sure blocksPrev should be false here?
       DrawConnector(connector_bulletConnector, '~trace', ['from-A']),
       SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-      DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsPrevBlock: true}),
+      DrawConnector(parentArrowDown, '~trace', ['from-A']),
       Entrance(MAccess, '~fade-in', []),
-      Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true, startsPrevBlock: true}),
+      Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),
-      DrawConnector(connector_MAccess, '~trace', ['from-A'], {startsPrevBlock: true}),
-      Entrance(textbox_MAccess, '~fade-in', [], {startsPrevBlock: true}),
+      DrawConnector(connector_MAccess, '~trace', ['from-A']),
+      Entrance(textbox_MAccess, '~fade-in', []),
     );
 
     animTimeline.addSequences(animSequence);
@@ -1245,10 +1245,10 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
     })
     .addBlocks(
       EraseConnector(connector_toMBlock, '~fade-out', [], {startsNextBlock: true}),
-      EraseConnector(connector_MAccess, '~trace', ['from-B'], {startsPrevBlock: true, startsNextBlock: true}),
-      Exit(textbox_MAccess, '~fade-out', [], {startsPrevBlock: true}),
+      EraseConnector(connector_MAccess, '~trace', ['from-B'], {startsNextBlock: true}),
+      Exit(textbox_MAccess, '~fade-out', []),
       EraseConnector(parentArrowDown, '~fade-out', [], {startsNextBlock: true}),
-      Emphasis(MAccessContainer, '~un-highlight', [], {startsPrevBlock: true}),
+      Emphasis(MAccessContainer, '~un-highlight', []),
     );
 
     animTimeline.addSequences(animSequence);
