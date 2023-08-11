@@ -190,11 +190,17 @@ export class AnimSequence {
     return this.config.continuePrev;
   }
 
+  static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
+  static activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
+  static endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime;
+
   // TODO: Complete this method
   commit(): AnimSequence {
-    const activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
-    const activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
-    const endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime
+    const {
+      activeBackwardFinishComparator,
+      activeFinishComparator,
+      endDelayFinishComparator,
+    } = AnimSequence;
 
     let maxFinishTime = 0;
     const animBlocks = this.animBlocks;
