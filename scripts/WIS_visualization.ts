@@ -13,7 +13,7 @@ import { Job } from './Job.js';
 
 // TODO: Put somewhere better
 const dataDisplay = document.querySelector('.data-display') as HTMLElement;
-const animTimeline = new AnimTimeline(null, {debugMode: true});
+const animTimeline = new AnimTimeline({debugMode: true});
 
 const {
   Entrance,

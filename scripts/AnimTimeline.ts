@@ -23,11 +23,11 @@ export class AnimTimeline {
 
   get numSequences() { return this.animSequences.length; }
 
-  constructor(animSequences: AnimSequence[] | null = null, config: Partial<AnimTimelineConfig> = {}) {
+  constructor(config: Partial<AnimTimelineConfig & {animSequences: AnimSequence[]}> = {}) {
     this.id = AnimTimeline.id++;
 
-    if (animSequences) {
-      this.addSequences(...animSequences);
+    if (config.animSequences) {
+      this.addSequences(...config.animSequences);
     }
 
     this.config = {
@@ -36,18 +36,22 @@ export class AnimTimeline {
     };
   }
 
-  addSequences(...animSequences: AnimSequence[]): void {
+  addSequences(...animSequences: AnimSequence[]): AnimTimeline {
     for(const animSequence of animSequences) {
       animSequence.parentTimeline = this;
       animSequence.setID(this.id);
     };
     this.animSequences.push(...animSequences);
+
+    return this;
   }
 
-  setPlaybackRate(rate: number): void {
+  setPlaybackRate(rate: number): AnimTimeline {
     this.playbackRate = rate;
     // set playback rates of currently running animations so that they don't continue to run at regular speed
     this.doForCurrentAnimations((animation: Animation) => animation.playbackRate = rate);
+
+    return this;
   }
   getPlaybackRate() { return this.playbackRate; }
 
