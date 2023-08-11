@@ -23,7 +23,7 @@ const {
   SetConnector,
   DrawConnector,
   EraseConnector,
-} = WebFlik.createBanks({});
+} = WebFlik.createBanks();
 
 export function generateVisualization (jobsUnsorted: Job[]) {
   // fade-in visualization screen

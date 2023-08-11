@@ -2,41 +2,29 @@ import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, Tr
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
+// represents keyframe-generation and preset configuration options for one animation
 export type KeyframesBankEntry = Readonly<{
   generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
   config?: Partial<AnimBlockConfig>;
 }>
-export type IKeyframesBank<T extends AnimBlock | void = void> = Readonly<Record<string, KeyframesBankEntry>> & (T extends void ? {} : ThisType<T>);
 
-// export interface Obj {
-//   Entrances?: IKeyframesBank<EntranceBlock>
-// }
-
-// type ShiftTuple<T extends any[]> =
-//   T extends [T[0], ...infer R] ? R : never;
+// represents an object where every string key is paired with a KeyframesBankEntry value
+export type IKeyframesBank<T extends AnimBlock | void = void> =
+  Readonly<Record<string, KeyframesBankEntry>>
+  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string}>>)
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // TODO: Handle undo-- prefixes
+// extracts only those strings in an object whose paired value is a KeyframesBankEntry
 export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
   [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];
-}, string>;
+}, string>
 
 type BlockInitParams<
 TBlock extends AnimBlock<TBank[AnimName]>,
   TBank extends IKeyframesBank = IKeyframesBank<TBlock>,
   AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>,
 > = Parameters<TBlock['initialize']>
-
-// type ReadonlyAnimBlock<T extends AnimBlock> = Readonly<Omit<T, 'setID'>>;
-// type ConstructorFunction = abstract new (...args: any[]) => any;
-// type AnimBlockCreator<T extends ConstructorFunction> = (...args: ConstructorParameters<T>)
-//   => ReadonlyAnimBlock<InstanceType<T>>;
-// type InitType<T extends AnimBlock> = Parameters<T[string]>
-// type AnimBlockCreator<
-//   TBank extends IKeyframesBank,
-//   AnimName extends AnimationNameIn<TBank>,
-//   T extends AnimBlock<TBank[AnimName]>,
-// > = (domElem: Element, animName: AnimName, ...params: Parameters< T['initialize'] >) => T
 
 class _WebFlik {
   createBanks
@@ -56,7 +44,7 @@ class _WebFlik {
       Exits?: UserExitBank & IKeyframesBank<ExitBlock>;
       Emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
       Translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
-    }, // TODO: Add = {} default so user doesn't have to pass in empty object if using only presets
+    } = {}, // TODO: Add = {} default so user doesn't have to pass in empty object if using only presets
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
     type TogglePresets<TUserBank, TPresetBank> = Readonly<TUserBank & (IncludePresets extends true ? TPresetBank : {})>;
@@ -147,6 +135,5 @@ class _WebFlik {
     };
   }
 }
-
 
 export const WebFlik = new _WebFlik();
