@@ -45,8 +45,8 @@ export class AnimSequence {
   getDescription() { return this.description; }
   getTag() { return this.tag; }
   
-  setDescription(description: string) { this.description = description; }
-  setTag(tag: string) { this.tag = tag; }
+  setDescription(description: string): AnimSequence { this.description = description; return this; }
+  setTag(tag: string): AnimSequence { this.tag = tag; return this; }
   setID(id: number) {
     this.timelineID = id;
     for (const animBlock of this.animBlocks) {
@@ -56,9 +56,10 @@ export class AnimSequence {
     }
   }
 
-  addBlocks(...animBlocks: AnimBlock[]): void {
+  addBlocks(...animBlocks: AnimBlock[]): AnimSequence {
     // CHANGE NOTE: removed addOneBlock()
     this.animBlocks.push(...animBlocks);
+    return this;
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
@@ -190,7 +191,7 @@ export class AnimSequence {
   }
 
   // TODO: Complete this method
-  commit(): void {
+  commit(): AnimSequence {
     const activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
     const activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
     const endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime
@@ -249,6 +250,8 @@ export class AnimSequence {
     this.animBlockGroupings_backwardActiveFinishOrder.push(currActiveBackwardFinishGrouping);
     this.animBlockGroupings_activeFinishOrder.push(currActiveFinishGrouping);
     this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
+
+    return this;
   }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping
