@@ -158,9 +158,10 @@ export class AnimSequence {
     let currEndDelayGrouping: AnimBlock[] = [];
 
     for (let i = 0; i < numBlocks; ++i) {
-      const startsWithPrev = animBlocks[i-1]?.startsNextBlock;
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
+      // TODO: Consider override scenarios
+      const startsWithPrev = currAnimBlock.startsWithPreviousBlock || animBlocks[i-1]?.startsNextBlock;
       let currStartTime: number;
 
       if (startsWithPrev || i === 0) {

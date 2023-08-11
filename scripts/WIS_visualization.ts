@@ -160,10 +160,10 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
       
       animSequence.addBlocks(
-        Translation(jobBarEl, '~move-to', [startCell], {startsNextBlock: true}),
-        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250}),
-        Entrance(rowSJNum, '~wipe', ['from-right'], {startsNextBlock: true, duration: 250}),
-        Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250}),
+        Translation(jobBarEl, '~move-to', [startCell]),
+        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true}),
+        Entrance(rowSJNum, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true, delay: 250}),
+        Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true}),
       );
     });
 
@@ -821,7 +821,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       // SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
       // DrawConnector(connector_cAccess, '~fade-in', [], {duration: 0}),
       Exit(cAccess, '~wipe', ['from-right']),
-      Entrance(cEntry, '~wipe', ['from-right'], {startsNextBlock: true}),
+      Entrance(cEntry, '~wipe', ['from-right']),
 
       // SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1]),
       // DrawConnector(connector_cAccess, '~fade-in', [], {duration: 0}),
@@ -1115,7 +1115,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       // Add last text box
       Exit(paragraph_MAccess_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
       Entrance(paragraph_MAccess_solved, '~appear', []), // TODO: blocksPrev no longer necessary
-      EraseConnector(connector_toMBlock, '~trace', ['from-A']),
+      EraseConnector(connector_toMBlock, '~trace', ['from-left']),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(connector_MAccess, '~trace', ['from-A']),
       Entrance(textbox_MAccess, '~fade-in', []),
@@ -1228,7 +1228,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
       Exit(MAccess, '~wipe', ['from-right']),
       Entrance(MEntry, '~wipe', ['from-right']),
       Exit(textbox_MAccess_p1, '~fade-out', [], {duration: 250, startsNextBlock: true}),
-      Entrance(textbox_MAccess_p2, '~fade-in', [], {duration: 250, startsNextBlock: true}),
+      Entrance(textbox_MAccess_p2, '~fade-in', [], {duration: 250, startsNextBlock: true, delay: 250}),
     );
 
     animTimeline.addSequences(animSequence);

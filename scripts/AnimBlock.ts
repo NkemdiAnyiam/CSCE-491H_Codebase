@@ -5,6 +5,7 @@ import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
+  startsWithPreviousBlock: boolean;
   commitsStyles: boolean;
   composite: 'replace' | 'add' | 'accumulate';
   classesToAddOnFinish: string[];
@@ -354,6 +355,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
   }
 
+  get startsWithPreviousBlock() { return this.config.startsWithPreviousBlock; }
   get startsNextBlock() { return this.config.startsNextBlock; }
   get delay() { return this.config.delay; }
   get endDelay() { return this.config.endDelay; }
@@ -511,6 +513,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
     return {
       // pure defaults
+      startsWithPreviousBlock: false,
       startsNextBlock: false,
       duration: 500,
       playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
