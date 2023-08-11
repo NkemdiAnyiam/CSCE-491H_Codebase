@@ -225,7 +225,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: `Hide explanation of c array's purpose and continue into next phase`,
-      continueNext: true, // after hiding, immediately continue into next phase
+      autoplaysNextSequence: true, // after hiding, immediately continue into next phase
     })
     .addBlocks(
       Exit(textbox_cArray, '~fade-out', [], {startsNextBlock: true}),
@@ -263,7 +263,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     {
       const animSequence = new AnimSequence({
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
-        continuePrev: true,
       })
       .addBlocks(
         Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
@@ -330,7 +329,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     {
       const animSequence = new AnimSequence({
         description: 'Hide cbar and arrow and un-highlight everything',
-        continueNext: true,
+        autoplaysNextSequence: true,
       });
       if (compatibleJobBarEl) {
         animSequence.addBlocks(
@@ -366,7 +365,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const animSequence = new AnimSequence({
       description: 'State that now we need to find the maximum weight',
       tag: 'finished c array',
-      continuePrev: true,
     })
     .addBlocks(
       Entrance(textbox_finishedCArray, '~fade-in', []),
@@ -443,7 +441,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const animSequence = new AnimSequence({
       description: 'Hide naive approach explanations',
       tag: 'explain naive bad',
-      continueNext: true,
+      autoplaysNextSequence: true,
     })
     .addBlocks(
       Exit(textbox_explainNaive1, '~fade-out', [], {startsNextBlock: true}),
@@ -466,7 +464,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Explain why naive approach is bad',
-      continuePrev: true,
     })
     .addBlocks(
       Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
@@ -486,7 +483,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Collapse text boxes about the naive approach',
-      continueNext: true,
+      autoplaysNextSequence: true,
     })
     .addBlocks(
       Exit(naiveAlgorithmText, '~fade-out', []),
@@ -509,7 +506,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const animSequence = new AnimSequence({
       description: 'Explain memoization',
       tag: 'introduce memoization',
-      continuePrev: true,
     })
     .addBlocks(
       Entrance(jArray2, '~wipe', ['from-left']),
@@ -571,7 +567,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Hide M array text explanation boxes',
-      continueNext: true,
+      // autoplaysNextSequence: true,
     })
     .addBlocks(
       Exit(MArrayTextBoxes, '~fade-out', []),
@@ -672,7 +668,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     const animSequence = new AnimSequence({
       description: 'Fade in job card and M access',
       tag: 'start',
-      continuePrev: true,
+      autoplays: true,
     });
     if (parentArrowDown && parentArrowSource && aboveBullet) {
       const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as Connector;
@@ -866,7 +862,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = new AnimSequence({continueNext: true});
+    const animSeqPassDown = new AnimSequence({autoplaysNextSequence: true});
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addBlocks(
       Exit(textbox_OPTExpression1, '~fade-out', [], {startsNextBlock: true}),
@@ -883,7 +879,6 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     const animSequence = new AnimSequence({
       description: 'Replace OPT1 expression with answer, change text box text',
       tag: 'OPT point 1',
-      continuePrev: true,
     })
     .addBlocks(
       SetConnector(connector_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
@@ -982,7 +977,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
     const animSeqPassDown = new AnimSequence({
-      continueNext: true,
+      autoplaysNextSequence: true,
     })
     .addBlocks(
       Exit(textbox_OPTExpression2, '~fade-out', [], {startsNextBlock: true}),
@@ -998,7 +993,6 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     /****************************************************** */
     const animSequence = new AnimSequence({
       description: 'Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text',
-      continuePrev: true,
     })
     .addBlocks(
       SetConnector(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
@@ -1133,7 +1127,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     const animSequence = new AnimSequence({
       description: 'If this is child block, hide parent arrow and unhighlight M access',
       tag: 'finish a main card',
-      continueNext: true,
+      autoplaysNextSequence: true,
     })
     .addBlocks(
       Exit(textbox_MAccess, '~fade-out', [], {startsNextBlock: true}),
@@ -1176,7 +1170,6 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   {
     const animSequence = new AnimSequence({
       description: 'Fade in job stub and M access',
-      continuePrev: true,
     })
     .addBlocks(
       Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}),
@@ -1241,7 +1234,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   {
     const animSequence = new AnimSequence({
       description: 'Hide parent arrow and unhighlight M access',
-      continueNext: true,
+      autoplaysNextSequence: true,
     })
     .addBlocks(
       EraseConnector(connector_toMBlock, '~fade-out', [], {startsNextBlock: true}),

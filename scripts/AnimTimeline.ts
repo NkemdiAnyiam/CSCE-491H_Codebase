@@ -101,9 +101,9 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
-      .then(continueNext => {
+      .then(() => {
         ++this.nextSeqIndex;
-        resolve(continueNext && !this.atEnd());
+        resolve(!this.atEnd() && (this.animSequences[this.nextSeqIndex].autoplay || this.animSequences[this.nextSeqIndex - 1].autoplaysNextSequence));
       });
     });
   }
@@ -117,8 +117,8 @@ export class AnimTimeline {
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].rewind()
-      .then(continuePrev => {
-        resolve(continuePrev && !this.atBeginning());
+      .then(() => {
+        resolve(!this.atBeginning() && (this.animSequences[this.nextSeqIndex].autoplay || this.animSequences[this.nextSeqIndex - 1].autoplaysNextSequence));
       });
     });
   }

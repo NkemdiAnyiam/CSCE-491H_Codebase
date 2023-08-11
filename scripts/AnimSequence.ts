@@ -4,8 +4,8 @@ import { AnimTimeline } from "./AnimTimeline.js";
 type AnimSequenceConfig = {
   description: string;
   tag: string;
-  continueNext: boolean; // TODO: rename to autoPlayNext
-  continuePrev: boolean; // TODO: rename to autoRewindPrev
+  autoplaysNextSequence: boolean;
+  autoplays: boolean;
 };
 
 export class AnimSequence {
@@ -24,6 +24,9 @@ export class AnimSequence {
   private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
 
+  get autoplaysNextSequence() { return this.config.autoplaysNextSequence; }
+  get autoplay() { return this.config.autoplays; }
+
   constructor(config: Partial<AnimSequenceConfig & {animBlocks: AnimBlock[]}>  = {}) {
     this.id = AnimSequence.id++;
 
@@ -34,8 +37,8 @@ export class AnimSequence {
     this.config = {
       description: '<blank sequence description>',
       tag: '',
-      continueNext: false, // decides whether the next AnimSequence should automatically play after this one
-      continuePrev: false, // decides if the prev AnimSequence should automatically play after this one
+      autoplaysNextSequence: false, // decides whether the next AnimSequence should automatically play after this one
+      autoplays: false,
 
       // user config takes priority
       ...config,
@@ -64,7 +67,7 @@ export class AnimSequence {
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
   // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
-  async play(): Promise<boolean> {
+  async play(): Promise<void> {
     this.commit();
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
     const numGroupings = activeGroupings.length;
@@ -90,12 +93,10 @@ export class AnimSequence {
       }
       await Promise.all(parallelBlocks);
     }
-
-    return this.config.continueNext;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
-  async rewind(): Promise<boolean> {
+  async rewind(): Promise<void> {
     const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
     const numGroupings = activeGroupings.length;
 
@@ -130,8 +131,6 @@ export class AnimSequence {
       }
       await Promise.all(parallelBlocks);
     }
-
-    return this.config.continuePrev;
   }
 
   static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
