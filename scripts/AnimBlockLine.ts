@@ -29,8 +29,7 @@ export class Connector extends HTMLElement {
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
   trackingEnabled: boolean = true;
-  private currentlyTracking: boolean = false;
-  private timeoutForTracking?: NodeJS.Timer;
+  private continuousTrackingReqId: number = NaN;
 
   get ax(): number { return this.lineLayer.x1.baseVal.value; }
   get bx(): number { return this.lineLayer.x2.baseVal.value; }
@@ -188,8 +187,7 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = (usingTimeout = false): void => {
-    if (usingTimeout && !this.currentlyTracking) { return; }
+  updateEndpoints = (): void => {
     const pointA = this.pointA;
     const pointB = this.pointB;
     if (!pointA || !pointB) { return; }
@@ -247,15 +245,19 @@ export class Connector extends HTMLElement {
     this.mask.y.baseVal.valueAsString = `${Math.min(ay, by) - 25}`;
   }
 
+  // CHANGE NOTE: Use requestAnimationFrame() loop instead of setInterval() to laglessly update endpoints
+  continuouslyUpdateEndpoints = () => {
+    this.updateEndpoints();
+    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
+  }
+
   // TODO: No reason for these to be arrow functions
   setTrackingInterval = (): void => {
-    this.timeoutForTracking = setInterval(this.updateEndpoints, 4, true);
-    this.currentlyTracking = true;
+    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
   clearTrackingInterval = (): void => {
-    this.currentlyTracking = false;
-    clearInterval(this.timeoutForTracking);
+    window.cancelAnimationFrame(this.continuousTrackingReqId);
   }
 }
 
