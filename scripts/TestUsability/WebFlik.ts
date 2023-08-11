@@ -91,7 +91,7 @@ class _WebFlik {
       },
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
-      },// TODO: Add optional lineOptions
+      },
       SetConnector: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
         return new SetConnectorBlock(connectorElem, pointA, pointB, connectorConfig).initialize([]);
       },

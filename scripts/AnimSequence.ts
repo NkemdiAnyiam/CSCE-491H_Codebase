@@ -1,7 +1,7 @@
 import { AnimBlock, AnimTimelineAnimation } from "./AnimBlock.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 
-type AnimSequenceOptions = {
+type AnimSequenceConfig = {
   description: string;
   tag: string;
   continueNext: boolean; // TODO: rename to autoPlayNext
@@ -17,28 +17,28 @@ export class AnimSequence {
   description: string = '<blank sequence description>';
   tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   animBlocks: AnimBlock[] = []; // array of animBlocks
-  options: AnimSequenceOptions;
+  config: AnimSequenceConfig;
 
   private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
 
-  constructor(animBlocks: AnimBlock[] | null = null, options: Partial<AnimSequenceOptions> = {}) {
+  constructor(animBlocks: AnimBlock[] | null = null, config: Partial<AnimSequenceConfig> = {}) {
     this.id = AnimSequence.id++;
 
     if (animBlocks) {
       this.addBlocks(...animBlocks);
     }
 
-    this.options = {
+    this.config = {
       description: '',
       tag: '',
       continueNext: false, // decides whether the next AnimSequence should automatically play after this one
       continuePrev: false, // decides if the prev AnimSequence should automatically play after this one
 
-      // user options take priority
-      ...options,
+      // user config takes priority
+      ...config,
     };
   }
 
@@ -123,7 +123,7 @@ export class AnimSequence {
       await Promise.all(parallelBlocks);
     }
 
-    return this.options.continueNext;
+    return this.config.continueNext;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
@@ -187,7 +187,7 @@ export class AnimSequence {
       await Promise.all(parallelBlocks);
     }
 
-    return this.options.continuePrev;
+    return this.config.continuePrev;
   }
 
   // TODO: Complete this method

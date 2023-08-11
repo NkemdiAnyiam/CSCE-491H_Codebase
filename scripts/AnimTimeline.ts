@@ -1,7 +1,7 @@
 import { AnimTimelineAnimation } from "./AnimBlock.js";
 import { AnimSequence } from "./AnimSequence.js";
 
-type AnimTimelineOptions = {
+type AnimTimelineConfig = {
   debugMode: boolean;
 };
 
@@ -18,21 +18,21 @@ export class AnimTimeline {
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
-  options: AnimTimelineOptions;
+  config: AnimTimelineConfig;
   currentAnimations: Map<number, AnimTimelineAnimation> = new Map();
 
   get numSequences() { return this.animSequences.length; }
 
-  constructor(animSequences: AnimSequence[] | null = null, options: Partial<AnimTimelineOptions> = {}) {
+  constructor(animSequences: AnimSequence[] | null = null, config: Partial<AnimTimelineConfig> = {}) {
     this.id = AnimTimeline.id++;
 
     if (animSequences) {
       this.addSequences(...animSequences);
     }
 
-    this.options = {
+    this.config = {
       debugMode: false,
-      ...options,
+      ...config,
     };
   }
 
@@ -93,7 +93,7 @@ export class AnimTimeline {
   stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
 
-    if (this.options.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].play() // wait for the current AnimSequence to finish all of its animations
@@ -109,7 +109,7 @@ export class AnimTimeline {
     --this.nextSeqIndex;
     this.currDirection = 'backward';
 
-    if (this.options.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.config.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.animSequences[this.nextSeqIndex].getDescription()}`); }
 
     return new Promise(resolve => {
       this.animSequences[this.nextSeqIndex].rewind()
