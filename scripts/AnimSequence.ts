@@ -160,7 +160,7 @@ export class AnimSequence {
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
       // TODO: Consider override scenarios
-      const startsWithPrev = currAnimBlock.startsWithPreviousBlock || animBlocks[i-1]?.startsNextBlock;
+      const startsWithPrev = currAnimBlock.startsWithPreviousBlock || prevBlock?.startsNextBlock;
       let currStartTime: number;
 
       if (startsWithPrev || i === 0) {
