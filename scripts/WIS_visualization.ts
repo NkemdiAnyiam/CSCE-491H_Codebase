@@ -676,12 +676,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as Connector;
       animSequence.addBlocks(
         // TODO: need to address the fact that jobCard needs to be revealed first or SJNumLabel's position won't be available below
-        Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
+        Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}),
         SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-        DrawConnector(parentArrowDown, '~trace', ['from-A']), // TODO: startPrevBlock: true is problematic for set/draw
-        // TODO: should really let bullet connector be drawn at the same time
+        DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsNextBlock: true}),
         SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
-        DrawConnector(connector_bulletConnector, '~trace', ['from-A']),
+        DrawConnector(connector_bulletConnector, '~trace', ['from-A'], {startsWithPreviousBlock: true}),
       );
     }
     else {
@@ -1176,9 +1175,9 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
     .addBlocks(
       Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}),
       SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
-      DrawConnector(connector_bulletConnector, '~trace', ['from-A']),
+      DrawConnector(connector_bulletConnector, '~trace', ['from-A'], {startsNextBlock: true}),
       SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-      DrawConnector(parentArrowDown, '~trace', ['from-A']),
+      DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsWithPreviousBlock: true}),
       Entrance(MAccess, '~fade-in', []),
       Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),
