@@ -14,25 +14,25 @@ export class AnimSequence {
   id: number;
   timelineID: number = NaN; // set to match the id of the AnimTimeline to which it belongs
   parentTimeline?: AnimTimeline; // pointer to parent AnimTimeline
-  description: string = '<blank sequence description>';
-  tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
-  animBlocks: AnimBlock[] = []; // array of animBlocks
-  config: AnimSequenceConfig;
+  get description() {return this.config.description}
+  get tag() {return this.config.tag} // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
+  private animBlocks: AnimBlock[] = []; // array of animBlocks
+  private config: AnimSequenceConfig;
 
   private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
 
-  constructor(animBlocks: AnimBlock[] | null = null, config: Partial<AnimSequenceConfig> = {}) {
+  constructor(config: Partial<AnimSequenceConfig & {animBlocks: AnimBlock[]}>  = {}) {
     this.id = AnimSequence.id++;
 
-    if (animBlocks) {
-      this.addBlocks(...animBlocks);
+    if (config.animBlocks) {
+      this.addBlocks(...config.animBlocks);
     }
 
     this.config = {
-      description: '',
+      description: '<blank sequence description>',
       tag: '',
       continueNext: false, // decides whether the next AnimSequence should automatically play after this one
       continuePrev: false, // decides if the prev AnimSequence should automatically play after this one
@@ -45,8 +45,8 @@ export class AnimSequence {
   getDescription() { return this.description; }
   getTag() { return this.tag; }
   
-  setDescription(description: string): AnimSequence { this.description = description; return this; }
-  setTag(tag: string): AnimSequence { this.tag = tag; return this; }
+  setDescription(description: string): AnimSequence { this.config.description = description; return this; }
+  setTag(tag: string): AnimSequence { this.config.tag = tag; return this; }
   setID(id: number) {
     this.timelineID = id;
     for (const animBlock of this.animBlocks) {

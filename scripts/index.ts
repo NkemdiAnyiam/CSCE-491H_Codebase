@@ -33,7 +33,7 @@ const constraintOptions = { maxNumJobs, maxTime, maxWeight };
 const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_multiInput(constraintOptions);
 const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
-const toggleSequence = new AnimSequence([
+const toggleSequence = new AnimSequence().addBlocks(...[
   Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),
 ]);

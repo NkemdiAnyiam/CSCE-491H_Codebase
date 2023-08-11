@@ -82,13 +82,15 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // DESCRIBE THAT WE'RE ABOUT TO MOVE BARS ONTO GRAPH
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription(`Describe that we're about to move bars onto graph`);
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: `Describe that we're about to move bars onto graph`,
+    })
+    .addBlocks(
       SetConnector(connector_placeBars, [textbox_placeBars, 0.5, 1], [jobsUnsorted[0].getJobBar(), 0.5, 0]),
       DrawConnector(connector_placeBars, '~trace', ['from-B']),
       Entrance(textbox_placeBars, '~fade-in', [], {blocksPrev: false}),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -96,10 +98,11 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS ONTO TIME GRAPH IN UNSORTED ORDER
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Move job bars onto time graph in unsorted order');
-    animSequence.addBlocks(
-      EraseConnector(connector_placeBars, '~trace', ['from-B'], {blocksNext: false})
+    const animSequence = new AnimSequence({
+      description: 'Move job bars onto time graph in unsorted order',
+    })
+    .addBlocks(
+      EraseConnector(connector_placeBars, '~trace', ['from-B'], {blocksNext: false}),
     );
     jobsUnsorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
@@ -112,6 +115,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(paragraph_placeBars_unorder, '~fade-out', [], {duration: 250}),
       Entrance(paragraph_placeBars_unorder2, '~fade-in', [], {duration: 250}),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -120,9 +124,10 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS BACK OFF OF THE TIME GRAPH
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Move job bars back off of the time graph');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Move job bars back off of the time graph',
+    })
+    .addBlocks(
       Exit(paragraph_placeBars_unorder2, '~fade-out', [], {duration: 250}),
       Entrance(paragraph_placeBars_order, '~fade-in', [], {duration: 250}),
     );
@@ -182,14 +187,16 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHAT A COMPATIBLE JOB IS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Explain what a compatible job is');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain what a compatible job is',
+    })
+    .addBlocks(
       Exit(textbox_placeBars, '~fade-out', []),
       Entrance(jArray1, '~wipe', ['from-left']),
       Entrance(cArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_cArray, '~fade-in', [], {blocksPrev: false}),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -198,14 +205,16 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHAT C ARRAY WILL BE USED FOR
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Explain what c array will be used for');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain what c array will be used for',
+    })
+    .addBlocks(
       SetConnector(connector_cArray, [textbox_cArray, 0, 0.5], [cArray, 1, 0.5]),
       DrawConnector(connector_cArray, '~trace', ['from-B']),
       Exit(paragraph_cArray_explain, '~fade-out', [], {duration: 250}),
       Entrance(paragraph_cArray_refArray, '~fade-in', [], {duration: 250}),
     );
+    
     animTimeline.addSequences(animSequence);
   }
 
@@ -214,12 +223,15 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE EXPLANATION OF C ARRAY'S PURPOSE AND CONTINUE INTO NEXT PHASE
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continueNext: true}); // after hiding, immediately continue into next phase
-    animSequence.setDescription(`Hide explanation of c array's purpose and continue into next phase`);
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: `Hide explanation of c array's purpose and continue into next phase`,
+      continueNext: true, // after hiding, immediately continue into next phase
+    })
+    .addBlocks(
       Exit(textbox_cArray, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_cArray, '~trace', ['from-A']),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -249,9 +261,11 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
     // MOVE CBAR TO CURRENT JOB BAR, UNHIDE IT, AND HIGHLIGHT CURRENT JOB BAR AND J ARRAY BLOCK
     {
-      const animSequence = new AnimSequence(null, {continuePrev: true});
-      animSequence.setDescription('Move cbar to current job bar, unhide it, and highlight current job bar and j array block');
-      animSequence.addBlocks(
+      const animSequence = new AnimSequence({
+        description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
+        continuePrev: true,
+      })
+      .addBlocks(
         Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
         Emphasis(jobBarEl, '~highlight', [], {blocksNext: false}),
         Emphasis(jBlock, '~highlight', [], {blocksNext: false, blocksPrev: false}),
@@ -266,10 +280,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
     // MOVE CBAR, HIGHLIGHT COMPATIBLE JOB IF EXISTS, AND POINT TO C ARRAY
     {
-      const animSequence = new AnimSequence();
-      const animSequence2 = new AnimSequence();
-      animSequence.setDescription('Move cbar and highlight compatible job if it exists');
-      animSequence2.setDescription('Point to c array and fill entry');
+      const animSequence = new AnimSequence({description: 'Move cbar and highlight compatible job if it exists'});
+      const animSequence2 = new AnimSequence({description:'Point to c array and fill entry'});
       // If the compatible job exists, Move cbar to compatible job bar and highlight it
       // Then point arrow from compatible row header to current c-array entry
       if (compatibleJobBarEl) {
@@ -280,9 +292,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
           Emphasis(compatibleJobBarEl, '~highlight', []),
         );
         animSequence2.addBlocks(
-            SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
-            // TODO: No reason for blocksPrev to be false
-            DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {blocksPrev: false}),
+          SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
+          // TODO: No reason for blocksPrev to be false
+          DrawConnector(timeGraphArrowEl, '~trace', ['from-top'], {blocksPrev: false}),
         );
       }
       // If no compatible job exists, move cbar to left of time graph
@@ -300,7 +312,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       animSequence.addBlocks(
         Exit(paragraph_fillCArray_forJobX, '~fade-out', [], {duration: 250}),
         Entrance(paragraph_fillCArray_resultJobX, '~fade-in', [], {duration: 250}),
-      )
+      );
     
       // "Update" current c-array entry
       animSequence2.addBlocks(
@@ -310,15 +322,16 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Entrance(paragraph_fillCArray_continueOn, '~fade-in', [], {duration: 250}),
       );
     
-      animTimeline.addSequences(animSequence);
-      animTimeline.addSequences(animSequence2);
+      animTimeline.addSequences(animSequence, animSequence2);
     }
 
 
     // HIDE CBAR AND ARROW AND UN-HIGHLIGHT EVERYTHING
     {
-      const animSequence = new AnimSequence(null, {continueNext: true});
-      animSequence.setDescription('Hide cbar and arrow and un-highlight everything');
+      const animSequence = new AnimSequence({
+        description: 'Hide cbar and arrow and un-highlight everything',
+        continueNext: true,
+      });
       if (compatibleJobBarEl) {
         animSequence.addBlocks(
           Emphasis(compatibleJobBarEl, '~un-highlight', [], {blocksNext: false}),
@@ -335,6 +348,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Emphasis(jBlock, '~un-highlight', [], {blocksPrev: false}),
         Exit(paragraph_fillCArray_continueOn, '~disappear', []),
       );
+
       animTimeline.addSequences(animSequence);
     }
   });
@@ -349,12 +363,15 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // STATE THAT NOW WE NEED TO FIND THE MAXIMUM WEIGHT
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('State that now we need to find the maximum weight');
-    animSequence.setTag('finished c array');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'State that now we need to find the maximum weight',
+      tag: 'finished c array',
+      continuePrev: true,
+    })
+    .addBlocks(
       Entrance(textbox_finishedCArray, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -363,15 +380,17 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // SHOW NAIVE APPROACH TO FINDING MAX WEIGHT
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null);
-    animSequence.setDescription('Explain naive approach to finding max weight');
-    animSequence.setTag('show naive');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain naive approach to finding max weight',
+      tag: 'show naive',
+    })
+    .addBlocks(
       Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
       SetConnector(connector_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       DrawConnector(connector_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -381,16 +400,18 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN POSSIBILITY THAT JOB IS PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null);
-    animSequence.setDescription('Explain possibility that job is part of optimal sequence');
-    animSequence.setTag('explain naive');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain possibility that job is part of optimal sequence',
+      tag: 'explain naive',
+    })
+    .addBlocks(
       Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: -1.0, offsetSelfX: '10rem'}], {duration: 0}),
       Emphasis(algorithm_term1, '~highlight', []),
       SetConnector(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
       DrawConnector(connector_explainNaive1, '~trace', ['from-top']),
       Entrance(textbox_explainNaive1, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -400,16 +421,18 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN POSSIBILITY THAT JOB IS **NOT** PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null);
-    animSequence.setDescription('Explain possibility that job is NOT part of optimal sequence');
-    animSequence.setTag('explain naive');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain possibility that job is NOT part of optimal sequence',
+      tag: 'explain naive' // TODO: Why is this identical to the one above?
+    })
+    .addBlocks(
       Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: 1.0, offsetSelfX: '-10rem', alignmentX: 'right'}], {duration: 0}),
       Emphasis(algorithm_term2, '~highlight', []),
       SetConnector(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
       DrawConnector(connector_explainNaive2, '~trace', ['from-top']),
       Entrance(textbox_explainNaive2, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -417,10 +440,12 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE NAIVE APPROACH EXPLANATIONS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('Hide naive approach explanations');
-    animSequence.setTag('explain naive bad');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Hide naive approach explanations',
+      tag: 'explain naive bad',
+      continueNext: true,
+    })
+    .addBlocks(
       Exit(textbox_explainNaive1, '~fade-out', [], {blocksNext: false}),
       Exit(textbox_explainNaive2, '~fade-out', [], {blocksNext: false, blocksPrev: false}),
       EraseConnector(connector_explainNaive1, '~trace', ['from-bottom'], {blocksNext: false}),
@@ -428,6 +453,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Emphasis(algorithm_term1, '~un-highlight', [], {blocksNext: false}),
       Emphasis(algorithm_term2, '~un-highlight', [], {blocksPrev: false}),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -438,14 +464,17 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHY NAIVE APPROACH IS BAD
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Explain why naive approach is bad');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain why naive approach is bad',
+      continuePrev: true,
+    })
+    .addBlocks(
       Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
       SetConnector(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       DrawConnector(connector_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', [], {blocksPrev: false}),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -455,11 +484,14 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // COLLAPSE TEXT BOXES ABOUT THE NAIVE APPROACH
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('Collapse text boxes about the naive approach');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Collapse text boxes about the naive approach',
+      continueNext: true,
+    })
+    .addBlocks(
       Exit(naiveAlgorithmText, '~fade-out', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -474,14 +506,17 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN MEMOIZATION
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Explain memoization');
-    animSequence.setTag('introduce memoization');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain memoization',
+      tag: 'introduce memoization',
+      continuePrev: true,
+    })
+    .addBlocks(
       Entrance(jArray2, '~wipe', ['from-left']),
       Entrance(MArray, '~wipe', ['from-left'], {blocksPrev: false}),
       Entrance(textbox_MArray, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -492,9 +527,10 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHAT M ARRAY WILL BE USED FOR
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Explain what M array will be used for');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Explain what M array will be used for',
+    })
+    .addBlocks(
       SetConnector(connector_MArray, [textbox_MArray, 0, 0.5], [MArray, 1, 0.5]),
       DrawConnector(connector_MArray, '~trace', ['from-B']),
       Exit( paragraph_MArray_explain, '~fade-out', [], {duration: 250}),
@@ -502,6 +538,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       Exit(arrayBlank_M_0, '~fade-out', []),
       Entrance(arrayValue_M_0, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -512,14 +549,16 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // SHOW MEMOIZED ALGORITHM
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Show memoized algorithm');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Show memoized algorithm',
+    })
+    .addBlocks(
       Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetSelfX: '6.25rem', preserveY: true}], {duration: 0}),
       SetConnector(connector_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       DrawConnector(connector_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),
     );
+
     animTimeline.addSequences(animSequence);
   }
 
@@ -530,12 +569,15 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE M ARRAY TEXT EXPLANATION BOXES
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('Hide M array text explanation boxes');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Hide M array text explanation boxes',
+      continueNext: true,
+    })
+    .addBlocks(
       Exit(MArrayTextBoxes, '~fade-out', []),
       Entrance(dataDisplayBorder, '~wipe', ['from-top']),
     );
+
     animTimeline.addSequences(animSequence);
   }
 };
@@ -627,9 +669,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FADE IN JOB CARD AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Fade in job card and M access');
-    animSequence.setTag('start');
+    const animSequence = new AnimSequence({
+      description: 'Fade in job card and M access',
+      tag: 'start',
+      continuePrev: true,
+    });
     if (parentArrowDown && parentArrowSource && aboveBullet) {
       const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as Connector;
       animSequence.addBlocks(
@@ -663,10 +707,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // POINT TO M BLOCK ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Point to M block array entry');
+    const animSequence = new AnimSequence({
+      description: 'Point to M block array entry',
+    })
     // animSequence.addOneBlock([ 'line', connector_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
-    animSequence.addBlocks(
+    .addBlocks(
       SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
       DrawConnector(connector_toMBlock, '~trace', ['from-A']),
     );
@@ -679,9 +724,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON FORMULA CONTAINER
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on formula container');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on formula container',
+    })
+    .addBlocks(
       EraseConnector(connector_toMBlock, '~trace', ['from-B']),
       Exit(textbox_MAccess, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_MAccess, '~trace', ['from-B'], {blocksNext: false}),
@@ -703,9 +749,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON COMPUTATION 1
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on computation 1');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on computation 1',
+    })
+    .addBlocks(
       Exit(textbox_formulaComputation, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_formulaComputation, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(formulaComputation, '~un-highlight', [], {blocksPrev: false}),
@@ -724,9 +771,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON C ACCESS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on c access');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on c access',
+    })
+    .addBlocks(
       Exit(textbox_computation1, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_computation1, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(computationExpression1, '~un-highlight', [], {blocksNext: false, blocksPrev: false}),
@@ -745,9 +793,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // POINT TO C ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Point to c array entry');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Point to c array entry',
+    })
+    .addBlocks(
       SetConnector(connector_toCBlock, [cAccessContainer, 0, 0.5], [cBlock, 0.9, 0.5], {trackEndpoints: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A'], {blocksPrev: false}),
     );
@@ -760,9 +809,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // REVERSE ARROW AND REPLACE C ACCESS WITH VALUE
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Reverse arrow and replace c access with value');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Reverse arrow and replace c access with value',
+    })
+    .addBlocks(
       EraseConnector(connector_toCBlock, '~fade-out', []),
       SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5], {trackEndpoints: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A']),
@@ -787,9 +837,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON OPT EXPRESSION 1 AS A WHOLE
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on OPT expression 1 as a whole');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on OPT expression 1 as a whole',
+    })
+    .addBlocks(
       // hide arrow for c block
       EraseConnector(connector_toCBlock, '~fade-out', []),
   
@@ -815,7 +866,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = new AnimSequence(null, {continueNext: true});
+    const animSeqPassDown = new AnimSequence({continueNext: true});
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addBlocks(
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksNext: false}),
@@ -829,10 +880,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     /****************************************************** */
     // REPLACE OPT1 EXPRESSION WITH ANSWER, CHANGE TEXT BOX TEXT
     /****************************************************** */
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Replace OPT1 expression with answer, change text box text');
-    animSequence.setTag('OPT point 1');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Replace OPT1 expression with answer, change text box text',
+      tag: 'OPT point 1',
+      continuePrev: true,
+    })
+    .addBlocks(
       SetConnector(connector_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
       DrawConnector(connector_upFromChild1, '~trace', ['from-A']),
       Exit(OPTExpression1, '~wipe', ['from-right'], {blocksPrev: false}),
@@ -852,9 +905,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // REMOVE ARROW COMING FROM CHILD, HIDE CURRENT TEXT; REPLACE COMPUTATION EXPRESSION WITH ANSWER; AND FOCUS ON WHOLE COMPUTATION1 (SWAP TEXT AS WELL)
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription(`Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`);
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: `Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`,
+    })
+    .addBlocks(
       EraseConnector(connector_upFromChild1, '~fade-out', [], {blocksNext: false}),
       Exit(textbox_OPTExpression1, '~fade-out', [], {blocksPrev: false, blocksNext: false}),
       EraseConnector(connector_OPTExpression1, '~trace', ['from-B'], {blocksNext: false}),
@@ -878,10 +932,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON COMPUTATION 2
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on computation 2');
-    animSequence.setTag('focus comp 2');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on computation 2',
+      tag: 'focus comp 2',
+    })
+    .addBlocks(
       Exit(textbox_computation1, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_computation1, '~trace', ['from-B'], {blocksNext: false}),
       Emphasis(computationResult1, '~un-highlight', [], {blocksPrev: false}),
@@ -900,9 +955,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // REPLACE SUBTRACTION WITH RESULT; THEN FOCUS ON OPT EXPRESSION 2
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Replace subtraction with result; then focus on OPT expression 2');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Replace subtraction with result; then focus on OPT expression 2'
+    })
+    .addBlocks(
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_computation2, '~trace', ['from-B'], {blocksNext: false}),
   
@@ -925,8 +981,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = new AnimSequence(null, {continueNext: true});
-    animSeqPassDown.addBlocks(
+    const animSeqPassDown = new AnimSequence({
+      continueNext: true,
+    })
+    .addBlocks(
       Exit(textbox_OPTExpression2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_OPTExpression2, '~trace', ['from-B']),
     );
@@ -938,9 +996,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     /****************************************************** */
     // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
     /****************************************************** */
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text',
+      continuePrev: true,
+    })
+    .addBlocks(
       SetConnector(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       DrawConnector(connector_upFromChild2, '~trace', ['from-A']),
 
@@ -965,9 +1025,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // FOCUS ON WHOLE FORMULA CONTAINER
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Focus on whole formula container');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Focus on whole formula container',
+    })
+    .addBlocks(
       EraseConnector(connector_upFromChild2, '~fade-out', []),
       Exit(textbox_computation2, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_computation2, '~trace', ['from-B'], {blocksNext: false}),
@@ -990,10 +1051,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // REPLACE FORMULA CONTAINER CONTENTS WITH FINAL ANSWER
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setTag('replace formula container contents');
-    animSequence.setDescription('Replace formula container contents with final answer');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Replace formula container contents with final answer',
+      tag: 'replace formula container contents',
+    })
+    .addBlocks(
       // TODO: Address
       // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
@@ -1014,10 +1076,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // SHOW ONLY M CONTAINER, REPLACE M ACCESS WITH FINAL COMPUTED OPTIMAL VALUE, AND UPDATE M ARRAY BLOCK
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Show only M container, replace M access with final computed optimal value, and update M array block');
-    animSequence.setTag('found max');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Show only M container, replace M access with final computed optimal value, and update M array block',
+      tag: 'found max',
+    })
+    .addBlocks(
       // hide formula container
       Exit(textbox_formulaComputation, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_formulaComputation, '~trace', ['from-B'], {blocksNext: false}),
@@ -1045,9 +1108,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   // REMOVE ARROW POINTING FROM M BLOCK AND SHOW FINAL TEXT BOX
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Remove arrow pointing from M block and show final text box');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Remove arrow pointing from M block and show final text box',
+    })
+    .addBlocks(
       // Add last text box
       Exit(paragraph_MAccess_intro, '~disappear', [], {blocksNext: false}), // TODO: blocksNext no longer necessary
       Entrance(paragraph_MAccess_solved, '~appear', [], {blocksPrev: false}), // TODO: blocksPrev no longer necessary
@@ -1066,10 +1130,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   /****************************************************** */
   if (parentArrowDown) {
     // just for hiding the last text box before moving back up the tree
-    const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('If this is child block, hide parent arrow and unhighlight M access');
-    animSequence.setTag('finish a main card');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'If this is child block, hide parent arrow and unhighlight M access',
+      tag: 'finish a main card',
+      continueNext: true,
+    })
+    .addBlocks(
       Exit(textbox_MAccess, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_MAccess, '~trace', ['from-B']),
       EraseConnector(parentArrowDown, '~fade-out', [], {blocksNext: false}),
@@ -1108,9 +1174,11 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   // FADE IN JOB STUB AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continuePrev: true});
-    animSequence.setDescription('Fade in job stub and M access');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Fade in job stub and M access',
+      continuePrev: true,
+    })
+    .addBlocks(
       Entrance(jobCard, '~fade-in', [], {blocksNext: false}),
       SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
       // TODO: Pretty sure blocksPrev should be false here?
@@ -1132,9 +1200,10 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   // POINT TO M BLOCK ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Point to M block array entry');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Point to M block array entry',
+    })
+    .addBlocks(
       SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
       DrawConnector(connector_toMBlock, '~trace', ['from-A']),
     );
@@ -1147,9 +1216,10 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   // POINT BACK TO M ACCESS FROM M BLOCK
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Point back to M access from M block');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Point back to M access from M block',
+    })
+    .addBlocks(
       EraseConnector(connector_toMBlock, '~fade-out', []),
       SetConnector(connector_toMBlock, [MBlock, 0.9, 0.5], [MAccessContainer, 0, 0.5]),
       DrawConnector(connector_toMBlock, '~trace', ['from-A']),
@@ -1169,9 +1239,11 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
   // RETURN BLOCK THAT INITIALLY HIDES REMAINING STUFF AND POINTS TO PARENT
   /****************************************************** */
   {
-    const animSequence = new AnimSequence(null, {continueNext: true});
-    animSequence.setDescription('Hide parent arrow and unhighlight M access');
-    animSequence.addBlocks(
+    const animSequence = new AnimSequence({
+      description: 'Hide parent arrow and unhighlight M access',
+      continueNext: true,
+    })
+    .addBlocks(
       EraseConnector(connector_toMBlock, '~fade-out', [], {blocksNext: false}),
       EraseConnector(connector_MAccess, '~trace', ['from-B'], {blocksPrev: false, blocksNext: false}),
       Exit(textbox_MAccess, '~fade-out', [], {blocksPrev: false}),
