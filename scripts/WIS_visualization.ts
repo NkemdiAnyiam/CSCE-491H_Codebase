@@ -269,7 +269,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
         Entrance(cBar, '~wipe', ['from-top']),
-        Entrance(paragraph_fillCArray_forJobX, '~appear', [], {startsNextBlock: true}), // TODO: No need for blocksNext now
+        Entrance(paragraph_fillCArray_forJobX, '~appear', []),
         Entrance(textbox_fillCArray, '~fade-in', []),
       );
 
@@ -292,7 +292,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         );
         animSequence2.addBlocks(
           SetConnector(timeGraphArrowEl, [rowSJNum, 1, 0.5], [cBlock, 0.5, 0]),
-          // TODO: No reason for blocksPrev to be false
           DrawConnector(timeGraphArrowEl, '~trace', ['from-top']),
         );
       }
@@ -341,7 +340,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       );
       animSequence.addBlocks(
         Exit(textbox_fillCArray, '~fade-out', [], {startsNextBlock: true}),
-        // [ 'std', paragraph_fillCArray_continueOn, '~fade-out', [], {duration: 0}], // TODO: This being here and having to add startNextBlock: true above needs to be considered
         Exit(cBar, '~fade-out', [], {startsNextBlock: true}),
         Emphasis(jobBarEl, '~un-highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~un-highlight', []),
@@ -422,7 +420,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Explain possibility that job is NOT part of optimal sequence',
-      tag: 'explain naive' // TODO: Why is this identical to the one above?
+      tag: 'explain naive p2'
     })
     .addBlocks(
       Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: 1.0, offsetSelfX: '-10rem', alignmentX: 'right'}],
@@ -688,7 +686,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     }
     else {
       animSequence.addBlocks(
-        Entrance(jobCard, '~fade-in', []), // TODO: blocksPrev being false wouldn't make the data-display border disappear in parallel
+        Entrance(jobCard, '~fade-in', []),
       );
     }
     animSequence.addBlocks(
@@ -913,8 +911,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       EraseConnector(connector_OPTExpression1, '~trace', ['from-B'], {startsNextBlock: true}),
       Emphasis(OPTExpressionContainer1, '~un-highlight', []),
   
-      Exit(paragraph_computation1_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_computation1_summary, '~appear', []), // TODO: blocksPrev no longer necessary
+      Exit(paragraph_computation1_intro, '~disappear', []),
+      Entrance(paragraph_computation1_summary, '~appear', []),
       Exit(computationExpression1, '~wipe', ['from-right'],),
       Entrance(computationResult1, '~wipe', ['from-right'],),
       Emphasis(computationResult1, '~highlight', [], {startsNextBlock: true}),
@@ -1002,8 +1000,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       SetConnector(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       DrawConnector(connector_upFromChild2, '~trace', ['from-A']),
 
-      Exit(paragraph_computation2_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_computation2_summary, '~appear', []), // TODO: blocksPrev no longer necessary
+      Exit(paragraph_computation2_intro, '~disappear', []),
+      Entrance(paragraph_computation2_summary, '~appear', []),
 
       Emphasis(computation2, '~un-highlight', [], {startsNextBlock: true}),
       Exit(OPTExpression2, '~wipe', ['from-right']),
@@ -1033,8 +1031,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Emphasis(computationResult2, '~un-highlight', []),
 
       
-      Exit(paragraph_formulaComputation_find, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_formulaComputation_max, '~appear', []),  // TODO: blocksPrev no longer necessary
+      Exit(paragraph_formulaComputation_find, '~disappear', []),
+      Entrance(paragraph_formulaComputation_max, '~appear', []),
       Emphasis(formulaContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(connector_formulaComputation, '~trace', ['from-A']),
@@ -1111,8 +1109,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     })
     .addBlocks(
       // Add last text box
-      Exit(paragraph_MAccess_intro, '~disappear', [], {startsNextBlock: true}), // TODO: blocksNext no longer necessary
-      Entrance(paragraph_MAccess_solved, '~appear', []), // TODO: blocksPrev no longer necessary
+      Exit(paragraph_MAccess_intro, '~disappear', []),
+      Entrance(paragraph_MAccess_solved, '~appear', []),
       EraseConnector(connector_toMBlock, '~trace', ['from-left']),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
       DrawConnector(connector_MAccess, '~trace', ['from-A']),
@@ -1178,7 +1176,6 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
     .addBlocks(
       Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}),
       SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
-      // TODO: Pretty sure blocksPrev should be false here?
       DrawConnector(connector_bulletConnector, '~trace', ['from-A']),
       SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
       DrawConnector(parentArrowDown, '~trace', ['from-A']),
