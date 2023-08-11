@@ -389,9 +389,8 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     this.connectorElem = connectorElem;
   }
 
-  protected _onStartForward(): void {
-    this.connectorElem.clearTrackingInterval(); // TODO: Consider clearing in _onFinishForward()
-  }
+  // protected _onStartForward(): void {
+  // }
 
   protected _onStartBackward(): void {
     this.domElem.classList.remove('wbfk-hidden');
@@ -401,7 +400,11 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     }
   }
 
+  // protected _onFinishBackward(): void {
+  // }
+
   protected _onFinishForward(): void {
+    this.connectorElem.clearTrackingInterval(); // TODO: Consider clearing in _onFinishForward()
     this.domElem.classList.add('wbfk-hidden');
   }
 }
