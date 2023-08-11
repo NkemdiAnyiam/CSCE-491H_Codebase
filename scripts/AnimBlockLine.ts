@@ -5,6 +5,13 @@ export type ConnectorConfig = {
   trackEndpoints: boolean;
 };
 
+class ConnectorError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConnectorUpdateError';
+  }
+}
+
 // CHANGE NOTE: Completely get rid of obsolete AnimBlockLineUpdater
 export class Connector extends HTMLElement {
   static staticId: number = 0;
@@ -21,7 +28,7 @@ export class Connector extends HTMLElement {
   // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
-  trackingEnabled: boolean = false;
+  trackingEnabled: boolean = true;
   private currentlyTracking: boolean = false;
   private timeoutForTracking?: NodeJS.Timer;
 
@@ -190,7 +197,17 @@ export class Connector extends HTMLElement {
     // to properly place the endpoints, we need the positions of their bounding boxes
     
     // CHANGE NOTE: Use offsetParent instead of direct parent to properly get nearest positioned ancestor
-    const offsetParent = this.offsetParent!;
+    const offsetParent = this.offsetParent;
+    if (!offsetParent) {
+      this.clearTrackingInterval();
+      const errorArr = [
+        `Cannot call updateEndpoints() while the connector or its parent is invisible.`,
+        this.trackingEnabled ? `\nThis connector was also tracking its endpoints, so we disabled it.` : '',
+        this.trackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it along with its parent; this safely pauses the tracking.` : '',
+        this.trackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
+      ]
+      throw new ConnectorError(errorArr.join(' '));
+    }
 
     // The x and y coordinates of the line need to be with respect to the top left of document
     // Thus, we must subtract the offsetParent element's current top and left from the total offset
