@@ -205,12 +205,13 @@ export class Connector extends HTMLElement {
     // CHANGE NOTE: elements are unhidden using override to allow access to bounding box
     // the override class is appended without classList.add() so that multiple applications...
     // of the class do not interfere with each other upon removal
-    pointA[0].classList.value += ` wbfk-override-hidden`;
-    pointB[0].classList.value += ` wbfk-override-hidden`;
+    const [aHidden, bHidden] = [pointA[0].classList.value.includes('wbfk-hidden'), pointB[0].classList.value.includes('wbfk-hidden')];
+    if (aHidden) pointA[0].classList.value += ` wbfk-override-hidden`;
+    if (bHidden) pointB[0].classList.value += ` wbfk-override-hidden`;
     const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = pointA[0].getBoundingClientRect();
     const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = pointB[0].getBoundingClientRect();
-    pointA[0].classList.value = pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
-    pointB[0].classList.value = pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
+    if (aHidden) pointA[0].classList.value = pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
+    if (bHidden) pointB[0].classList.value = pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
