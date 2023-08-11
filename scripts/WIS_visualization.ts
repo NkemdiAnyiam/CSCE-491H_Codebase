@@ -265,7 +265,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addBlocks(
-        Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
+        Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesAttemptForcefully: true}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
         Entrance(cBar, '~wipe', ['from-top']),
@@ -383,7 +383,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'show naive',
     })
     .addBlocks(
-      Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
+      Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0, commitStylesAttemptForcefully: true}),
       SetConnector(connector_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       DrawConnector(connector_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
@@ -403,7 +403,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive',
     })
     .addBlocks(
-      Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: -1.0, offsetSelfX: '10rem'}], {duration: 0}),
+      Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: -1.0, offsetSelfX: '10rem'}],
+        {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term1, '~highlight', []),
       SetConnector(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
       DrawConnector(connector_explainNaive1, '~trace', ['from-top']),
@@ -424,7 +425,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive' // TODO: Why is this identical to the one above?
     })
     .addBlocks(
-      Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: 1.0, offsetSelfX: '-10rem', alignmentX: 'right'}], {duration: 0}),
+      Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem', offsetTargetX: 1.0, offsetSelfX: '-10rem', alignmentX: 'right'}],
+        {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term2, '~highlight', []),
       SetConnector(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
       DrawConnector(connector_explainNaive2, '~trace', ['from-top']),
@@ -466,7 +468,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Explain why naive approach is bad',
     })
     .addBlocks(
-      Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}], {duration: 0}),
+      Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: 1, offsetSelfY: '10rem'}],
+        {duration: 0, commitStylesAttemptForcefully: true}),
       SetConnector(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       DrawConnector(connector_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', []),
@@ -549,7 +552,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Show memoized algorithm',
     })
     .addBlocks(
-      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetSelfX: '6.25rem', preserveY: true}], {duration: 0}),
+      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: 1, offsetSelfX: '6.25rem', preserveY: true}],
+        {duration: 0, commitStylesAttemptForcefully: true}),
       SetConnector(connector_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       DrawConnector(connector_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),

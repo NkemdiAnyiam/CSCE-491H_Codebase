@@ -7,6 +7,7 @@ type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
   startsWithPreviousBlock: boolean;
   commitsStyles: boolean;
+  commitStylesAttemptForcefully: boolean; // attempt to unhide, commit, then re-hide
   composite: 'replace' | 'add' | 'accumulate';
   classesToAddOnFinish: string[];
   classesToAddOnStart: string[];
@@ -45,6 +46,13 @@ type CssLengthUnit = | 'px' | 'rem' | '%';
 type CssLength = `${number}${CssLengthUnit}`;
 type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
 type CssXAlignment = | 'left' | 'right'; // TODO: more options?
+
+class CommitStylesError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CommitStylesError';
+  }
+}
 
 
 
@@ -434,6 +442,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.loadKeyframeEffect(direction);
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.config.playbackRate);
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
+    let resolver: (value: void | PromiseLike<void>) => void = () => {};
+    let rejecter: (reason?: any) => void;
     skipping ? animation.finish() : animation.play();
     this.parentTimeline?.currentAnimations.set(this.id, this.animation);
     
@@ -472,15 +482,23 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       // console.log('A', this.domElem);
       // CHANGE NOTE: Move hidden class stuff here
       // TODO: Account for case where parent is hidden
-      if (this.config.commitsStyles) {
+      if (this.config.commitsStyles || this.config.commitStylesAttemptForcefully) {
         try {
           animation.commitStyles(); // actually applies the styles to the element
         }
         catch (err) {
-          console.warn(err); // TODO: Make more specific
-          this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
-          animation.commitStyles();
-          this.domElem.classList.remove('wbfk-override-hidden');
+          if (!this.config.commitStylesAttemptForcefully) {
+            // TODO: Add specifics about where exactly failure occured
+            rejecter(new CommitStylesError(`Cannot commit animation styles while element is not rendered.\nTo attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true. If the element's ancestor is hidden, this will still fail.`));
+          }
+          try {
+            this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
+            animation.commitStyles();
+            this.domElem.classList.remove('wbfk-override-hidden');
+          }
+          catch (err) {
+            rejecter(new CommitStylesError(`Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`));
+          }
         }
       }
       
@@ -497,8 +515,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           break;
       }
     };
-
-    let resolver: (value: void | PromiseLike<void>) => void = () => {};
     
     animation.onEndDelayFinish = () => {
       // console.log('E', this.domElem);
@@ -507,7 +523,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       resolver();
     };
 
-    return new Promise<void>(resolve => resolver = resolve);
+    return new Promise<void>((resolve, reject) => {
+      resolver = resolve;
+      rejecter = reject;
+    });
   }
 
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): AnimBlockConfig {
@@ -518,6 +537,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       duration: 500,
       playbackRate: 1, // TODO: Potentially rename to "basePlaybackRate"
       commitsStyles: true,
+      commitStylesAttemptForcefully: false,
       composite: 'replace',
       easing: 'linear',
       pregeneratesKeyframes: false,

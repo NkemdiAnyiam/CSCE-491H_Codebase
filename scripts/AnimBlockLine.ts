@@ -198,10 +198,11 @@ export class Connector extends HTMLElement {
     const offsetParent = this.offsetParent;
     if (!offsetParent) {
       this.clearTrackingInterval();
+      // TODO: Add specifics about where exactly failure occured
       const errorArr = [
         `Cannot call updateEndpoints() while the connector or its parent is invisible.`,
         this.trackingEnabled ? `\nThis connector was also tracking its endpoints, so we disabled it.` : '',
-        this.trackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it along with its parent; this safely pauses the tracking.` : '',
+        this.trackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is going to be hidden; this safely pauses the tracking.` : '',
         this.trackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
       ]
       throw new ConnectorError(errorArr.join(' '));
