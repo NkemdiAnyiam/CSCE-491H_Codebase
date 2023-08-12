@@ -2,7 +2,7 @@ import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 
 export type ConnectorConfig = {
-  trackEndpoints: boolean;
+  pointTrackingEnabled: boolean;
 };
 
 class ConnectorError extends Error {
@@ -28,7 +28,7 @@ export class Connector extends HTMLElement {
   // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
   pointB?: [elemB: Element, leftOffset: number, topOffset: number];
-  trackingEnabled: boolean = true;
+  pointTrackingEnabled: boolean = true;
   private continuousTrackingReqId: number = NaN;
 
   get ax(): number { return this.lineLayer.x1.baseVal.value; }
@@ -201,9 +201,9 @@ export class Connector extends HTMLElement {
       // TODO: Add specifics about where exactly failure occured
       const errorArr = [
         `Cannot call updateEndpoints() while the connector or its parent is invisible.`,
-        this.trackingEnabled ? `\nThis connector was also tracking its endpoints, so we disabled it.` : '',
-        this.trackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is going to be hidden; this safely pauses the tracking.` : '',
-        this.trackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
+        this.pointTrackingEnabled ? `\nThis connector was also tracking its endpoints, so we disabled it.` : '',
+        this.pointTrackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is going to be hidden; this safely pauses the tracking.` : '',
+        this.pointTrackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
       ]
       throw new ConnectorError(errorArr.join(' '));
     }
@@ -318,21 +318,21 @@ export class SetConnectorBlock extends AnimBlock {
   protected _onStartForward(): void {
     this.previousPointA = this.connectorElem.pointA;
     this.previousPointB = this.connectorElem.pointB;
-    this.previousConnectorConfig.trackEndpoints = this.connectorElem.trackingEnabled;
+    this.previousConnectorConfig.pointTrackingEnabled = this.connectorElem.pointTrackingEnabled;
     this.connectorElem.pointA = this.pointA;
     this.connectorElem.pointB = this.pointB;
-    this.connectorElem.trackingEnabled = this.connectorConfig.trackEndpoints;
+    this.connectorElem.pointTrackingEnabled = this.connectorConfig.pointTrackingEnabled;
   }
 
   protected _onStartBackward(): void {
     this.connectorElem.pointA = this.previousPointA;
     this.connectorElem.pointB = this.previousPointB;
-    this.connectorElem.trackingEnabled = this.previousConnectorConfig.trackEndpoints;
+    this.connectorElem.pointTrackingEnabled = this.previousConnectorConfig.pointTrackingEnabled;
   }
 
   applyLineConfig(connectorConfig: Partial<ConnectorConfig>): ConnectorConfig {
     return {
-      trackEndpoints: this.connectorElem.trackingEnabled,
+      pointTrackingEnabled: this.connectorElem.pointTrackingEnabled,
       ...connectorConfig,
     };
   }
@@ -360,7 +360,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onStartForward(): void {
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
-    if (this.connectorElem.trackingEnabled) {
+    if (this.connectorElem.pointTrackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
   }
@@ -396,7 +396,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
   protected _onStartBackward(): void {
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
-    if (this.connectorElem.trackingEnabled) {
+    if (this.connectorElem.pointTrackingEnabled) {
       this.connectorElem.setTrackingInterval();
     }
   }

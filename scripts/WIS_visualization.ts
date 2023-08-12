@@ -709,7 +709,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     })
     // animSequence.addOneBlock([ 'line', connector_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
     .addBlocks(
-      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toMBlock, '~trace', ['from-A']),
     );
 
@@ -777,7 +777,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Emphasis(computationExpression1, '~un-highlight', [], {startsNextBlock: true}),
   
       Emphasis(cAccessContainer, '~highlight', []),
-      SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
+      SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {pointTrackingEnabled: true}),
       DrawConnector(connector_cAccess, '~trace', ['from-A']),
       Entrance(textbox_cAccess, '~fade-in', []),
     );
@@ -794,7 +794,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       description: 'Point to c array entry',
     })
     .addBlocks(
-      SetConnector(connector_toCBlock, [cAccessContainer, 0, 0.5], [cBlock, 0.9, 0.5], {trackEndpoints: true}),
+      SetConnector(connector_toCBlock, [cAccessContainer, 0, 0.5], [cBlock, 0.9, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A']),
     );
 
@@ -811,7 +811,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     })
     .addBlocks(
       EraseConnector(connector_toCBlock, '~fade-out', []),
-      SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5], {trackEndpoints: true}),
+      SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A']),
       // TODO: Address SetConnector update dilemma. The commented out code won't work, so I stopped writing it partway through
       // EraseConnector(connector_cAccess, '~fade-out', [], {duration: 0}),
@@ -1033,7 +1033,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Exit(paragraph_formulaComputation_find, '~disappear', []),
       Entrance(paragraph_formulaComputation_max, '~appear', []),
       Emphasis(formulaContainer, '~highlight', [], {startsNextBlock: true}),
-      SetConnector(connector_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {trackEndpoints: true}),
+      SetConnector(connector_formulaComputation, [formulaContainer, 0.5, 0], [textbox_formulaComputation, 0.5, 1], {pointTrackingEnabled: true}),
       DrawConnector(connector_formulaComputation, '~trace', ['from-A']),
       Entrance(textbox_formulaComputation, '~fade-in', []),
     );
@@ -1089,7 +1089,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Emphasis(MAccessContainer, '~highlight', []),
   
       // Visually update M array entry
-      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toMBlock, '~trace', ['from-right']),
       Exit(MBlock_blank, '~fade-out', []),
       Entrance(MBlock_value, '~fade-in', []),
@@ -1111,7 +1111,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       Exit(paragraph_MAccess_intro, '~disappear', []),
       Entrance(paragraph_MAccess_solved, '~appear', []),
       EraseConnector(connector_toMBlock, '~trace', ['from-left']),
-      SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {trackEndpoints: true}),
+      SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1], {pointTrackingEnabled: true}),
       DrawConnector(connector_MAccess, '~trace', ['from-A']),
       Entrance(textbox_MAccess, '~fade-in', []),
     );
@@ -1197,7 +1197,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
       description: 'Point to M block array entry',
     })
     .addBlocks(
-      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {trackEndpoints: true}),
+      SetConnector(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toMBlock, '~trace', ['from-A']),
     );
 
