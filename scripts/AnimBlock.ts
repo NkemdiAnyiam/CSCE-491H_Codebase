@@ -115,7 +115,7 @@ export class AnimTimelineAnimation extends Animation {
     // TODO: check for undefined as well
     if (this.forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
     
-    super.effect = forwardEffect;
+    this.loadKeyframeEffect('forward');
     this.resetPromises('both');
   }
 
