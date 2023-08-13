@@ -101,6 +101,7 @@ export class AnimTimelineAnimation extends Animation {
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
   onEndDelayFinish: Function = () => {};
+  private get trueEndDelay(): number { return (this.direction === 'forward' ? this.forwardEffect : this.backwardEffect).getTiming().endDelay as number; }
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
@@ -454,11 +455,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.loadKeyframeEffect(direction);
     animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.playbackRate);
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
-    let resolver: (value: void | PromiseLike<void>) => void = () => {};
+    let resolver: (value: void | PromiseLike<void>) => void;
     let rejecter: (reason?: any) => void;
     skipping ? animation.finish() : animation.play();
     this.parentTimeline?.currentAnimations.set(this.id, this.animation);
     
+    // After delay phase, then apply class modifications and call onStart functions.
+    // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
       switch(direction) {
         case 'forward':
@@ -486,27 +489,30 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
       }
     };
-    
-    // // if in skip mode, finish the animation instantly. Otherwise, play through it normally
-    // this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo ? animation.finish() : animation.play(); // TODO: Move playback rate definition to subclasses?
 
+    // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
       // CHANGE NOTE: Move hidden class stuff here
-      // TODO: Account for case where parent is hidden
       if (this.commitsStyles || this.commitStylesAttemptForcefully) {
+        // Attempt to apply the styles to the element.
         try {
-          animation.commitStyles(); // actually applies the styles to the element
+          animation.commitStyles();
         }
-        catch (err) {
+        // If commitStyles() fails, it's because the element is not rendered.
+        catch (_) {
+          // If forced commit is disabled, do not re-attempt to commit the styles; throw error instead.
           if (!this.commitStylesAttemptForcefully) {
             // TODO: Add specifics about where exactly failure occured
             rejecter(new CommitStylesError(`Cannot commit animation styles while element is not rendered.\nTo attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true. If the element's ancestor is hidden, this will still fail.`));
           }
+
+          // If forced commit is enabled, attempt to override the hidden state and apply the style.
           try {
             this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
             animation.commitStyles();
             this.domElem.classList.remove('wbfk-override-hidden');
           }
+          // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
             rejecter(new CommitStylesError(`Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`));
           }
@@ -527,6 +533,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       }
     };
     
+    // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
       animation.cancel();
       this.parentTimeline?.currentAnimations.delete(this.id);
