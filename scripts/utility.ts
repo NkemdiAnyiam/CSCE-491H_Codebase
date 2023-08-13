@@ -3,6 +3,7 @@ export const stoi = (string: string): number => Number.parseInt(string);
 export const stof = (string: string): number => Number.parseFloat(string);
 export const getRandInt = (maximum: number): number => Math.floor(Math.random() * (maximum + 1)); // includes maximum
 export const getRandIntRange = (minimum: number, maximum: number): number => Math.floor(Math.random() * (maximum + 1 - minimum)) + minimum; // includes maximum
+export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export function enableButton(buttonEl: HTMLButtonElement): void {
   buttonEl.disabled = false;
   buttonEl.classList.remove('button-disabled');
