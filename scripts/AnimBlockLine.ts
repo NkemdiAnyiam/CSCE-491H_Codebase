@@ -1,5 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { equalWithinTol } from "./utility.js";
 
 export type ConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -236,15 +237,33 @@ export class Connector extends HTMLElement {
     const ay = (1 - pointA[2]) * aTop + (pointA[2]) * aBottom + connectorTopOffset;
     const bx = (1 - pointB[1]) * bLeft + (pointB[1]) * bRight + connectorLeftOffset;
     const by = (1 - pointB[2]) * bTop + (pointB[2]) * bBottom + connectorTopOffset;
-    this.ax = ax;
-    this.ay = ay;
-    this.bx = bx;
-    this.by = by;
-    // TODO: Document
-    this.mask.width.baseVal.valueAsString = `${Math.abs(bx - ax) + 50}`;
-    this.mask.x.baseVal.valueAsString = `${Math.min(ax, bx) - 25}`;
-    this.mask.height.baseVal.valueAsString = `${Math.abs(by - ay) + 50}`;
-    this.mask.y.baseVal.valueAsString = `${Math.min(ay, by) - 25}`;
+    let changedX = false;
+    let changedY = false;
+    if (!equalWithinTol(ax, this.ax)) {
+      this.ax = ax;
+      changedX = true;
+    }
+    if (!equalWithinTol(ay, this.ay)) {
+      this.ay = ay;
+      changedY = true;
+    }
+    if (!equalWithinTol(bx, this.bx)) {
+      this.bx = bx;
+      changedX = true;
+    }
+    if (!equalWithinTol(by, this.by)) {
+      this.by = by;
+      changedY = true;
+    }
+    // TODO: Document purpose of manipulating mask
+    if (changedX) {
+      this.mask.width.baseVal.valueAsString = `${Math.abs(bx - ax) + 50}`;
+      this.mask.x.baseVal.valueAsString = `${Math.min(ax, bx) - 25}`;
+    }
+    if (changedY) {
+      this.mask.height.baseVal.valueAsString = `${Math.abs(by - ay) + 50}`;
+      this.mask.y.baseVal.valueAsString = `${Math.min(ay, by) - 25}`;
+    }
   }
 
   // CHANGE NOTE: Use requestAnimationFrame() loop instead of setInterval() to laglessly update endpoints
