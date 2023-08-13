@@ -16,8 +16,6 @@ type CustomKeyframeEffectOptions = {
   pregeneratesKeyframes: boolean;
 }
 
-KeyframeEffect
-
 type KeyframeTimingOptions = {
   duration: number;
   easing: string;
