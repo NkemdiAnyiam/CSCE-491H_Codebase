@@ -293,7 +293,7 @@ export class AnimTimelineAnimation extends Animation {
     const awaitedTimesLength = awaitedTimes.length;
     for (let i = 1; i < awaitedTimesLength; ++i) {
       const currAwaitedTime = awaitedTimes[i];
-      if (currAwaitedTime[0] === 0.01) { 
+      if (currAwaitedTime[0] === 0) { 
         currAwaitedTime[2].push(...promises);
         break;
       }
