@@ -18,8 +18,8 @@ export class Connector extends HTMLElement {
 
   private connectorId: number = 0;
   readonly markerIdPrefix: string;
-  usesMarkerB: boolean;
-  usesMarkerA: boolean;
+  usesMarkerB: boolean = false;
+  usesMarkerA: boolean = false;
   private lineLayer: SVGLineElement;
   private lineMask: SVGLineElement;
   private gBody: SVGGElement;
@@ -69,6 +69,7 @@ export class Connector extends HTMLElement {
     const maskId = `mask--${this.connectorId}`;
     this.usesMarkerA = this.hasAttribute('a-marker');
     this.usesMarkerB = this.hasAttribute('b-marker');
+    this.pointTrackingEnabled = !this.hasAttribute('tracking-disabled');
     const markerWidth = 5;
     const markerHeight = 7;
 
