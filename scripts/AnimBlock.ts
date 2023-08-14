@@ -78,6 +78,12 @@ type FinishPromises = {
   endDelayPhase: Promise<void>;
 }
 
+type PhaseResolvers = {
+  delayPhase: (value: void | PromiseLike<void>) => void;
+  activePhase: (value: void | PromiseLike<void>) => void;
+  endDelayPhase: (value: void | PromiseLike<void>) => void;
+}
+
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
@@ -87,14 +93,10 @@ export class AnimTimelineAnimation extends Animation {
   // to help with Promises-based sequencing
   private awaitedForwardTimes: AwaitedTime[] = [];
   private awaitedBackwardTimes: AwaitedTime[] = [];
-  private resolveForward_delayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_delayPhase() was called before assigning resolve'); };
-  private resolveForward_activePhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_activePhase() was called before assigning resolve'); };
-  private resolveForward_endDelayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveForward_endDelayPhase() was called before assigning resolve'); };
   // TODO: Prevent outside modifications
+  private forwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
   forwardFinishes: FinishPromises = {} as FinishPromises;
-  private resolveBackward_delayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_delayPhase() was called before assigning resolve'); };
-  private resolveBackward_activePhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_activePhase() was called before assigning resolve'); };
-  private resolveBackward_endDelayPhase: (value: void | PromiseLike<void>) => void = () => { throw new Error('resolveBackward_endDelayPhase() was called before assigning resolve'); };
+  private backwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
   backwardFinishes: FinishPromises = {} as FinishPromises;
   phaseIsFinishable = false;
   
@@ -121,32 +123,34 @@ export class AnimTimelineAnimation extends Animation {
 
   private resetPromises(direction: 'forward' | 'backward' | 'both'): void {
     const resetForwardPromises = () => {
+      const forwardPhaseResolvers = this.forwardPhaseResolvers;
       this.forwardFinishes = {
-        delayPhase: new Promise<void>(resolve => {this.resolveForward_delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {this.resolveForward_activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {this.resolveForward_endDelayPhase = resolve}),
+        delayPhase: new Promise<void>(resolve => {forwardPhaseResolvers.delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {forwardPhaseResolvers.activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {forwardPhaseResolvers.endDelayPhase = resolve}),
       };
 
       const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
       this.awaitedForwardTimes = [
-        [ -duration, [() => this.onDelayFinish(), this.resolveForward_delayPhase], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), this.resolveForward_activePhase], [], false ],
-        [ endDelay as number, [() => this.onEndDelayFinish(), this.resolveForward_endDelayPhase], [] ],
+        [ -duration, [() => this.onDelayFinish(), forwardPhaseResolvers.delayPhase], [], delay === 0 ],
+        [ 0, [() => this.onActiveFinish(), forwardPhaseResolvers.activePhase], [], false ],
+        [ endDelay, [() => this.onEndDelayFinish(), forwardPhaseResolvers.endDelayPhase], [] ],
       ];
     };
 
     const resetBackwardPromises = () => {
+      const backwardPhaseResolvers = this.backwardPhaseResolvers;
       this.backwardFinishes = {
-        delayPhase: new Promise<void>(resolve => {this.resolveBackward_delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {this.resolveBackward_activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {this.resolveBackward_endDelayPhase = resolve}),
+        delayPhase: new Promise<void>(resolve => {backwardPhaseResolvers.delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {backwardPhaseResolvers.activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {backwardPhaseResolvers.endDelayPhase = resolve}),
       };
   
-      const { delay, duration, endDelay } = this.backwardEffect.getTiming();
+      const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
       this.awaitedBackwardTimes = [
-        [ -(duration as number), [() => this.onDelayFinish(), this.resolveBackward_delayPhase], [], (delay as number) === 0 ],
-        [ 0, [() => this.onActiveFinish(), this.resolveBackward_activePhase], [], false ],
-        [ endDelay as number, [() => this.onEndDelayFinish(), this.resolveBackward_endDelayPhase], [], (endDelay as number) === 0 ],
+        [ -duration, [() => this.onDelayFinish(), backwardPhaseResolvers.delayPhase], [], delay === 0 ],
+        [ 0, [() => this.onActiveFinish(), backwardPhaseResolvers.activePhase], [], false ],
+        [ endDelay, [() => this.onEndDelayFinish(), backwardPhaseResolvers.endDelayPhase], [], endDelay === 0 ],
       ];
     };
 
