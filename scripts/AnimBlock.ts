@@ -257,7 +257,7 @@ export class AnimTimelineAnimation extends Animation {
   }
 
   // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
-  blockUntil(direction: 'forward' | 'backward', localTime: number): Promise<void> {
+  generateTimePromise(direction: 'forward' | 'backward', localTime: number): Promise<void> {
     // TODO: check for out-of-bounds times
     // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
     // past localTime. In such cases, the returned promise should be immediately resolved
@@ -266,6 +266,7 @@ export class AnimTimelineAnimation extends Animation {
     // to await animation reaching currentTime in its running, we must use...
     // the equivalent endDelay, which is localTime - (duration + delay)
     const endDelay = localTime - ((duration as number) + (delay as number));
+    // if (endDelay > this.trueEndDelay) { throw new Error(`Invalid blockUntil() time ${localTime}; value exceeded this animation's endDelay ${this.trueEndDelay}.`); }
 
     return new Promise(resolve => {
       const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
@@ -285,26 +286,31 @@ export class AnimTimelineAnimation extends Animation {
     });
   }
 
-  // accepts promises that this animation must await before being able to complete active phase
-  awaitActiveForefinisher(direction: 'forward' | 'backward', ...promises: Promise<any>[]): void {
-    // TODO: may need to check if the animation is in the 'finished' state
+  addRoadblocks(direction: 'forward' | 'backward', atLocalTime: number, ...promises: Promise<any>[]): void;
+  addRoadblocks(direction: 'forward' | 'backward', atPhasePoint: 'atActiveFinish' | 'atEndDelayFinish', ...promises: Promise<any>[]): void;
+  addRoadblocks(direction: 'forward' | 'backward', point: number | ('atActiveFinish' | 'atEndDelayFinish'), ...promises: Promise<any>[]): void {
     const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
     const awaitedTimesLength = awaitedTimes.length;
-    for (let i = 1; i < awaitedTimesLength; ++i) {
-      const currAwaitedTime = awaitedTimes[i];
-      if (currAwaitedTime[0] === 0) { 
-        currAwaitedTime[2].push(...promises);
-        break;
+    // TODO: may need to check if animation is in 'finished' state
+
+    if (typeof point === 'string') {
+      switch(point) {
+        // starts at idx 1 because 0 is reserved for delay finish
+        case "atActiveFinish":
+          awaitedTimes.slice(1)
+            .find((awaitedTime) => awaitedTime[0] === 0)?.[2]
+            .push(...promises);
+          break;
+        case "atEndDelayFinish":
+          awaitedTimes[awaitedTimesLength - 1][2].push(...promises);
+          break;
+        default:
+          throw new Error(`Invalid addRoadblocks() direction '${direction}'; must be 'atActiveFinish' or 'atEndDelayFinish'.`);
       }
     }
-  }
-
-  // accepts promises that this animation must await before being allowed to complete endDelay phase
-  awaitEndDelayForefinisher(direction: 'forward' | 'backward', ...promises: Promise<any>[]): void {
-    // TODO: may need to check if the animation is in the 'finished' state
-    const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
-    const currAwaitedTime = awaitedTimes[awaitedTimes.length - 1];
-    currAwaitedTime[2].push(...promises);
+    else {
+      // TODO: implement numeric
+    }
   }
   
   setForwardFrames(frames: Keyframe[]): void {
@@ -325,7 +331,6 @@ export class AnimTimelineAnimation extends Animation {
   loadKeyframeEffect(direction: 'forward' | 'backward'): void {
     switch(direction) {
       case "forward":
-        // TODO: Might be able to just do super.effect = this.forwardEffect without encountering Firefox bug. Test later
         const forwardEffect = this.forwardEffect;
         super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming(), composite: forwardEffect.composite});
         break;
