@@ -166,85 +166,55 @@ export class AnimTimelineAnimation extends Animation {
   }
   
   async play(): Promise<void> {
-    // if animation is already in progress and is just paused, resume the animation directly
+    // If animation is already in progress and is just paused, resume the animation directly.
     if (super.playState === 'paused') {
       super.play();
       return;
     }
     
-    // if play() is called while already playing, return
+    // If play() is called while already playing, return.
     if (this.inProgress) { return; }
     this.inProgress = true;
     
     const effect = super.effect!;
+    // If going forward, reset backward promises. If going backward, reset forward promises.
+    this.resetPromises(this.direction === 'forward' ? 'backward' : 'forward');
+    const awaitedTimes = this.direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+    super.play();
 
-    switch(this.direction) {
-      case "forward":
-        this.resetPromises('backward');
-        const awaitedForwardTimes = this.awaitedForwardTimes;
+    await Promise.resolve();
+    // Use length directly because entries could be added after loop is already entered.
+    // TODO: May need to find a less breakable solution than the length thing.
+    for (let i = 0; i < awaitedTimes.length; ++i) {
+      const [ endDelay, resolvers, awaiteds, bypassPlay ] = awaitedTimes[i];
 
-        super.play();
+      if (!bypassPlay) {
+        this.phaseIsFinishable = true;
+        // Set animation to stop at a certain time using endDelay.
+        effect.updateTiming({ endDelay });
+        await super.finished;
+      }
+      else {
+        // This allows outside operations like blockUntil() to push more resolvers to the queue...
+        // before the next loop iteration.
+        this.phaseIsFinishable = false;
         await Promise.resolve();
-        // use length directly because entries could be added after loop is already entered
-        // TODO: May need to find a less breakable solution than the length thing
-        for (let i = 0; i < awaitedForwardTimes.length; ++i) {
-          const [ endDelay, resolvers, awaiteds, bypassPlay ] = awaitedForwardTimes[i];
+      }
 
-          if (!bypassPlay) {
-            this.phaseIsFinishable = true;
-            // set animation to stop at a certain time using endDelay
-            effect.updateTiming({ endDelay });
-            await super.finished;
-          }
-          else {
-            // this allows outside operations like blockUntil() to push more resolvers to the queue...
-            // before the next loop iteration
-            this.phaseIsFinishable = false;
-            await Promise.resolve();
-          }
-
-          // await any blockers for the completion of this phase
-          if (awaiteds.length > 0) { await Promise.all(awaiteds); }
-          // fulfill all promises that depend on the completion of this phase
-          for (const resolver of resolvers) { resolver(); }
-        }
-        break;
-
-      case "backward":
-        this.resetPromises('forward');
-        const awaitedBackwardTimes = this.awaitedBackwardTimes;
-        super.play();
-
-        await Promise.resolve();
-        for (let i = 0; i < awaitedBackwardTimes.length; ++i) {
-          const [ endDelay, resolvers, awaiteds, bypassPlay ] = awaitedBackwardTimes[i];
-
-          if (!bypassPlay) {
-            this.phaseIsFinishable = true;
-            effect.updateTiming({ endDelay });
-            await super.finished;
-          }
-          else {
-            this.phaseIsFinishable = false;
-            await Promise.resolve();
-          }
-
-          if (awaiteds.length > 0) { await Promise.all(awaiteds); }
-          for (const resolver of resolvers) { resolver(); }
-        }
-        break;
-
-      default: throw new Error(`Invalid direction '${this.direction}' encountered in play(). Must be either 'forward' or 'backward'`);
+      // Await any blockers for the completion of this phase
+      if (awaiteds.length > 0) { await Promise.all(awaiteds); }
+      // Fulfill all promises that depend on the completion of this phase
+      for (const resolver of resolvers) { resolver(); }
     }
     
     this.inProgress = false;
   }
 
   async finish(): Promise<void> {
-    // all the side-effects of custom play() need to be in motion before calling super.finish()
+    // All the side-effects of custom play() need to be in motion before calling super.finish().
     if (!this.inProgress) { this.play(); }
 
-    // we must await super.finished each time because of segmentation
+    // We must await super.finished each time to account for segmentation.
     while (this.inProgress) {
       if (this.phaseIsFinishable) {
         super.finish();
