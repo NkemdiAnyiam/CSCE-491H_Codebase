@@ -200,7 +200,7 @@ export class AnimTimelineAnimation extends Animation {
         await super.finished;
       }
       else {
-        // This allows outside operations like blockUntil() to push more resolvers to the queue...
+        // This allows outside operations like generateTimePromise() to push more resolvers to the queue...
         // before the next loop iteration.
         this.phaseIsFinishable = false;
         await Promise.resolve();
@@ -237,11 +237,11 @@ export class AnimTimelineAnimation extends Animation {
     // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
     // past localTime. In such cases, the returned promise should be immediately resolved
     const { duration, delay } = super.effect!.getTiming();
-    if (localTime < 0) { throw new Error(`Invalid blockUntil() value ${localTime}; value must be >= 0`); }
+    if (localTime < 0) { throw new Error(`Invalid generateTimePromise() value ${localTime}; value must be >= 0`); }
     // to await animation reaching currentTime in its running, we must use...
     // the equivalent endDelay, which is localTime - (duration + delay)
     const endDelay = localTime - ((duration as number) + (delay as number));
-    // if (endDelay > this.trueEndDelay) { throw new Error(`Invalid blockUntil() time ${localTime}; value exceeded this animation's endDelay ${this.trueEndDelay}.`); }
+    // if (endDelay > this.trueEndDelay) { throw new Error(`Invalid generateTimePromise() time ${localTime}; value exceeded this animation's endDelay ${this.trueEndDelay}.`); }
 
     return new Promise(resolve => {
       const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
