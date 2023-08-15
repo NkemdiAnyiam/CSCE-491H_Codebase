@@ -91,10 +91,9 @@ export class AnimTimelineAnimation extends Animation {
   // to help with Promises-based sequencing
   private awaitedForwardTimes: AwaitedTime[] = [];
   private awaitedBackwardTimes: AwaitedTime[] = [];
-  // TODO: Prevent outside modifications
   private forwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
-  private forwardFinishes: FinishPromises = {} as FinishPromises;
   private backwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
+  private forwardFinishes: FinishPromises = {} as FinishPromises;
   private backwardFinishes: FinishPromises = {} as FinishPromises;
   private phaseIsFinishable = false;
   
@@ -111,9 +110,8 @@ export class AnimTimelineAnimation extends Animation {
   constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
     super();
 
+    if (!this.forwardEffect.target) { throw new Error(`Animation target must not be null or undefined`); }
     if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
-    // TODO: check for undefined as well
-    if (this.forwardEffect.target == null) { throw new Error(`Animation target must be non-null`); }
     
     this.loadKeyframeEffect('forward');
     this.resetPromises('both');
