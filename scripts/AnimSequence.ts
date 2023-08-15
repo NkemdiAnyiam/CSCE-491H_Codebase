@@ -63,7 +63,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addRoadblocks('forward', 'atActiveFinish', activeGrouping[j-1].animation.forwardFinishes.activePhase);
+        activeGrouping[j].animation.addRoadblocks('forward', 'atActiveFinish', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
       }
     }
 
@@ -73,7 +73,7 @@ export class AnimSequence implements AnimSequenceConfig {
       parallelBlocks = [];
       parallelBlocks.push(grouping[0].stepForward());
       for (let j = 1; j < grouping.length; ++j) {
-        await grouping[j-1].animation.forwardFinishes.delayPhase;
+        await grouping[j-1].animation.getFinished('forward', 'delayPhase');
         const currAnimBlock = grouping[j];
         parallelBlocks.push(currAnimBlock.stepForward());
       }
@@ -91,7 +91,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-          activeGrouping[j].animation.addRoadblocks('backward', 'atActiveFinish', activeGrouping[j-1].animation.backwardFinishes.activePhase);
+          activeGrouping[j].animation.addRoadblocks('backward', 'atActiveFinish', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
       }
     }
     
@@ -110,7 +110,7 @@ export class AnimSequence implements AnimSequenceConfig {
           await nextAnimBlock.animation.generateTimePromise('backward', nextAnimBlock.fullFinishTime - currAnimBlock.fullFinishTime);
         }
         else {
-          await nextAnimBlock.animation.backwardFinishes.endDelayPhase;
+          await nextAnimBlock.animation.getFinished('backward', 'endDelayPhase');
         }
 
         parallelBlocks.push(currAnimBlock.stepBackward());

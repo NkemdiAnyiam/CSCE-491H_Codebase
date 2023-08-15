@@ -93,10 +93,10 @@ export class AnimTimelineAnimation extends Animation {
   private awaitedBackwardTimes: AwaitedTime[] = [];
   // TODO: Prevent outside modifications
   private forwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
-  forwardFinishes: FinishPromises = {} as FinishPromises;
+  private forwardFinishes: FinishPromises = {} as FinishPromises;
   private backwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
-  backwardFinishes: FinishPromises = {} as FinishPromises;
-  phaseIsFinishable = false;
+  private backwardFinishes: FinishPromises = {} as FinishPromises;
+  private phaseIsFinishable = false;
   
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
@@ -117,6 +117,11 @@ export class AnimTimelineAnimation extends Animation {
     
     this.loadKeyframeEffect('forward');
     this.resetPromises('both');
+  }
+
+  getFinished(direction: 'forward' | 'backward', phase: keyof FinishPromises): Promise<void> {
+    const finishedPromises = direction === 'forward' ? this.forwardFinishes : this.backwardFinishes;
+    return finishedPromises[phase];
   }
 
   private resetPromises(direction: 'forward' | 'backward' | 'both'): void {
