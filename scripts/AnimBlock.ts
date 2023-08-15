@@ -68,8 +68,8 @@ type AwaitedTime = [
   endDelay: number,
   resolvers: ((value: void | PromiseLike<void>) => void)[],
   awaiteds: Promise<any>[],
-  // true when awaiting delay/endDelay periods but the awaited delay/endDelay duration is 0
-  skipPlay?: boolean,
+  // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
+  skipEndDelayUpdation?: boolean,
 ];
 
 type FinishPromises = {
@@ -79,9 +79,7 @@ type FinishPromises = {
 }
 
 type PhaseResolvers = {
-  delayPhase: (value: void | PromiseLike<void>) => void;
-  activePhase: (value: void | PromiseLike<void>) => void;
-  endDelayPhase: (value: void | PromiseLike<void>) => void;
+  [prop in keyof FinishPromises]: (value: void | PromiseLike<void>) => void;
 }
 
 export class AnimTimelineAnimation extends Animation {
@@ -190,9 +188,9 @@ export class AnimTimelineAnimation extends Animation {
     // Use length directly because entries could be added after loop is already entered.
     // TODO: May need to find a less breakable solution than the length thing.
     for (let i = 0; i < awaitedTimes.length; ++i) {
-      const [ endDelay, resolvers, awaiteds, bypassPlay ] = awaitedTimes[i];
+      const [ endDelay, resolvers, awaiteds, skipEndDelayUpdation ] = awaitedTimes[i];
 
-      if (!bypassPlay) {
+      if (!skipEndDelayUpdation) {
         this.phaseIsFinishable = true;
         // Set animation to stop at a certain time using endDelay.
         effect.updateTiming({ endDelay });
