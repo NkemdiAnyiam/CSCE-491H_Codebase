@@ -11,19 +11,19 @@ const maxWeight = 99;
 
 (function() {
   const mainMenu = document.querySelector('.main-menu')!;
-  const maxJobsEl = mainMenu.querySelector('.fill--max-jobs')!;
-  const maxTimeEl = mainMenu.querySelector('.fill--max-time')!;
-  const maxWeightEl = mainMenu.querySelector('.fill--max-weight')!;
+  const maxJobsEl = mainMenu.querySelector('.fill--max-jobs') as HTMLInputElement;
+  const maxTimeEl = mainMenu.querySelector('.fill--max-time') as HTMLInputElement;
+  const maxWeightEl = mainMenu.querySelector('.fill--max-weight') as HTMLInputElement;
 
-  maxJobsEl.value = maxNumJobs;
-  maxTimeEl.value = maxTime;
-  maxWeightEl.value = maxWeight;
+  maxJobsEl.value = maxNumJobs.toString();
+  maxTimeEl.value = maxTime.toString();
+  maxWeightEl.value = maxWeight.toString();
 })();
 
 const jobForm_multiInput = document.querySelector('.job-form--multi-input')!;
 const jobForm_textarea = document.querySelector('.job-form--textarea')!;
-const toggleFormButton_toTA = document.querySelector('.job-form__button--toggle-form--TA');
-const toggleFormButton_toMI = document.querySelector('.job-form__button--toggle-form--MI');
+const toggleFormButton_toTA = document.querySelector('.job-form__button--toggle-form--TA') as HTMLButtonElement;
+const toggleFormButton_toMI = document.querySelector('.job-form__button--toggle-form--MI') as HTMLButtonElement;
 disableButton(toggleFormButton_toMI);
 
 toggleFormButton_toTA.addEventListener('click', swapForm);
@@ -38,8 +38,8 @@ const toggleSequence = new AnimSequence().addBlocks(...[
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),
 ]);
 
-function swapForm(e) {
-  const toggleButton = e.target;
+function swapForm(e: MouseEvent) {
+  const toggleButton = e.target as HTMLButtonElement;
   disableButton(toggleButton); // disable currently pressed button
   // disable both forms for the transition
   disableForm_MI();
