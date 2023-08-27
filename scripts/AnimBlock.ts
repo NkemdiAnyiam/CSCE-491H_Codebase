@@ -340,26 +340,41 @@ export class AnimTimelineAnimation extends Animation {
     let initialArrIndex: number; // skips to first entry of a given phase
     let phaseEndDelayOffset: number; // applies negative (or 0) endDelay based on phase
     let relativePhaseTimePos: number = timePosition === 'start' ? 0 : timePosition; // localTime relative to phase
+    let phaseDuration: number;
 
     // compute initial index, relative time position, and endDelay offset based on phase and arguments
     switch(phase) {
       case "delayPhase":
         initialArrIndex = 0;
+        phaseDuration = delay;
         phaseEndDelayOffset = -(delay + duration);
         if (relativePhaseTimePos < 0) { relativePhaseTimePos = delay + relativePhaseTimePos; }
         break;
       case "activePhase":
         initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[0]) + 1;
+        phaseDuration = duration;
         phaseEndDelayOffset = -(duration);
         if (relativePhaseTimePos < 0) { relativePhaseTimePos = duration + relativePhaseTimePos; }
         break;
       case "endDelayPhase":
         initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[1]) + 1;
+        phaseDuration = this.trueEndDelay;
         phaseEndDelayOffset = 0;
         if (relativePhaseTimePos < 0) { relativePhaseTimePos = this.trueEndDelay + relativePhaseTimePos; }
         break;
       default:
         throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
+    }
+
+    // TODO: Give information on specific location of this animation block
+    // check for out of bounds time positions
+    if (typeof timePosition === 'number' && (relativePhaseTimePos < 0 || relativePhaseTimePos > phaseDuration)) {
+      if (timePosition < 0) {
+        throw new Error(`timePosition value ${timePosition} for phase '${phase}' resulted in invalid time position ${relativePhaseTimePos}. Must be in the range [0, ${duration}] for this '${phase}'.`);
+      }
+      else {
+        throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${duration}] for this '${phase}'.`);
+      }
     }
 
     const endDelay: number = phaseEndDelayOffset + relativePhaseTimePos;
