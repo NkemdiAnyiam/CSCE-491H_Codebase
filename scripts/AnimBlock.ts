@@ -63,14 +63,16 @@ class CommitStylesError extends Error {
 
 
 
-
+// TODO: rename to something segment-related
 type AwaitedTime = [
   endDelay: number,
-  resolvers: ((value: void | PromiseLike<void>) => void)[],
+  callbacks: ((...args: any[]) => void)[],
   awaiteds: Promise<any>[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
   skipEndDelayUpdation?: boolean,
 ];
+
+type AwaitedTimesCache = [delayPhaseEnd: AwaitedTime, activePhaseEnd: AwaitedTime, endDelayPhaseEnd: AwaitedTime];
 
 type FinishPromises = {
   delayPhase: Promise<void>;
@@ -90,7 +92,9 @@ export class AnimTimelineAnimation extends Animation {
   // holds list of stopping points and resolvers to control segmentation of animation...
   // to help with Promises-based sequencing
   private awaitedForwardTimes: AwaitedTime[] = [];
+  private awaitedForwardTimesCache: AwaitedTimesCache;
   private awaitedBackwardTimes: AwaitedTime[] = [];
+  private awaitedBackwardTimesCache: AwaitedTimesCache;
   private forwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
   private backwardPhaseResolvers: PhaseResolvers = {} as PhaseResolvers;
   private forwardFinishes: FinishPromises = {} as FinishPromises;
@@ -115,6 +119,8 @@ export class AnimTimelineAnimation extends Animation {
     
     this.loadKeyframeEffect('forward');
     this.resetPromises('both');
+    this.awaitedForwardTimesCache = [...this.awaitedForwardTimes] as AwaitedTimesCache;
+    this.awaitedBackwardTimesCache = [...this.awaitedBackwardTimes] as AwaitedTimesCache;
   }
 
   getFinished(direction: 'forward' | 'backward', phase: keyof FinishPromises): Promise<void> {
@@ -132,11 +138,13 @@ export class AnimTimelineAnimation extends Animation {
       };
 
       const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
-      this.awaitedForwardTimes = [
+      const awaitedForwardTimes: AwaitedTime[] = [
         [ -duration, [() => this.onDelayFinish(), forwardPhaseResolvers.delayPhase], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), forwardPhaseResolvers.activePhase], [], false ],
-        [ endDelay, [() => this.onEndDelayFinish(), forwardPhaseResolvers.endDelayPhase], [] ],
+        [ 0, [() => this.onActiveFinish(), forwardPhaseResolvers.activePhase], [] ],
+        [ endDelay, [() => this.onEndDelayFinish(), forwardPhaseResolvers.endDelayPhase], [], endDelay === 0 ],
       ];
+      this.awaitedForwardTimes = awaitedForwardTimes;
+      this.awaitedForwardTimesCache = [...awaitedForwardTimes] as AwaitedTimesCache;
     };
 
     const resetBackwardPromises = () => {
@@ -148,11 +156,13 @@ export class AnimTimelineAnimation extends Animation {
       };
   
       const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
-      this.awaitedBackwardTimes = [
+      const awaitedBackwardTimes: AwaitedTime[] = [
         [ -duration, [() => this.onDelayFinish(), backwardPhaseResolvers.delayPhase], [], delay === 0 ],
         [ 0, [() => this.onActiveFinish(), backwardPhaseResolvers.activePhase], [], false ],
         [ endDelay, [() => this.onEndDelayFinish(), backwardPhaseResolvers.endDelayPhase], [], endDelay === 0 ],
       ];
+      this.awaitedBackwardTimes = awaitedBackwardTimes;
+      this.awaitedBackwardTimesCache = [...awaitedBackwardTimes] as AwaitedTimesCache;
     };
 
     switch(direction) {
@@ -185,31 +195,35 @@ export class AnimTimelineAnimation extends Animation {
     // If going forward, reset backward promises. If going backward, reset forward promises.
     this.resetPromises(this.direction === 'forward' ? 'backward' : 'forward');
     const awaitedTimes = this.direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
-    super.play();
 
     await Promise.resolve();
     // Use length directly because entries could be added after loop is already entered.
     // TODO: May need to find a less breakable solution than the length thing.
     for (let i = 0; i < awaitedTimes.length; ++i) {
-      const [ endDelay, resolvers, awaiteds, skipEndDelayUpdation ] = awaitedTimes[i];
+      const [ endDelay, callbacks, awaiteds, skipEndDelayUpdation ] = awaitedTimes[i];
 
       if (!skipEndDelayUpdation) {
         this.phaseIsFinishable = true;
         // Set animation to stop at a certain time using endDelay.
         effect.updateTiming({ endDelay });
+        super.play(); // just in case paused
         await super.finished;
       }
       else {
-        // This allows outside operations like generateTimePromise() to push more resolvers to the queue...
+        // This allows outside operations like generateTimePromise() to push more callbacks to the queue...
         // before the next loop iteration.
         this.phaseIsFinishable = false;
         await Promise.resolve();
       }
 
       // Await any blockers for the completion of this phase
-      if (awaiteds.length > 0) { await Promise.all(awaiteds); }
-      // Fulfill all promises that depend on the completion of this phase
-      for (const resolver of resolvers) { resolver(); }
+      if (awaiteds.length > 0) {
+        // TODO: Should pause whole sequence instead of just the block
+        super.pause();
+        await Promise.all(awaiteds);
+      }
+      // Call all callbacks that awaited the completions of this phase
+      for (const callback of callbacks) { callback(); }
     }
     
     this.inProgress = false;
@@ -261,30 +275,74 @@ export class AnimTimelineAnimation extends Animation {
     });
   }
 
-  addRoadblocks(direction: 'forward' | 'backward', atLocalTime: number, ...promises: Promise<any>[]): void;
-  addRoadblocks(direction: 'forward' | 'backward', atPhasePoint: 'atActiveFinish' | 'atEndDelayFinish', ...promises: Promise<any>[]): void;
-  addRoadblocks(direction: 'forward' | 'backward', point: number | ('atActiveFinish' | 'atEndDelayFinish'), ...promises: Promise<any>[]): void {
-    const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
-    const awaitedTimesLength = awaitedTimes.length;
+  addRoadblocks(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    ...promises: Promise<any>[]
+  ): void {
     // TODO: may need to check if animation is in 'finished' state
+    // TODO: add error checking
 
-    if (typeof point === 'string') {
-      switch(point) {
-        // starts at idx 1 because 0 is reserved for delay finish
-        case "atActiveFinish":
-          awaitedTimes.slice(1)
-            .find((awaitedTime) => awaitedTime[0] === 0)?.[2]
-            .push(...promises);
-          break;
-        case "atEndDelayFinish":
-          awaitedTimes[awaitedTimesLength - 1][2].push(...promises);
-          break;
+    // if adding at the end of a phase, push directly to the cache
+    if (timePosition === 'end') {
+      const awaitedTimesCache = direction === 'forward' ? this.awaitedForwardTimesCache : this.awaitedBackwardTimesCache;
+      switch(phase) {
+        case "delayPhase":
+          awaitedTimesCache[0][2].push(...promises);
+          return;
+        case "activePhase":
+          awaitedTimesCache[1][2].push(...promises);
+          return;
+        case "endDelayPhase":
+          awaitedTimesCache[2][2].push(...promises);
+          return;
         default:
-          throw new Error(`Invalid addRoadblocks() direction '${direction}'; must be 'atActiveFinish' or 'atEndDelayFinish'.`);
+          throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
       }
     }
-    else {
-      // TODO: implement numeric
+
+    const awaitedTimes = direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+    const { duration, delay } = super.effect!.getTiming() as {duration: number, delay: number};
+    let initialArrIndex: number; // skips to first entry of a given phase
+    let phaseEndDelayOffset: number; // applies negative endDelay based on phase
+    let relativePhaseTimePos: number = timePosition === 'start' ? 0 : timePosition;
+
+    // compute initial index, relative time position, and endDelay offset based on phase and arguments
+    switch(phase) {
+      case "delayPhase":
+        initialArrIndex = 0;
+        phaseEndDelayOffset = -(delay + duration);
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = delay - relativePhaseTimePos; }
+        break;
+      case "activePhase":
+        initialArrIndex = awaitedTimes.findIndex(awaitedTime => awaitedTime === this.awaitedForwardTimesCache[0]) + 1;
+        phaseEndDelayOffset = -(duration);
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = duration - relativePhaseTimePos; }
+        break;
+      case "endDelayPhase":
+        initialArrIndex = awaitedTimes.findIndex(awaitedTime => awaitedTime === this.awaitedForwardTimesCache[1]) + 1;
+        phaseEndDelayOffset = 0;
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = this.trueEndDelay - relativePhaseTimePos; }
+        break;
+      default:
+        throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
+    }
+
+    const endDelay: number = phaseEndDelayOffset + relativePhaseTimePos;
+    const awaitedTimesLength = awaitedTimes.length;
+    
+    for (let i = initialArrIndex; i < awaitedTimesLength; ++i) {
+      const currAwaitedTime = awaitedTimes[i];
+      if (endDelay <= currAwaitedTime[0]) {
+        // if new endDelay is less than curr, insert new awaitedTime group to list
+        if (endDelay < currAwaitedTime[0])
+          { awaitedTimes.splice(i, 0, [endDelay, [], [...promises], relativePhaseTimePos === 0]); }
+        // otherwise, the promises should be awaited along with others in the same awaited time group
+        else
+          { currAwaitedTime[2].push(...promises); }
+        break;
+      }
     }
   }
   
@@ -386,7 +444,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       delay: this.delay,
       duration: this.duration,
       endDelay: this.endDelay,
-      fill: this.commitsStyles ? 'forwards' : 'none',
+      fill: this.commitsStyles ? 'forwards' : 'forwards', // TODO: Should really always be 'forwards' since animation.cancel() will take care of things anyway
       easing: this.easing,
       composite: this.composite,
     };
@@ -443,6 +501,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
+      console.log('A', this.domElem);
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnStart);
@@ -472,6 +531,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
+      console.log('B', this.domElem);
       // CHANGE NOTE: Move hidden class stuff here
       if (this.commitsStyles || this.commitStylesAttemptForcefully) {
         // Attempt to apply the styles to the element.
@@ -515,6 +575,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
+      console.log('C', this.domElem);
       animation.cancel();
       this.parentTimeline?.currentAnimations.delete(this.id);
       resolver();

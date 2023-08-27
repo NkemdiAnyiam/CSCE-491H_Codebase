@@ -56,14 +56,17 @@ export class AnimSequence implements AnimSequenceConfig {
   async play(): Promise<void> {
     this.commit();
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
+    // const activeGroupings2 = this.animBlockGroupings_endDelayFinishOrder;
     const numGroupings = activeGroupings.length;
 
     for (let i = 0; i < numGroupings; ++i) {
       const activeGrouping = activeGroupings[i];
+      // const activeGrouping2 = activeGroupings2[i];
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addRoadblocks('forward', 'atActiveFinish', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
+        activeGrouping[j].animation.addRoadblocks('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
+        // activeGrouping2[j].animation.addRoadblocks('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
       }
     }
 
@@ -91,7 +94,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-          activeGrouping[j].animation.addRoadblocks('backward', 'atActiveFinish', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
+        activeGrouping[j].animation.addRoadblocks('backward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
       }
     }
     
