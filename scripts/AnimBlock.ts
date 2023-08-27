@@ -67,7 +67,8 @@ class CommitStylesError extends Error {
 type AwaitedTime = [
   endDelay: number,
   callbacks: ((...args: any[]) => void)[],
-  awaiteds: Promise<any>[],
+  roadblocks: Promise<any>[],
+  syncPoints: Promise<any>[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
   skipEndDelayUpdation?: boolean,
 ];
@@ -139,9 +140,9 @@ export class AnimTimelineAnimation extends Animation {
 
       const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
       const awaitedForwardTimes: AwaitedTime[] = [
-        [ -duration, [() => this.onDelayFinish(), forwardPhaseResolvers.delayPhase], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), forwardPhaseResolvers.activePhase], [] ],
-        [ endDelay, [() => this.onEndDelayFinish(), forwardPhaseResolvers.endDelayPhase], [], endDelay === 0 ],
+        [ -duration, [() => this.onDelayFinish(), forwardPhaseResolvers.delayPhase], [], [], delay === 0 ],
+        [ 0, [() => this.onActiveFinish(), forwardPhaseResolvers.activePhase], [], [] ],
+        [ endDelay, [() => this.onEndDelayFinish(), forwardPhaseResolvers.endDelayPhase], [], [], endDelay === 0 ],
       ];
       this.awaitedForwardTimes = awaitedForwardTimes;
       this.awaitedForwardTimesCache = [...awaitedForwardTimes] as AwaitedTimesCache;
@@ -157,9 +158,9 @@ export class AnimTimelineAnimation extends Animation {
   
       const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
       const awaitedBackwardTimes: AwaitedTime[] = [
-        [ -duration, [() => this.onDelayFinish(), backwardPhaseResolvers.delayPhase], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), backwardPhaseResolvers.activePhase], [], false ],
-        [ endDelay, [() => this.onEndDelayFinish(), backwardPhaseResolvers.endDelayPhase], [], endDelay === 0 ],
+        [ -duration, [() => this.onDelayFinish(), backwardPhaseResolvers.delayPhase], [], [], delay === 0 ],
+        [ 0, [() => this.onActiveFinish(), backwardPhaseResolvers.activePhase], [], [], false ],
+        [ endDelay, [() => this.onEndDelayFinish(), backwardPhaseResolvers.endDelayPhase], [], [], endDelay === 0 ],
       ];
       this.awaitedBackwardTimes = awaitedBackwardTimes;
       this.awaitedBackwardTimesCache = [...awaitedBackwardTimes] as AwaitedTimesCache;
@@ -195,18 +196,23 @@ export class AnimTimelineAnimation extends Animation {
     // If going forward, reset backward promises. If going backward, reset forward promises.
     this.resetPromises(this.direction === 'forward' ? 'backward' : 'forward');
     const awaitedTimes = this.direction === 'forward' ? this.awaitedForwardTimes : this.awaitedBackwardTimes;
+    let roadblocked: boolean | null = null;
 
+    super.play();
     await Promise.resolve();
     // Use length directly because entries could be added after loop is already entered.
     // TODO: May need to find a less breakable solution than the length thing.
     for (let i = 0; i < awaitedTimes.length; ++i) {
-      const [ endDelay, callbacks, awaiteds, skipEndDelayUpdation ] = awaitedTimes[i];
+      const [ endDelay, callbacks, roadblocks, syncblocks, skipEndDelayUpdation ]: AwaitedTime = awaitedTimes[i];
 
       if (!skipEndDelayUpdation) {
         this.phaseIsFinishable = true;
         // Set animation to stop at a certain time using endDelay.
         effect.updateTiming({ endDelay });
-        super.play(); // just in case paused
+        if (roadblocked === true) {
+          super.play();
+          roadblocked = false;
+        }
         await super.finished;
       }
       else {
@@ -217,10 +223,12 @@ export class AnimTimelineAnimation extends Animation {
       }
 
       // Await any blockers for the completion of this phase
-      if (awaiteds.length > 0) {
+      if (syncblocks.length > 0) { await Promise.all(syncblocks); }
+      if (roadblocks.length > 0) {
         // TODO: Should pause whole sequence instead of just the block
         super.pause();
-        await Promise.all(awaiteds);
+        roadblocked = true;
+        await Promise.all(roadblocks);
       }
       // Call all callbacks that awaited the completions of this phase
       for (const callback of callbacks) { callback(); }
@@ -265,7 +273,7 @@ export class AnimTimelineAnimation extends Animation {
         if (endDelay <= currAwaitedTime[0]) {
           // if new endDelay is less than curr, insert new awaitedTime group to list
           if (endDelay < currAwaitedTime[0])
-            { awaitedTimes.splice(i, 0, [endDelay, [resolve], []]); }
+            { awaitedTimes.splice(i, 0, [endDelay, [resolve], [], []]); }
           // otherwise, this resolver should be called along with others functions in the same awaited time group
           else
             { currAwaitedTime[1].push(resolve); }
@@ -275,10 +283,29 @@ export class AnimTimelineAnimation extends Animation {
     });
   }
 
+  addSyncblock(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    ...promises: Promise<any>[]
+  ): void {
+      this.addAwaited(direction, phase, timePosition, 'syncPoint', ...promises);
+  }
+
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
     timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    ...promises: Promise<any>[]
+  ): void {
+    this.addAwaited(direction, phase, timePosition, 'roadblock', ...promises);
+  }
+
+  addAwaited(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    awaitedType: 'syncPoint' | 'roadblock',
     ...promises: Promise<any>[]
   ): void {
     // TODO: may need to check if animation is in 'finished' state
@@ -334,13 +361,22 @@ export class AnimTimelineAnimation extends Animation {
     
     for (let i = initialArrIndex; i < awaitedTimesLength; ++i) {
       const currAwaitedTime = awaitedTimes[i];
+
       if (endDelay <= currAwaitedTime[0]) {
         // if new endDelay is less than curr, insert new awaitedTime group to list
-        if (endDelay < currAwaitedTime[0])
-          { awaitedTimes.splice(i, 0, [endDelay, [], [...promises], relativePhaseTimePos === 0]); }
+        if (endDelay < currAwaitedTime[0]) {
+          awaitedTimes.splice(i, 0, [
+            endDelay,
+            [],
+            (awaitedType === 'roadblock' ? [...promises] : []),
+            (awaitedType === 'syncPoint' ? [...promises] : []),
+            relativePhaseTimePos === 0
+          ]);
+        }
         // otherwise, the promises should be awaited along with others in the same awaited time group
-        else
-          { currAwaitedTime[2].push(...promises); }
+        else {
+          currAwaitedTime[awaitedType === 'roadblock' ? 2 : 3].push(...promises);
+        }
         break;
       }
     }

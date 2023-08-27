@@ -65,8 +65,8 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addRoadblocks('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
-        // activeGrouping2[j].animation.addRoadblocks('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
+        activeGrouping[j].animation.addSyncblock('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
+        // activeGrouping2[j].animation.addSyncPoint('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
       }
     }
 
@@ -94,7 +94,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addRoadblocks('backward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
+        activeGrouping[j].animation.addSyncblock('backward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
       }
     }
     
