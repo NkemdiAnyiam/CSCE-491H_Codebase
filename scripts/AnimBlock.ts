@@ -226,13 +226,13 @@ export class AnimTimelineAnimation extends Animation {
       }
 
       // Await any blockers for the completion of this phase
-      if (syncblocks.length > 0) { await Promise.all(syncblocks); }
       if (roadblocks.length > 0) {
         // TODO: Should pause whole sequence instead of just the block
         super.pause();
         roadblocked = true;
         await Promise.all(roadblocks);
       }
+      if (syncblocks.length > 0) { await Promise.all(syncblocks); }
       // Call all callbacks that awaited the completions of this phase
       for (const callback of callbacks) { callback(); }
     }
