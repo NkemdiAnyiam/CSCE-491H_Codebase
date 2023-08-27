@@ -340,17 +340,17 @@ export class AnimTimelineAnimation extends Animation {
       case "delayPhase":
         initialArrIndex = 0;
         phaseEndDelayOffset = -(delay + duration);
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = delay - relativePhaseTimePos; }
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = delay + relativePhaseTimePos; }
         break;
       case "activePhase":
         initialArrIndex = awaitedTimes.findIndex(awaitedTime => awaitedTime === this.awaitedForwardTimesCache[0]) + 1;
         phaseEndDelayOffset = -(duration);
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = duration - relativePhaseTimePos; }
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = duration + relativePhaseTimePos; }
         break;
       case "endDelayPhase":
         initialArrIndex = awaitedTimes.findIndex(awaitedTime => awaitedTime === this.awaitedForwardTimesCache[1]) + 1;
         phaseEndDelayOffset = 0;
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = this.trueEndDelay - relativePhaseTimePos; }
+        if (relativePhaseTimePos < 0) { relativePhaseTimePos = this.trueEndDelay + relativePhaseTimePos; }
         break;
       default:
         throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
