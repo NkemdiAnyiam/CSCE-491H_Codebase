@@ -121,7 +121,7 @@ export class AnimTimelineAnimation extends Animation {
     if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
     
     this.loadKeyframeEffect('forward');
-    this.resetPromises('both');
+    this.resetPhases('both');
     this.segmentsForwardCache = [...this.segmentsForward] as SegmentsCache;
     this.segmentsBackwardCache = [...this.segmentsBackward] as SegmentsCache;
   }
@@ -131,8 +131,8 @@ export class AnimTimelineAnimation extends Animation {
     return finishPromises[phase];
   }
 
-  private resetPromises(direction: 'forward' | 'backward' | 'both'): void {
-    const resetForwardPromises = () => {
+  private resetPhases(direction: 'forward' | 'backward' | 'both'): void {
+    const resetForwardPhases = () => {
       const phaseResolversForward = this.phaseResolversForward;
       this.finishPromisesForward = {
         delayPhase: new Promise<void>(resolve => {phaseResolversForward.delayPhase = resolve}),
@@ -150,7 +150,7 @@ export class AnimTimelineAnimation extends Animation {
       this.segmentsForwardCache = [...segmentsForward] as SegmentsCache;
     };
 
-    const resetBackwardPromises = () => {
+    const resetBackwardPhases = () => {
       const phaseResolversBackward = this.phaseResolversBackward;
       this.finishPromisesBackward = {
         delayPhase: new Promise<void>(resolve => {phaseResolversBackward.delayPhase = resolve}),
@@ -170,14 +170,14 @@ export class AnimTimelineAnimation extends Animation {
 
     switch(direction) {
       case "forward":
-        resetForwardPromises();
+        resetForwardPhases();
         break;
       case "backward":
-        resetBackwardPromises();
+        resetBackwardPhases();
         break;
       case "both":
-        resetForwardPromises();
-        resetBackwardPromises();
+        resetForwardPhases();
+        resetBackwardPhases();
         break;
       default: throw new Error(`Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
     }
@@ -196,7 +196,7 @@ export class AnimTimelineAnimation extends Animation {
     
     const effect = super.effect!;
     // If going forward, reset backward promises. If going backward, reset forward promises.
-    this.resetPromises(this.direction === 'forward' ? 'backward' : 'forward');
+    this.resetPhases(this.direction === 'forward' ? 'backward' : 'forward');
     const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
     let roadblocked: boolean | null = null;
 
