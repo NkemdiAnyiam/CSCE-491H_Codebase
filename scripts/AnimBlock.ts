@@ -107,7 +107,7 @@ export class AnimTimelineAnimation extends Animation {
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
   onEndDelayFinish: Function = () => {};
-  private get trueEndDelay(): number { return (this.direction === 'forward' ? this.forwardEffect : this.backwardEffect).getTiming().endDelay as number; }
+  private getEffect(direction: 'forward' | 'backward'): KeyframeEffect { return direction === 'forward' ? this.forwardEffect : this.backwardEffect; }
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
@@ -260,7 +260,7 @@ export class AnimTimelineAnimation extends Animation {
     // TODO: check for out-of-bounds times
     // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
     // past localTime. In such cases, the returned promise should be immediately resolved
-    const { duration, delay } = super.effect!.getTiming();
+    const { duration, delay } = this.getEffect(direction).getTiming();
     if (localTime < 0) { throw new Error(`Invalid generateTimePromise() value ${localTime}; value must be >= 0`); }
     // to await animation reaching currentTime in its running, we must use...
     // the equivalent endDelay, which is localTime - (duration + delay)
@@ -339,7 +339,7 @@ export class AnimTimelineAnimation extends Animation {
     const [segments, segmentsCache] = direction === 'forward'
       ? [this.segmentsForward, this.segmentsForwardCache]
       : [this.segmentsBackward, this.segmentsBackwardCache];
-    const { duration, delay } = super.effect!.getTiming() as {duration: number, delay: number};
+    const { duration, delay } = this.getEffect(direction).getTiming() as {duration: number, delay: number};
     let initialArrIndex: number; // skips to first entry of a given phase
     let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
     let phaseDuration: number; // duration of phase specified in argument
@@ -357,7 +357,7 @@ export class AnimTimelineAnimation extends Animation {
         break;
       case "endDelayPhase":
         initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === segmentsCache[1]) + 1;
-        phaseDuration = this.trueEndDelay;
+        phaseDuration = this.getEffect(direction).getTiming().endDelay as number;
         phaseEndDelayOffset = 0;
         break;
       default:
