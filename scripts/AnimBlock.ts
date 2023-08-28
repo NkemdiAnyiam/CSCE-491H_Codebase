@@ -63,7 +63,6 @@ class CommitStylesError extends Error {
 
 
 
-// TODO: rename to something segment-related
 type Segment = [
   endDelay: number,
   callbacks: ((...args: any[]) => void)[],
@@ -313,38 +312,13 @@ export class AnimTimelineAnimation extends Animation {
     ...promises: Promise<any>[]
   ): void {
     // TODO: may need to check if animation is in 'finished' state
-    // TODO: add error checking
 
-    // if adding at the end of a phase, push directly to the cache
-    if (timePosition === 'end') {
-      const segmentsCache = direction === 'forward' ? this.segmentsForwardCache : this.segmentsBackwardCache;
-      switch(phase) {
-        case "delayPhase":
-          segmentsCache[0][2].push(...promises);
-          break;
-        case "activePhase":
-          segmentsCache[1][2].push(...promises);
-          break;
-        case "endDelayPhase":
-          segmentsCache[2][2].push(...promises);
-          break;
-        default:
-          throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
-      }
-
-      return;
-    }
-
-    const segments = direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
-    const { duration, delay } = super.effect!.getTiming() as {duration: number, delay: number};
-    let initialArrIndex: number; // skips to first entry of a given phase
-    let phaseEndDelayOffset: number; // applies negative (or 0) endDelay based on phase
-    let phaseDuration: number; // duration of phase specified in argument
-
-    const computeRelativeTime = (phaseDuration: number) => {
+    // computes the time position relative to the given phase
+    const computePhaseTimePosition = (direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number) => {
       let result: number;
 
       if (timePosition === 'start') { return 0; }
+      if (timePosition === 'end') { return phaseDuration; }
       else if (typeof timePosition === 'number') { result = timePosition; }
       else {
         // if timePosition is in percent format, convert to correct time value based on phase
@@ -356,10 +330,20 @@ export class AnimTimelineAnimation extends Animation {
       }
 
       // wrap any negative time values to count backwards from end of phase
-      return result < 0 ? phaseDuration + result : result;
+      const initialResult = result < 0 ? phaseDuration + result : result;
+      // time positions should refer to the same point in a phase, regardless of the current direction
+      return direction === 'forward' ? initialResult : phaseDuration - initialResult;
     }
 
-    // compute initial index, relative time position, and endDelay offset based on phase and arguments
+    // compute initial index, phase duration, and endDelay offset based on phase and arguments
+    const [segments, segmentsCache] = direction === 'forward'
+      ? [this.segmentsForward, this.segmentsForwardCache]
+      : [this.segmentsBackward, this.segmentsBackwardCache];
+    const { duration, delay } = super.effect!.getTiming() as {duration: number, delay: number};
+    let initialArrIndex: number; // skips to first entry of a given phase
+    let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
+    let phaseDuration: number; // duration of phase specified in argument
+
     switch(phase) {
       case "delayPhase":
         initialArrIndex = 0;
@@ -367,33 +351,33 @@ export class AnimTimelineAnimation extends Animation {
         phaseEndDelayOffset = -(delay + duration);
         break;
       case "activePhase":
-        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[0]) + 1;
+        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === segmentsCache[0]) + 1;
         phaseDuration = duration;
         phaseEndDelayOffset = -duration;
         break;
       case "endDelayPhase":
-        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[1]) + 1;
+        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === segmentsCache[1]) + 1;
         phaseDuration = this.trueEndDelay;
         phaseEndDelayOffset = 0;
         break;
       default:
-        throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
+        throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
     }
     
-    const relativePhaseTimePos = computeRelativeTime(phaseDuration);
+    const phaseTimePosition = computePhaseTimePosition(direction, timePosition, phaseDuration);
 
     // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
-    if (relativePhaseTimePos < 0) {
-      if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${relativePhaseTimePos}. Must be in the range [0, ${duration}] for this '${phase}'.`);}
+    if (phaseTimePosition < 0) {
+      if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
       else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
-    if (relativePhaseTimePos > phaseDuration) {
-      if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${duration}] for this '${phase}'.`); }
+    if (phaseTimePosition > phaseDuration) {
+      if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
       else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
 
-    const endDelay: number = phaseEndDelayOffset + relativePhaseTimePos;
+    const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
     const numSegments = segments.length;
     
     for (let i = initialArrIndex; i < numSegments; ++i) {
@@ -406,7 +390,7 @@ export class AnimTimelineAnimation extends Animation {
           [],
           (awaitedType === 'roadblock' ? [...promises] : []),
           (awaitedType === 'syncblock' ? [...promises] : []),
-          relativePhaseTimePos === 0
+          phaseTimePosition === 0
         ]);
         return;
       }
