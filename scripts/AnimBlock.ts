@@ -93,6 +93,7 @@ export class AnimTimelineAnimation extends Animation {
   private _sequenceID: number = NaN;
   direction: 'forward' | 'backward' = 'forward';
   private inProgress = false;
+  private isFinished = false;
   // holds list of stopping points and resolvers to control segmentation of animation...
   // to help with Promises-based sequencing
   private segmentsForward: Segment[] = [];
@@ -201,8 +202,10 @@ export class AnimTimelineAnimation extends Animation {
     
     const effect = super.effect!;
     // If going forward, reset backward promises. If going backward, reset forward promises.
-    // NEXT REMINDER: Implement some new finished member variable
-    this.resetPhases(this.direction === 'forward' ? 'backward' : 'forward');
+    if (this.isFinished) {
+      this.isFinished = false;
+      this.resetPhases(this.direction === 'forward' ? 'backward' : 'forward');
+    }
     const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
     let roadblocked: boolean | null = null;
 
@@ -250,6 +253,7 @@ export class AnimTimelineAnimation extends Animation {
     }
     
     this.inProgress = false;
+    this.isFinished = true;
   }
 
   async finish(): Promise<void> {
@@ -324,7 +328,12 @@ export class AnimTimelineAnimation extends Animation {
     awaitedType: 'integrityblock' | 'roadblock',
     ...promises: Promise<any>[]
   ): void {
-    // TODO: may need to check if animation is in 'finished' state
+    // if the animation is already finished in the given direction, do nothing
+    if (this.isFinished && this.direction === direction) {
+      // TODO: Add more details
+      console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+      return;
+    }
 
     // computes the time position relative to the given phase
     const computePhaseTimePosition = (direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number) => {
