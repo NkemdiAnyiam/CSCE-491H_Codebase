@@ -317,8 +317,8 @@ export class AnimTimelineAnimation extends Animation {
     const computePhaseTimePosition = (direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number) => {
       let result: number;
 
-      if (timePosition === 'start') { return 0; }
-      if (timePosition === 'end') { return phaseDuration; }
+      if (timePosition === 'start') { result = 0; }
+      else if (timePosition === 'end') {  result = phaseDuration; }
       else if (typeof timePosition === 'number') { result = timePosition; }
       else {
         // if timePosition is in percent format, convert to correct time value based on phase
