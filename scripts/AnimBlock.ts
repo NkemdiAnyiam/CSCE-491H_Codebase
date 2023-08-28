@@ -290,25 +290,25 @@ export class AnimTimelineAnimation extends Animation {
   addSyncblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    timePosition: number | 'start' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
-      this.addAwaited(direction, phase, timePosition, 'syncblock', ...promises);
+      this.addAwaiteds(direction, phase, timePosition, 'syncblock', ...promises);
   }
 
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    timePosition: number | 'start' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
-    this.addAwaited(direction, phase, timePosition, 'roadblock', ...promises);
+    this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
   }
 
-  addAwaited(
+  private addAwaiteds(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end', // TODO: allow percentage values
+    timePosition: number | 'start' | 'end' | `${number}%`,
     awaitedType: 'syncblock' | 'roadblock',
     ...promises: Promise<any>[]
   ): void {
@@ -329,7 +329,7 @@ export class AnimTimelineAnimation extends Animation {
           segmentsCache[2][2].push(...promises);
           break;
         default:
-          throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
+          throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
       }
 
       return;
@@ -339,8 +339,25 @@ export class AnimTimelineAnimation extends Animation {
     const { duration, delay } = super.effect!.getTiming() as {duration: number, delay: number};
     let initialArrIndex: number; // skips to first entry of a given phase
     let phaseEndDelayOffset: number; // applies negative (or 0) endDelay based on phase
-    let relativePhaseTimePos: number = timePosition === 'start' ? 0 : timePosition; // localTime relative to phase
-    let phaseDuration: number;
+    let phaseDuration: number; // duration of phase specified in argument
+
+    const computeRelativeTime = (phaseDuration: number) => {
+      let result: number;
+
+      if (timePosition === 'start') { return 0; }
+      else if (typeof timePosition === 'number') { result = timePosition; }
+      else {
+        // if timePosition is in percent format, convert to correct time value based on phase
+        const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
+        // note: this error should never occur
+        if (!match) { throw new Error(`Percentage format match not found.`); }
+
+        result = phaseDuration * (Number(match[1]) / 100);
+      }
+
+      // wrap any negative time values to count backwards from end of phase
+      return result < 0 ? phaseDuration + result : result;
+    }
 
     // compute initial index, relative time position, and endDelay offset based on phase and arguments
     switch(phase) {
@@ -348,33 +365,32 @@ export class AnimTimelineAnimation extends Animation {
         initialArrIndex = 0;
         phaseDuration = delay;
         phaseEndDelayOffset = -(delay + duration);
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = delay + relativePhaseTimePos; }
         break;
       case "activePhase":
         initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[0]) + 1;
         phaseDuration = duration;
-        phaseEndDelayOffset = -(duration);
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = duration + relativePhaseTimePos; }
+        phaseEndDelayOffset = -duration;
         break;
       case "endDelayPhase":
         initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === this.segmentsForwardCache[1]) + 1;
         phaseDuration = this.trueEndDelay;
         phaseEndDelayOffset = 0;
-        if (relativePhaseTimePos < 0) { relativePhaseTimePos = this.trueEndDelay + relativePhaseTimePos; }
         break;
       default:
         throw new Error(`Invalid addRoadblocks() phase '${phase}'; must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
     }
+    
+    const relativePhaseTimePos = computeRelativeTime(phaseDuration);
 
     // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
-    if (typeof timePosition === 'number' && (relativePhaseTimePos < 0 || relativePhaseTimePos > phaseDuration)) {
-      if (timePosition < 0) {
-        throw new Error(`timePosition value ${timePosition} for phase '${phase}' resulted in invalid time position ${relativePhaseTimePos}. Must be in the range [0, ${duration}] for this '${phase}'.`);
-      }
-      else {
-        throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${duration}] for this '${phase}'.`);
-      }
+    if (relativePhaseTimePos < 0) {
+      if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${relativePhaseTimePos}. Must be in the range [0, ${duration}] for this '${phase}'.`);}
+      else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+    }
+    if (relativePhaseTimePos > phaseDuration) {
+      if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${duration}] for this '${phase}'.`); }
+      else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
 
     const endDelay: number = phaseEndDelayOffset + relativePhaseTimePos;
@@ -392,15 +408,18 @@ export class AnimTimelineAnimation extends Animation {
           (awaitedType === 'syncblock' ? [...promises] : []),
           relativePhaseTimePos === 0
         ]);
-        break;
+        return;
       }
 
       // if new endDelay matches that of curr, the promises should be awaited with others in the same segment
       if (endDelay === currSegment[0]) {
         currSegment[awaitedType === 'roadblock' ? 2 : 3].push(...promises);
-        break;
+        return;
       }
     }
+
+    // note: this error should never be reached
+    throw new Error('Something very wrong occured for addAwaited() to not be completed.');
   }
   
   setForwardFrames(frames: Keyframe[]): void {
