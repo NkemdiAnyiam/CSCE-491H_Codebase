@@ -69,7 +69,11 @@ type Segment = [
   roadblocks: Promise<any>[],
   integrityblocks: Promise<any>[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
-  skipEndDelayUpdation?: boolean,
+  skipEndDelayUpdation: boolean,
+  header: Partial<{
+    completed: boolean,
+    activated: boolean,
+  }>,
 ];
 
 type SegmentsCache = [delayPhaseEnd: Segment, activePhaseEnd: Segment, endDelayPhaseEnd: Segment];
@@ -142,14 +146,15 @@ export class AnimTimelineAnimation extends Animation {
 
       const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
       const segmentsForward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversForward.delayPhase], [], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversForward.activePhase], [], [] ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversForward.endDelayPhase], [], [], endDelay === 0 ],
+        [ -duration, [() => this.onDelayFinish(), phaseResolversForward.delayPhase], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish(), phaseResolversForward.activePhase], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversForward.endDelayPhase], [], [], endDelay === 0, {} ],
       ];
       this.segmentsForward = segmentsForward;
       this.segmentsForwardCache = [...segmentsForward] as SegmentsCache;
     };
 
+    // NEXT REMINDER: Reimplement so that delayPhase for backwards direction corresponds to endDelayPhase
     const resetBackwardPhases = () => {
       const phaseResolversBackward = this.phaseResolversBackward;
       this.finishPromisesBackward = {
@@ -160,9 +165,9 @@ export class AnimTimelineAnimation extends Animation {
   
       const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
       const segmentsBackward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversBackward.delayPhase], [], [], delay === 0 ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversBackward.activePhase], [], [], false ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversBackward.endDelayPhase], [], [], endDelay === 0 ],
+        [ -duration, [() => this.onDelayFinish(), phaseResolversBackward.delayPhase], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish(), phaseResolversBackward.activePhase], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversBackward.endDelayPhase], [], [], endDelay === 0, {} ],
       ];
       this.segmentsBackward = segmentsBackward;
       this.segmentsBackwardCache = [...segmentsBackward] as SegmentsCache;
@@ -196,16 +201,20 @@ export class AnimTimelineAnimation extends Animation {
     
     const effect = super.effect!;
     // If going forward, reset backward promises. If going backward, reset forward promises.
+    // NEXT REMINDER: Implement some new finished member variable
     this.resetPhases(this.direction === 'forward' ? 'backward' : 'forward');
     const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
     let roadblocked: boolean | null = null;
 
     super.play();
+    // extra await allows additional pushes to queue before loop begins
     await Promise.resolve();
-    // Use length directly because entries could be added after loop is already entered.
+
+    // Traverse live array instead of static length since entries could be added mid-loop
     // TODO: May need to find a less breakable solution than the length thing.
-    for (let i = 0; i < segments.length; ++i) {
-      const [ endDelay, callbacks, roadblocks, integrityblocks, skipEndDelayUpdation ]: Segment = segments[i];
+    for (const segment of segments) {
+      const [ endDelay, callbacks, roadblocks, integrityblocks, skipEndDelayUpdation, header ]: Segment = segment;
+      header.activated = true;
 
       if (!skipEndDelayUpdation) {
         this.phaseIsFinishable = true;
@@ -219,10 +228,11 @@ export class AnimTimelineAnimation extends Animation {
       }
       else {
         // This allows outside operations like generateTimePromise() to push more callbacks to the queue...
-        // before the next loop iteration.
+        // before the next loop iteration (this makes up for not having await super.finished)
         this.phaseIsFinishable = false;
         await Promise.resolve();
       }
+      header.completed = true;
 
       // Await any blockers for the completion of this phase
       if (roadblocks.length > 0) {
@@ -234,6 +244,9 @@ export class AnimTimelineAnimation extends Animation {
       if (integrityblocks.length > 0) { await Promise.all(integrityblocks); }
       // Call all callbacks that awaited the completions of this phase
       for (const callback of callbacks) { callback(); }
+
+      // extra await allows additional pushes to preempt next segment when they should
+      await Promise.resolve();
     }
     
     this.inProgress = false;
@@ -275,7 +288,7 @@ export class AnimTimelineAnimation extends Animation {
         if (endDelay <= currSegment[0]) {
           // if new endDelay is less than curr, insert new awaitedTime group to list
           if (endDelay < currSegment[0])
-            { segments.splice(i, 0, [endDelay, [resolve], [], []]); }
+            { segments.splice(i, 0, [endDelay, [resolve], [], [], false, {}]); }
           // otherwise, this resolver should be called along with others functions in the same awaited time group
           else
             { currSegment[1].push(resolve); }
@@ -383,20 +396,37 @@ export class AnimTimelineAnimation extends Animation {
     for (let i = initialArrIndex; i < numSegments; ++i) {
       const currSegment = segments[i];
       
-      // if new endDelay is less than curr, insert new segment to list
+      // if new endDelay is less than curr, new segment should be inserted to list
       if (endDelay < currSegment[0]) {
+        // but if the proceeding segement has already been reached in the loop, then the time at which the new promises
+        // should be awaited as already passed
+        if (currSegment[5].activated) {
+          // TODO: Add block location
+          console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+          return;
+        }
+
+        // insert new segment to list
         segments.splice(i, 0, [
           endDelay,
           [],
           (awaitedType === 'roadblock' ? [...promises] : []),
           (awaitedType === 'integrityblock' ? [...promises] : []),
-          phaseTimePosition === 0
+          phaseTimePosition === 0,
+          {}
         ]);
         return;
       }
 
       // if new endDelay matches that of curr, the promises should be awaited with others in the same segment
       if (endDelay === currSegment[0]) {
+        // but if curr segment is already completed, the time to await the promises has already passed
+        if (currSegment[5].completed) {
+          console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+          return;
+        }
+
+        // add promises to current segment
         currSegment[awaitedType === 'roadblock' ? 2 : 3].push(...promises);
         return;
       }
@@ -562,7 +592,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
-      console.log('A', this.domElem);
+      // console.log('A', this.domElem);
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnStart);
@@ -592,7 +622,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
-      console.log('B', this.domElem);
+      // console.log('B', this.domElem);
       // CHANGE NOTE: Move hidden class stuff here
       if (this.commitsStyles || this.commitStylesAttemptForcefully) {
         // Attempt to apply the styles to the element.
@@ -636,7 +666,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
-      console.log('C', this.domElem);
+      // console.log('C', this.domElem);
       animation.cancel();
       this.parentTimeline?.currentAnimations.delete(this.id);
       resolver();
