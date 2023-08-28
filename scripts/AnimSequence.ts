@@ -94,7 +94,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addIntegrityblocks('backward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
+        activeGrouping[j].animation.addIntegrityblocks('backward', 'activePhase', 'start', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
       }
     }
     
