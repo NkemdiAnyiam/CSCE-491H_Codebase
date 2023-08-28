@@ -107,7 +107,7 @@ export class AnimTimelineAnimation extends Animation {
   private finishPromisesForward: FinishPromises = {} as FinishPromises;
   private finishPromisesBackward: FinishPromises = {} as FinishPromises;
 
-  private phaseIsFinishable = false;
+  private segmentIsExpeditable = false;
   
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
@@ -220,7 +220,7 @@ export class AnimTimelineAnimation extends Animation {
       header.activated = true;
 
       if (!skipEndDelayUpdation) {
-        this.phaseIsFinishable = true;
+        this.segmentIsExpeditable = true;
         // Set animation to stop at a certain time using endDelay.
         effect.updateTiming({ endDelay });
         if (roadblocked === true) {
@@ -232,7 +232,7 @@ export class AnimTimelineAnimation extends Animation {
       else {
         // This allows outside operations like generateTimePromise() to push more callbacks to the queue...
         // before the next loop iteration (this makes up for not having await super.finished)
-        this.phaseIsFinishable = false;
+        this.segmentIsExpeditable = false;
         await Promise.resolve();
       }
       header.completed = true;
@@ -262,7 +262,7 @@ export class AnimTimelineAnimation extends Animation {
 
     // We must await super.finished each time to account for segmentation.
     while (this.inProgress) {
-      if (this.phaseIsFinishable) {
+      if (this.segmentIsExpeditable) {
         super.finish();
         await super.finished;
       }
