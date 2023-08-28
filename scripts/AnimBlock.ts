@@ -67,7 +67,7 @@ type Segment = [
   endDelay: number,
   callbacks: ((...args: any[]) => void)[],
   roadblocks: Promise<any>[],
-  syncblocks: Promise<any>[],
+  integrityblocks: Promise<any>[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
   skipEndDelayUpdation?: boolean,
 ];
@@ -205,7 +205,7 @@ export class AnimTimelineAnimation extends Animation {
     // Use length directly because entries could be added after loop is already entered.
     // TODO: May need to find a less breakable solution than the length thing.
     for (let i = 0; i < segments.length; ++i) {
-      const [ endDelay, callbacks, roadblocks, syncblocks, skipEndDelayUpdation ]: Segment = segments[i];
+      const [ endDelay, callbacks, roadblocks, integrityblocks, skipEndDelayUpdation ]: Segment = segments[i];
 
       if (!skipEndDelayUpdation) {
         this.phaseIsFinishable = true;
@@ -231,7 +231,7 @@ export class AnimTimelineAnimation extends Animation {
         roadblocked = true;
         await Promise.all(roadblocks);
       }
-      if (syncblocks.length > 0) { await Promise.all(syncblocks); }
+      if (integrityblocks.length > 0) { await Promise.all(integrityblocks); }
       // Call all callbacks that awaited the completions of this phase
       for (const callback of callbacks) { callback(); }
     }
@@ -286,13 +286,13 @@ export class AnimTimelineAnimation extends Animation {
   }
 
   // TODO: Hide from general use
-  addSyncblocks(
+  addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
     timePosition: number | 'start' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
-      this.addAwaiteds(direction, phase, timePosition, 'syncblock', ...promises);
+      this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
   }
 
   addRoadblocks(
@@ -308,7 +308,7 @@ export class AnimTimelineAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
     timePosition: number | 'start' | 'end' | `${number}%`,
-    awaitedType: 'syncblock' | 'roadblock',
+    awaitedType: 'integrityblock' | 'roadblock',
     ...promises: Promise<any>[]
   ): void {
     // TODO: may need to check if animation is in 'finished' state
@@ -389,7 +389,7 @@ export class AnimTimelineAnimation extends Animation {
           endDelay,
           [],
           (awaitedType === 'roadblock' ? [...promises] : []),
-          (awaitedType === 'syncblock' ? [...promises] : []),
+          (awaitedType === 'integrityblock' ? [...promises] : []),
           phaseTimePosition === 0
         ]);
         return;
@@ -504,7 +504,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       delay: this.delay,
       duration: this.duration,
       endDelay: this.endDelay,
-      fill: this.commitsStyles ? 'forwards' : 'forwards', // TODO: Should really always be 'forwards' since animation.cancel() will take care of things anyway
+      // TODO: Consider adding 'backwards' (so options for 'both')
+      fill: 'forwards',
       easing: this.easing,
       composite: this.composite,
     };
