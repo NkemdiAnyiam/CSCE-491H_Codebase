@@ -318,10 +318,10 @@ export class AnimTimelineAnimation extends Animation {
     return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset];
   }
 
-  private static computePhaseTimePosition(direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number): number {
+  private static computePhaseTimePosition(direction: 'forward' | 'backward', timePosition: number | 'beginning' | 'end' | `${number}%`, phaseDuration: number): number {
     let result: number;
 
-    if (timePosition === 'start') { result = 0; }
+    if (timePosition === 'beginning') { result = 0; }
     else if (timePosition === 'end') {  result = phaseDuration; }
     else if (typeof timePosition === 'number') { result = timePosition; }
     else {
@@ -343,13 +343,13 @@ export class AnimTimelineAnimation extends Animation {
   generateTimePromise(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
   ): Promise<void>;
   generateTimePromise( direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ): Promise<void>;
   generateTimePromise(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
   ): Promise<void> {
     return new Promise(resolve => {
       // if the animation is already finished in the given direction, resolve immediately
@@ -406,14 +406,14 @@ export class AnimTimelineAnimation extends Animation {
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void;
   addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
       this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
@@ -422,14 +422,14 @@ export class AnimTimelineAnimation extends Animation {
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void;
   addRoadblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
     this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
@@ -438,7 +438,7 @@ export class AnimTimelineAnimation extends Animation {
   private addAwaiteds(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
-    timePosition: number | 'start' | 'end' | `${number}%`,
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
     awaitedType: 'integrityblock' | 'roadblock',
     ...promises: Promise<any>[]
   ): void {
