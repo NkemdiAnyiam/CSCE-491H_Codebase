@@ -110,7 +110,7 @@ export class AnimSequence implements AnimSequenceConfig {
         const currAnimBlock = grouping[j];
         const nextAnimBlock = grouping[j + 1];
         if (currAnimBlock.fullFinishTime > nextAnimBlock.fullStartTime) {
-          await nextAnimBlock.animation.generateTimePromise('backward', nextAnimBlock.fullFinishTime - currAnimBlock.fullFinishTime);
+          await nextAnimBlock.animation.generateTimePromise('backward', 'whole', currAnimBlock.fullFinishTime - nextAnimBlock.fullStartTime);
         }
         else {
           await nextAnimBlock.animation.getFinished('backward', 'endDelayPhase');

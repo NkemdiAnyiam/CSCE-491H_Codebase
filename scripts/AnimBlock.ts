@@ -272,96 +272,15 @@ export class AnimTimelineAnimation extends Animation {
     }
   }
 
-  // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
-  generateTimePromise(direction: 'forward' | 'backward', localTime: number): Promise<void> {
-    // TODO: check for out-of-bounds times
-    // TODO: may need to check if the animation is in the 'finished' state or is in progress already...
-    // past localTime. In such cases, the returned promise should be immediately resolved
-    const { duration, delay } = this.getEffect(direction).getTiming();
-    if (localTime < 0) { throw new Error(`Invalid generateTimePromise() value ${localTime}; value must be >= 0`); }
-    // to await animation reaching currentTime in its running, we must use...
-    // the equivalent endDelay, which is localTime - (duration + delay)
-    const endDelay = localTime - ((duration as number) + (delay as number));
-    // if (endDelay > this.trueEndDelay) { throw new Error(`Invalid generateTimePromise() time ${localTime}; value exceeded this animation's endDelay ${this.trueEndDelay}.`); }
-
-    return new Promise(resolve => {
-      const segments = direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
-      const numSegments = segments.length;
-      for (let i = 0; i < numSegments; ++i) {
-        const currSegment = segments[i];
-        if (endDelay <= currSegment[0]) {
-          // if new endDelay is less than curr, insert new segment to list
-          if (endDelay < currSegment[0])
-            { segments.splice(i, 0, [endDelay, [resolve], [], [], false, {}]); }
-          // otherwise, this resolver should be called along with others functions in the same segment
-          else
-            { currSegment[1].push(resolve); }
-          break;
-        }
-      }
-    });
-  }
-
-  // TODO: Hide from general use
-  addIntegrityblocks(
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
-  ): void {
-      this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
-  }
-
-  addRoadblocks(
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
-  ): void {
-    this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
-  }
-
-  private addAwaiteds(
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'start' | 'end' | `${number}%`,
-    awaitedType: 'integrityblock' | 'roadblock',
-    ...promises: Promise<any>[]
-  ): void {
-    // if the animation is already finished in the given direction, do nothing
-    if (this.isFinished && this.direction === direction) {
-      // TODO: Add more details
-      console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
-      return;
-    }
-
-    // computes the time position relative to the given phase
-    const computePhaseTimePosition = (direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number) => {
-      let result: number;
-
-      if (timePosition === 'start') { result = 0; }
-      else if (timePosition === 'end') {  result = phaseDuration; }
-      else if (typeof timePosition === 'number') { result = timePosition; }
-      else {
-        // if timePosition is in percent format, convert to correct time value based on phase
-        const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
-        // note: this error should never occur
-        if (!match) { throw new Error(`Percentage format match not found.`); }
-
-        result = phaseDuration * (Number(match[1]) / 100);
-      }
-
-      // wrap any negative time values to count backwards from end of phase
-      const initialResult = result < 0 ? phaseDuration + result : result;
-      // time positions should refer to the same point in a phase, regardless of the current direction
-      return direction === 'forward' ? initialResult : phaseDuration - initialResult;
-    }
-
+  private static someThing(
+    anim: AnimTimelineAnimation, direction: 'forward' | 'backward', phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole'
+    ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number] {
     // compute initial index, phase duration, and endDelay offset based on phase and arguments
     const [segments, segmentsCache] = direction === 'forward'
-      ? [this.segmentsForward, this.segmentsForwardCache]
-      : [this.segmentsBackward, this.segmentsBackwardCache];
-    const { duration, delay } = this.getEffect(direction).getTiming() as {duration: number, delay: number};
+      ? [anim.segmentsForward, anim.segmentsForwardCache]
+      : [anim.segmentsBackward, anim.segmentsBackwardCache];
+    const effect = anim.getEffect(direction);
+    const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
     let initialArrIndex: number; // skips to first entry of a given phase
     let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
     let phaseDuration: number; // duration of phase specified in argument
@@ -384,14 +303,154 @@ export class AnimTimelineAnimation extends Animation {
         break;
       case "endDelayPhase":
         initialArrIndex = segments.indexOf(segmentsCache[1]) + 1;
-        phaseDuration = this.getEffect(direction).getTiming().endDelay as number;
+        phaseDuration = effect.getTiming().endDelay as number;
         phaseEndDelayOffset = 0;
+        break;
+      case "whole":
+        initialArrIndex = 0;
+        phaseDuration = delay + duration + (effect.getTiming().endDelay as number);
+        phaseEndDelayOffset = -(delay + duration);
         break;
       default:
         throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
     }
+
+    return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset];
+  }
+
+  private static computePhaseTimePosition(direction: 'forward' | 'backward', timePosition: number | 'start' | 'end' | `${number}%`, phaseDuration: number): number {
+    let result: number;
+
+    if (timePosition === 'start') { result = 0; }
+    else if (timePosition === 'end') {  result = phaseDuration; }
+    else if (typeof timePosition === 'number') { result = timePosition; }
+    else {
+      // if timePosition is in percent format, convert to correct time value based on phase
+      const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
+      // note: this error should never occur
+      if (!match) { throw new Error(`Percentage format match not found.`); }
+
+      result = phaseDuration * (Number(match[1]) / 100);
+    }
+
+    // wrap any negative time values to count backwards from end of phase
+    const initialResult = result < 0 ? phaseDuration + result : result;
+    // time positions should refer to the same point in a phase, regardless of the current direction
+    return direction === 'forward' ? initialResult : phaseDuration - initialResult;
+  }
+
+  // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
+  generateTimePromise(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+  ): Promise<void>;
+  generateTimePromise( direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ): Promise<void>;
+  generateTimePromise(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+  ): Promise<void> {
+    return new Promise(resolve => {
+      // if the animation is already finished in the given direction, resolve immediately
+      if (this.isFinished && this.direction === direction) { resolve(); return; }
+
+      const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset] = AnimTimelineAnimation.someThing(this, direction, phase);
+      const phaseTimePosition = AnimTimelineAnimation.computePhaseTimePosition(direction, timePosition, phaseDuration);
+
+      // TODO: Give information on specific location of this animation block
+      // check for out of bounds time positions
+      if (phaseTimePosition < 0) {
+        if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
+        else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      }
+      if (phaseTimePosition > phaseDuration) {
+        if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+        else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      }
+
+      const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
+      const numSegments = segments.length;
+      
+      for (let i = initialArrIndex; i < numSegments; ++i) {
+        const currSegment = segments[i];
+        
+        // if new endDelay is less than curr, new segment should be inserted to list
+        if (endDelay < currSegment[0]) {
+          // but if the proceeding segement has already been reached in the loop, then the awaited time has already passed
+          if (currSegment[5].activated) { resolve(); return; }
+
+          // insert new segment to list
+          segments.splice(i, 0, [ endDelay, [resolve], [], [], phaseTimePosition === 0, {} ]);
+          return;
+        }
+
+        // if new endDelay matches that of curr, the resolver should be called with others in the same segment
+        if (endDelay === currSegment[0]) {
+          // but if curr segment is already completed, the awaited time has already passed
+          if (currSegment[5].completed) { resolve(); return; }
+
+          // add resolver to current segment
+          currSegment[1].push(resolve);
+          return;
+        }
+      }
+
+      // note: this error should never be reached
+      throw new Error('Something very wrong occured for addAwaited() to not be completed.');
+    });
+  }
+
+  // TODO: Hide from general use
+
+  addIntegrityblocks(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+    ...promises: Promise<any>[]
+  ): void;
+  addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
+  addIntegrityblocks(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+    ...promises: Promise<any>[]
+  ): void {
+      this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
+  }
+
+  addRoadblocks(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+    ...promises: Promise<any>[]
+  ): void;
+  addRoadblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
+  addRoadblocks(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+    ...promises: Promise<any>[]
+  ): void {
+    this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
+  }
+
+  private addAwaiteds(
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'start' | 'end' | `${number}%`,
+    awaitedType: 'integrityblock' | 'roadblock',
+    ...promises: Promise<any>[]
+  ): void {
+    // if the animation is already finished in the given direction, do nothing
+    if (this.isFinished && this.direction === direction) {
+      // TODO: Add more details
+      console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+      return;
+    }
     
-    const phaseTimePosition = computePhaseTimePosition(direction, timePosition, phaseDuration);
+    const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset] = AnimTimelineAnimation.someThing(this, direction, phase);
+    const phaseTimePosition = AnimTimelineAnimation.computePhaseTimePosition(direction, timePosition, phaseDuration);
 
     // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
