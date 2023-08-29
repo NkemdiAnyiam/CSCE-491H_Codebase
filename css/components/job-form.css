@@ -32,6 +32,10 @@
   gap: 10rem;
 }
 
+.job-form--multi-input {
+  width: max-content;
+}
+
 .job-form__button {
   width: max-content;
   cursor: pointer;
