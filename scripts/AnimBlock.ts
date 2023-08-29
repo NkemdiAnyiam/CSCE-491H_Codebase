@@ -290,10 +290,10 @@ export class AnimTimelineAnimation extends Animation {
       for (let i = 0; i < numSegments; ++i) {
         const currSegment = segments[i];
         if (endDelay <= currSegment[0]) {
-          // if new endDelay is less than curr, insert new awaitedTime group to list
+          // if new endDelay is less than curr, insert new segment to list
           if (endDelay < currSegment[0])
             { segments.splice(i, 0, [endDelay, [resolve], [], [], false, {}]); }
-          // otherwise, this resolver should be called along with others functions in the same awaited time group
+          // otherwise, this resolver should be called along with others functions in the same segment
           else
             { currSegment[1].push(resolve); }
           break;
@@ -365,20 +365,25 @@ export class AnimTimelineAnimation extends Animation {
     let initialArrIndex: number; // skips to first entry of a given phase
     let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
     let phaseDuration: number; // duration of phase specified in argument
-
+    let quasiPhase: typeof phase = phase; // opposite of phase (for backward direction)
     switch(phase) {
+      case "delayPhase": quasiPhase = 'endDelayPhase'; break;
+      case "endDelayPhase": quasiPhase = 'delayPhase'; break;
+    }
+
+    switch(direction === 'forward' ? phase : quasiPhase) {
       case "delayPhase":
         initialArrIndex = 0;
         phaseDuration = delay;
         phaseEndDelayOffset = -(delay + duration);
         break;
       case "activePhase":
-        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === segmentsCache[0]) + 1;
+        initialArrIndex = segments.indexOf(segmentsCache[0]) + 1;
         phaseDuration = duration;
         phaseEndDelayOffset = -duration;
         break;
       case "endDelayPhase":
-        initialArrIndex = segments.findIndex(awaitedTime => awaitedTime === segmentsCache[1]) + 1;
+        initialArrIndex = segments.indexOf(segmentsCache[1]) + 1;
         phaseDuration = this.getEffect(direction).getTiming().endDelay as number;
         phaseEndDelayOffset = 0;
         break;
