@@ -973,7 +973,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
   /****************************************************** */
   // RECURSION 2
   /****************************************************** */
-  const jobCardChild2Content = jobCardChild1.querySelector('.job-card-content') as HTMLElement;
+  const jobCardChild2Content = jobCardChild2.querySelector('.job-card-content') as HTMLElement;
   const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as Connector;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
