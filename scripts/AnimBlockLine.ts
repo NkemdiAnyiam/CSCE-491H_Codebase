@@ -299,6 +299,7 @@ export class SetConnectorBlock extends AnimBlock {
       duration: 0,
       commitsStyles: false,
       pregeneratesKeyframes: true,
+      startsNextBlock: true,
     };
   }
   
