@@ -50,8 +50,14 @@ export class AnimSequence implements AnimSequenceConfig {
     }
   }
 
+  // TODO: Review implementation
   addBlocks(...animBlocks: AnimBlock[]): AnimSequence {
     // CHANGE NOTE: removed addOneBlock()
+    for (const animBlock of animBlocks) {
+      animBlock.setID(this.id, this.timelineID);
+      animBlock.parentTimeline = this.parentTimeline;
+      animBlock.parentSequence = this;
+    }
     this.animBlocks.push(...animBlocks);
     return this;
   }
