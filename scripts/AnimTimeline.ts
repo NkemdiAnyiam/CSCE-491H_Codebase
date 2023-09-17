@@ -24,6 +24,8 @@ export class AnimTimeline {
   get numSequences(): number { return this.animSequences.length; }
   private get nextSequence(): AnimSequence { return this.animSequences[this.nextSeqIndex]; }
   private get prevSequence(): AnimSequence | undefined { return this.animSequences[this.nextSeqIndex - 1]; }
+  get atBeginning(): boolean { return this.nextSeqIndex === 0; }
+  get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
 
   constructor(config: Partial<AnimTimelineConfig & {animSequences: AnimSequence[]}> = {}) {
     this.id = AnimTimeline.id++;
@@ -71,13 +73,13 @@ export class AnimTimeline {
     switch(direction) {
       case 'forward':
         // reject promise if trying to step forward at the end of the timeline
-        if (this.atEnd()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
+        if (this.atEnd) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
         do {continueOn = await this.stepForward();} while(continueOn);
         break;
 
       case 'backward':
         // reject promise if trying to step backward at the beginning of the timeline
-        if (this.atBeginning()) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
+        if (this.atBeginning) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
         do {continueOn = await this.stepBackward();} while(continueOn);
         break;
 
@@ -92,9 +94,6 @@ export class AnimTimeline {
     });
   }
 
-  atBeginning(): boolean { return this.nextSeqIndex === 0; }
-  atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
-
   // plays current AnimSequence and increments nextSeqIndex
   stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
@@ -105,7 +104,7 @@ export class AnimTimeline {
       this.nextSequence.play() // wait for the current AnimSequence to finish all of its animations
       .then(() => {
         ++this.nextSeqIndex;
-        resolve(!this.atEnd() && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
+        resolve(!this.atEnd && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
       });
     });
   }
@@ -120,7 +119,7 @@ export class AnimTimeline {
     return new Promise(resolve => {
       this.nextSequence.rewind()
       .then(() => {
-        resolve(!this.atBeginning() && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
+        resolve(!this.atBeginning && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
       });
     });
   }

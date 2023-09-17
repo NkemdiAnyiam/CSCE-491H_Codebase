@@ -23,7 +23,7 @@ export const setupPlaybackControls = (animTimeline) => {
 
   forwardButton.addEventListener('mousedown', e => {
     if (isLeftClickOrKey(e)) {
-      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atEnd()) { return; }
+      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atEnd) { return; }
       
       forwardButton.classList.add(PRESSED);
       backwardButton.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
@@ -35,14 +35,14 @@ export const setupPlaybackControls = (animTimeline) => {
         forwardButton.classList.remove(PRESSED);
         forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
         backwardButton.classList.remove(DISABLED_FROM_STEPPING);
-        if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+        if (animTimeline.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
       });
     }
   });
 
   backwardButton.addEventListener('mousedown', e => {
     if (isLeftClickOrKey(e)) {
-      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atBeginning()) { return; }
+      if (animTimeline.getIsStepping() || animTimeline.getIsPaused() || animTimeline.atBeginning) { return; }
 
       backwardButton.classList.add(PRESSED);
       forwardButton.classList.remove(DISABLED_FROM_EDGE);
@@ -54,7 +54,7 @@ export const setupPlaybackControls = (animTimeline) => {
         backwardButton.classList.remove(PRESSED);
         forwardButton.classList.remove(DISABLED_FROM_STEPPING);
         backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-        if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+        if (animTimeline.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
       });
     }
   });
@@ -153,10 +153,10 @@ export const setupPlaybackControls = (animTimeline) => {
   const skipTo = (tag, offset) => {
     animTimeline.skipTo(tag, offset)
     .then(() => {
-      if (animTimeline.atBeginning()) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+      if (animTimeline.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
       else { backwardButton.classList.remove(DISABLED_FROM_EDGE); }
 
-      if (animTimeline.atEnd()) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+      if (animTimeline.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
       else { forwardButton.classList.remove(DISABLED_FROM_EDGE); }
     })
   };
