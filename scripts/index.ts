@@ -1,9 +1,9 @@
-import { enableButton, disableButton } from './utility.js';
+import { enableButton, disableButton, /*wait*/ } from './utility.js';
 import { createForm_multiInput, createForm_textarea } from './jobForm.js';
 import { AnimSequence } from './AnimSequence.js';
 import { WebFlik } from './TestUsability/WebFlik.js';
 
-const {Exit, Entrance} = WebFlik.createBanks({});
+const {Exit, Entrance /*, Scroll*/} = WebFlik.createBanks({});
 
 const maxNumJobs = 8;
 const maxTime = 11;
@@ -33,7 +33,16 @@ const constraintOptions = { maxNumJobs, maxTime, maxWeight };
 const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_multiInput(constraintOptions);
 const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
+// const scroll = Scroll(document.querySelector('.aaa'), document.querySelector('.chill')!, {scrollableOffset: 0, targetOffset: 0}, {duration: 1000});
+// scroll.animation.generateTimePromise('forward', 'activePhase', '50%').then(() => {
+//   scroll.animation.pause();
+//   wait(2000).then(() => {
+//     scroll.animation.play();
+//   });
+// });
+
 const toggleSequence = new AnimSequence().addBlocks(...[
+  // scroll,
   Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),
 ]);

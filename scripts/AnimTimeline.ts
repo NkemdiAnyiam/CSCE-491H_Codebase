@@ -5,6 +5,8 @@ type AnimTimelineConfig = {
   debugMode: boolean;
 };
 
+type SequenceOperation = (sequence: AnimSequence) => void;
+
 export class AnimTimeline {
   static id = 0;
 
@@ -19,7 +21,7 @@ export class AnimTimeline {
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
   config: AnimTimelineConfig;
-  currentAnimations: Map<number, AnimTimelineAnimation> = new Map();
+  inProgressSequences: Map<number, AnimSequence> = new Map();
 
   get numSequences(): number { return this.animSequences.length; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
@@ -51,7 +53,7 @@ export class AnimTimeline {
   setPlaybackRate(rate: number): AnimTimeline {
     this.playbackRate = rate;
     // set playback rates of currently running animations so that they don't continue to run at regular speed
-    this.doForCurrentAnimations((animation: Animation) => animation.playbackRate = rate);
+    this.doForInProgressSequences(sequence => sequence.updatePlaybackRate(rate));
 
     return this;
   }
@@ -99,7 +101,10 @@ export class AnimTimeline {
 
     if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${sequences[this.nextSeqIndex].getDescription()}`); }
 
+    const toPlay = sequences[this.nextSeqIndex];
+    this.inProgressSequences.set(toPlay.id, toPlay);
     await sequences[this.nextSeqIndex].play(); // wait for the current AnimSequence to finish all of its animations
+    this.inProgressSequences.delete(toPlay.id);
 
     ++this.nextSeqIndex;
     const autoplayNext = !this.atEnd && (
@@ -118,7 +123,10 @@ export class AnimTimeline {
 
     if (this.config.debugMode) { console.log(`<<-- ${prevSeqIndex}: ${sequences[prevSeqIndex].getDescription()}`); }
 
+    const toRewind = sequences[prevSeqIndex];
+    this.inProgressSequences.set(toRewind.id, toRewind);
     await sequences[prevSeqIndex].rewind();
+    this.inProgressSequences.delete(toRewind.id);
     
     const autorewindPrevious = !this.atBeginning && (
       sequences[prevSeqIndex - 1].autoplaysNextSequence || // new prev sequence
@@ -157,30 +165,31 @@ export class AnimTimeline {
   toggleSkipping(isSkipping?: boolean): boolean {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipCurrentAnimations(); }
+    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipCurrentSequences(); }
     return this.isSkipping;
   }
 
+  skipCurrentSequences(): void { this.doForInProgressSequences(sequence => sequence.skipCurrentAnimations()); }
   // tells the current AnimSequence to instantly finish its animations
-  skipCurrentAnimations(): void { this.animSequences[this.nextSeqIndex].skipCurrentAnimations(); }
 
   // pauses or unpauses playback
   togglePause(isPaused?: boolean): boolean {
     this.isPaused = isPaused ?? !this.isPaused;
     if (this.isPaused) {
-      this.doForCurrentAnimations((animation: Animation) => animation.pause());
+      this.doForInProgressSequences(sequence => sequence.pause());
     }
     else {
-      this.doForCurrentAnimations((animation: Animation) => animation.play());
-      if (this.isSkipping) { this.skipCurrentAnimations(); }
+      this.doForInProgressSequences(sequence => sequence.resume());
+      if (this.isSkipping) { this.skipCurrentSequences(); }
     }
     return this.isPaused;
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
-  doForCurrentAnimations(operation: (animation: Animation) => void): void {
-    for (const animation of this.currentAnimations.values()) {
-      operation(animation);
+  doForInProgressSequences(operation: SequenceOperation): void {
+    console.log(this.inProgressSequences);
+    for (const sequence of this.inProgressSequences.values()) {
+      operation(sequence);
     }
   }
 }

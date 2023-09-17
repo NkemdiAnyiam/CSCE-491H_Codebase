@@ -8,6 +8,8 @@ type AnimSequenceConfig = {
   autoplays: boolean;
 };
 
+type AnimationOperation = (animation: AnimBlock) => void; 
+
 export class AnimSequence implements AnimSequenceConfig {
   static id = 0;
   
@@ -18,12 +20,15 @@ export class AnimSequence implements AnimSequenceConfig {
   tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
   autoplaysNextSequence: boolean = false; // decides whether the next AnimSequence should automatically play after this one
   autoplays: boolean = false;
+  basePlaybackRate: number = 1;
+  get playbackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 
   private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
+  private inProgressBlocks: Map<number, AnimBlock> = new Map();
 
   constructor(config: Partial<AnimSequenceConfig> = {}) {
     this.id = AnimSequence.id++;
@@ -65,20 +70,28 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addIntegrityblocks('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
+        activeGrouping[j].addIntegrityblocks('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
         // activeGrouping2[j].animation.addIntegrityblocks('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
       }
     }
 
     let parallelBlocks: Promise<void>[] = [];
     for (let i = 0; i < this.animBlock_forwardGroupings.length; ++i) {
-      const grouping = this.animBlock_forwardGroupings[i];
       parallelBlocks = [];
-      parallelBlocks.push(grouping[0].stepForward());
+      const grouping = this.animBlock_forwardGroupings[i];
+      const firstBlock = grouping[0];
+      this.inProgressBlocks.set(firstBlock.id, firstBlock);
+      parallelBlocks.push(firstBlock.stepForward()
+        .then(() => {this.inProgressBlocks.delete(firstBlock.id)})
+      );
+
       for (let j = 1; j < grouping.length; ++j) {
         await grouping[j-1].animation.getFinished('forward', 'delayPhase');
         const currAnimBlock = grouping[j];
-        parallelBlocks.push(currAnimBlock.stepForward());
+        this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
+        parallelBlocks.push(currAnimBlock.stepForward()
+          .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
+        );
       }
       await Promise.all(parallelBlocks);
     }
@@ -94,7 +107,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = activeGrouping.length;
 
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].animation.addIntegrityblocks('backward', 'activePhase', 'beginning', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
+        activeGrouping[j].addIntegrityblocks('backward', 'activePhase', 'beginning', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
       }
     }
     
@@ -102,21 +115,29 @@ export class AnimSequence implements AnimSequenceConfig {
     const groupings = this.animBlockGroupings_endDelayFinishOrder;
     const groupingsLength = groupings.length;
     for (let i = groupingsLength - 1; i >= 0; --i) {
+      parallelBlocks = [];
       const grouping = groupings[i];
       const groupingLength = grouping.length;
-      parallelBlocks = [];
-      parallelBlocks.push(grouping[groupingLength - 1].stepBackward());
+      const lastBlock = grouping[groupingLength - 1];
+      this.inProgressBlocks.set(lastBlock.id, lastBlock);
+      parallelBlocks.push(lastBlock.stepBackward()
+        .then(() => {this.inProgressBlocks.delete(lastBlock.id)})
+      );
+
       for (let j = groupingLength - 2; j >= 0; --j) {
         const currAnimBlock = grouping[j];
         const nextAnimBlock = grouping[j + 1];
         if (currAnimBlock.fullFinishTime > nextAnimBlock.fullStartTime) {
-          await nextAnimBlock.animation.generateTimePromise('backward', 'whole', currAnimBlock.fullFinishTime - nextAnimBlock.fullStartTime);
+          await nextAnimBlock.generateTimePromise('backward', 'whole', currAnimBlock.fullFinishTime - nextAnimBlock.fullStartTime);
         }
         else {
           await nextAnimBlock.animation.getFinished('backward', 'endDelayPhase');
         }
 
-        parallelBlocks.push(currAnimBlock.stepBackward());
+        this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
+        parallelBlocks.push(currAnimBlock.stepBackward()
+          .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
+        );
       }
       await Promise.all(parallelBlocks);
     }
@@ -192,16 +213,29 @@ export class AnimSequence implements AnimSequenceConfig {
 
     return this;
   }
+  
+  pause(): void {
+    this.doForInProgressBlocks(animBlock => animBlock.pause());
+  }
+
+  resume(): void {
+    this.doForInProgressBlocks(animBlock => animBlock.resume());
+  }
+
+  updatePlaybackRate(newRate: number) {
+    // TODO: Account for the fact that animations will need to use multiplier if they already have a playbackRate set
+    this.doForInProgressBlocks(animBlock => animBlock.multBasePlaybackRate(this.playbackRate));
+  }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping
   skipCurrentAnimations(): void {
-    // get all currently running animations (if animations are currently running, we need to force them to finish)
-    const allAnimations = document.getAnimations() as AnimTimelineAnimation[];
-    const numAnimations = allAnimations.length;
-    // an animation "belongs" to this sequence if its sequence id matches
-    for (let i = 0; i < numAnimations; ++i) {
-      // an animation "belongs" to this sequence if its ids match
-      if (allAnimations[i].sequenceID === this.id) { allAnimations[i].finish(); }
+    this.doForInProgressBlocks(animBlock => animBlock.finish());
+  }
+
+  // get all currently running animations that belong to this timeline and perform operation() with them
+  doForInProgressBlocks(operation: AnimationOperation): void {
+    for (const animBlock of this.inProgressBlocks.values()) {
+      operation(animBlock);
     }
   }
 }

@@ -645,6 +645,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   stepForward(): Promise<void> { return this.animate('forward'); }
   stepBackward(): Promise<void> { return this.animate('backward'); }
+  get pause() { return this.animation.pause.bind(this.animation); }
+  get resume() { return this.animation.play.bind(this.animation); }
+  get finish() { return this.animation.finish.bind(this.animation); }
+  get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
+  get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
+  multBasePlaybackRate(rateMultiplier: number) { this.animation.updatePlaybackRate(this.playbackRate * rateMultiplier); }
 
   // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
@@ -657,17 +663,16 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const animation = this.animation;
     animation.setDirection(direction);
     animation.loadKeyframeEffect(direction);
-    animation.updatePlaybackRate((this.parentTimeline?.playbackRate ?? 1) * this.playbackRate);
+    this.multBasePlaybackRate(this.parentSequence?.playbackRate ?? 1);
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     let resolver: (value: void | PromiseLike<void>) => void;
     let rejecter: (reason?: any) => void;
     skipping ? animation.finish() : animation.play();
-    this.parentTimeline?.currentAnimations.set(this.id, this.animation);
     
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
-      // console.log('A', this.domElem);
+      console.log('A', this.domElem.tagName);
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnStart);
@@ -698,7 +703,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
-      // console.log('B', this.domElem);
+      console.log('B', this.domElem.tagName);
       // CHANGE NOTE: Move hidden class stuff here
       if (this.commitsStyles || this.commitStylesAttemptForcefully) {
         // Attempt to apply the styles to the element.
@@ -742,9 +747,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
-      // console.log('C', this.domElem);
+      console.log('C', this.domElem.tagName);
       animation.cancel();
-      this.parentTimeline?.currentAnimations.delete(this.id);
       resolver();
     };
 
