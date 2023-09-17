@@ -125,7 +125,7 @@ export class AnimTimelineAnimation extends Animation {
     if (!this.forwardEffect.target) { throw new Error(`Animation target must not be null or undefined`); }
     if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
     
-    this.loadKeyframeEffect('forward');
+    this.setDirection('forward');
     this.resetPhases('both');
     this.segmentsForwardCache = [...this.segmentsForward] as SegmentsCache;
     this.segmentsBackwardCache = [...this.segmentsBackward] as SegmentsCache;
@@ -519,7 +519,10 @@ export class AnimTimelineAnimation extends Animation {
     this.setBackwardFrames(backwardFrames, backwardIsMirror);
   }
 
-  loadKeyframeEffect(direction: 'forward' | 'backward'): void {
+  setDirection(direction: 'forward' | 'backward') {
+    this.direction = direction;
+
+    // load proper KeyframeEffect
     switch(direction) {
       case "forward":
         const forwardEffect = this.forwardEffect;
@@ -533,8 +536,6 @@ export class AnimTimelineAnimation extends Animation {
         throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
   }
-
-  setDirection(direction: 'forward' | 'backward') { this.direction = direction; }
 }
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
@@ -660,7 +661,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.reqReady = false;
     const animation = this.animation;
     animation.setDirection(direction);
-    animation.loadKeyframeEffect(direction);
     this.useCompoundedPlaybackRate();
 
     // used as resolve() and reject() in the eventually returned promise
