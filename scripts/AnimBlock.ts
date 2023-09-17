@@ -234,7 +234,6 @@ export class AnimTimelineAnimation extends Animation {
       else {
         // This allows outside operations like generateTimePromise() to push more callbacks to the queue...
         // before the next loop iteration (this makes up for not having await super.finished)
-        this.segmentIsExpeditable = false;
         await Promise.resolve();
       }
       header.completed = true;
@@ -678,6 +677,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
             this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
           }
+
+          // sets it back to 'forwards' in case it was set to 'none' in a previous running
+          animation.effect?.updateTiming({fill: 'forwards'});
   
           break;
   
@@ -701,6 +703,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         // Attempt to apply the styles to the element.
         try {
           animation.commitStyles();
+          // ensures that accumulating effects are not stacked after commitStyles() (hopefully, new spec will prevent the need for this workaround)
+          animation.effect?.updateTiming({ fill: 'none' });
         }
         // If commitStyles() fails, it's because the element is not rendered.
         catch (_) {
@@ -714,6 +718,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           try {
             this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
             animation.commitStyles();
+            animation.effect?.updateTiming({ fill: 'none' });
             this.domElem.classList.remove('wbfk-override-hidden');
           }
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
@@ -722,7 +727,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           }
         }
       }
-      
+
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnFinish);
