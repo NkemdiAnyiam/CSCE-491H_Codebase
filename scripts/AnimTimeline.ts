@@ -22,8 +22,6 @@ export class AnimTimeline {
   currentAnimations: Map<number, AnimTimelineAnimation> = new Map();
 
   get numSequences(): number { return this.animSequences.length; }
-  private get nextSequence(): AnimSequence { return this.animSequences[this.nextSeqIndex]; }
-  private get prevSequence(): AnimSequence | undefined { return this.animSequences[this.nextSeqIndex - 1]; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
   get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
 
@@ -95,47 +93,53 @@ export class AnimTimeline {
   }
 
   // plays current AnimSequence and increments nextSeqIndex
-  stepForward(): Promise<boolean> {
+  async stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
+    const sequences = this.animSequences;
 
-    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${this.nextSequence.getDescription()}`); }
+    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${sequences[this.nextSeqIndex].getDescription()}`); }
 
-    return new Promise(resolve => {
-      this.nextSequence.play() // wait for the current AnimSequence to finish all of its animations
-      .then(() => {
-        ++this.nextSeqIndex;
-        resolve(!this.atEnd && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
-      });
-    });
+    await sequences[this.nextSeqIndex].play(); // wait for the current AnimSequence to finish all of its animations
+
+    ++this.nextSeqIndex;
+    const autoplayNext = !this.atEnd && (
+      sequences[this.nextSeqIndex - 1].autoplaysNextSequence || // sequence that was just played
+      sequences[this.nextSeqIndex].autoplays // new next sequence
+    );
+
+    return autoplayNext;
   }
 
   // decrements nextSeqIndex and rewinds the AnimSequence
-  stepBackward(): Promise<boolean> {
-    --this.nextSeqIndex;
+  async stepBackward(): Promise<boolean> {
     this.currDirection = 'backward';
+    const prevSeqIndex = --this.nextSeqIndex;
+    const sequences = this.animSequences;
 
-    if (this.config.debugMode) { console.log(`<<-- ${this.nextSeqIndex}: ${this.nextSequence.getDescription()}`); }
+    if (this.config.debugMode) { console.log(`<<-- ${prevSeqIndex}: ${sequences[prevSeqIndex].getDescription()}`); }
 
-    return new Promise(resolve => {
-      this.nextSequence.rewind()
-      .then(() => {
-        resolve(!this.atBeginning && (this.nextSequence.autoplays || this.prevSequence!.autoplaysNextSequence));
-      });
-    });
+    await sequences[prevSeqIndex].rewind();
+    
+    const autorewindPrevious = !this.atBeginning && (
+      sequences[prevSeqIndex - 1].autoplaysNextSequence || // new prev sequence
+      sequences[prevSeqIndex].autoplays // sequence that was just rewound
+    );
+
+    return autorewindPrevious;
   }
 
   // immediately skips to first AnimSequence in animSequences with matching tag field
   async skipTo(tag: string, offset: number = 0): Promise<void> {
     if (this.isStepping) { throw new Error('Cannot use skipTo() while currently animating'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
-    if (this.usingSkipTo) { throw new Error('Do not perform simultaneous calls to skipTo() in timeline'); }
-    if (!Number.isSafeInteger(offset)) { throw new Error(`Error: invalid offset "${offset}". Value must be an integer.`); }
+    if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline'); }
+    if (!Number.isSafeInteger(offset)) { throw new Error(`Invalid offset "${offset}". Value must be an integer.`); }
 
     // get nextSeqIndex corresponding to matching AnimSequence
     const tagIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
     if (tagIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found`); }
     if (tagIndex < 0 || tagIndex  > this.numSequences)
-      { throw new Error(`Error: skipping to tag "${tag}" with offset "${offset}" goes out of timeline bounds`); }
+      { throw new Error(`Skipping to tag "${tag}" with offset "${offset}" goes out of timeline bounds`); }
 
     this.usingSkipTo = true;
     let wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then pause
@@ -158,7 +162,7 @@ export class AnimTimeline {
   }
 
   // tells the current AnimSequence to instantly finish its animations
-  skipCurrentAnimations(): void { this.nextSequence.skipCurrentAnimations(); }
+  skipCurrentAnimations(): void { this.animSequences[this.nextSeqIndex].skipCurrentAnimations(); }
 
   // pauses or unpauses playback
   togglePause(isPaused?: boolean): boolean {
