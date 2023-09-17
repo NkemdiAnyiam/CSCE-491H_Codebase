@@ -108,7 +108,7 @@ export class AnimTimelineAnimation extends Animation {
   private finishPromisesForward: FinishPromises = {} as FinishPromises;
   private finishPromisesBackward: FinishPromises = {} as FinishPromises;
 
-  private segmentIsExpeditable = false;
+  private isExpediting = false;
   
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
@@ -201,19 +201,19 @@ export class AnimTimelineAnimation extends Animation {
     if (this.inProgress) { return; }
     this.inProgress = true;
     
-    const effect = super.effect!;
-    // If going forward, reset backward promises. If going backward, reset forward promises.
     if (this.isFinished) {
       this.isFinished = false;
+      // If going forward, reset backward promises. If going backward, reset forward promises.
       this.resetPhases(this.direction === 'forward' ? 'backward' : 'forward');
     }
-    const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
-    let roadblocked: boolean | null = null;
 
     super.play();
     // extra await allows additional pushes to queue before loop begins
     await Promise.resolve();
 
+    const effect = super.effect!;
+    const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
+    let roadblocked: boolean | null = null;
     // Traverse live array instead of static length since entries could be added mid-loop
     // TODO: May need to find a less breakable solution than the length thing.
     for (const segment of segments) {
@@ -221,19 +221,19 @@ export class AnimTimelineAnimation extends Animation {
       header.activated = true;
 
       if (!skipEndDelayUpdation) {
-        this.segmentIsExpeditable = true;
         // Set animation to stop at a certain time using endDelay.
         effect.updateTiming({ endDelay });
+        // if playback was paused from, resume playback
         if (roadblocked === true) {
           super.play();
           roadblocked = false;
         }
+        if (this.isExpediting) { super.finish(); }
         await super.finished;
       }
       else {
         // This allows outside operations like generateTimePromise() to push more callbacks to the queue...
         // before the next loop iteration (this makes up for not having await super.finished)
-        this.segmentIsExpeditable = false;
         await Promise.resolve();
       }
       header.completed = true;
@@ -255,22 +255,18 @@ export class AnimTimelineAnimation extends Animation {
     
     this.inProgress = false;
     this.isFinished = true;
+    this.isExpediting = false;
   }
 
-  async finish(): Promise<void> {
-    // All the side-effects of custom play() need to be in motion before calling super.finish().
-    if (!this.inProgress) { this.play(); }
+  finish(): void {
+    if (this.isExpediting) { return; }
 
-    // We must await super.finished each time to account for segmentation.
-    while (this.inProgress) {
-      if (this.segmentIsExpeditable) {
-        super.finish();
-        await super.finished;
-      }
-      else {
-        await Promise.resolve();
-      }
-    }
+    this.isExpediting = true;
+    // Calling finish() on an unplayed animation should play and finish the animation
+    if (!this.inProgress) { this.play(); }
+    // If animation is already in progress, expedite its current segment.
+    // From there, it will continue expediting using isExpediting
+    else { super.finish(); }
   }
 
   private static someThing(
@@ -686,6 +682,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
             this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
           }
+
+          // sets it back to 'forwards' in case it was set to 'none' in a previous running
+          animation.effect?.updateTiming({fill: 'forwards'});
   
           break;
   
@@ -709,6 +708,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         // Attempt to apply the styles to the element.
         try {
           animation.commitStyles();
+          // ensures that accumulating effects are not stacked after commitStyles() (hopefully, new spec will prevent the need for this workaround)
+          animation.effect?.updateTiming({ fill: 'none' });
         }
         // If commitStyles() fails, it's because the element is not rendered.
         catch (_) {
@@ -722,6 +723,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           try {
             this.domElem.classList.add('wbfk-override-hidden'); // CHANGE NOTE: Use new hidden classes
             animation.commitStyles();
+            animation.effect?.updateTiming({ fill: 'none' });
             this.domElem.classList.remove('wbfk-override-hidden');
           }
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
@@ -730,7 +732,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           }
         }
       }
-      
+
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnFinish);
