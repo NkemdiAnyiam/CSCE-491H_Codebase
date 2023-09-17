@@ -21,6 +21,7 @@ export class AnimTimeline {
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
   config: AnimTimelineConfig;
+  // CHANGE NOTE: AnimTimeline now stores references to in-progress sequences and also does not act directly on individual animations
   inProgressSequences: Map<number, AnimSequence> = new Map();
 
   get numSequences(): number { return this.animSequences.length; }
@@ -50,10 +51,11 @@ export class AnimTimeline {
     return this;
   }
 
+  // CHANGE NOTE: sequences, and blocks now have base playback rates that are then compounded by parents
   setPlaybackRate(rate: number): AnimTimeline {
     this.playbackRate = rate;
     // set playback rates of currently running animations so that they don't continue to run at regular speed
-    this.doForInProgressSequences(sequence => sequence.updatePlaybackRate(rate));
+    this.doForInProgressSequences(sequence => sequence.useCompoundedPlaybackRate());
 
     return this;
   }
@@ -165,11 +167,11 @@ export class AnimTimeline {
   toggleSkipping(isSkipping?: boolean): boolean {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipCurrentSequences(); }
+    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipInProgressSequences(); }
     return this.isSkipping;
   }
 
-  skipCurrentSequences(): void { this.doForInProgressSequences(sequence => sequence.skipCurrentAnimations()); }
+  skipInProgressSequences(): void { this.doForInProgressSequences(sequence => sequence.skipInProgressAnimations()); }
   // tells the current AnimSequence to instantly finish its animations
 
   // pauses or unpauses playback
@@ -180,14 +182,13 @@ export class AnimTimeline {
     }
     else {
       this.doForInProgressSequences(sequence => sequence.resume());
-      if (this.isSkipping) { this.skipCurrentSequences(); }
+      if (this.isSkipping) { this.skipInProgressSequences(); }
     }
     return this.isPaused;
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
   doForInProgressSequences(operation: SequenceOperation): void {
-    console.log(this.inProgressSequences);
     for (const sequence of this.inProgressSequences.values()) {
       operation(sequence);
     }

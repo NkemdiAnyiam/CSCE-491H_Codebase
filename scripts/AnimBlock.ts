@@ -543,7 +543,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
-  parentSequence?: AnimSequence; // TODO: replace with own dynamic list of running animations
+  parentSequence?: AnimSequence;
   parentTimeline?: AnimTimeline;
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
@@ -567,12 +567,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   delay: number = 0;
   endDelay: number = 0;
   easing: string = 'linear';
-  playbackRate: number = 1;
+  playbackRate: number = 1; // actually base playback rate
+  get compoundedPlaybackRate(): number { return this.playbackRate * (this.parentSequence?.compoundedPlaybackRate ?? 1); }
 
   fullStartTime = NaN;
-  get activeStartTime() { return this.fullStartTime + this.delay; }
-  get activeFinishTime() { return this.activeStartTime + this.duration; }
-  get fullFinishTime() { return this.activeFinishTime + this.endDelay; }
+  get activeStartTime() { return (this.fullStartTime + this.delay) / this.playbackRate; }
+  get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
+  get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
   constructor(domElem: Element | null, public animName: string, public bankEntry: TBankEntry) {
     if (!domElem) {
@@ -587,6 +588,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.animArgs = animArgs;
     const mergedConfig = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
     Object.assign(this, mergedConfig);
+    // cannot be exactly 0 because that causes some Animation-related bugs that can't be easily worked around
     this.duration = Math.max(this.duration as number, 0.01);
 
     // TODO: Handle case where only one keyframe is provided
@@ -600,6 +602,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
       [[{fontFeatureSettings: 'normal'}], []]; // TODO: maybe use 'default' instead
 
+    // playbackRate is not included because it is computed at the time of animating
     const keyframeOptions: KeyframeEffectOptions = {
       delay: this.delay,
       duration: this.duration,
@@ -610,7 +613,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       composite: this.composite,
     };
 
-    // TODO: Add playbackRate
     this.animation = new AnimTimelineAnimation(
       new KeyframeEffect(
         this.domElem,
@@ -646,7 +648,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get finish() { return this.animation.finish.bind(this.animation); }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
   get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
-  multBasePlaybackRate(rateMultiplier: number) { this.animation.updatePlaybackRate(this.playbackRate * rateMultiplier); }
+  // multiplies playback rate of parent timeline and sequence (if exist) with base playback rate
+  useCompoundedPlaybackRate() { this.animation.updatePlaybackRate(this.compoundedPlaybackRate); }
 
   // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
@@ -659,16 +662,17 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const animation = this.animation;
     animation.setDirection(direction);
     animation.loadKeyframeEffect(direction);
-    this.multBasePlaybackRate(this.parentSequence?.playbackRate ?? 1);
+    this.useCompoundedPlaybackRate();
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     let resolver: (value: void | PromiseLike<void>) => void;
     let rejecter: (reason?: any) => void;
-    skipping ? animation.finish() : animation.play();
+
+    if (skipping) { animation.finish(); }
+    else { animation.play(); }
     
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
-      console.log('A', this.domElem.tagName);
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnStart);
@@ -685,7 +689,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
-  
           break;
   
         case 'backward':
@@ -702,7 +705,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
-      console.log('B', this.domElem.tagName);
       // CHANGE NOTE: Move hidden class stuff here
       if (this.commitsStyles || this.commitStylesAttemptForcefully) {
         // Attempt to apply the styles to the element.
@@ -749,7 +751,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
-      console.log('C', this.domElem.tagName);
       animation.cancel();
       resolver();
     };

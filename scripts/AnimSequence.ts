@@ -21,13 +21,14 @@ export class AnimSequence implements AnimSequenceConfig {
   autoplaysNextSequence: boolean = false; // decides whether the next AnimSequence should automatically play after this one
   autoplays: boolean = false;
   basePlaybackRate: number = 1;
-  get playbackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
+  get compoundedPlaybackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 
   private animBlockGroupings_activeFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_endDelayFinishOrder: AnimBlock[][] = [];
   private animBlockGroupings_backwardActiveFinishOrder: AnimBlock[][] = [];
   private animBlock_forwardGroupings: AnimBlock[][] = [[]];
+  // CHANGE NOTE: AnimSequence now stores references to all in-progress blocks
   private inProgressBlocks: Map<number, AnimBlock> = new Map();
 
   constructor(config: Partial<AnimSequenceConfig> = {}) {
@@ -148,6 +149,23 @@ export class AnimSequence implements AnimSequenceConfig {
       await Promise.all(parallelBlocks);
     }
   }
+  
+  pause(): void { this.doForInProgressBlocks(animBlock => animBlock.pause()); }
+  resume(): void { this.doForInProgressBlocks(animBlock => animBlock.resume()); }
+
+  updatePlaybackRate(newRate: number) {
+    this.basePlaybackRate = newRate;
+    this.useCompoundedPlaybackRate();
+  }
+
+  useCompoundedPlaybackRate() {
+    this.doForInProgressBlocks(animBlock => animBlock.useCompoundedPlaybackRate());
+  }
+
+  // used to skip currently running animation so they don't run at regular speed while using skipping
+  skipInProgressAnimations(): void {
+    this.doForInProgressBlocks(animBlock => animBlock.finish());
+  }
 
   static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
   static activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
@@ -175,7 +193,6 @@ export class AnimSequence implements AnimSequenceConfig {
     for (let i = 0; i < numBlocks; ++i) {
       const currAnimBlock = animBlocks[i];
       const prevBlock = animBlocks[i-1];
-      // TODO: Consider override scenarios
       const startsWithPrev = currAnimBlock.startsWithPreviousBlock || prevBlock?.startsNextBlock;
       let currStartTime: number;
 
@@ -218,24 +235,6 @@ export class AnimSequence implements AnimSequenceConfig {
     this.animBlockGroupings_endDelayFinishOrder.push(currEndDelayGrouping);
 
     return this;
-  }
-  
-  pause(): void {
-    this.doForInProgressBlocks(animBlock => animBlock.pause());
-  }
-
-  resume(): void {
-    this.doForInProgressBlocks(animBlock => animBlock.resume());
-  }
-
-  updatePlaybackRate(newRate: number) {
-    // TODO: Account for the fact that animations will need to use multiplier if they already have a playbackRate set
-    this.doForInProgressBlocks(animBlock => animBlock.multBasePlaybackRate(this.playbackRate));
-  }
-
-  // used to skip currently running animation so they don't run at regular speed while using skipping
-  skipCurrentAnimations(): void {
-    this.doForInProgressBlocks(animBlock => animBlock.finish());
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
