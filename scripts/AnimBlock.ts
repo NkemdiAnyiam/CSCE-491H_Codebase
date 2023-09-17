@@ -1,6 +1,7 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+// import { presetScrolls } from "./Presets.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -402,7 +403,6 @@ export class AnimTimelineAnimation extends Animation {
   }
 
   // TODO: Hide from general use
-
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
@@ -555,6 +555,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
   animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
+  reqReady = false;
   
   startsNextBlock: boolean = false;
   startsWithPreviousBlock: boolean = false;
@@ -652,6 +653,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onFinishBackward(): void {};
 
   protected async animate(direction: 'forward' | 'backward'): Promise<void> {
+    this.reqReady = false;
     const animation = this.animation;
     animation.setDirection(direction);
     animation.loadKeyframeEffect(direction);
@@ -691,6 +693,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         default:
           throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
       }
+      this.reqReady = true;
     };
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
@@ -809,6 +812,140 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 
   protected _onFinishBackward(): void {
     this.domElem.classList.add('wbfk-hidden');
+  }
+}
+
+export type ScrollOptions = {
+  scrollableOffset: number;
+  targetOffset: number;
+};
+
+export class ScrollBlock extends AnimBlock {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
+    return {
+      commitsStyles: false,
+      pregeneratesKeyframes: true,
+    };
+  }
+
+  private targetElem: Element;
+
+  private scrollOptions: ScrollOptions = {
+    scrollableOffset: 0,
+    targetOffset: 0,
+  } as ScrollOptions;
+
+  // constructor(domElem: Element | null, private targetElem: Element | null, animName: keyof typeof presetScrolls, bankEntry: TBankEntry) {
+  //   if (!targetElem) {
+  //     throw new Error(`Target element must not be null`); // TODO: Improve error message
+  //   }
+  //   if (!bankEntry) { throw new Error(`Invalid scroll animation name ${animName}`); }
+    
+  //   super(domElem, animName, bankEntry);
+
+  //   this.setAnimators(animName);
+
+  //   switch(animName) {
+  //     case "~scroll-to":
+  //       // this.targetElem = 
+  //     case "~scroll-to-self":
+  //   }
+  // }
+
+  constructor(
+    private scrollableElem: Element | null,
+    targetElem: Element | null,
+    scrollOptions: Partial<ScrollOptions>
+  ) {
+    super(scrollableElem, `~scroll-self`, {
+      generateKeyframes() {
+        return [[], []];
+      },
+    });
+
+    if (!targetElem) {
+      throw new Error(`Target element must not be null`); // TODO: Improve error message
+    }
+    this.targetElem = targetElem;
+
+    this.scrollOptions = {...this.scrollOptions, ...scrollOptions};
+  }
+  
+  from: number = NaN;
+  to: number = NaN;
+
+  loop = () => {
+    const effect = this.animation.effect;
+    if (!effect || !this.reqReady) {
+      requestAnimationFrame(this.loop);
+      return;
+    }
+
+    const {progress, direction} = effect.getComputedTiming();
+    if (progress === null || progress === undefined) {
+      this.domElem.scrollTo({behavior: "instant", top: this.to});
+      return;
+    }
+    this.domElem.scrollTo({
+      behavior: "instant",
+      top: this.from + (this.to - this.from) * (direction === 'normal' ? progress : 1 - progress)
+    });
+
+    requestAnimationFrame(this.loop);
+  }
+
+  private setScrollies(scrollable: Element, target: Element): void {
+    // determines the intersection point of the target
+    const offsetPerc: number = this.scrollOptions.targetOffset ?? 0;
+    // determines the intersection point of the scrolling container
+    const placementOffsetPerc: number = this.scrollOptions.scrollableOffset ?? 0;
+
+    const selfRect = scrollable.getBoundingClientRect();
+    const targetRect = target!.getBoundingClientRect();
+    const targetInnerTop = targetRect.top - selfRect.top + (scrollable === document.documentElement ? 0 : scrollable.scrollTop);
+    // console.log(targetInnerTop);
+    // The maximum view height should be the height of the scrolling container,
+    // but it can only be as large as the viewport height since all scrolling should be
+    // with respect to what the user can see.
+    const maxSelfViewHeight = Math.min(selfRect.height, window.innerHeight);
+
+    // initial position of the intersection point of the target relative to the top of the scrolling container
+    const oldTargetIntersectionPointPos = targetInnerTop + (targetRect.height * offsetPerc);
+    // new position of the intersection point of the target relative to the top of the scrolling container
+    const newTargetIntersectionPointPos = oldTargetIntersectionPointPos - (maxSelfViewHeight * placementOffsetPerc);
+    // set to just start scrolling from current scroll position
+    this.from = scrollable.scrollTop;
+    // If new target intersection is larger (lower) than initial,
+    // we'd need to scroll the screen up to move the target intersection down to it.
+    // Same logic but opposite for needing to scroll down.
+    const scrollDirection = newTargetIntersectionPointPos > oldTargetIntersectionPointPos ? 'up' : 'down';
+
+    switch(scrollDirection) {
+      case "up":
+        // Capped at 0 because that's the minimum scrollTop value
+        this.to = Math.max(newTargetIntersectionPointPos, 0);
+      case "down":
+        // Capped at the highest scrollTop value, which equals the scroll height minus the
+        // minimum between the height of the scrolling container and the viewport height)
+        this.to = Math.min(newTargetIntersectionPointPos, scrollable.scrollHeight - maxSelfViewHeight);
+    }
+  }
+
+  protected _onStartForward(): void {
+    this.setScrollies(this.domElem, this.targetElem);
+
+    requestAnimationFrame(this.loop);
+  }
+
+  protected _onStartBackward(): void {
+    // if (this.scrollOptions.backwardsAnchor) {
+    //   this.from = this.to;
+
+    // }
+    // else {
+      [this.from, this.to] = [this.to, this.from];
+    // }
+    requestAnimationFrame(this.loop);
   }
 }
 

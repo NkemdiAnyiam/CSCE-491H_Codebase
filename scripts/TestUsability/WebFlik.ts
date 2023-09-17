@@ -1,4 +1,4 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock } from "../AnimBlock.js";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollBlock, ScrollOptions } from "../AnimBlock.js";
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
@@ -6,25 +6,25 @@ import { presetEntrances, presetExits, presetEmphases, presetTranslations, prese
 export type KeyframesBankEntry = Readonly<{
   generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
   config?: Partial<AnimBlockConfig>;
-}>
+}>;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock | void = void> =
   Readonly<Record<string, KeyframesBankEntry>>
-  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string}>>)
+  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string}>>);
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // TODO: Handle undo-- prefixes
 // extracts only those strings in an object whose paired value is a KeyframesBankEntry
 export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
   [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];
-}, string>
+}, string>;
 
 type BlockInitParams<
-TBlock extends AnimBlock<TBank[AnimName]>,
+  TBlock extends AnimBlock<TBank[AnimName]>,
   TBank extends IKeyframesBank = IKeyframesBank<TBlock>,
   AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>,
-> = Parameters<TBlock['initialize']>
+> = Parameters<TBlock['initialize']>;
 
 class _WebFlik {
   createBanks
@@ -89,6 +89,9 @@ class _WebFlik {
       EraseConnector: function(connectorElem, animName, ...params) {
         return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank[animName]).initialize(...params);
       },
+      Scroll: function(domElem, targetElem, scrollOptions, userConfig = {}) {
+        return new ScrollBlock(domElem, targetElem, scrollOptions).initialize([], userConfig);
+      },
     } satisfies {
       Entrance: <AnimName extends AnimationNameIn<CombinedEntranceBank>>(
         domElem: Element | null,
@@ -132,6 +135,13 @@ class _WebFlik {
         animName: AnimName,
         ...params: BlockInitParams<EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>>
       ) => EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>;
+
+      Scroll: (
+        domElem: Element | null,
+        targetElem: Element | null,
+        scrollOptions: ScrollOptions,
+        userConfig: Partial<AnimBlockConfig>
+      ) => ScrollBlock;
     };
   }
 }
