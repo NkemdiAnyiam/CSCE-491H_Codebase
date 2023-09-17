@@ -26,7 +26,6 @@ type KeyframeTimingOptions = {
 }
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
-// TODO: validate duration and playbackRate?
 
 type TOffset = {
   offsetSelfX: CssLength; // determines offset to apply to the respective positional property
@@ -269,9 +268,12 @@ export class AnimTimelineAnimation extends Animation {
     else { super.finish(); }
   }
 
-  private static someThing(
-    anim: AnimTimelineAnimation, direction: 'forward' | 'backward', phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole'
-    ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number] {
+  private static computePhaseEmplacement(
+    anim: AnimTimelineAnimation,
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
+    ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number, phaseTimePosition: number] {
     // compute initial index, phase duration, and endDelay offset based on phase and arguments
     const [segments, segmentsCache] = direction === 'forward'
       ? [anim.segmentsForward, anim.segmentsForwardCache]
@@ -312,28 +314,27 @@ export class AnimTimelineAnimation extends Animation {
         throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
     }
 
-    return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset];
-  }
+    // COMPUTE TIME POSITION RELATIVE TO PHASE
+    let initialPhaseTimePos: number;
 
-  private static computePhaseTimePosition(direction: 'forward' | 'backward', timePosition: number | 'beginning' | 'end' | `${number}%`, phaseDuration: number): number {
-    let result: number;
-
-    if (timePosition === 'beginning') { result = 0; }
-    else if (timePosition === 'end') {  result = phaseDuration; }
-    else if (typeof timePosition === 'number') { result = timePosition; }
+    if (timePosition === 'beginning') { initialPhaseTimePos = 0; }
+    else if (timePosition === 'end') {  initialPhaseTimePos = phaseDuration; }
+    else if (typeof timePosition === 'number') { initialPhaseTimePos = timePosition; }
     else {
       // if timePosition is in percent format, convert to correct time value based on phase
       const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
       // note: this error should never occur
       if (!match) { throw new Error(`Percentage format match not found.`); }
 
-      result = phaseDuration * (Number(match[1]) / 100);
+      initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
     }
 
     // wrap any negative time values to count backwards from end of phase
-    const initialResult = result < 0 ? phaseDuration + result : result;
+    const wrappedPhaseTimePos = initialPhaseTimePos < 0 ? phaseDuration + initialPhaseTimePos : initialPhaseTimePos;
     // time positions should refer to the same point in a phase, regardless of the current direction
-    return direction === 'forward' ? initialResult : phaseDuration - initialResult;
+    const phaseTimePosition: number = direction === 'forward' ? wrappedPhaseTimePos : phaseDuration - wrappedPhaseTimePos;
+
+    return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition];
   }
 
   // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
@@ -352,8 +353,7 @@ export class AnimTimelineAnimation extends Animation {
       // if the animation is already finished in the given direction, resolve immediately
       if (this.isFinished && this.direction === direction) { resolve(); return; }
 
-      const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset] = AnimTimelineAnimation.someThing(this, direction, phase);
-      const phaseTimePosition = AnimTimelineAnimation.computePhaseTimePosition(direction, timePosition, phaseDuration);
+      const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = AnimTimelineAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
       // TODO: Give information on specific location of this animation block
       // check for out of bounds time positions
@@ -445,8 +445,7 @@ export class AnimTimelineAnimation extends Animation {
       return;
     }
     
-    const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset] = AnimTimelineAnimation.someThing(this, direction, phase);
-    const phaseTimePosition = AnimTimelineAnimation.computePhaseTimePosition(direction, timePosition, phaseDuration);
+    const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = AnimTimelineAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
     // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
@@ -663,10 +662,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.setDirection(direction);
     animation.loadKeyframeEffect(direction);
     this.useCompoundedPlaybackRate();
-    const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
+
+    // used as resolve() and reject() in the eventually returned promise
     let resolver: (value: void | PromiseLike<void>) => void;
     let rejecter: (reason?: any) => void;
-
+    
+    const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     if (skipping) { animation.finish(); }
     else { animation.play(); }
     
