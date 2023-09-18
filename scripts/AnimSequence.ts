@@ -76,8 +76,9 @@ export class AnimSequence implements AnimSequenceConfig {
       // const activeGrouping2 = activeGroupings2[i];
       const groupingLength = activeGrouping.length;
 
+      // ensure that no block finishes its active phase before any block that should finish its active phase first (according to the calculated "perfect" timing)
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].addIntegrityblocks('forward', 'activePhase', 'end', activeGrouping[j-1].animation.getFinished('forward', 'activePhase'));
+        activeGrouping[j].addIntegrityblocks('forward', 'activePhase', 'end', activeGrouping[j-1].generateTimePromise('forward', 'activePhase', 'end'));
         // activeGrouping2[j].animation.addIntegrityblocks('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
       }
     }
@@ -93,7 +94,9 @@ export class AnimSequence implements AnimSequenceConfig {
       );
 
       for (let j = 1; j < grouping.length; ++j) {
-        await grouping[j-1].animation.getFinished('forward', 'delayPhase');
+        // the start of any block within a grouping should line up with the beginning of the preceding block's active phase
+        // (akin to PowerPoint timing)
+        await grouping[j-1].generateTimePromise('forward', 'activePhase', 'beginning');
         const currAnimBlock = grouping[j];
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
         parallelBlocks.push(currAnimBlock.stepForward()
@@ -113,8 +116,9 @@ export class AnimSequence implements AnimSequenceConfig {
       const activeGrouping = activeGroupings[i];
       const groupingLength = activeGrouping.length;
 
+      // ensure that no block finishes rewinding its active phase before any block that should finishing doing so first first (according to the calculated "perfect" timing)
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].addIntegrityblocks('backward', 'activePhase', 'beginning', activeGrouping[j-1].animation.getFinished('backward', 'activePhase'));
+        activeGrouping[j].addIntegrityblocks('backward', 'activePhase', 'beginning', activeGrouping[j-1].generateTimePromise('backward', 'activePhase', 'beginning'));
       }
     }
     
@@ -134,13 +138,16 @@ export class AnimSequence implements AnimSequenceConfig {
       for (let j = groupingLength - 2; j >= 0; --j) {
         const currAnimBlock = grouping[j];
         const nextAnimBlock = grouping[j + 1];
+        // if the current block intersects the next block, wait for that intersection time
         if (currAnimBlock.fullFinishTime > nextAnimBlock.fullStartTime) {
           await nextAnimBlock.generateTimePromise('backward', 'whole', currAnimBlock.fullFinishTime - nextAnimBlock.fullStartTime);
         }
+        // otherwise, wait for the next block to finish rewinding entirely
         else {
-          await nextAnimBlock.animation.getFinished('backward', 'endDelayPhase');
+          await nextAnimBlock.generateTimePromise('backward', 'delayPhase', 'beginning');
         }
 
+        // once waiting period above is over, begin rewinding current block
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
         parallelBlocks.push(currAnimBlock.stepBackward()
           .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})

@@ -76,17 +76,7 @@ type Segment = [
   }>,
 ];
 
-type SegmentsCache = [delayPhaseEnd: Segment, activePhaseEnd: Segment, endDelayPhaseEnd: Segment];
-
-type FinishPromises = {
-  delayPhase: Promise<void>;
-  activePhase: Promise<void>;
-  endDelayPhase: Promise<void>;
-}
-
-type PhaseResolvers = {
-  [prop in keyof FinishPromises]: (value: void | PromiseLike<void>) => void;
-}
+type SegmentsCache = [delayPhaseEnd: Segment, activePhaseEnd: Segment, endDelayPhaseEnd: Segment]
 
 export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
@@ -101,12 +91,6 @@ export class AnimTimelineAnimation extends Animation {
   private segmentsForwardCache: SegmentsCache;
   private segmentsBackward: Segment[] = [];
   private segmentsBackwardCache: SegmentsCache;
-
-  private phaseResolversForward: PhaseResolvers = {} as PhaseResolvers;
-  private phaseResolversBackward: PhaseResolvers = {} as PhaseResolvers;
-
-  private finishPromisesForward: FinishPromises = {} as FinishPromises;
-  private finishPromisesBackward: FinishPromises = {} as FinishPromises;
 
   private isExpediting = false;
   
@@ -165,11 +149,6 @@ export class AnimTimelineAnimation extends Animation {
       default:
         throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
-  }
-
-  getFinished(direction: 'forward' | 'backward', phase: keyof FinishPromises): Promise<void> {
-    const finishPromises = direction === 'forward' ? this.finishPromisesForward : this.finishPromisesBackward;
-    return finishPromises[phase];
   }
   
   async play(): Promise<void> {
@@ -252,18 +231,11 @@ export class AnimTimelineAnimation extends Animation {
 
   private resetPhases(direction: 'forward' | 'backward' | 'both'): void {
     const resetForwardPhases = () => {
-      const phaseResolversForward = this.phaseResolversForward;
-      this.finishPromisesForward = {
-        delayPhase: new Promise<void>(resolve => {phaseResolversForward.delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {phaseResolversForward.activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {phaseResolversForward.endDelayPhase = resolve}),
-      };
-
       const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
       const segmentsForward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversForward.delayPhase], [], [], delay === 0, {} ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversForward.activePhase], [], [], false, {} ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversForward.endDelayPhase], [], [], endDelay === 0, {} ],
+        [ -duration, [() => this.onDelayFinish()], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish()], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish()], [], [], endDelay === 0, {} ],
       ];
       this.segmentsForward = segmentsForward;
       this.segmentsForwardCache = [...segmentsForward] as SegmentsCache;
@@ -272,18 +244,11 @@ export class AnimTimelineAnimation extends Animation {
     // NEXT REMINDER: Reimplement so that delayPhase for backwards direction corresponds to endDelayPhase
     // TODO: Determine if the NEXT REMINDER above has been correctly fulfilled
     const resetBackwardPhases = () => {
-      const phaseResolversBackward = this.phaseResolversBackward;
-      this.finishPromisesBackward = {
-        delayPhase: new Promise<void>(resolve => {phaseResolversBackward.delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {phaseResolversBackward.activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {phaseResolversBackward.endDelayPhase = resolve}),
-      };
-  
       const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
       const segmentsBackward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversBackward.delayPhase], [], [], delay === 0, {} ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversBackward.activePhase], [], [], false, {} ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversBackward.endDelayPhase], [], [], endDelay === 0, {} ],
+        [ -duration, [() => this.onDelayFinish()], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish()], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish()], [], [], endDelay === 0, {} ],
       ];
       this.segmentsBackward = segmentsBackward;
       this.segmentsBackwardCache = [...segmentsBackward] as SegmentsCache;
@@ -551,7 +516,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
+  protected animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
   animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
   domElem: Element;
   reqReady = false;
