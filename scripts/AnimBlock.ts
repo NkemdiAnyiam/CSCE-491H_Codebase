@@ -133,63 +133,43 @@ export class AnimTimelineAnimation extends Animation {
     this.segmentsForwardCache = [...this.segmentsForward] as SegmentsCache;
     this.segmentsBackwardCache = [...this.segmentsBackward] as SegmentsCache;
   }
+  
+  setForwardFrames(frames: Keyframe[]): void {
+    this.forwardEffect.setKeyframes(frames);
+  }
+
+  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean): void {
+    this.backwardEffect.setKeyframes(frames);
+    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
+  }
+
+  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
+    this.setForwardFrames(forwardFrames);
+    (super.effect as KeyframeEffect).setKeyframes(forwardFrames);
+    this.setBackwardFrames(backwardFrames, backwardIsMirror);
+  }
+
+  setDirection(direction: 'forward' | 'backward') {
+    this.direction = direction;
+
+    // load proper KeyframeEffect
+    switch(direction) {
+      case "forward":
+        const forwardEffect = this.forwardEffect;
+        super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming(), composite: forwardEffect.composite});
+        break;
+      case "backward":
+        const backwardEffect = this.backwardEffect;
+        super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
+        break;
+      default:
+        throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+    }
+  }
 
   getFinished(direction: 'forward' | 'backward', phase: keyof FinishPromises): Promise<void> {
     const finishPromises = direction === 'forward' ? this.finishPromisesForward : this.finishPromisesBackward;
     return finishPromises[phase];
-  }
-
-  private resetPhases(direction: 'forward' | 'backward' | 'both'): void {
-    const resetForwardPhases = () => {
-      const phaseResolversForward = this.phaseResolversForward;
-      this.finishPromisesForward = {
-        delayPhase: new Promise<void>(resolve => {phaseResolversForward.delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {phaseResolversForward.activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {phaseResolversForward.endDelayPhase = resolve}),
-      };
-
-      const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
-      const segmentsForward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversForward.delayPhase], [], [], delay === 0, {} ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversForward.activePhase], [], [], false, {} ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversForward.endDelayPhase], [], [], endDelay === 0, {} ],
-      ];
-      this.segmentsForward = segmentsForward;
-      this.segmentsForwardCache = [...segmentsForward] as SegmentsCache;
-    };
-
-    // NEXT REMINDER: Reimplement so that delayPhase for backwards direction corresponds to endDelayPhase
-    const resetBackwardPhases = () => {
-      const phaseResolversBackward = this.phaseResolversBackward;
-      this.finishPromisesBackward = {
-        delayPhase: new Promise<void>(resolve => {phaseResolversBackward.delayPhase = resolve}),
-        activePhase: new Promise<void>(resolve => {phaseResolversBackward.activePhase = resolve}),
-        endDelayPhase: new Promise<void>(resolve => {phaseResolversBackward.endDelayPhase = resolve}),
-      };
-  
-      const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
-      const segmentsBackward: Segment[] = [
-        [ -duration, [() => this.onDelayFinish(), phaseResolversBackward.delayPhase], [], [], delay === 0, {} ],
-        [ 0, [() => this.onActiveFinish(), phaseResolversBackward.activePhase], [], [], false, {} ],
-        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversBackward.endDelayPhase], [], [], endDelay === 0, {} ],
-      ];
-      this.segmentsBackward = segmentsBackward;
-      this.segmentsBackwardCache = [...segmentsBackward] as SegmentsCache;
-    };
-
-    switch(direction) {
-      case "forward":
-        resetForwardPhases();
-        break;
-      case "backward":
-        resetBackwardPhases();
-        break;
-      case "both":
-        resetForwardPhases();
-        resetBackwardPhases();
-        break;
-      default: throw new Error(`Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
-    }
   }
   
   async play(): Promise<void> {
@@ -242,7 +222,6 @@ export class AnimTimelineAnimation extends Animation {
 
       // Await any blockers for the completion of this phase
       if (roadblocks.length > 0) {
-        // TODO: Should pause whole sequence instead of just the block
         this.pauseForRoadblocks();
         roadblocked = true;
         await Promise.all(roadblocks);
@@ -271,73 +250,58 @@ export class AnimTimelineAnimation extends Animation {
     else { super.finish(); }
   }
 
-  private static computePhaseEmplacement(
-    anim: AnimTimelineAnimation,
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
-    timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number, phaseTimePosition: number] {
-    // compute initial index, phase duration, and endDelay offset based on phase and arguments
-    const [segments, segmentsCache] = direction === 'forward'
-      ? [anim.segmentsForward, anim.segmentsForwardCache]
-      : [anim.segmentsBackward, anim.segmentsBackwardCache];
-    const effect = anim.getEffect(direction);
-    const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
-    let initialArrIndex: number; // skips to first entry of a given phase
-    let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
-    let phaseDuration: number; // duration of phase specified in argument
-    let quasiPhase: typeof phase = phase; // opposite of phase (for backward direction)
-    switch(phase) {
-      case "delayPhase": quasiPhase = 'endDelayPhase'; break;
-      case "endDelayPhase": quasiPhase = 'delayPhase'; break;
+  private resetPhases(direction: 'forward' | 'backward' | 'both'): void {
+    const resetForwardPhases = () => {
+      const phaseResolversForward = this.phaseResolversForward;
+      this.finishPromisesForward = {
+        delayPhase: new Promise<void>(resolve => {phaseResolversForward.delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {phaseResolversForward.activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {phaseResolversForward.endDelayPhase = resolve}),
+      };
+
+      const { delay, duration, endDelay } = this.forwardEffect.getTiming() as {[prop: string]: number};
+      const segmentsForward: Segment[] = [
+        [ -duration, [() => this.onDelayFinish(), phaseResolversForward.delayPhase], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish(), phaseResolversForward.activePhase], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversForward.endDelayPhase], [], [], endDelay === 0, {} ],
+      ];
+      this.segmentsForward = segmentsForward;
+      this.segmentsForwardCache = [...segmentsForward] as SegmentsCache;
+    };
+
+    // NEXT REMINDER: Reimplement so that delayPhase for backwards direction corresponds to endDelayPhase
+    // TODO: Determine if the NEXT REMINDER above has been correctly fulfilled
+    const resetBackwardPhases = () => {
+      const phaseResolversBackward = this.phaseResolversBackward;
+      this.finishPromisesBackward = {
+        delayPhase: new Promise<void>(resolve => {phaseResolversBackward.delayPhase = resolve}),
+        activePhase: new Promise<void>(resolve => {phaseResolversBackward.activePhase = resolve}),
+        endDelayPhase: new Promise<void>(resolve => {phaseResolversBackward.endDelayPhase = resolve}),
+      };
+  
+      const { delay, duration, endDelay } = this.backwardEffect.getTiming() as {[prop: string]: number};
+      const segmentsBackward: Segment[] = [
+        [ -duration, [() => this.onDelayFinish(), phaseResolversBackward.delayPhase], [], [], delay === 0, {} ],
+        [ 0, [() => this.onActiveFinish(), phaseResolversBackward.activePhase], [], [], false, {} ],
+        [ endDelay, [() => this.onEndDelayFinish(), phaseResolversBackward.endDelayPhase], [], [], endDelay === 0, {} ],
+      ];
+      this.segmentsBackward = segmentsBackward;
+      this.segmentsBackwardCache = [...segmentsBackward] as SegmentsCache;
+    };
+
+    switch(direction) {
+      case "forward":
+        resetForwardPhases();
+        break;
+      case "backward":
+        resetBackwardPhases();
+        break;
+      case "both":
+        resetForwardPhases();
+        resetBackwardPhases();
+        break;
+      default: throw new Error(`Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
     }
-
-    switch(direction === 'forward' ? phase : quasiPhase) {
-      case "delayPhase":
-        initialArrIndex = 0;
-        phaseDuration = delay;
-        phaseEndDelayOffset = -(delay + duration);
-        break;
-      case "activePhase":
-        initialArrIndex = segments.indexOf(segmentsCache[0]) + 1;
-        phaseDuration = duration;
-        phaseEndDelayOffset = -duration;
-        break;
-      case "endDelayPhase":
-        initialArrIndex = segments.indexOf(segmentsCache[1]) + 1;
-        phaseDuration = effect.getTiming().endDelay as number;
-        phaseEndDelayOffset = 0;
-        break;
-      case "whole":
-        initialArrIndex = 0;
-        phaseDuration = delay + duration + (effect.getTiming().endDelay as number);
-        phaseEndDelayOffset = -(delay + duration);
-        break;
-      default:
-        throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
-    }
-
-    // COMPUTE TIME POSITION RELATIVE TO PHASE
-    let initialPhaseTimePos: number;
-
-    if (timePosition === 'beginning') { initialPhaseTimePos = 0; }
-    else if (timePosition === 'end') {  initialPhaseTimePos = phaseDuration; }
-    else if (typeof timePosition === 'number') { initialPhaseTimePos = timePosition; }
-    else {
-      // if timePosition is in percent format, convert to correct time value based on phase
-      const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
-      // note: this error should never occur
-      if (!match) { throw new Error(`Percentage format match not found.`); }
-
-      initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
-    }
-
-    // wrap any negative time values to count backwards from end of phase
-    const wrappedPhaseTimePos = initialPhaseTimePos < 0 ? phaseDuration + initialPhaseTimePos : initialPhaseTimePos;
-    // time positions should refer to the same point in a phase, regardless of the current direction
-    const phaseTimePosition: number = direction === 'forward' ? wrappedPhaseTimePos : phaseDuration - wrappedPhaseTimePos;
-
-    return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition];
   }
 
   // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
@@ -506,38 +470,74 @@ export class AnimTimelineAnimation extends Animation {
     // note: this error should never be reached
     throw new Error('Something very wrong occured for addAwaited() to not be completed.');
   }
-  
-  setForwardFrames(frames: Keyframe[]): void {
-    this.forwardEffect.setKeyframes(frames);
-  }
 
-  setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean): void {
-    this.backwardEffect.setKeyframes(frames);
-    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
-  }
+  private static computePhaseEmplacement(
+    anim: AnimTimelineAnimation,
+    direction: 'forward' | 'backward',
+    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
+    timePosition: number | 'beginning' | 'end' | `${number}%`,
+    ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number, phaseTimePosition: number] {
+    // compute initial index, phase duration, and endDelay offset based on phase and arguments
+    const [segments, segmentsCache] = direction === 'forward'
+      ? [anim.segmentsForward, anim.segmentsForwardCache]
+      : [anim.segmentsBackward, anim.segmentsBackwardCache];
+    const effect = anim.getEffect(direction);
+    const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
+    let initialArrIndex: number; // skips to first entry of a given phase
+    let phaseEndDelayOffset: number; // applies negative (or 0) endDelay to get beginning of phase
+    let phaseDuration: number; // duration of phase specified in argument
+    let quasiPhase: typeof phase = phase; // opposite of phase (for backward direction)
+    switch(phase) {
+      case "delayPhase": quasiPhase = 'endDelayPhase'; break;
+      case "endDelayPhase": quasiPhase = 'delayPhase'; break;
+    }
 
-  setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
-    this.setForwardFrames(forwardFrames);
-    (super.effect as KeyframeEffect).setKeyframes(forwardFrames);
-    this.setBackwardFrames(backwardFrames, backwardIsMirror);
-  }
-
-  setDirection(direction: 'forward' | 'backward') {
-    this.direction = direction;
-
-    // load proper KeyframeEffect
-    switch(direction) {
-      case "forward":
-        const forwardEffect = this.forwardEffect;
-        super.effect = new KeyframeEffect(forwardEffect.target, forwardEffect.getKeyframes(), {...forwardEffect.getTiming(), composite: forwardEffect.composite});
+    switch(direction === 'forward' ? phase : quasiPhase) {
+      case "delayPhase":
+        initialArrIndex = 0;
+        phaseDuration = delay;
+        phaseEndDelayOffset = -(delay + duration);
         break;
-      case "backward":
-        const backwardEffect = this.backwardEffect;
-        super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
+      case "activePhase":
+        initialArrIndex = segments.indexOf(segmentsCache[0]) + 1;
+        phaseDuration = duration;
+        phaseEndDelayOffset = -duration;
+        break;
+      case "endDelayPhase":
+        initialArrIndex = segments.indexOf(segmentsCache[1]) + 1;
+        phaseDuration = effect.getTiming().endDelay as number;
+        phaseEndDelayOffset = 0;
+        break;
+      case "whole":
+        initialArrIndex = 0;
+        phaseDuration = delay + duration + (effect.getTiming().endDelay as number);
+        phaseEndDelayOffset = -(delay + duration);
         break;
       default:
-        throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+        throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
     }
+
+    // COMPUTE TIME POSITION RELATIVE TO PHASE
+    let initialPhaseTimePos: number;
+
+    if (timePosition === 'beginning') { initialPhaseTimePos = 0; }
+    else if (timePosition === 'end') {  initialPhaseTimePos = phaseDuration; }
+    else if (typeof timePosition === 'number') { initialPhaseTimePos = timePosition; }
+    else {
+      // if timePosition is in percent format, convert to correct time value based on phase
+      const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
+      // note: this error should never occur
+      if (!match) { throw new Error(`Percentage format match not found.`); }
+
+      initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
+    }
+
+    // wrap any negative time values to count backwards from end of phase
+    const wrappedPhaseTimePos = initialPhaseTimePos < 0 ? phaseDuration + initialPhaseTimePos : initialPhaseTimePos;
+    // time positions should refer to the same point in a phase, regardless of the current direction
+    const phaseTimePosition: number = direction === 'forward' ? wrappedPhaseTimePos : phaseDuration - wrappedPhaseTimePos;
+
+    return [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition];
   }
 }
 
