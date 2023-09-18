@@ -92,6 +92,7 @@ export class AnimTimelineAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
   direction: 'forward' | 'backward' = 'forward';
+  private getEffect(direction: 'forward' | 'backward'): KeyframeEffect { return direction === 'forward' ? this.forwardEffect : this.backwardEffect; }
   private inProgress = false;
   private isFinished = false;
   // holds list of stopping points and resolvers to control segmentation of animation...
@@ -112,7 +113,9 @@ export class AnimTimelineAnimation extends Animation {
   onDelayFinish: Function = () => {};
   onActiveFinish: Function = () => {};
   onEndDelayFinish: Function = () => {};
-  private getEffect(direction: 'forward' | 'backward'): KeyframeEffect { return direction === 'forward' ? this.forwardEffect : this.backwardEffect; }
+  // FIXME: The behavior for pausing for roadblocks while expedition is in act is undefined
+  pauseForRoadblocks: Function = () => { throw new Error(`This should never be called before being defined by parent block`); };
+  resumeFromRoadblocks: Function = () => { throw new Error(`This should never be called before being defined by parent block`); };
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
@@ -224,7 +227,7 @@ export class AnimTimelineAnimation extends Animation {
         effect.updateTiming({ endDelay });
         // if playback was paused from, resume playback
         if (roadblocked === true) {
-          super.play();
+          this.resumeFromRoadblocks();
           roadblocked = false;
         }
         if (this.isExpediting) { super.finish(); }
@@ -240,7 +243,7 @@ export class AnimTimelineAnimation extends Animation {
       // Await any blockers for the completion of this phase
       if (roadblocks.length > 0) {
         // TODO: Should pause whole sequence instead of just the block
-        super.pause();
+        this.pauseForRoadblocks();
         roadblocked = true;
         await Promise.all(roadblocks);
       }
@@ -632,6 +635,15 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         },
       )
     );
+
+    this.animation.pauseForRoadblocks = () => {
+      if (this.parentSequence) { this.parentSequence.pause(); }
+      else { this.pause(); }
+    }
+    this.animation.resumeFromRoadblocks = () => {
+      if (this.parentSequence) { this.parentSequence.resume(); }
+      else { this.resume(); }
+    }
 
     return this;
   }
