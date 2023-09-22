@@ -650,6 +650,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     if (skipping) { animation.finish(); }
     else { animation.play(); }
+    if (this.parentSequence?.isPaused) { animation.pause(); }
     
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.

@@ -21,6 +21,7 @@ export class AnimSequence implements AnimSequenceConfig {
   autoplaysNextSequence: boolean = false; // decides whether the next AnimSequence should automatically play after this one
   autoplays: boolean = false;
   basePlaybackRate: number = 1;
+  isPaused = false;
   get compoundedPlaybackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 
@@ -157,8 +158,14 @@ export class AnimSequence implements AnimSequenceConfig {
     }
   }
   
-  pause(): void { this.doForInProgressBlocks(animBlock => animBlock.pause()); }
-  resume(): void { this.doForInProgressBlocks(animBlock => animBlock.resume()); }
+  pause(): void {
+    this.isPaused = true;
+    this.doForInProgressBlocks(animBlock => animBlock.pause());
+  }
+  resume(): void {
+    this.isPaused = false;
+    this.doForInProgressBlocks(animBlock => animBlock.resume());
+  }
 
   updatePlaybackRate(newRate: number) {
     this.basePlaybackRate = newRate;
