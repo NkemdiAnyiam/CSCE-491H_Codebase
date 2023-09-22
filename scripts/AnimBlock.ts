@@ -120,17 +120,19 @@ export class AnimTimelineAnimation extends Animation {
   
   setForwardFrames(frames: Keyframe[]): void {
     this.forwardEffect.setKeyframes(frames);
+    (super.effect as KeyframeEffect).setKeyframes(frames);
   }
 
   setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean): void {
     this.backwardEffect.setKeyframes(frames);
     this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
+    (super.effect as KeyframeEffect).setKeyframes(frames);
   }
 
   setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
     this.setForwardFrames(forwardFrames);
-    (super.effect as KeyframeEffect).setKeyframes(forwardFrames);
     this.setBackwardFrames(backwardFrames, backwardIsMirror);
+    (super.effect as KeyframeEffect).setKeyframes(forwardFrames);
   }
 
   setDirection(direction: 'forward' | 'backward') {
