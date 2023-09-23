@@ -2,11 +2,27 @@ import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, Tr
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "../AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits } from "../Presets.js";
 
-// represents keyframe-generation and preset configuration options for one animation
-export type KeyframesBankEntry = Readonly<{
+type KeyframesGenerator = {
   generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
-  config?: Partial<AnimBlockConfig>;
-}>;
+  generateGenerators?: never;
+};
+type KeyframesFunctionsGenerator = {
+  generateKeyframes?: never;
+  generateGenerators(...animArgs: any[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
+}
+
+export type KeyframesBankEntry = Readonly<
+  { config?: Partial<AnimBlockConfig>; }
+  & (KeyframesGenerator | KeyframesFunctionsGenerator)
+>;
+
+export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
+TBankEntry extends KeyframesGenerator ? TBankEntry['generateKeyframes'] : (
+  TBankEntry extends KeyframesFunctionsGenerator ? TBankEntry['generateGenerators'] : (
+    never
+  )
+)
+>;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock | void = void> =

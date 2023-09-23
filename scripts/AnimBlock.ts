@@ -1,6 +1,6 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
-import { KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { GeneratorParams, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
 // import { presetScrolls } from "./Presets.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
@@ -346,7 +346,7 @@ export class AnimTimelineAnimation extends Animation {
     timePosition: number | 'beginning' | 'end' | `${number}%`,
     ...promises: Promise<any>[]
   ): void {
-      this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
+    this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
   }
 
   addRoadblocks(
@@ -519,7 +519,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
   protected animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
-  animArgs: Parameters<TBankEntry['generateKeyframes']> = {} as Parameters<TBankEntry['generateKeyframes']>;
+  animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
   reqReady = false;
   
@@ -533,6 +533,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   classesToRemoveOnFinish: string[] = [];
   classesToRemoveOnStart: string[] = []; // TODO: Consider order of addition/removal
   pregeneratesKeyframes: boolean = false;
+  keyframesGenerators?: {
+    forward: () => Keyframe[];
+    backward: () => Keyframe[];
+  };
+
   duration: number = 500;
   delay: number = 0;
   endDelay: number = 0;
@@ -554,7 +559,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
   }
 
-  initialize(animArgs: Parameters<TBankEntry['generateKeyframes']>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
+  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
     const mergedConfig = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
     Object.assign(this, mergedConfig);
@@ -562,22 +567,36 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.duration = Math.max(this.duration as number, 0.01);
 
     // TODO: Handle case where only one keyframe is provided
-    // The fontFeatureSettings part handles a very strange Firefox bug that causes animations to run without any visual changes...
-    // when the animation is finished, setKeyframes() is called, and the animation continues after extending the runtime using...
-    // endDelay. It appears that the bug only occurs when the keyframes field contains nothing that will actually affect the...
-    // styling of the element (for example, adding {['fake-field']: 'bla'} will not fix it), but I obviously do not want to...
-    // add anything that will actually affect the style of the element, so I decided to use fontFeatureSettings and set it to...
+
+    // The fontFeatureSettings part handles a very strange Firefox bug that causes animations to run without any visual changes
+    // when the animation is finished, setKeyframes() is called, and the animation continues after extending the runtime using
+    // endDelay. It appears that the bug only occurs when the keyframes field contains nothing that will actually affect the
+    // styling of the element (for example, adding {['fake-field']: 'bla'} will not fix it), but I obviously do not want to
+    // add anything that will actually affect the style of the element, so I decided to use fontFeatureSettings and set it to
     // the default value to make it as unlikely as possible that anything the user does is obstructed.
-    let [forwardFrames, backwardFrames] = this.pregeneratesKeyframes ?
-      this.bankEntry.generateKeyframes.call(this, ...animArgs) : // TODO: extract generateKeyframes
-      [[{fontFeatureSettings: 'normal'}], []]; // TODO: maybe use 'default' instead
+    let [forwardFrames, backwardFrames]: [Keyframe[], Keyframe[] | undefined] = [[{fontFeatureSettings: 'normal'}], []];
+
+    if (this.bankEntry.generateGenerators) {
+      const [forwardGenerator, backwardGenerator] = this.bankEntry.generateGenerators.call(this, ...animArgs);
+      if (this.pregeneratesKeyframes) {
+        [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator()];
+      }
+      this.keyframesGenerators = {
+        forward: forwardGenerator,
+        backward: backwardGenerator,
+      };
+    }
+    else if (this.bankEntry.generateKeyframes) {
+      if (this.pregeneratesKeyframes) {
+        [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
+      }
+    }
 
     // playbackRate is not included because it is computed at the time of animating
     const keyframeOptions: KeyframeEffectOptions = {
       delay: this.delay,
       duration: this.duration,
       endDelay: this.endDelay,
-      // TODO: Consider adding 'backwards' (so options for 'both')
       fill: 'forwards',
       easing: this.easing,
       composite: this.composite,
@@ -641,6 +660,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.reqReady = false;
     const animation = this.animation;
     animation.setDirection(direction);
+    // If keyframes are generated here, clear the current frames to prevent interference with
+    // generators
+    if (!this.pregeneratesKeyframes && direction === 'forward') {
+      animation.setForwardAndBackwardFrames([{fontFeatureSettings: 'normal'}], []);
+    }
     this.useCompoundedPlaybackRate();
 
     // used as resolve() and reject() in the eventually returned promise
@@ -661,12 +685,17 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           this.domElem.classList.remove(...this.classesToRemoveOnStart);
           this._onStartForward();
   
-          // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
+          // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()
           // can function properly.
+          // TODO: Handle case where only one keyframe is provided
           if (!this.pregeneratesKeyframes) {
-            // TODO: Handle case where only one keyframe is provided
-            let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
-            this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+            if (this.bankEntry.generateKeyframes) {
+              let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+              this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+            }
+            else {
+              this.animation.setForwardFrames(this.keyframesGenerators!.forward());
+            }
           }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
@@ -677,6 +706,15 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           this._onStartBackward();
           this.domElem.classList.add(...this.classesToRemoveOnFinish);
           this.domElem.classList.remove(...this.classesToAddOnFinish);
+
+          if (!this.pregeneratesKeyframes) {
+            if (this.bankEntry.generateKeyframes) {
+              // do nothing (backward keyframes would have already been set during forward direction)
+            }
+            else {
+              this.animation.setBackwardFrames(this.keyframesGenerators!.backward());
+            }
+          }
           break;
   
         default:
@@ -892,7 +930,6 @@ export class ScrollBlock extends AnimBlock {
     const selfRect = scrollable.getBoundingClientRect();
     const targetRect = target!.getBoundingClientRect();
     const targetInnerTop = targetRect.top - selfRect.top + (scrollable === document.documentElement ? 0 : scrollable.scrollTop);
-    // console.log(targetInnerTop);
     // The maximum view height should be the height of the scrolling container,
     // but it can only be as large as the viewport height since all scrolling should be
     // with respect to what the user can see.
