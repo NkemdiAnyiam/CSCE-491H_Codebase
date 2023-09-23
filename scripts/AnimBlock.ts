@@ -598,6 +598,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       duration: this.duration,
       endDelay: this.endDelay,
       fill: 'forwards',
+      // BUG: easing is not reversed when backward keyframes are defined because direction is 'normal'
       easing: this.easing,
       composite: this.composite,
     };
