@@ -28,40 +28,40 @@ export const presetEntrances = {
   },
 
   [`~fly-in`]: {
-    generateGenerators(fromDirection: 'left' | 'top' | 'right' | 'bottom') {
+    generateGenerators(direction: 'from-left' | 'from-top' | 'from-right' | 'from-bottom' = 'from-bottom') {
       return [
         () => {
           const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
-          switch(fromDirection) {
-            case "left":
+          switch(direction) {
+            case 'from-left':
               return [ {translate: `${-right}px`}, {translate: `0`} ];
-            case "right":
+            case 'from-right':
               return [ {translate: `${window.innerWidth - left}px`}, {translate: `0`} ];
-              case "top":
+            case 'from-top':
               return [ {translate: `0 ${-bottom}px`}, {translate: `0 0`} ];
-              case "bottom":
+            case 'from-bottom':
               return [ {translate: `0 ${window.innerHeight - top}px`}, {translate: `0 0`} ];
-            default: throw new Error(`Invalid fromDirection ${fromDirection}. Must be 'left', 'top', 'right', or 'bottom'.`);
+            default: throw new Error(`Invalid fromDirection ${direction}. Must be 'from-left', 'from-top', 'from-right', or 'from-bottom'.`);
           }
         },
         () => {
           const {left, right, top, height} = this.domElem.getBoundingClientRect();
-          switch(fromDirection) {
-            case "left":
+          switch(direction) {
+            case 'from-left':
               return [ {translate: `${-right}px`} ];
-            case "right":
+            case 'from-right':
               return [ {translate: `${window.innerWidth - left}px`} ];
-              case "top":
+            case 'from-top':
               return [ {translate: `0 ${-(top + height)}px`} ];
-              case "bottom":
+            case 'from-bottom':
               return [ {translate: `0 ${window.innerHeight - top}px`} ];
-            // case "left":
+            // case 'from-left':
             //   return [ {translate: `0`}, {translate: `${-right}px`} ];
-            // case "right":
+            // case 'from-right':
             //   return [ {translate: `0`}, {translate: `${window.innerWidth - left}px`} ];
-            //   case "top":
+            //   case 'from-top':
             //   return [ {translate: `0 0`}, {translate: `0 ${-bottom}px`} ];
-            //   case "bottom":
+            //   case 'from-bottom':
             //   return [ {translate: `0 0`}, {translate: `0 ${window.innerHeight - top}px`} ];
           }
         }
@@ -149,6 +149,43 @@ export const presetExits = {
       {opacity: '1'},
       {opacity: '0'},
     ]],
+  },
+
+  [`~fly-out`]: {
+    generateGenerators(direction: 'to-left' | 'to-top' | 'to-right' | 'to-bottom' = 'to-bottom') {
+      return [
+        () => {
+          const {left, right, top, height} = this.domElem.getBoundingClientRect();
+          switch(direction) {
+            case 'to-left':
+              return [ {translate: `${-right}px`} ];
+            case 'to-right':
+              return [ {translate: `${window.innerWidth - left}px`} ];
+            case 'to-top':
+              return [ {translate: `0 ${-(top + height)}px`} ];
+            case 'to-bottom':
+              return [ {translate: `0 ${window.innerHeight - top}px`} ];
+            default: throw new Error(`Invalid direction ${direction}. Must be 'to-left', 'to-top', 'to-right', or 'to-bottom'.`);
+          }
+        },
+        () => {
+          const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
+          switch(direction) {
+            case 'to-left':
+              return [ {translate: `${-right}px`}, {translate: `0`} ];
+            case 'to-right':
+              return [ {translate: `${window.innerWidth - left}px`}, {translate: `0`} ];
+            case 'to-top':
+              return [ {translate: `0 ${-bottom}px`}, {translate: `0 0`} ];
+            case 'to-bottom':
+              return [ {translate: `0 ${window.innerHeight - top}px`}, {translate: `0 0`} ];
+          }
+        }
+      ];
+    },
+    config: {
+      pregeneratesKeyframes: false
+    }
   },
 
   [`~pinwheel`]: {
