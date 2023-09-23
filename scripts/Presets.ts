@@ -4,6 +4,9 @@ import { IKeyframesBank } from "./TestUsability/WebFlik.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
+type OrthoDirection = 'left' | 'top' | 'right' | 'bottom';
+type DiagDirection = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+type Direction = OrthoDirection | DiagDirection;
 
 const negateNumString = (str: string) => {
   return str[0] === '-' ? str.slice(1) : `-${str}`;
@@ -28,43 +31,34 @@ export const presetEntrances = {
   },
 
   [`~fly-in`]: {
-    generateGenerators(direction: 'from-left' | 'from-top' | 'from-right' | 'from-bottom' = 'from-bottom') {
-      return [
-        () => {
-          const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
-          switch(direction) {
-            case 'from-left':
-              return [ {translate: `${-right}px`}, {translate: `0`} ];
-            case 'from-right':
-              return [ {translate: `${window.innerWidth - left}px`}, {translate: `0`} ];
-            case 'from-top':
-              return [ {translate: `0 ${-bottom}px`}, {translate: `0 0`} ];
-            case 'from-bottom':
-              return [ {translate: `0 ${window.innerHeight - top}px`}, {translate: `0 0`} ];
-            default: throw new Error(`Invalid fromDirection ${direction}. Must be 'from-left', 'from-top', 'from-right', or 'from-bottom'.`);
-          }
-        },
-        () => {
-          const {left, right, top, height} = this.domElem.getBoundingClientRect();
-          switch(direction) {
-            case 'from-left':
-              return [ {translate: `${-right}px`} ];
-            case 'from-right':
-              return [ {translate: `${window.innerWidth - left}px`} ];
-            case 'from-top':
-              return [ {translate: `0 ${-(top + height)}px`} ];
-            case 'from-bottom':
-              return [ {translate: `0 ${window.innerHeight - top}px`} ];
-            // case 'from-left':
-            //   return [ {translate: `0`}, {translate: `${-right}px`} ];
-            // case 'from-right':
-            //   return [ {translate: `0`}, {translate: `${window.innerWidth - left}px`} ];
-            //   case 'from-top':
-            //   return [ {translate: `0 0`}, {translate: `0 ${-bottom}px`} ];
-            //   case 'from-bottom':
-            //   return [ {translate: `0 0`}, {translate: `0 ${window.innerHeight - top}px`} ];
-          }
+    generateGenerators(direction: `from-${Direction}` = 'from-bottom') {
+      const computeOrthoDist = (dir: `from-${OrthoDirection}`) => {
+        const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
+        switch(dir) {
+          case "from-left": return -right;
+          case "from-right": return window.innerWidth - left;
+          case "from-top": return -bottom;
+          case "from-bottom": return window.innerHeight - top;
         }
+      };
+
+      const computeTranslationStr = () => {
+        switch(direction) {
+          case 'from-left': return `${computeOrthoDist('from-left')}px 0`;
+          case 'from-right': return `${computeOrthoDist('from-right')}px 0`;
+          case 'from-top': return `0 ${computeOrthoDist('from-top')}px`;
+          case 'from-bottom': return `0 ${computeOrthoDist('from-bottom')}px`;
+          case 'from-top-left': return `${computeOrthoDist('from-left')}px ${computeOrthoDist('from-top')}px`;
+          case 'from-top-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-top')}px`;
+          case 'from-bottom-left': return `${computeOrthoDist('from-left')}px ${computeOrthoDist('from-bottom')}px`;
+          case 'from-bottom-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-bottom')}px`;
+          default: throw new Error(`Invalid fromDirection ${direction}. Must be 'from-left', 'from-right', 'from-top', 'from-bottom', 'from-top-left', 'from-top-right', 'from-bottom-left', or 'from-bottom-right'.`);
+        }
+      };
+
+      return [
+        () => [ {translate: computeTranslationStr()}, {translate: `0 0`} ],
+        () => [ {translate: computeTranslationStr()} ]
       ];
     },
     config: {
@@ -152,35 +146,34 @@ export const presetExits = {
   },
 
   [`~fly-out`]: {
-    generateGenerators(direction: 'to-left' | 'to-top' | 'to-right' | 'to-bottom' = 'to-bottom') {
-      return [
-        () => {
-          const {left, right, top, height} = this.domElem.getBoundingClientRect();
-          switch(direction) {
-            case 'to-left':
-              return [ {translate: `${-right}px`} ];
-            case 'to-right':
-              return [ {translate: `${window.innerWidth - left}px`} ];
-            case 'to-top':
-              return [ {translate: `0 ${-(top + height)}px`} ];
-            case 'to-bottom':
-              return [ {translate: `0 ${window.innerHeight - top}px`} ];
-            default: throw new Error(`Invalid direction ${direction}. Must be 'to-left', 'to-top', 'to-right', or 'to-bottom'.`);
-          }
-        },
-        () => {
-          const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
-          switch(direction) {
-            case 'to-left':
-              return [ {translate: `${-right}px`}, {translate: `0`} ];
-            case 'to-right':
-              return [ {translate: `${window.innerWidth - left}px`}, {translate: `0`} ];
-            case 'to-top':
-              return [ {translate: `0 ${-bottom}px`}, {translate: `0 0`} ];
-            case 'to-bottom':
-              return [ {translate: `0 ${window.innerHeight - top}px`}, {translate: `0 0`} ];
-          }
+    generateGenerators(direction: `to-${OrthoDirection | DiagDirection}` = 'to-bottom') {
+      const computeOrthoDist = (dir: `to-${OrthoDirection}`) => {
+        const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
+        switch(dir) {
+          case "to-left": return -right;
+          case "to-right": return window.innerWidth - left;
+          case "to-top": return -bottom;
+          case "to-bottom": return window.innerHeight - top;
         }
+      };
+
+      const computeTranslationStr = () => {
+        switch(direction) {
+          case 'to-left': return `${computeOrthoDist('to-left')}px 0`;
+          case 'to-right': return `${computeOrthoDist('to-right')}px 0`;
+          case 'to-top': return `0 ${computeOrthoDist('to-top')}px`;
+          case 'to-bottom': return `0 ${computeOrthoDist('to-bottom')}px`;
+          case 'to-top-left': return `${computeOrthoDist('to-left')}px ${computeOrthoDist('to-top')}px`;
+          case 'to-top-right': return `${computeOrthoDist('to-right')}px ${computeOrthoDist('to-top')}px`;
+          case 'to-bottom-left': return `${computeOrthoDist('to-left')}px ${computeOrthoDist('to-bottom')}px`;
+          case 'to-bottom-right': return `${computeOrthoDist('to-right')}px ${computeOrthoDist('to-bottom')}px`;
+          default: throw new Error(`Invalid fromDirection ${direction}. Must be 'to-left', 'to-right', 'to-top', 'to-bottom', 'to-top-left', 'to-top-right', 'to-bottom-left', or 'to-bottom-right'.`);
+        }
+      };
+
+      return [
+        () => [ {translate: computeTranslationStr()} ],
+        () => [ {translate: computeTranslationStr()}, {translate: `0 0`} ]
       ];
     },
     config: {
