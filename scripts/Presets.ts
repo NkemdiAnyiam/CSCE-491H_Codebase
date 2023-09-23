@@ -5,7 +5,7 @@ import { IKeyframesBank } from "./TestUsability/WebFlik.js";
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 
-const negate = (str: string) => {
+const negateNumString = (str: string) => {
   return str[0] === '-' ? str.slice(1) : `-${str}`;
 }
 
@@ -26,6 +26,58 @@ export const presetEntrances = {
       {opacity: '1'},
     ]],
   },
+
+  [`~fly-in`]: {
+    generateGenerators(fromDirection: 'left' | 'top' | 'right' | 'bottom') {
+      return [
+        () => {
+          const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
+          switch(fromDirection) {
+            case "left":
+              return [ {translate: `${-right}px`}, {translate: `0`} ];
+            case "right":
+              return [ {translate: `${window.innerWidth - left}px`}, {translate: `0`} ];
+              case "top":
+              return [ {translate: `0 ${-bottom}px`}, {translate: `0 0`} ];
+              case "bottom":
+              return [ {translate: `0 ${window.innerHeight - top}px`}, {translate: `0 0`} ];
+            default: throw new Error(`Invalid fromDirection ${fromDirection}. Must be 'left', 'top', 'right', or 'bottom'.`);
+          }
+        },
+        () => {
+          const {left, right, top, height} = this.domElem.getBoundingClientRect();
+          switch(fromDirection) {
+            case "left":
+              return [ {translate: `${-right}px`} ];
+            case "right":
+              return [ {translate: `${window.innerWidth - left}px`} ];
+              case "top":
+              return [ {translate: `0 ${-(top + height)}px`} ];
+              case "bottom":
+              return [ {translate: `0 ${window.innerHeight - top}px`} ];
+            // case "left":
+            //   return [ {translate: `0`}, {translate: `${-right}px`} ];
+            // case "right":
+            //   return [ {translate: `0`}, {translate: `${window.innerWidth - left}px`} ];
+            //   case "top":
+            //   return [ {translate: `0 0`}, {translate: `0 ${-bottom}px`} ];
+            //   case "bottom":
+            //   return [ {translate: `0 0`}, {translate: `0 ${window.innerHeight - top}px`} ];
+          }
+        }
+      ];
+    },
+    config: {
+      pregeneratesKeyframes: false
+    }
+  },
+
+  // [`~fade-in`]: {
+  //   generateFunctions: () => [() => {console.log('F'); return [{opacity: 0}, {opacity: 1}]}, () => {console.log('B'); return [{opacity: 1}, {opacity: 0}]}],
+  //   config: {
+  //     pregeneratesKeyframes: false,
+  //   }
+  // },
 
   [`~pinwheel`]: {
     generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'counterclockwise') {
@@ -217,7 +269,7 @@ export const presetTranslations = {
         [{translate: `calc(${translateX}px + ${offsetSelfX}) calc(${translateY}px + ${offsetSelfY})`}],
 
         // backward
-        [{translate: `calc(${-translateX}px + ${negate(offsetSelfX)}) calc(${-translateY}px + ${negate(offsetSelfY)})`}],
+        [{translate: `calc(${-translateX}px + ${negateNumString(offsetSelfX)}) calc(${-translateY}px + ${negateNumString(offsetSelfY)})`}],
       ];
     },
   },
@@ -236,7 +288,7 @@ export const presetTranslations = {
         [{translate: `calc(${translateX} + ${offsetSelfX}) calc(${translateY} + ${offsetSelfY})`}],
   
         // backward
-        [{translate: `calc(${negate(translateX)} + ${negate(offsetSelfX)}) calc(${negate(translateY)} + ${negate(offsetSelfY)})`}],
+        [{translate: `calc(${negateNumString(translateX)} + ${negateNumString(offsetSelfX)}) calc(${negateNumString(translateY)} + ${negateNumString(offsetSelfY)})`}],
       ];
     },
   },
