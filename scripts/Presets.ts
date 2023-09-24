@@ -431,20 +431,18 @@ export const presetConnectorExits = {
 } satisfies IKeyframesBank<EraseConnectorBlock>;
 
 
-// interface Nothing {};
-// type Union<T, U> = T | (U & Nothing);
-type EasingFunctionBaseName = `power${'1' | '2' | '3' | '4'}` | `quad` | `expo` | `circ` | `sine` | `back` | `elastic` | `bounce`;
-type EasingInFunction = `${EasingFunctionBaseName}-in`;
-type EasingOutFunction = `${EasingFunctionBaseName}-out`;
-type EasingInOutFunction = `${EasingFunctionBaseName}-in-out`;
-type Func<funcName extends string> = `${funcName}(${string})`
-export type EasingFunction = 
+interface Nothing {};
+type Union<T, U> = T | (U & Nothing);
+type PresetLinearEasingKey = `${`power${'1' | '2' | '3' | '4'}` | `quad` | `expo` | `circ` | `sine` | `back` | `elastic` | `bounce`}-${'in' | 'out' | 'in-out'}`;
+type EasingFunction<funcName extends string> = `${funcName}(${string})`
+export type EasingString = Union<
   | `linear` | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'jump-start' | 'jump-end'
-  | EasingInFunction | EasingOutFunction | EasingInOutFunction
-  | Func<'cubic-bezier'> | Func<'linear'> | Func<'steps'>
-;
+  | PresetLinearEasingKey,
+  // | EasingFunction<'cubic-bezier'> | EasingFunction<'linear'> | EasingFunction<'steps'>,
+  string
+>;
 
-export const easingMap = new Map<EasingFunction, string>([
+export const easingMap = new Map<PresetLinearEasingKey, string>([
   [`power1-in`, `linear( 0, 0.0039, 0.0156, 0.0352, 0.0625, 0.0977, 0.1407, 0.1914, 0.2499, 0.3164, 0.3906 62.5%, 0.5625, 0.7656, 1 )`],
   [`power1-out`, `linear( 0, 0.2342, 0.4374, 0.6093 37.49%, 0.6835, 0.7499, 0.8086, 0.8593, 0.9023, 0.9375, 0.9648, 0.9844, 0.9961, 1 )`],
   [`power1-in-out`, `linear( 0, 0.0027, 0.0106 7.29%, 0.0425, 0.0957, 0.1701 29.16%, 0.2477, 0.3401 41.23%, 0.5982 55.18%, 0.7044 61.56%, 0.7987, 0.875 75%, 0.9297, 0.9687, 0.9922, 1 )`],
@@ -480,55 +478,64 @@ export const easingMap = new Map<EasingFunction, string>([
   [`bounce-in-out`, `linear( 0, 0.0078, 0, 0.0235, 0.0313, 0.0235, 0.0001 13.63%, 0.0549 15.92%, 0.0938, 0.1172, 0.125, 0.1172, 0.0939 27.26%, 0.0554 29.51%, 0.0003 31.82%, 0.2192, 0.3751 40.91%, 0.4332, 0.4734 45.8%, 0.4947 48.12%, 0.5027 51.35%, 0.5153 53.19%, 0.5437, 0.5868 57.58%, 0.6579, 0.7504 62.87%, 0.9999 68.19%, 0.9453, 0.9061, 0.8828, 0.875, 0.8828, 0.9063, 0.9451 84.08%, 0.9999 86.37%, 0.9765, 0.9688, 0.9765, 1, 0.9922, 1 )`],
 ]);
 
-function invertEasing(strOg: string): string {
-  const str = strOg.trim().toLowerCase();
 
-  // INVERT LINEAR
-  if (str === 'linear') { return 'linear'; }
+// TODO: move to utility file
+export type KeyInEasingMap = typeof easingMap extends Map<infer I, any> ? I : never;
 
-  // INVERT EASE
-  if (str.startsWith('ease')) {
-    // if (str.match(/^ease(-(in-out))?$/)) { return str; }
-    if (str === 'ease-in') { return 'ease-out'; }
-    if (str === 'ease-out') { return 'ease-in'; }
-    return str; // either ease or ease-in-ouot
-  }
+export function invertEasing(easingString: EasingString): string {
+  try {
+    const str = (easingMap.get(easingString as KeyInEasingMap) ?? easingString).trim().toLowerCase();
 
-  // INVERT LINEAR()
-  if (str.startsWith(`linear(`)) {
-    const args = str.match(/linear\((.*)\)/)![1].trim();
-    return `linear( ${args
-      .split(/,\s*/)
-      .reverse()
-      .map(piece => {
-        const [val, perc] = piece.split(/\s+/);
-        const inverseVal = 1 - Number(val);
-        const inversePerc = perc ? 100 - Number(perc.slice(0, -1)) : null;
-        return `${inverseVal.toFixed(5)}${inversePerc ? ` ${inversePerc.toFixed(5)}%` : ''}`;
-      })
-      .join(', ')} )`
-    ;
-  }
-
-  // INVERT CUBIC-BEZIER()
-  else if (str.startsWith(`cubic-bezier(`)) {
-    const [a, b, c, d] = str
-      .match(/cubic-bezier\((.*)\)/)![1]
-      .split(',')
-      .map(point => Number(point.trim()))
-    ;
-    return `cubic-bezier(${1-c}, ${1-d}, ${1-a}, ${1-b})`;
-  }
+    // INVERT LINEAR
+    if (str === 'linear') { return 'linear'; }
   
-  // INVERT STEPS()
-  else if (str.startsWith(`steps(`) || str.match(/step-(start|end)/)) {
-    if (str.includes('end')) { return str.replace('end', 'start'); }
-    if (str.includes('start')) { return str.replace('start', 'end'); }
+    // INVERT EASE
+    if (str.startsWith('ease')) {
+      // if (str.match(/^ease(-(in-out))?$/)) { return str; }
+      if (str === 'ease-in') { return 'ease-out'; }
+      if (str === 'ease-out') { return 'ease-in'; }
+      return str; // either ease or ease-in-ouot
+    }
+  
+    // INVERT LINEAR()
+    if (str.startsWith(`linear(`)) {
+      const args = str.match(/linear\((.*)\)/)![1].trim();
+      return `linear( ${args
+        .split(/,\s*/)
+        .reverse()
+        .map(piece => {
+          const [val, perc] = piece.split(/\s+/);
+          const inverseVal = 1 - Number(val);
+          const inversePerc = perc ? 100 - Number(perc.slice(0, -1)) : null;
+          return `${inverseVal.toFixed(5)}${inversePerc ? ` ${inversePerc.toFixed(5)}%` : ''}`;
+        })
+        .join(', ')} )`
+      ;
+    }
+  
+    // INVERT CUBIC-BEZIER()
+    else if (str.startsWith(`cubic-bezier(`)) {
+      const [a, b, c, d] = str
+        .match(/cubic-bezier\((.*)\)/)![1]
+        .split(',')
+        .map(point => Number(point.trim()));
+      return `cubic-bezier(${1-c}, ${1-d}, ${1-a}, ${1-b})`;
+    }
+    
+    // INVERT STEPS()
+    else if (str.startsWith(`steps(`) || str.match(/step-(start|end)/)) {
+      if (str.includes('end')) { return str.replace('end', 'start'); }
+      if (str.includes('start')) { return str.replace('start', 'end'); }
+    }
+  
+    throw new Error(`Invalid easing string ${easingString}`);
   }
-
-  throw new Error(`Invalid easing string ${strOg}`);
+  catch (err) {
+    throw new Error(`Invalid easing string ${easingString}.`);
+  }
 }
 
-export function getInvertedEasing(str: EasingFunction): string {
-  return invertEasing(easingMap.get(str) ?? str);
+export function getEasing(easingString: EasingString, options: {inverted: boolean} = {inverted: false}): string {
+  if (options?.inverted) { return invertEasing(easingString); }
+  return easingMap.get(easingString as KeyInEasingMap) ?? easingString;
 }
