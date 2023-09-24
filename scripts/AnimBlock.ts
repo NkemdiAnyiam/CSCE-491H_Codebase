@@ -1,6 +1,7 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { EasingString, getEasing } from "./Presets.js";
 // import { presetScrolls } from "./Presets.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
@@ -19,7 +20,7 @@ type CustomKeyframeEffectOptions = {
 
 type KeyframeTimingOptions = {
   duration: number;
-  easing: string;
+  easing: EasingString;
   playbackRate: number;
   delay: number;
   endDelay: number;
@@ -541,7 +542,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   duration: number = 500;
   delay: number = 0;
   endDelay: number = 0;
-  easing: string = 'linear';
+  easing: EasingString = 'linear';
   playbackRate: number = 1; // actually base playback rate
   get compoundedPlaybackRate(): number { return this.playbackRate * (this.parentSequence?.compoundedPlaybackRate ?? 1); }
 
@@ -598,8 +599,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       duration: this.duration,
       endDelay: this.endDelay,
       fill: 'forwards',
-      // BUG: easing is not reversed when backward keyframes are defined because direction is 'normal'
-      easing: this.easing,
+      easing: getEasing(this.easing),
       composite: this.composite,
     };
 
@@ -615,7 +615,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         {
           ...keyframeOptions,
           // if no backward frames were specified, assume the reverse of the forward frames
-          direction: backwardFrames ? 'normal' : 'reverse',
+          ...(backwardFrames ? {} : {direction: 'reverse'}),
+          // if backward frames were specified, easing needs to be inverted
+          ...(backwardFrames ? {easing: getEasing(this.easing, {inverted: true})} : {}),
           // delay & endDelay are of course swapped when we want to play in "reverse"
           delay: keyframeOptions.endDelay,
           endDelay: keyframeOptions.delay,
