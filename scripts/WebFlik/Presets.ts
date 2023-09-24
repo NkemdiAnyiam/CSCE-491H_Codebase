@@ -432,7 +432,7 @@ export const presetConnectorExits = {
 type PresetLinearEasingKey = `${`power${'1' | '2' | '3' | '4'}` | `quad` | `expo` | `circ` | `sine` | `back` | `elastic` | `bounce`}-${'in' | 'out' | 'in-out'}`;
 // type EasingFunction<funcName extends string> = `${funcName}(${string})`;
 export type EasingString = Union<
-  | `linear` | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'jump-start' | 'jump-end'
+  | `linear` | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'step-start' | 'step-end'
   | PresetLinearEasingKey,
   // | EasingFunction<'cubic-bezier'> | EasingFunction<'linear'> | EasingFunction<'steps'>,
   string
