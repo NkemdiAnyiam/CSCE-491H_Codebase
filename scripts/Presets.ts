@@ -493,7 +493,7 @@ function invertEasing(str: string) {
     ;
   }
   // INVERT STEPS()
-  else if (str.startsWith(`steps(`)) {
+  else if (str.startsWith(`steps(`) || str.match(/step-(start|end)/)) {
     if (str.includes('end')) { return str.replace('end', 'start'); }
     if (str.includes('start')) { return str.replace('start', 'end'); }
   }
