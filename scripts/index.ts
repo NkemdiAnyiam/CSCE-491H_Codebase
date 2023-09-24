@@ -1,7 +1,7 @@
 import { enableButton, disableButton, /*wait*/ } from './utility.js';
 import { createForm_multiInput, createForm_textarea } from './jobForm.js';
-import { AnimSequence } from './AnimSequence.js';
-import { WebFlik } from './TestUsability/WebFlik.js';
+import { AnimSequence } from './WebFlik/AnimSequence.js';
+import { WebFlik } from './WebFlik/WebFlik.js';
 
 const {Exit, Entrance /*, Scroll*/} = WebFlik.createBanks({});
 

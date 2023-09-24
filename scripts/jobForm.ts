@@ -1,8 +1,8 @@
 import { stoi, stof, enableButton, disableButton, getRandInt, getRandIntRange } from './utility.js';
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
-import { AnimBlock } from './AnimBlock.js';
-import { WebFlik } from './TestUsability/WebFlik.js';
+import { AnimBlock } from './WebFlik/AnimBlock.js';
+import { WebFlik } from './WebFlik/WebFlik.js';
 
 const {Entrance, Exit} = WebFlik.createBanks({});
 

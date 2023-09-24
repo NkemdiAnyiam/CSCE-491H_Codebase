@@ -1,10 +1,10 @@
 import { setupPlaybackControls } from './playbackControls.js';
 import { JobScheduler } from './JobScheduler.js';
 import { SceneCreator } from './SceneCreator.js';
-import { AnimSequence } from './AnimSequence.js';
-import { AnimTimeline } from "./AnimTimeline.js";
-import { WebFlik } from './TestUsability/WebFlik.js';
-import { Connector } from './AnimBlockLine.js';
+import { AnimSequence } from './WebFlik/AnimSequence.js';
+import { AnimTimeline } from "./WebFlik/AnimTimeline.js";
+import { WebFlik } from './WebFlik/WebFlik.js';
+import { Connector } from './WebFlik/AnimBlockLine.js';
 import { Job } from './Job.js';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]

@@ -1,6 +1,7 @@
 import { EmphasisBlock, EntranceBlock, ExitBlock, /*ScrollBlock,*/ TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
-import { IKeyframesBank } from "./TestUsability/WebFlik.js";
+import { IKeyframesBank } from "./WebFlik.js";
+import { Union, negateNumString } from "./utils.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
@@ -8,9 +9,6 @@ type OrthoDirection = 'left' | 'top' | 'right' | 'bottom';
 type DiagDirection = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 type Direction = OrthoDirection | DiagDirection;
 
-const negateNumString = (str: string) => {
-  return str[0] === '-' ? str.slice(1) : `-${str}`;
-}
 
 export const presetEntrances = {
   [`~appear`]: {
@@ -431,10 +429,8 @@ export const presetConnectorExits = {
 } satisfies IKeyframesBank<EraseConnectorBlock>;
 
 
-interface Nothing {};
-type Union<T, U> = T | (U & Nothing);
 type PresetLinearEasingKey = `${`power${'1' | '2' | '3' | '4'}` | `quad` | `expo` | `circ` | `sine` | `back` | `elastic` | `bounce`}-${'in' | 'out' | 'in-out'}`;
-type EasingFunction<funcName extends string> = `${funcName}(${string})`
+// type EasingFunction<funcName extends string> = `${funcName}(${string})`;
 export type EasingString = Union<
   | `linear` | 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'jump-start' | 'jump-end'
   | PresetLinearEasingKey,

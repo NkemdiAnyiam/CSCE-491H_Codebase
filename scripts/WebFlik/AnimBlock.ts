@@ -1,7 +1,8 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
-import { GeneratorParams, KeyframesBankEntry } from "./TestUsability/WebFlik.js";
+import { GeneratorParams, KeyframesBankEntry } from "./WebFlik.js";
 import { EasingString, getEasing } from "./Presets.js";
+import { mergeArrays } from "./utils.js";
 // import { presetScrolls } from "./Presets.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
@@ -1022,9 +1023,4 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
     if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
     super(domElem, animName, bankEntry);
   }
-}
-
-// TODO: Create util
-function mergeArrays<T>(...arrays: Array<T>[]): Array<T> {
-  return Array.from(new Set(new Array<T>().concat(...arrays)));
 }
