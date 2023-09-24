@@ -476,10 +476,11 @@ export const easingMap = new Map<EasingFunction, string>([
   [`bounce-in-out`, `linear( 0, 0.0078, 0, 0.0235, 0.0313, 0.0235, 0.0001 13.63%, 0.0549 15.92%, 0.0938, 0.1172, 0.125, 0.1172, 0.0939 27.26%, 0.0554 29.51%, 0.0003 31.82%, 0.2192, 0.3751 40.91%, 0.4332, 0.4734 45.8%, 0.4947 48.12%, 0.5027 51.35%, 0.5153 53.19%, 0.5437, 0.5868 57.58%, 0.6579, 0.7504 62.87%, 0.9999 68.19%, 0.9453, 0.9061, 0.8828, 0.875, 0.8828, 0.9063, 0.9451 84.08%, 0.9999 86.37%, 0.9765, 0.9688, 0.9765, 1, 0.9922, 1 )`],
 ]);
 
-function reverseEasing(str: string) {
+function invertEasing(str: string) {
+  // INVERT LINEAR()
   if (str.startsWith(`linear(`)) {
-    let result = str.match(/linear\((.*)\)/)![1].trim();
-    return `linear( ${result
+    const args = str.match(/linear\((.*)\)/)![1].trim();
+    return `linear( ${args
       .split(/,\s*/)
       .reverse()
       .map(piece => {
@@ -491,11 +492,15 @@ function reverseEasing(str: string) {
       .join(', ')} )`
     ;
   }
+  // INVERT STEPS()
+  else if (str.startsWith(`steps(`)) {
+    if (str.includes('end')) { return str.replace('end', 'start'); }
+    if (str.includes('start')) { return str.replace('start', 'end'); }
+  }
 }
 
-export function getReverseEasing(str: EasingFunction) {
-  const linearStr = easingMap.get(str);
-  if (linearStr) {
-    return reverseEasing(linearStr);
-  }
+export function getInvertedEasing(str: EasingFunction) {
+  return invertEasing(str)
+
+
 }
