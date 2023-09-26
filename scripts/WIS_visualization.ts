@@ -162,9 +162,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       
       animSequence.addBlocks(
         Translation(jobBarEl, '~move-to', [startCell]),
-        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true}),
-        Entrance(rowSJNum, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true, delay: 250}),
-        Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPreviousBlock: true}),
+        Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true}),
+        Entrance(rowSJNum, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true, delay: 250}),
+        Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true}),
       );
     });
 
@@ -682,7 +682,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
         DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsNextBlock: true}),
         Scroll(document.documentElement, jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsNextBlock: true}),
         SetConnector(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
-        DrawConnector(connector_bulletConnector, '~trace', ['from-A'], {startsWithPreviousBlock: true}),
+        DrawConnector(connector_bulletConnector, '~trace', ['from-A'], {startsWithPrevious: true}),
       );
     }
     else {
@@ -886,7 +886,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       SetConnector(connector_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
       DrawConnector(connector_upFromChild1, '~trace', ['from-A']),
-      Scroll(document.querySelector('html'), jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsWithPreviousBlock: true}),
+      Scroll(document.querySelector('html'), jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsWithPrevious: true}),
       Exit(OPTExpression1, '~wipe', ['from-right']),
       Entrance(OPTResult1, '~wipe', ['from-right'], {startsNextBlock: true}),
       Exit(paragraph_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
@@ -1001,7 +1001,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     .addBlocks(
       SetConnector(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       DrawConnector(connector_upFromChild2, '~trace', ['from-A']),
-      Scroll(document.querySelector('html'), jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsWithPreviousBlock: true}),
+      Scroll(document.querySelector('html'), jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsWithPrevious: true}),
 
       Exit(paragraph_computation2_intro, '~disappear', []),
       Entrance(paragraph_computation2_summary, '~appear', []),
@@ -1182,7 +1182,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
       DrawConnector(connector_bulletConnector, '~trace', ['from-A'], {startsNextBlock: true}),
       Scroll(document.documentElement, jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}, {startsNextBlock: true}),
       SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
-      DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsWithPreviousBlock: true}),
+      DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsWithPrevious: true}),
       Entrance(MAccess, '~fade-in', []),
       Emphasis(MAccessContainer, '~highlight', [], {startsNextBlock: true}),
       SetConnector(connector_MAccess, [MAccessContainer, 0.5, -0.2], [textbox_MAccess, 0.5, 1]),

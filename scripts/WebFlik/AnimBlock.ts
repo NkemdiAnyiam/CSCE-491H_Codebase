@@ -8,7 +8,7 @@ import { mergeArrays } from "./utils.js";
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
-  startsWithPreviousBlock: boolean;
+  startsWithPrevious: boolean;
   commitsStyles: boolean;
   commitStylesAttemptForcefully: boolean; // attempt to unhide, commit, then re-hide
   composite: CompositeOperation;
@@ -526,7 +526,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   reqReady = false;
   
   startsNextBlock: boolean = false;
-  startsWithPreviousBlock: boolean = false;
+  startsWithPrevious: boolean = false;
   commitsStyles: boolean = true;
   commitStylesAttemptForcefully: boolean = false; // attempt to unhide, commit, then re-hide
   composite: CompositeOperation = 'replace';
