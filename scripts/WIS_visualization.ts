@@ -146,8 +146,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS BACK ONTO THE TIME GRAPH (SORTED BY FINISH TIME) AND UPDATE TIME GRAPH ROW HEADERS
   /****************************************************** */
   {
-    const animSequence = new AnimSequence();
-    animSequence.setDescription('Move job bars back onto the time graph (sorted by finish time) and update time graph row headers');
+    const animSequence = new AnimSequence({
+      description: 'Move job bars back onto the time graph (sorted by finish time) and update time graph row headers'
+    });
     jobsSorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
       // set up options for moving job bars to correct location
