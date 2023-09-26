@@ -155,7 +155,7 @@ class _WebFlik {
       Scroll: (
         domElem: Element | null,
         targetElem: Element | null,
-        scrollOptions: ScrollOptions,
+        scrollOptions: Partial<ScrollOptions>,
         userConfig: Partial<AnimBlockConfig>
       ) => ScrollBlock;
     };

@@ -33,7 +33,7 @@ const constraintOptions = { maxNumJobs, maxTime, maxWeight };
 const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_multiInput(constraintOptions);
 const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
-// const scroll = Scroll(document.querySelector('.aaa'), document.querySelector('.chill')!, {scrollableOffset: 0, targetOffset: 0}, {duration: 1000});
+// const scroll = Scroll(document.querySelector('.aaa'), document.querySelector('.chill')!, {scrollableOffset: [0.5, 1], targetOffset: [0.5, 1]}, {duration: 1000});
 // scroll.animation.generateTimePromise('forward', 'activePhase', '50%').then(() => {
 //   scroll.animation.pause();
 //   wait(2000).then(() => {

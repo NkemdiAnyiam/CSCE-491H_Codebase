@@ -847,8 +847,14 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export type ScrollOptions = {
-  scrollableOffset: number;
-  targetOffset: number;
+  scrollableOffset?: [x: number, y: number];
+  scrollableOffsetX?: number;
+  scrollableOffsetY?: number;
+  targetOffset?: [x: number, y: number];
+  targetOffsetX?: number;
+  targetOffsetY?: number;
+  preserveX?: boolean;
+  preserveY?: boolean;
 };
 
 export class ScrollBlock extends AnimBlock {
@@ -862,9 +868,9 @@ export class ScrollBlock extends AnimBlock {
   private targetElem: Element;
 
   private scrollOptions: ScrollOptions = {
-    scrollableOffset: 0,
-    targetOffset: 0,
-  } as ScrollOptions;
+    preserveX: false,
+    preserveY: false,
+  };
 
   // constructor(domElem: Element | null, private targetElem: Element | null, animName: keyof typeof presetScrolls, bankEntry: TBankEntry) {
   //   if (!targetElem) {
@@ -902,8 +908,10 @@ export class ScrollBlock extends AnimBlock {
     this.scrollOptions = {...this.scrollOptions, ...scrollOptions};
   }
   
-  from: number = NaN;
-  to: number = NaN;
+  x_from: number = NaN;
+  x_to: number = NaN;
+  y_from: number = NaN;
+  y_to: number = NaN;
 
   loop = () => {
     const effect = this.animation.effect;
@@ -914,12 +922,17 @@ export class ScrollBlock extends AnimBlock {
 
     const {progress, direction} = effect.getComputedTiming();
     if (progress === null || progress === undefined) {
-      this.domElem.scrollTo({behavior: "instant", top: this.to});
+      this.domElem.scrollTo({
+        behavior: "instant",
+        ...(!this.scrollOptions.preserveX ? {left: this.x_to} : {}),
+        ...(!this.scrollOptions.preserveY ? {top: this.y_to} : {}),
+      });
       return;
     }
     this.domElem.scrollTo({
       behavior: "instant",
-      top: this.from + (this.to - this.from) * (direction === 'normal' ? progress : 1 - progress)
+      ...(!this.scrollOptions.preserveX ? {left: this.x_from + (this.x_to - this.x_from) * (direction === 'normal' ? progress : 1 - progress)} : {}),
+      ...(!this.scrollOptions.preserveY ? {top: this.y_from + (this.y_to - this.y_from) * (direction === 'normal' ? progress : 1 - progress)} : {}),
     });
 
     requestAnimationFrame(this.loop);
@@ -927,37 +940,62 @@ export class ScrollBlock extends AnimBlock {
 
   private setScrollies(scrollable: Element, target: Element): void {
     // determines the intersection point of the target
-    const offsetPerc: number = this.scrollOptions.targetOffset ?? 0;
+    const offsetPercX: number = this.scrollOptions.targetOffsetX ?? this.scrollOptions.targetOffset?.[0] ?? 0;
+    const offsetPercY: number = this.scrollOptions.targetOffsetY ?? this.scrollOptions.targetOffset?.[1] ?? 0;
     // determines the intersection point of the scrolling container
-    const placementOffsetPerc: number = this.scrollOptions.scrollableOffset ?? 0;
+    const placementOffsetPercX: number = this.scrollOptions.scrollableOffsetX ?? this.scrollOptions.scrollableOffset?.[0] ?? 0;
+    const placementOffsetPercY: number = this.scrollOptions.scrollableOffsetY ?? this.scrollOptions.scrollableOffset?.[1] ?? 0;
 
     const selfRect = scrollable.getBoundingClientRect();
     const targetRect = target!.getBoundingClientRect();
+    const targetInnerLeft = targetRect.left - selfRect.left + (scrollable === document.documentElement ? 0 : scrollable.scrollLeft);
     const targetInnerTop = targetRect.top - selfRect.top + (scrollable === document.documentElement ? 0 : scrollable.scrollTop);
     // The maximum view height should be the height of the scrolling container,
     // but it can only be as large as the viewport height since all scrolling should be
     // with respect to what the user can see.
+    // The same logic applies for max width
+    const maxSelfViewWidth = Math.min(selfRect.width, window.innerWidth);
     const maxSelfViewHeight = Math.min(selfRect.height, window.innerHeight);
 
     // initial position of the intersection point of the target relative to the top of the scrolling container
-    const oldTargetIntersectionPointPos = targetInnerTop + (targetRect.height * offsetPerc);
+    const oldTargetIntersectionPointPos = [
+      targetInnerLeft + (targetRect.width * offsetPercX),
+      targetInnerTop + (targetRect.height * offsetPercY)
+    ];
     // new position of the intersection point of the target relative to the top of the scrolling container
-    const newTargetIntersectionPointPos = oldTargetIntersectionPointPos - (maxSelfViewHeight * placementOffsetPerc);
+    const newTargetIntersectionPointPos = [
+      oldTargetIntersectionPointPos[0] - (maxSelfViewWidth * placementOffsetPercX),
+      oldTargetIntersectionPointPos[1] - (maxSelfViewHeight * placementOffsetPercY),
+    ];
     // set to just start scrolling from current scroll position
-    this.from = scrollable.scrollTop;
+    this.x_from = scrollable.scrollLeft;
+    this.y_from = scrollable.scrollTop;
     // If new target intersection is larger (lower) than initial,
     // we'd need to scroll the screen up to move the target intersection down to it.
     // Same logic but opposite for needing to scroll down.
-    const scrollDirection = newTargetIntersectionPointPos > oldTargetIntersectionPointPos ? 'up' : 'down';
+    // Same logic applies to horizontal scrolling with left and right instead of up and down.
+    const [scrollDirectionX, scrollDirectionY] = [
+      newTargetIntersectionPointPos[0] > oldTargetIntersectionPointPos[1] ? 'left' : 'right',
+      newTargetIntersectionPointPos[1] > oldTargetIntersectionPointPos[0] ? 'up' : 'down',
+    ];
 
-    switch(scrollDirection) {
+    switch(scrollDirectionX) {
+      case "left":
+        // Capped at 0 because that's the minimum scrollLeft value
+        this.x_to = Math.max(newTargetIntersectionPointPos[0], 0);
+      case "right":
+        // Capped at the highest scrollWidth value, which equals the scroll width minus the
+        // minimum between the width of the scrolling container and the viewport width)
+        this.x_to = Math.min(newTargetIntersectionPointPos[0], scrollable.scrollWidth - maxSelfViewWidth);
+    }
+    switch(scrollDirectionY) {
       case "up":
         // Capped at 0 because that's the minimum scrollTop value
-        this.to = Math.max(newTargetIntersectionPointPos, 0);
+        this.y_to = Math.max(newTargetIntersectionPointPos[1], 0);
       case "down":
         // Capped at the highest scrollTop value, which equals the scroll height minus the
         // minimum between the height of the scrolling container and the viewport height)
-        this.to = Math.min(newTargetIntersectionPointPos, scrollable.scrollHeight - maxSelfViewHeight);
+        this.y_to = Math.min(newTargetIntersectionPointPos[1], scrollable.scrollHeight - maxSelfViewHeight);
     }
   }
 
@@ -973,7 +1011,8 @@ export class ScrollBlock extends AnimBlock {
 
     // }
     // else {
-      [this.from, this.to] = [this.to, this.from];
+      [this.x_from, this.x_to] = [this.x_to, this.x_from];
+      [this.y_from, this.y_to] = [this.y_to, this.y_from];
     // }
     requestAnimationFrame(this.loop);
   }
