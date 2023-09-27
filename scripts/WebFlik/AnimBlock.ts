@@ -643,8 +643,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }
 
-  stepForward(): Promise<void> { return this.animate('forward'); }
-  stepBackward(): Promise<void> { return this.animate('backward'); }
+  // TODO: Think about the naming/relationship between play, rewind, and resume
+  play(): Promise<void> { return this.animate('forward'); }
+  rewind(): Promise<void> { return this.animate('backward'); }
   get pause() { return this.animation.pause.bind(this.animation); }
   get resume() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }

@@ -30,7 +30,7 @@ export function generateVisualization (jobsUnsorted: Job[]) {
   // fade-in visualization screen
   (function() {
     const fadeinVisualization = Entrance(document.querySelector('.visualization'), '~fade-in', [], {duration: 375});
-    fadeinVisualization.stepForward();
+    fadeinVisualization.play();
   })();
 
   // const jobsUnsorted = [

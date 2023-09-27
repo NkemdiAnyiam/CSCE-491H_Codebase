@@ -122,7 +122,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const grouping = this.animBlock_forwardGroupings[i];
       const firstBlock = grouping[0];
       this.inProgressBlocks.set(firstBlock.id, firstBlock);
-      parallelBlocks.push(firstBlock.stepForward()
+      parallelBlocks.push(firstBlock.play()
         .then(() => {this.inProgressBlocks.delete(firstBlock.id)})
       );
 
@@ -132,7 +132,7 @@ export class AnimSequence implements AnimSequenceConfig {
         await grouping[j-1].generateTimePromise('forward', 'activePhase', 'beginning');
         const currAnimBlock = grouping[j];
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
-        parallelBlocks.push(currAnimBlock.stepForward()
+        parallelBlocks.push(currAnimBlock.play()
           .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
         );
       }
@@ -164,7 +164,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = grouping.length;
       const lastBlock = grouping[groupingLength - 1];
       this.inProgressBlocks.set(lastBlock.id, lastBlock);
-      parallelBlocks.push(lastBlock.stepBackward()
+      parallelBlocks.push(lastBlock.rewind()
         .then(() => {this.inProgressBlocks.delete(lastBlock.id)})
       );
 
@@ -182,7 +182,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
         // once waiting period above is over, begin rewinding current block
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
-        parallelBlocks.push(currAnimBlock.stepBackward()
+        parallelBlocks.push(currAnimBlock.rewind()
           .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
         );
       }
