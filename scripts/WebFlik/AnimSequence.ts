@@ -1,10 +1,42 @@
 import { AnimBlock, AnimTimelineAnimation } from "./AnimBlock.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 
+/**
+ * This is the description of the interface
+ *
+ * @interface AnimSequenceConfig
+ * @property {string} description — This string is logged when debugging mode is enabled.
+ * @property {boolean} tag — This string can be used as an argument to AnimTimeline.prototype.skipTo().
+ * @property {boolean} autoplaysNextSequence — If true, the next sequence in the timeline will automatically play after this sequence finishes.
+ * @property {boolean} autoplays — If true, this sequence will automatically play after the previous sequence in the timeline finishes.
+ */
 type AnimSequenceConfig = {
+  /**
+   * This string is logged when debugging mode is enabled.
+   * @optional
+   * @defaultValue `'<blank sequence description>'`
+   * 
+  */
   description: string;
+
+  /**
+   * This string can be used as an argument to AnimTimeline.prototype.skipTo().
+   * @defaultValue `''`
+  */
+
   tag: string;
+
+  /**
+   * If true, the next sequence in the timeline will automatically play after this sequence finishes.
+   * @defaultValue `false`
+   * */
   autoplaysNextSequence: boolean;
+
+  /**
+   * If true, this sequence will automatically play after the previous sequence in the timeline finishes.
+   * @defaultValue `false`
+   * 
+  */
   autoplays: boolean;
 };
 
