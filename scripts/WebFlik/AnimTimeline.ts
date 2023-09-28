@@ -181,7 +181,7 @@ export class AnimTimeline {
       this.doForInProgressSequences(sequence => sequence.pause());
     }
     else {
-      this.doForInProgressSequences(sequence => sequence.resume());
+      this.doForInProgressSequences(sequence => sequence.unpause());
       if (this.isSkipping) { this.skipInProgressSequences(); }
     }
     return this.isPaused;

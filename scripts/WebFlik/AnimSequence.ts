@@ -194,9 +194,9 @@ export class AnimSequence implements AnimSequenceConfig {
     this.isPaused = true;
     this.doForInProgressBlocks(animBlock => animBlock.pause());
   }
-  resume(): void {
+  unpause(): void {
     this.isPaused = false;
-    this.doForInProgressBlocks(animBlock => animBlock.resume());
+    this.doForInProgressBlocks(animBlock => animBlock.unpause());
   }
 
   updatePlaybackRate(newRate: number) {

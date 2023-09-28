@@ -101,7 +101,7 @@ export class AnimTimelineAnimation extends Animation {
   onEndDelayFinish: Function = () => {};
   // FIXME: The behavior for pausing for roadblocks while expedition is in act is undefined
   pauseForRoadblocks: Function = () => { throw new Error(`This should never be called before being defined by parent block`); };
-  resumeFromRoadblocks: Function = () => { throw new Error(`This should never be called before being defined by parent block`); };
+  unpauseFromRoadblocks: Function = () => { throw new Error(`This should never be called before being defined by parent block`); };
 
   get timelineID(): number { return this._timelineID; }
   set timelineID(id: number) { this._timelineID = id; }
@@ -157,6 +157,7 @@ export class AnimTimelineAnimation extends Animation {
   
   async play(): Promise<void> {
     // If animation is already in progress and is just paused, resume the animation directly.
+    // TODO: might need to rework this considering unpause()
     if (super.playState === 'paused') {
       super.play();
       return;
@@ -190,7 +191,7 @@ export class AnimTimelineAnimation extends Animation {
         effect.updateTiming({ endDelay });
         // if playback was paused from, resume playback
         if (roadblocked === true) {
-          this.resumeFromRoadblocks();
+          this.unpauseFromRoadblocks();
           roadblocked = false;
         }
         if (this.isExpediting) { super.finish(); }
@@ -630,9 +631,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       if (this.parentSequence) { this.parentSequence.pause(); }
       else { this.pause(); }
     }
-    this.animation.resumeFromRoadblocks = () => {
-      if (this.parentSequence) { this.parentSequence.resume(); }
-      else { this.resume(); }
+    this.animation.unpauseFromRoadblocks = () => {
+      if (this.parentSequence) { this.parentSequence.unpause(); }
+      else { this.unpause(); }
     }
 
     return this;
@@ -643,11 +644,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }
 
-  // TODO: Think about the naming/relationship between play, rewind, and resume
+  // TODO: prevent calls to play/rewind while already animating
   play(): Promise<void> { return this.animate('forward'); }
   rewind(): Promise<void> { return this.animate('backward'); }
   get pause() { return this.animation.pause.bind(this.animation); }
-  get resume() { return this.animation.play.bind(this.animation); }
+  get unpause() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
   get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); } // TODO: Hide from general use
