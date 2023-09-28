@@ -97,7 +97,6 @@ export class AnimSequence implements AnimSequenceConfig {
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
-  // TODO: Overhaul current sequencing structure to make timing more intuitive (and fix some catastrophic edge cases)
   async play(): Promise<void> {
     this.commit();
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
@@ -106,6 +105,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
     for (let i = 0; i < numGroupings; ++i) {
       const activeGrouping = activeGroupings[i];
+      // TODO: probably want to reincorporate this
       // const activeGrouping2 = activeGroupings2[i];
       const groupingLength = activeGrouping.length;
 
