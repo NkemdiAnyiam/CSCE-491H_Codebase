@@ -60,7 +60,7 @@ class _WebFlik {
       Exits?: UserExitBank & IKeyframesBank<ExitBlock>;
       Emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
       Translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
-    } = {}, // TODO: Add = {} default so user doesn't have to pass in empty object if using only presets
+    } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
     type TogglePresets<TUserBank, TPresetBank> = Readonly<TUserBank & (IncludePresets extends true ? TPresetBank : {})>;
