@@ -73,7 +73,7 @@ export const presetEntrances = {
 
   [`~pinwheel`]: {
     generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'counterclockwise') {
-      // TODO: tweak starting scale and reconsider modifying opaticy
+      // TODO: tweak starting scale and reconsider modifying opacity
       return [[
         {
           rotate: `z 0deg`,
