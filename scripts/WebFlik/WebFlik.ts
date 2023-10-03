@@ -42,6 +42,16 @@ type BlockInitParams<
   AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>,
 > = Parameters<TBlock['initialize']>;
 
+type BlockCreator<
+  TBank extends IKeyframesBank,
+  TBlock extends AnimBlock = AnimBlock<TBank[AnimationNameIn<TBank>]>,
+  TElemType extends Element = Element,
+> = <AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>>(
+  domElem: TElemType | null,
+  animName: AnimName,
+  ...params: BlockInitParams<AnimBlock<TBank[AnimName]>, TBank, AnimName>
+) => TBlock;
+
 class _WebFlik {
   createBanks
   <
@@ -109,29 +119,12 @@ class _WebFlik {
         return new ScrollBlock(domElem, targetElem, scrollOptions).initialize([], userConfig);
       },
     } satisfies {
-      Entrance: <AnimName extends AnimationNameIn<CombinedEntranceBank>>(
-        domElem: Element | null,
-        animName: AnimName,
-        ...params: BlockInitParams<EntranceBlock<CombinedEntranceBank[AnimName]>>
-      ) => EntranceBlock<CombinedEntranceBank[AnimName]>;
-
-      Exit: <AnimName extends AnimationNameIn<CombinedExitBank>>(
-        domElem: Element | null,
-        animName: AnimName,
-        ...params: BlockInitParams<ExitBlock<CombinedExitBank[AnimName]>>
-      ) => ExitBlock<CombinedExitBank[AnimName]>;
-
-      Emphasis: <AnimName extends AnimationNameIn<CombinedEmphasisBank>>(
-        domElem: Element | null,
-        animName: AnimName,
-        ...params: BlockInitParams<EmphasisBlock<CombinedEmphasisBank[AnimName]>>
-      ) => EmphasisBlock<CombinedEmphasisBank[AnimName]>;
-
-      Translation: <AnimName extends AnimationNameIn<CombinedTranslationBank>>(
-        domElem: Element | null,
-        animName: AnimName,
-        ...params: BlockInitParams<TranslationBlock<CombinedTranslationBank[AnimName]>>
-      ) => TranslationBlock<CombinedTranslationBank[AnimName]>;
+      Entrance: BlockCreator<CombinedEntranceBank, EntranceBlock>;
+      Exit: BlockCreator<CombinedExitBank, ExitBlock>;
+      Emphasis: BlockCreator<CombinedEmphasisBank, EmphasisBlock>;
+      Translation: BlockCreator<CombinedTranslationBank, TranslationBlock>;
+      DrawConnector: BlockCreator<CombinedDrawConnectorBank, DrawConnectorBlock, Connector>;
+      EraseConnector: BlockCreator<CombinedEraseConnectorBank, EraseConnectorBlock, Connector>;
 
       SetConnector: (
         connectorElem: Connector,
@@ -139,18 +132,6 @@ class _WebFlik {
         pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
         connectorConfig: ConnectorConfig
       ) => SetConnectorBlock;
-
-      DrawConnector: <AnimName extends AnimationNameIn<CombinedDrawConnectorBank>>(
-        connectorElem: Connector,
-        animName: AnimName,
-        ...params: BlockInitParams<DrawConnectorBlock<CombinedDrawConnectorBank[AnimName]>>
-      ) => DrawConnectorBlock<CombinedDrawConnectorBank[AnimName]>;
-
-      EraseConnector: <AnimName extends AnimationNameIn<CombinedEraseConnectorBank>>(
-        connectorElem: Connector,
-        animName: AnimName,
-        ...params: BlockInitParams<EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>>
-      ) => EraseConnectorBlock<CombinedEraseConnectorBank[AnimName]>;
 
       Scroll: (
         domElem: Element | null,
