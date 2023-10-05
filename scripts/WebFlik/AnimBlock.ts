@@ -655,6 +655,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   // TODO: prevent calls to play/rewind while already animating
   play(): Promise<void> { return this.animate('forward'); }
   rewind(): Promise<void> { return this.animate('backward'); }
+  get rafLoopsProgress(): number {
+    const { progress, direction } = this.animation.effect!.getComputedTiming();
+    // ?? 1 because during the active phase (the only time when raf runs), null progress means finished
+    return direction === 'normal' ? (progress ?? 1) : 1 - (progress ?? 1);
+  }
   get pause() { return this.animation.pause.bind(this.animation); }
   get unpause() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }
@@ -930,21 +935,15 @@ export class ScrollBlock extends AnimBlock {
       return;
     }
 
-    const {progress, direction} = effect.getComputedTiming();
-    if (progress === null || progress === undefined) {
-      this.domElem.scrollTo({
-        behavior: "instant",
-        ...(!this.scrollOptions.preserveX ? {left: this.x_to} : {}),
-        ...(!this.scrollOptions.preserveY ? {top: this.y_to} : {}),
-      });
-      return;
-    }
+    const progress = this.rafLoopsProgress;
+
     this.domElem.scrollTo({
       behavior: "instant",
-      ...(!this.scrollOptions.preserveX ? {left: this.x_from + (this.x_to - this.x_from) * (direction === 'normal' ? progress : 1 - progress)} : {}),
-      ...(!this.scrollOptions.preserveY ? {top: this.y_from + (this.y_to - this.y_from) * (direction === 'normal' ? progress : 1 - progress)} : {}),
+      ...(!this.scrollOptions.preserveX ? {left: this.x_from + (this.x_to - this.x_from) * progress} : {}),
+      ...(!this.scrollOptions.preserveY ? {top: this.y_from + (this.y_to - this.y_from) * progress} : {}),
     });
 
+    if (progress === 1) { return; }
     requestAnimationFrame(this.loop);
   }
 
