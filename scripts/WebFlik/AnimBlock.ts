@@ -857,7 +857,7 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 }
 
-export type ScrollOptions = {
+export type ScrollingOptions = {
   scrollableOffset?: [x: number, y: number];
   scrollableOffsetX?: number;
   scrollableOffsetY?: number;
@@ -879,7 +879,7 @@ export class ScrollBlock extends AnimBlock {
 
   private targetElem: Element;
 
-  private scrollOptions: ScrollOptions = {
+  private scrollOptions: ScrollingOptions = {
     preserveX: false,
     preserveY: false,
   };
@@ -906,7 +906,7 @@ export class ScrollBlock extends AnimBlock {
     targetElem: Element | null,
     animName: string,
     bank: IKeyframesBank | {bankExclusion: true},
-    scrollOptions: Partial<ScrollOptions>
+    scrollOptions: Partial<ScrollingOptions>
   ) {
     super(scrollableElem, animName, bank);
 
