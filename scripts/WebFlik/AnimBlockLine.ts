@@ -294,6 +294,7 @@ export class SetConnectorBlock extends AnimBlock {
   connectorConfig: ConnectorConfig = {} as ConnectorConfig;
   previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
 
+  protected category = 'set-connector';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
@@ -362,6 +363,7 @@ export class SetConnectorBlock extends AnimBlock {
 export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
+  protected category = 'draw-connector';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -395,6 +397,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
+  protected category = 'erase-connector';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,

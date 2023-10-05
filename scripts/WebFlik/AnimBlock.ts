@@ -514,6 +514,7 @@ export class AnimTimelineAnimation extends Animation {
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
   static id: number = 0;
 
+  protected category: string = '<unspecificed category>';
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
 
   parentSequence?: AnimSequence;
@@ -827,6 +828,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 }
 
 export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  protected category = 'entrance';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -860,6 +862,7 @@ export type ScrollOptions = {
 };
 
 export class ScrollBlock extends AnimBlock {
+  protected category = 'scroll';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -1021,6 +1024,7 @@ export class ScrollBlock extends AnimBlock {
 }
 
 export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  protected category = 'exit';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -1043,6 +1047,7 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
 }
 
 export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  protected category = 'emphasis';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
@@ -1054,6 +1059,7 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  protected category = 'translation';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',
