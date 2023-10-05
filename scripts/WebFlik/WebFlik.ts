@@ -76,24 +76,17 @@ class _WebFlik {
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
-    type TogglePresets<TUserBank, TPresetBank> = Readonly<TUserBank & (IncludePresets extends true ? TPresetBank : {})>;
+    type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
-    const combineBanks = <T, U>(presets: T, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})});
-
-    type CombinedEntranceBank = TogglePresets<UserEntranceBank, typeof presetEntrances>;
-    type CombinedExitBank = TogglePresets<UserExitBank, typeof presetExits>;
-    type CombinedEmphasisBank = TogglePresets<UserEmphasisBank, typeof presetEmphases>;
-    type CombinedTranslationBank = TogglePresets<UserTranslationBank, typeof presetTranslations>;
-    type CombinedDrawConnectorBank = typeof presetConnectorEntrances;
-    type CombinedEraseConnectorBank = typeof presetConnectorExits;
+    const combineBanks = <P, U>(presets: P, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})}) as TogglePresets<P, U>;
     
     // Add the keyframes groups to the static banks of the block classes
-    const combinedEntranceBank = combineBanks(presetEntrances, Entrances) as CombinedEntranceBank;
-    const combinedExitBank = combineBanks(presetExits, Exits) as CombinedExitBank;
-    const combinedEmphasisBank = combineBanks(presetEmphases, Emphases) as CombinedEmphasisBank;
-    const combinedTranslationBank = combineBanks(presetTranslations, Translations) as CombinedTranslationBank;
-    const combinedDrawConnectorBank = combineBanks(presetConnectorEntrances, {}) as CombinedDrawConnectorBank;
-    const combinedEraseConnectorBank = combineBanks(presetConnectorExits, {}) as CombinedEraseConnectorBank;
+    const combinedEntranceBank = combineBanks(presetEntrances, Entrances as UserEntranceBank);
+    const combinedExitBank = combineBanks(presetExits, Exits as UserExitBank);
+    const combinedEmphasisBank = combineBanks(presetEmphases, Emphases as UserEmphasisBank);
+    const combinedTranslationBank = combineBanks(presetTranslations, Translations as UserTranslationBank);
+    const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
+    const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
@@ -122,18 +115,18 @@ class _WebFlik {
         return new ScrollBlock(domElem, targetElem, `~scroll-self`, {bankExclusion: true}, scrollOptions).initialize([], userConfig);
       },
     } satisfies {
-      Entrance: BlockCreator<CombinedEntranceBank, EntranceBlock>;
-      Exit: BlockCreator<CombinedExitBank, ExitBlock>;
-      Emphasis: BlockCreator<CombinedEmphasisBank, EmphasisBlock>;
-      Translation: BlockCreator<CombinedTranslationBank, TranslationBlock>;
+      Entrance: BlockCreator<typeof combinedEntranceBank, EntranceBlock>;
+      Exit: BlockCreator<typeof combinedExitBank, ExitBlock>;
+      Emphasis: BlockCreator<typeof combinedEmphasisBank, EmphasisBlock>;
+      Translation: BlockCreator<typeof combinedTranslationBank, TranslationBlock>;
       SetConnector: (
         connectorElem: Connector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
         pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
         connectorConfig: ConnectorConfig
       ) => SetConnectorBlock;
-      DrawConnector: BlockCreator<CombinedDrawConnectorBank, DrawConnectorBlock, Connector>;
-      EraseConnector: BlockCreator<CombinedEraseConnectorBank, EraseConnectorBlock, Connector>;
+      DrawConnector: BlockCreator<typeof combinedDrawConnectorBank, DrawConnectorBlock, Connector>;
+      EraseConnector: BlockCreator<typeof combinedEraseConnectorBank, EraseConnectorBlock, Connector>;
       Scroll: (
         domElem: Element | null,
         targetElem: Element | null,
