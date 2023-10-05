@@ -1,6 +1,6 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
-import { GeneratorParams, KeyframesBankEntry } from "./WebFlik.js";
+import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { EasingString, getEasing } from "./Presets.js";
 import { mergeArrays } from "./utils.js";
 // import { presetScrolls } from "./Presets.js";
@@ -513,6 +513,7 @@ export class AnimTimelineAnimation extends Animation {
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
   static id: number = 0;
+  private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected category: string = '<unspecificed category>';
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
@@ -523,6 +524,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
   protected animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
+  bankEntry: TBankEntry;
   animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
   reqReady = false;
@@ -554,10 +556,15 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, public bankEntry: TBankEntry) {
+  // TODO: Remove temporary bankExclusion solution
+  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank | {bankExclusion: true}) {
     if (!domElem) {
       throw new Error(`Element must not be null`); // TODO: Improve error message
     }
+    
+    if ('bankExclusion' in bank) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
+    else if (!bank[animName]) { throw new Error(`Invalid ${this.category} animation name ${animName}`); }
+    else { this.bankEntry = bank[animName] as TBankEntry; }
 
     this.domElem = domElem;
     this.id = AnimBlock.id++;
@@ -836,10 +843,10 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
     };
   }
 
-  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid entrance animation name ${animName}`); }
-    super(domElem, animName, bankEntry);
-  }
+  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+  //   if (!bankEntry) { throw new Error(`Invalid entrance animation name ${animName}`); }
+  //   super(domElem, animName, bankEntry);
+  // }
 
   protected _onStartForward(): void {
     this.domElem.classList.remove('wbfk-hidden');
@@ -897,13 +904,11 @@ export class ScrollBlock extends AnimBlock {
   constructor(
     private scrollableElem: Element | null,
     targetElem: Element | null,
+    animName: string,
+    bank: IKeyframesBank | {bankExclusion: true},
     scrollOptions: Partial<ScrollOptions>
   ) {
-    super(scrollableElem, `~scroll-self`, {
-      generateKeyframes() {
-        return [[], []];
-      },
-    });
+    super(scrollableElem, animName, bank);
 
     if (!targetElem) {
       throw new Error(`Target element must not be null`); // TODO: Improve error message
@@ -1032,10 +1037,10 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
     };
   }
 
-  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid exit animation name ${animName}`); }
-    super(domElem, animName, bankEntry);
-  }
+  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+  //   if (!bankEntry) { throw new Error(`Invalid exit animation name ${animName}`); }
+  //   super(domElem, animName, bankEntry);
+  // }
 
   protected _onFinishForward(): void {
     this.domElem.classList.add('wbfk-hidden');
@@ -1052,10 +1057,10 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
     return {};
   }
 
-  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid emphasis animation name ${animName}`); }
-    super(domElem, animName, bankEntry);
-  }
+  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+  //   if (!bankEntry) { throw new Error(`Invalid emphasis animation name ${animName}`); }
+  //   super(domElem, animName, bankEntry);
+  // }
 }
 
 export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
@@ -1066,8 +1071,8 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
     };
   }
 
-  constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
-    super(domElem, animName, bankEntry);
-  }
+  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
+  //   if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
+  //   super(domElem, animName, bankEntry);
+  // }
 }

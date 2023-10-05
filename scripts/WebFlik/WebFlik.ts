@@ -52,6 +52,9 @@ type BlockCreator<
   ...params: BlockInitParams<AnimBlock<TBank[AnimName]>, TBank, AnimName>
 ) => TBlock;
 
+// type ShiftTuple<T extends any[]> =
+//   T extends [T[0], ...infer R] ? R : never;
+
 class _WebFlik {
   createBanks
   <
@@ -95,44 +98,42 @@ class _WebFlik {
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
       Entrance: function(domElem, animName, ...params) {
-        return new EntranceBlock(domElem, animName, combinedEntranceBank[animName]).initialize(...params);
+        return new EntranceBlock(domElem, animName, combinedEntranceBank).initialize(...params);
       },
       Exit: function(domElem, animName, ...params) {
-        return new ExitBlock(domElem, animName, combinedExitBank[animName]).initialize(...params);
+        return new ExitBlock(domElem, animName, combinedExitBank).initialize(...params);
       },
       Emphasis: function(domElem, animName, ...params) {
-        return new EmphasisBlock(domElem, animName, combinedEmphasisBank[animName]).initialize(...params);
+        return new EmphasisBlock(domElem, animName, combinedEmphasisBank).initialize(...params);
       },
       Translation: function(domElem, animName, ...params) {
-        return new TranslationBlock(domElem, animName, combinedTranslationBank[animName]).initialize(...params);
+        return new TranslationBlock(domElem, animName, combinedTranslationBank).initialize(...params);
       },
       SetConnector: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
-        return new SetConnectorBlock(connectorElem, pointA, pointB, connectorConfig).initialize([]);
+        return new SetConnectorBlock(connectorElem, pointA, pointB, `~set-line-points`, {bankExclusion: true}, connectorConfig).initialize([]);
       },
       DrawConnector: function(connectorElem, animName, ...params) {
-        return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank[animName]).initialize(...params);
+        return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank).initialize(...params);
       },
       EraseConnector: function(connectorElem, animName, ...params) {
-        return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank[animName]).initialize(...params);
+        return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank).initialize(...params);
       },
       Scroll: function(domElem, targetElem, scrollOptions, userConfig = {}) {
-        return new ScrollBlock(domElem, targetElem, scrollOptions).initialize([], userConfig);
+        return new ScrollBlock(domElem, targetElem, `~scroll-self`, {bankExclusion: true}, scrollOptions).initialize([], userConfig);
       },
     } satisfies {
       Entrance: BlockCreator<CombinedEntranceBank, EntranceBlock>;
       Exit: BlockCreator<CombinedExitBank, ExitBlock>;
       Emphasis: BlockCreator<CombinedEmphasisBank, EmphasisBlock>;
       Translation: BlockCreator<CombinedTranslationBank, TranslationBlock>;
-      DrawConnector: BlockCreator<CombinedDrawConnectorBank, DrawConnectorBlock, Connector>;
-      EraseConnector: BlockCreator<CombinedEraseConnectorBank, EraseConnectorBlock, Connector>;
-
       SetConnector: (
         connectorElem: Connector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
         pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
         connectorConfig: ConnectorConfig
       ) => SetConnectorBlock;
-
+      DrawConnector: BlockCreator<CombinedDrawConnectorBank, DrawConnectorBlock, Connector>;
+      EraseConnector: BlockCreator<CombinedEraseConnectorBank, EraseConnectorBlock, Connector>;
       Scroll: (
         domElem: Element | null,
         targetElem: Element | null,

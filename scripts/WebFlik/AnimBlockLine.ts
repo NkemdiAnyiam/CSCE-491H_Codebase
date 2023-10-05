@@ -1,5 +1,5 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
-import { KeyframesBankEntry } from "./WebFlik.js";
+import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { equalWithinTol } from "./utils.js";
 
 export type ConnectorConfig = {
@@ -294,7 +294,7 @@ export class SetConnectorBlock extends AnimBlock {
   connectorConfig: ConnectorConfig = {} as ConnectorConfig;
   previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
 
-  protected category = 'set-connector';
+  protected category = 'connector-setting';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
@@ -308,11 +308,10 @@ export class SetConnectorBlock extends AnimBlock {
     connectorElem: Connector | null,
     pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
+    animName: string,
+    bank: IKeyframesBank | {bankExclusion: true},
     connectorConfig: Partial<ConnectorConfig> = {},
-    /*animName: string, behaviorGroup: TBehavior*/
     ) {
-    // if (!behaviorGroup) { throw new Error(`Invalid set line animation name ${animName}`); }
-
     if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
     if (!(pointA?.[0] instanceof Element)) {
@@ -324,11 +323,7 @@ export class SetConnectorBlock extends AnimBlock {
 
     // TODO: Validate offsets?
 
-    super(connectorElem, `~set-line-points`, {
-      generateKeyframes() {
-        return [[], []];
-      },
-    });
+    super(connectorElem, animName, bank);
 
     this.connectorElem = connectorElem;
     this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];
@@ -363,7 +358,7 @@ export class SetConnectorBlock extends AnimBlock {
 export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
-  protected category = 'draw-connector';
+  protected category = 'connector-drawing';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -371,12 +366,11 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid line-drawing animation name ${animName}`); }
+  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank) {
     if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
 
-    super(connectorElem, animName, bankEntry);
+    super(connectorElem, animName, bank);
     this.connectorElem = connectorElem;
   }
 
@@ -397,7 +391,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
-  protected category = 'erase-connector';
+  protected category = 'connector-erasing';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -405,12 +399,11 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bankEntry: TBankEntry) {
-    if (!bankEntry) { throw new Error(`Invalid line-erasing animation name ${animName}`); }
+  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank) {
     if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
 
-    super(connectorElem, animName, bankEntry);
+    super(connectorElem, animName, bank);
     this.connectorElem = connectorElem;
   }
 
