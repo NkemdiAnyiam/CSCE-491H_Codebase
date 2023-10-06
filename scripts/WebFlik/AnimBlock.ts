@@ -140,7 +140,8 @@ export class AnimTimelineAnimation extends Animation {
   setDirection(direction: 'forward' | 'backward') {
     this.direction = direction;
 
-    // load proper KeyframeEffect
+    // Load proper KeyframeEffect
+    // The deep copying circumvents a strange Firefox bug involving reusing effects
     switch(direction) {
       case "forward":
         const forwardEffect = this.forwardEffect;
@@ -527,7 +528,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   bankEntry: TBankEntry;
   animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
-  reqReady = false;
+  get rafLoopsProgress(): number {
+    const { progress, direction } = this.animation.effect!.getComputedTiming();
+    // ?? 1 because during the active phase (the only time when raf runs), null progress means finished
+    return direction === 'normal' ? (progress ?? 1) : 1 - (progress ?? 1);
+  }
   
   startsNextBlock: boolean = false;
   startsWithPrevious: boolean = false;
@@ -668,11 +673,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   // TODO: prevent calls to play/rewind while already animating
   play(): Promise<void> { return this.animate('forward'); }
   rewind(): Promise<void> { return this.animate('backward'); }
-  get rafLoopsProgress(): number {
-    const { progress, direction } = this.animation.effect!.getComputedTiming();
-    // ?? 1 because during the active phase (the only time when raf runs), null progress means finished
-    return direction === 'normal' ? (progress ?? 1) : 1 - (progress ?? 1);
-  }
   get pause() { return this.animation.pause.bind(this.animation); }
   get unpause() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }
@@ -689,7 +689,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onFinishBackward(): void {};
 
   protected async animate(direction: 'forward' | 'backward'): Promise<void> {
-    this.reqReady = false;
     const animation = this.animation;
     animation.setDirection(direction);
     // If keyframes are generated here, clear the current frames to prevent interference with
@@ -760,7 +759,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         default:
           throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
       }
-      this.reqReady = true;
     };
 
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
@@ -898,171 +896,6 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 }
 
-export type ScrollingOptions = {
-  scrollableOffset?: [x: number, y: number];
-  scrollableOffsetX?: number;
-  scrollableOffsetY?: number;
-  targetOffset?: [x: number, y: number];
-  targetOffsetX?: number;
-  targetOffsetY?: number;
-  preserveX?: boolean;
-  preserveY?: boolean;
-};
-
-export class ScrollBlock extends AnimBlock {
-  protected category = 'scroll';
-  protected get defaultConfig(): Partial<AnimBlockConfig> {
-    return {
-      commitsStyles: false,
-      pregeneratesKeyframes: true,
-    };
-  }
-
-  private targetElem: Element;
-
-  private scrollOptions: ScrollingOptions = {
-    preserveX: false,
-    preserveY: false,
-  };
-
-  // constructor(domElem: Element | null, private targetElem: Element | null, animName: keyof typeof presetScrolls, bankEntry: TBankEntry) {
-  //   if (!targetElem) {
-  //     throw new Error(`Target element must not be null`); // TODO: Improve error message
-  //   }
-  //   if (!bankEntry) { throw new Error(`Invalid scroll animation name ${animName}`); }
-    
-  //   super(domElem, animName, bankEntry);
-
-  //   this.setAnimators(animName);
-
-  //   switch(animName) {
-  //     case "~scroll-to":
-  //       // this.targetElem = 
-  //     case "~scroll-to-self":
-  //   }
-  // }
-
-  constructor(
-    private scrollableElem: Element | null,
-    targetElem: Element | null,
-    animName: string,
-    bank: IKeyframesBank | {bankExclusion: true},
-    scrollOptions: Partial<ScrollingOptions>
-  ) {
-    super(scrollableElem, animName, bank);
-
-    if (!targetElem) {
-      throw new Error(`Target element must not be null`); // TODO: Improve error message
-    }
-    this.targetElem = targetElem;
-
-    this.scrollOptions = {...this.scrollOptions, ...scrollOptions};
-  }
-  
-  x_from: number = NaN;
-  x_to: number = NaN;
-  y_from: number = NaN;
-  y_to: number = NaN;
-
-  loop = () => {
-    const effect = this.animation.effect;
-    if (!effect || !this.reqReady) {
-      requestAnimationFrame(this.loop);
-      return;
-    }
-
-    const progress = this.rafLoopsProgress;
-
-    this.domElem.scrollTo({
-      behavior: "instant",
-      ...(!this.scrollOptions.preserveX ? {left: this.x_from + (this.x_to - this.x_from) * progress} : {}),
-      ...(!this.scrollOptions.preserveY ? {top: this.y_from + (this.y_to - this.y_from) * progress} : {}),
-    });
-
-    if (progress === 1) { return; }
-    requestAnimationFrame(this.loop);
-  }
-
-  private setScrollies(scrollable: Element, target: Element): void {
-    // determines the intersection point of the target
-    const offsetPercX: number = this.scrollOptions.targetOffsetX ?? this.scrollOptions.targetOffset?.[0] ?? 0;
-    const offsetPercY: number = this.scrollOptions.targetOffsetY ?? this.scrollOptions.targetOffset?.[1] ?? 0;
-    // determines the intersection point of the scrolling container
-    const placementOffsetPercX: number = this.scrollOptions.scrollableOffsetX ?? this.scrollOptions.scrollableOffset?.[0] ?? 0;
-    const placementOffsetPercY: number = this.scrollOptions.scrollableOffsetY ?? this.scrollOptions.scrollableOffset?.[1] ?? 0;
-
-    const selfRect = scrollable.getBoundingClientRect();
-    const targetRect = target!.getBoundingClientRect();
-    const targetInnerLeft = targetRect.left - selfRect.left + (scrollable === document.documentElement ? 0 : scrollable.scrollLeft);
-    const targetInnerTop = targetRect.top - selfRect.top + (scrollable === document.documentElement ? 0 : scrollable.scrollTop);
-    // The maximum view height should be the height of the scrolling container,
-    // but it can only be as large as the viewport height since all scrolling should be
-    // with respect to what the user can see.
-    // The same logic applies for max width
-    const maxSelfViewWidth = Math.min(selfRect.width, window.innerWidth);
-    const maxSelfViewHeight = Math.min(selfRect.height, window.innerHeight);
-
-    // initial position of the intersection point of the target relative to the top of the scrolling container
-    const oldTargetIntersectionPointPos = [
-      targetInnerLeft + (targetRect.width * offsetPercX),
-      targetInnerTop + (targetRect.height * offsetPercY)
-    ];
-    // new position of the intersection point of the target relative to the top of the scrolling container
-    const newTargetIntersectionPointPos = [
-      oldTargetIntersectionPointPos[0] - (maxSelfViewWidth * placementOffsetPercX),
-      oldTargetIntersectionPointPos[1] - (maxSelfViewHeight * placementOffsetPercY),
-    ];
-    // set to just start scrolling from current scroll position
-    this.x_from = scrollable.scrollLeft;
-    this.y_from = scrollable.scrollTop;
-    // If new target intersection is larger (lower) than initial,
-    // we'd need to scroll the screen up to move the target intersection down to it.
-    // Same logic but opposite for needing to scroll down.
-    // Same logic applies to horizontal scrolling with left and right instead of up and down.
-    const [scrollDirectionX, scrollDirectionY] = [
-      newTargetIntersectionPointPos[0] > oldTargetIntersectionPointPos[1] ? 'left' : 'right',
-      newTargetIntersectionPointPos[1] > oldTargetIntersectionPointPos[0] ? 'up' : 'down',
-    ];
-
-    switch(scrollDirectionX) {
-      case "left":
-        // Capped at 0 because that's the minimum scrollLeft value
-        this.x_to = Math.max(newTargetIntersectionPointPos[0], 0);
-      case "right":
-        // Capped at the highest scrollWidth value, which equals the scroll width minus the
-        // minimum between the width of the scrolling container and the viewport width)
-        this.x_to = Math.min(newTargetIntersectionPointPos[0], scrollable.scrollWidth - maxSelfViewWidth);
-    }
-    switch(scrollDirectionY) {
-      case "up":
-        // Capped at 0 because that's the minimum scrollTop value
-        this.y_to = Math.max(newTargetIntersectionPointPos[1], 0);
-      case "down":
-        // Capped at the highest scrollTop value, which equals the scroll height minus the
-        // minimum between the height of the scrolling container and the viewport height)
-        this.y_to = Math.min(newTargetIntersectionPointPos[1], scrollable.scrollHeight - maxSelfViewHeight);
-    }
-  }
-
-  protected _onStartForward(): void {
-    this.setScrollies(this.domElem, this.targetElem);
-
-    requestAnimationFrame(this.loop);
-  }
-
-  protected _onStartBackward(): void {
-    // if (this.scrollOptions.backwardsAnchor) {
-    //   this.from = this.to;
-
-    // }
-    // else {
-      [this.x_from, this.x_to] = [this.x_to, this.x_from];
-      [this.y_from, this.y_to] = [this.y_to, this.y_from];
-    // }
-    requestAnimationFrame(this.loop);
-  }
-}
-
 export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   protected category = 'exit';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -1109,5 +942,18 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
   // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
   //   if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
   //   super(domElem, animName, bankEntry);
+  // }
+}
+
+export class ScrollBlock extends AnimBlock {
+  protected category = 'scroll';
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
+    return {
+      commitsStyles: false,
+    };
+  }
+
+  // constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank) {
+  //   super(scrollableElem, animName, bank);
   // }
 }
