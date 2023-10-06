@@ -5,21 +5,30 @@ import { presetEntrances, presetExits, presetEmphases, presetTranslations, prese
 type KeyframesGenerator = {
   generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateGenerators?: never;
+  generateRafLoops?: never;
 };
 type KeyframesFunctionsGenerator = {
   generateKeyframes?: never;
   generateGenerators(...animArgs: any[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
+  generateRafLoops?: never;
+}
+type ReqAnimFrameLoopsGenerator = {
+  generateKeyframes?: never;
+  generateGenerators?: never;
+  generateRafLoops(...animArgs: any[]): [forwardLoop: () => void, backwardLoop: () => void];
 }
 
 export type KeyframesBankEntry = Readonly<
   { config?: Partial<AnimBlockConfig>; }
-  & (KeyframesGenerator | KeyframesFunctionsGenerator)
+  & (KeyframesGenerator | KeyframesFunctionsGenerator | ReqAnimFrameLoopsGenerator)
 >;
 
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator ? TBankEntry['generateKeyframes'] : (
   TBankEntry extends KeyframesFunctionsGenerator ? TBankEntry['generateGenerators'] : (
-    never
+    TBankEntry extends ReqAnimFrameLoopsGenerator ? TBankEntry['generateRafLoops'] : (
+      never
+    )
   )
 )
 >;
