@@ -522,16 +522,16 @@ export const presetScrolls = {
       const loopForward = () => {
         this.domElem.scrollTo({
           behavior: "instant",
-          ...(!preserveX ? {left: x_from + (x_to - x_from) * this.rafLoopsProgress} : {}),
-          ...(!preserveY ? {top: y_from + (y_to - y_from) * this.rafLoopsProgress} : {}),
+          ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
+          ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
         });
       };
 
       const loopBackward = () => {
         this.domElem.scrollTo({
           behavior: "instant",
-          ...(!preserveX ? {left: x_to + (x_from - x_to) * this.rafLoopsProgress} : {}),
-          ...(!preserveY ? {top: y_to + (y_from - y_to) * this.rafLoopsProgress} : {}),
+          ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
+          ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
         });
       };
 

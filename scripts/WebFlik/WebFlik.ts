@@ -36,7 +36,7 @@ TBankEntry extends KeyframesGenerator ? TBankEntry['generateKeyframes'] : (
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock | void = void> =
   Readonly<Record<string, KeyframesBankEntry>>
-  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string, rafLoopsProgress: number}>>);
+  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string, computeTween: (startVal: number, endVal: number) => number}>>);
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // TODO: Handle undo-- prefixes

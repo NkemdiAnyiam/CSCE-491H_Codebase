@@ -552,6 +552,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     forward: () => void;
     backward: () => void;
   };
+  computeTween(initialVal: number, finalVal: number): number {
+    return initialVal + (finalVal - initialVal) * this.rafLoopsProgress;
+  }
 
   duration: number = 500;
   delay: number = 0;
