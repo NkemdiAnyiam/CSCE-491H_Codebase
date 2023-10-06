@@ -543,6 +543,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     forward: () => Keyframe[];
     backward: () => Keyframe[];
   };
+  keyframeRequesters?: {
+    forward: () => void;
+    backward: () => void;
+  };
 
   duration: number = 500;
   delay: number = 0;
@@ -587,7 +591,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // the default value to make it as unlikely as possible that anything the user does is obstructed.
     let [forwardFrames, backwardFrames]: [Keyframe[], Keyframe[] | undefined] = [[{fontFeatureSettings: 'normal'}], []];
 
-    if (this.bankEntry.generateGenerators) {
+    if (this.bankEntry.generateKeyframes) {
+      if (this.pregeneratesKeyframes) {
+        [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
+      }
+    }
+    else if (this.bankEntry.generateGenerators) {
       const [forwardGenerator, backwardGenerator] = this.bankEntry.generateGenerators.call(this, ...animArgs);
       if (this.pregeneratesKeyframes) {
         [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator()];
@@ -597,9 +606,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         backward: backwardGenerator,
       };
     }
-    else if (this.bankEntry.generateKeyframes) {
+    else {
       if (this.pregeneratesKeyframes) {
-        [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
+        const [forwardRequester, backwardRequester] = this.bankEntry.generateRafLoops.call(this, ...animArgs);
+        this.keyframeRequesters = {
+          forward: forwardRequester,
+          backward: backwardRequester,
+        };
       }
     }
 
@@ -712,10 +725,16 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
               let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
               this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
             }
-            else {
+            else if (this.bankEntry.generateGenerators) {
               this.animation.setForwardFrames(this.keyframesGenerators!.forward());
             }
+            else if (this.bankEntry.generateRafLoops) {
+              const newLoops = this.bankEntry.generateRafLoops.call(this, ...this.animArgs);
+              this.keyframeRequesters = {forward: newLoops[0], backward: newLoops[1]};
+            }
           }
+
+          if (this.bankEntry.generateRafLoops) { requestAnimationFrame(this.loop); }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
@@ -730,10 +749,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             if (this.bankEntry.generateKeyframes) {
               // do nothing (backward keyframes would have already been set during forward direction)
             }
-            else {
+            else if (this.bankEntry.generateGenerators) {
               this.animation.setBackwardFrames(this.keyframesGenerators!.backward());
             }
           }
+
+          if (this.bankEntry.generateRafLoops) { requestAnimationFrame(this.loop); }
           break;
   
         default:
@@ -798,6 +819,21 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       resolver = resolve;
       rejecter = reject;
     });
+  }
+
+  private loop = () => {
+    switch(this.animation.direction) {
+      case "forward":
+        this.keyframeRequesters?.forward();
+        break;
+      case "backward":
+        this.keyframeRequesters?.backward();
+        break;
+      default: throw new Error(`Something very wrong occured for there to be an error here.`);
+    }
+
+    if (this.rafLoopsProgress === 1) { return; }
+    requestAnimationFrame(this.loop);
   }
 
   private mergeConfigs(userConfig: Partial<AnimBlockConfig>, bankEntryConfig: Partial<AnimBlockConfig>): Partial<AnimBlockConfig> {
