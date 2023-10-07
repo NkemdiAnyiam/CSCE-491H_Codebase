@@ -949,6 +949,7 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
 }
 
 export class ScrollBlock extends AnimBlock {
+  scrollableElem: Element;
   protected category = 'scroll';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -956,7 +957,9 @@ export class ScrollBlock extends AnimBlock {
     };
   }
 
-  // constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank) {
-  //   super(scrollableElem, animName, bank);
-  // }
+  constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank) {
+    super(scrollableElem, animName, bank);
+    if (!scrollableElem) { throw new Error(`Something very wrong must have occured for this error to be thrown`) }
+    this.scrollableElem = scrollableElem;
+  }
 }

@@ -2,41 +2,46 @@ import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, Tr
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "./AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls } from "./Presets.js";
 
-type KeyframesGenerator = {
-  generateKeyframes(...animArgs: any[]): [forward: Keyframe[], backward?: Keyframe[]];
+type KeyframesGenerator<T extends unknown> = {
+  generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateGenerators?: never;
   generateRafLoops?: never;
 };
-type KeyframesFunctionsGenerator = {
+type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframes?: never;
-  generateGenerators(...animArgs: any[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
+  generateGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
   generateRafLoops?: never;
-}
-type ReqAnimFrameLoopsGenerator = {
+};
+type ReqAnimFrameLoopsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateGenerators?: never;
-  generateRafLoops(...animArgs: any[]): [forwardLoop: () => void, backwardLoop: () => void];
-}
+  generateRafLoops(this: T & (Pick<AnimBlock, 'computeTween'>), ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
+};
 
-export type KeyframesBankEntry = Readonly<
+export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
   { config?: Partial<AnimBlockConfig>; }
-  & (KeyframesGenerator | KeyframesFunctionsGenerator | ReqAnimFrameLoopsGenerator)
+  & (KeyframesGenerator<T> | KeyframesFunctionsGenerator<T> | ReqAnimFrameLoopsGenerator<T>)
 >;
 
+// represents an object where every string key is paired with a KeyframesBankEntry value
+export type IKeyframesBank<T extends AnimBlock = AnimBlock> = Readonly<Record<string, KeyframesBankEntry<
+  Pick<T, 'animName'>
+  & (T extends (DrawConnectorBlock | SetConnectorBlock | EraseConnectorBlock) ? Pick<T, 'connectorElem'> : (
+    T extends ScrollBlock ? Pick<T, 'scrollableElem'> : (
+      Pick<T, 'domElem'>
+    )
+  ))
+>>>;
+
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
-TBankEntry extends KeyframesGenerator ? TBankEntry['generateKeyframes'] : (
-  TBankEntry extends KeyframesFunctionsGenerator ? TBankEntry['generateGenerators'] : (
-    TBankEntry extends ReqAnimFrameLoopsGenerator ? TBankEntry['generateRafLoops'] : (
+TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
+  TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateGenerators'] : (
+    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafLoops'] : (
       never
     )
   )
 )
 >;
-
-// represents an object where every string key is paired with a KeyframesBankEntry value
-export type IKeyframesBank<T extends AnimBlock | void = void> =
-  Readonly<Record<string, KeyframesBankEntry>>
-  & (T extends void ? {} : ThisType<Readonly<T | {domElem: HTMLElement, connectorElem: Connector, animName: string, computeTween: (startVal: number, endVal: number) => number}>>);
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // TODO: Handle undo-- prefixes

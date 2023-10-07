@@ -517,10 +517,10 @@ export const presetScrolls = {
       const {
         fromXY: [x_from, y_from],
         toXY: [x_to, y_to]
-      } = setScrollies(this.domElem, target, scrollOptions);
+      } = setScrollies(this.scrollableElem, target, scrollOptions);
 
       const loopForward = () => {
-        this.domElem.scrollTo({
+        this.scrollableElem.scrollTo({
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
           ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
@@ -528,7 +528,7 @@ export const presetScrolls = {
       };
 
       const loopBackward = () => {
-        this.domElem.scrollTo({
+        this.scrollableElem.scrollTo({
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
           ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
