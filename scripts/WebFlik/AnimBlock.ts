@@ -68,8 +68,8 @@ class CommitStylesError extends Error {
 type Segment = [
   endDelay: number,
   callbacks: ((...args: any[]) => void)[],
-  roadblocks: Promise<any>[],
-  integrityblocks: Promise<any>[],
+  roadblocks: Promise<unknown>[],
+  integrityblocks: Promise<unknown>[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
   skipEndDelayUpdation: boolean,
   header: Partial<{
@@ -341,14 +341,14 @@ export class AnimTimelineAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
+    ...promises: Promise<unknown>[]
   ): void;
-  addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
+  addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<unknown>[]): void;
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
+    ...promises: Promise<unknown>[]
   ): void {
     this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
   }
@@ -357,14 +357,14 @@ export class AnimTimelineAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
+    ...promises: Promise<unknown>[]
   ): void;
-  addRoadblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<any>[]): void;
+  addRoadblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<unknown>[]): void;
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<any>[]
+    ...promises: Promise<unknown>[]
   ): void {
     this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
   }
@@ -374,7 +374,7 @@ export class AnimTimelineAnimation extends Animation {
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
     awaitedType: 'integrityblock' | 'roadblock',
-    ...promises: Promise<any>[]
+    ...promises: Promise<unknown>[]
   ): void {
     // if the animation is already finished in the given direction, do nothing
     if (this.isFinished && this.direction === direction) {
