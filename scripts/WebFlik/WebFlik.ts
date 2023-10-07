@@ -15,7 +15,7 @@ type KeyframesFunctionsGenerator<T extends unknown> = {
 type ReqAnimFrameLoopsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateGenerators?: never;
-  generateRafLoops(this: T & (Pick<AnimBlock, 'computeTween'>), ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
+  generateRafLoops(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
 };
 
 export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
@@ -25,12 +25,13 @@ export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock = AnimBlock> = Readonly<Record<string, KeyframesBankEntry<
+Readonly<
   Pick<T, 'animName'>
   & (T extends (DrawConnectorBlock | SetConnectorBlock | EraseConnectorBlock) ? Pick<T, 'connectorElem'> : (
     T extends ScrollBlock ? Pick<T, 'scrollableElem'> : (
       Pick<T, 'domElem'>
     )
-  ))
+  ))>
 >>>;
 
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
