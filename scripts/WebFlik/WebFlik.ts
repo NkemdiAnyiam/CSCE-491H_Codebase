@@ -91,8 +91,8 @@ class _WebFlik {
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
-    this.#checkBanksFormatting(Entrances, Exits, Emphases, Translations);
-    
+    _WebFlik.#checkBanksFormatting(Entrances, Exits, Emphases, Translations);
+
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
     const combineBanks = <P, U>(presets: P, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})}) as TogglePresets<P, U>;
@@ -149,7 +149,7 @@ class _WebFlik {
     };
   }
 
-  #checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
+  static #checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
     const errors: string[] = [];
     
     const checkForArrowFunctions = (bank?: IKeyframesBank) => {
