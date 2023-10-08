@@ -604,8 +604,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
       }
     }
-    else if (this.bankEntry.generateGenerators) {
-      const [forwardGenerator, backwardGenerator] = this.bankEntry.generateGenerators.call(this, ...animArgs);
+    else if (this.bankEntry.generateKeyframeGenerators) {
+      const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
       if (this.pregeneratesKeyframes) {
         [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator()];
       }
@@ -616,7 +616,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     }
     else {
       if (this.pregeneratesKeyframes) {
-        const [forwardRequester, backwardRequester] = this.bankEntry.generateRafLoops.call(this, ...animArgs);
+        const [forwardRequester, backwardRequester] = this.bankEntry.generateRafLoopBodies.call(this, ...animArgs);
         this.keyframeRequesters = {
           forward: forwardRequester,
           backward: backwardRequester,
@@ -727,16 +727,16 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
               let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
               this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
             }
-            else if (this.bankEntry.generateGenerators) {
+            else if (this.bankEntry.generateKeyframeGenerators) {
               this.animation.setForwardFrames(this.keyframesGenerators!.forward());
             }
-            else if (this.bankEntry.generateRafLoops) {
-              const newLoops = this.bankEntry.generateRafLoops.call(this, ...this.animArgs);
+            else if (this.bankEntry.generateRafLoopBodies) {
+              const newLoops = this.bankEntry.generateRafLoopBodies.call(this, ...this.animArgs);
               this.keyframeRequesters = {forward: newLoops[0], backward: newLoops[1]};
             }
           }
 
-          if (this.bankEntry.generateRafLoops) { requestAnimationFrame(this.loop); }
+          if (this.bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
@@ -751,12 +751,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             if (this.bankEntry.generateKeyframes) {
               // do nothing (backward keyframes would have already been set during forward direction)
             }
-            else if (this.bankEntry.generateGenerators) {
+            else if (this.bankEntry.generateKeyframeGenerators) {
               this.animation.setBackwardFrames(this.keyframesGenerators!.backward());
             }
           }
 
-          if (this.bankEntry.generateRafLoops) { requestAnimationFrame(this.loop); }
+          if (this.bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
           break;
   
         default:

@@ -29,7 +29,7 @@ export const presetEntrances = {
   },
 
   [`~fly-in`]: {
-    generateGenerators(direction: `from-${Direction}` = 'from-bottom') {
+    generateKeyframeGenerators(direction: `from-${Direction}` = 'from-bottom') {
       const computeOrthoDist = (dir: `from-${OrthoDirection}`) => {
         const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
         switch(dir) {
@@ -144,7 +144,7 @@ export const presetExits = {
   },
 
   [`~fly-out`]: {
-    generateGenerators(direction: `to-${OrthoDirection | DiagDirection}` = 'to-bottom') {
+    generateKeyframeGenerators(direction: `to-${OrthoDirection | DiagDirection}` = 'to-bottom') {
       const computeOrthoDist = (dir: `to-${OrthoDirection}`) => {
         const {left, right, top, bottom} = this.domElem.getBoundingClientRect();
         switch(dir) {
@@ -507,7 +507,7 @@ function setScrollies(scrollable: Element, target: Element, scrollOptions: Scrol
 
 export const presetScrolls = {
   [`~scroll-self`]: {
-    generateRafLoops(target: Element | null, scrollOptions: Partial<ScrollingOptions> = {}) {
+    generateRafLoopBodies(target: Element | null, scrollOptions: Partial<ScrollingOptions> = {}) {
       if (!target) { throw new Error(); }
       const {
         preserveX = false,

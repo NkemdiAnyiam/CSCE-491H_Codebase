@@ -4,18 +4,18 @@ import { presetEntrances, presetExits, presetEmphases, presetTranslations, prese
 
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
-  generateGenerators?: never;
-  generateRafLoops?: never;
+  generateKeyframeGenerators?: never;
+  generateRafLoopBodies?: never;
 };
 type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframes?: never;
-  generateGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
-  generateRafLoops?: never;
+  generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
+  generateRafLoopBodies?: never;
 };
 type ReqAnimFrameLoopsGenerator<T extends unknown> = {
   generateKeyframes?: never;
-  generateGenerators?: never;
-  generateRafLoops(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
+  generateKeyframeGenerators?: never;
+  generateRafLoopBodies(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
 };
 
 export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
@@ -36,8 +36,8 @@ Readonly<
 
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
-  TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateGenerators'] : (
-    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafLoops'] : (
+  TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateKeyframeGenerators'] : (
+    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafLoopBodies'] : (
       never
     )
   )
