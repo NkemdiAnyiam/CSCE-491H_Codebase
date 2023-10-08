@@ -13,7 +13,7 @@ type Direction = OrthoDirection | DiagDirection;
 export const presetEntrances = {
   [`~appear`]: {
     generateKeyframes() {
-      return [[]]
+      return [[]];
     },
     config: {
       duration: 0,
@@ -22,10 +22,12 @@ export const presetEntrances = {
 
   // TODO: Rename to just 'fade'
   [`~fade-in`]: {
-    generateKeyframes: () => [[
-      {opacity: '0'},
-      {opacity: '1'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {opacity: '0'},
+        {opacity: '1'},
+      ]];
+    },
   },
 
   [`~fly-in`]: {
@@ -129,7 +131,7 @@ export const presetEntrances = {
 export const presetExits = {
   [`~disappear`]: {
     generateKeyframes() {
-      return [[]]
+      return [[]];
     },
     config: {
       duration: 0,
@@ -137,10 +139,12 @@ export const presetExits = {
   },
 
   [`~fade-out`]: {
-    generateKeyframes: () => [[
-      {opacity: '1'},
-      {opacity: '0'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {opacity: '1'},
+        {opacity: '0'},
+      ]]
+    },
   },
 
   [`~fly-out`]: {
@@ -234,10 +238,12 @@ export const presetExits = {
 
 export const presetEmphases = {
   [`~highlight`]: {
-    generateKeyframes: () =>  [[
-      {backgroundPositionX: '100%'},
-      {backgroundPositionX: '0%'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {backgroundPositionX: '100%'},
+        {backgroundPositionX: '0%'},
+      ]];
+    },
     config: {
       classesToAddOnStart: [`highlightable`],
       // invalidProp: 4,
@@ -245,10 +251,12 @@ export const presetEmphases = {
   },
 
   [`~un-highlight`]: {
-    generateKeyframes: () =>  [[
-      {backgroundPositionX: '0'},
-      {backgroundPositionX: '100%'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {backgroundPositionX: '0%'},
+        {backgroundPositionX: '100%'},
+      ]];
+    },
     config: {
       classesToRemoveOnFinish: [`highlightable`],
     },
@@ -303,7 +311,7 @@ export const presetTranslations = {
   },
 
   ['~translate']: {
-    generateKeyframes: (translationOptions: Partial<TNoElem> = {}): [Keyframe[], Keyframe[]] => {
+    generateKeyframes(translationOptions: Partial<TNoElem> = {}): [Keyframe[], Keyframe[]] {
       const {
         translateX = '0px',
         translateY = '0px',
@@ -324,10 +332,12 @@ export const presetTranslations = {
 
 export const presetConnectorEntrances = {
   [`~fade-in`]: {
-    generateKeyframes: () => [[
-      {opacity: '0'},
-      {opacity: '1'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {opacity: '0'},
+        {opacity: '1'},
+      ]];
+    },
   },
 
   [`~trace`]: {
@@ -378,10 +388,12 @@ export const presetConnectorEntrances = {
 
 export const presetConnectorExits = {
   [`~fade-out`]: {
-    generateKeyframes: () => [[
-      {opacity: '1'},
-      {opacity: '0'},
-    ]],
+    generateKeyframes() {
+      return [[
+        {opacity: '1'},
+        {opacity: '0'},
+      ]];
+    },
   },
 
   [`~trace`]: {

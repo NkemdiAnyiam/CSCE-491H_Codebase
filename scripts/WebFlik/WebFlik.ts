@@ -91,6 +91,8 @@ class _WebFlik {
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) /* TODO: Add coherent return type */ {
+    this.#checkBanksFormatting(Entrances, Exits, Emphases, Translations);
+    
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
     const combineBanks = <P, U>(presets: P, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})}) as TogglePresets<P, U>;
@@ -145,6 +147,29 @@ class _WebFlik {
       EraseConnector: BlockCreator<typeof combinedEraseConnectorBank, EraseConnectorBlock, Connector>;
       Scroll: BlockCreator<typeof combinedScrollsBank, ScrollBlock>;
     };
+  }
+
+  #checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
+    const errors: string[] = [];
+    
+    const checkForArrowFunctions = (bank?: IKeyframesBank) => {
+      if (!bank) { return; }
+      for (const animName in bank) {
+        const entry = bank[animName];
+        const generator = entry.generateKeyframes?.toString() ?? entry.generateKeyframeGenerators?.toString() ?? entry.generateRafLoopBodies?.toString()!;
+        if (generator.match(/^\(.*\) => .*/)) {
+          errors.push(`"${animName}"`);
+        }
+      }
+    };
+
+    for (const bank of banks) { checkForArrowFunctions(bank); }
+
+    if (errors.length > 0) {
+      throw new SyntaxError(
+        `Arrow functions are not allowed to be used as generators. Detected in the following animation definitions:${errors.map(msg => `\n${msg}`)}`
+      );
+    }
   }
 }
 
