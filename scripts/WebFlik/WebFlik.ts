@@ -156,8 +156,8 @@ class _WebFlik {
       if (!bank) { return; }
       for (const animName in bank) {
         const entry = bank[animName];
-        const generator = entry.generateKeyframes?.toString() ?? entry.generateKeyframeGenerators?.toString() ?? entry.generateRafLoopBodies?.toString()!;
-        if (generator.match(/^\(.*\) => .*/)) {
+        const generator = entry.generateKeyframes ?? entry.generateKeyframeGenerators ?? entry.generateRafLoopBodies;
+        if (generator.toString().match(/^\(.*\) => .*/)) {
           errors.push(`"${animName}"`);
         }
       }
