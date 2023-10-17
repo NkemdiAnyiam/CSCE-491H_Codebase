@@ -1,2 +1,2 @@
-Use the visualization here: https://nkemdianyiam.github.io/CSCE-491H_WIS-Visualization-with-AnimTimeline/
-(This README will be filled out with more details later)
+This branch is dedicated to the massive overhaul (phase 2) of this project. It is built in TypeScript and substantially more robust with more features and better usability.
+This README might be filled out later, but the goal is to eventually extract the framework code (which will surely be renamed to something different from "AnimTimeline") and create an NPM package.
