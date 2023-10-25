@@ -328,7 +328,7 @@ export const presetTranslations = {
       ];
     },
   },
-} satisfies IKeyframesBank<TranslationBlock>; 
+} satisfies IKeyframesBank<TranslationBlock>;
 
 export const presetConnectorEntrances = {
   [`~fade-in`]: {
