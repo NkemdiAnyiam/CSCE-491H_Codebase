@@ -62,7 +62,8 @@ export const presetEntrances = {
       ];
     },
     config: {
-      pregeneratesKeyframes: false
+      pregeneratesKeyframes: false,
+      composite: 'accumulate',
     }
   },
 
@@ -179,7 +180,8 @@ export const presetExits = {
       ];
     },
     config: {
-      pregeneratesKeyframes: false
+      pregeneratesKeyframes: false,
+      composite: 'accumulate',
     }
   },
 
