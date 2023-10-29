@@ -571,6 +571,9 @@ export type EasingString = Union<
 >;
 
 export const easingMap = new Map<PresetLinearEasingKey, string>([
+  // CREDITS:
+  // https://www.smashingmagazine.com/2023/09/path-css-easing-linear-function/
+  // https://gist.github.com/jh3y/1b3afdfa7af3ebc5668bf169cea17d09
   [`power1-in`, `linear( 0, 0.0039, 0.0156, 0.0352, 0.0625, 0.0977, 0.1407, 0.1914, 0.2499, 0.3164, 0.3906 62.5%, 0.5625, 0.7656, 1 )`],
   [`power1-out`, `linear( 0, 0.2342, 0.4374, 0.6093 37.49%, 0.6835, 0.7499, 0.8086, 0.8593, 0.9023, 0.9375, 0.9648, 0.9844, 0.9961, 1 )`],
   [`power1-in-out`, `linear( 0, 0.0027, 0.0106 7.29%, 0.0425, 0.0957, 0.1701 29.16%, 0.2477, 0.3401 41.23%, 0.5982 55.18%, 0.7044 61.56%, 0.7987, 0.875 75%, 0.9297, 0.9687, 0.9922, 1 )`],
