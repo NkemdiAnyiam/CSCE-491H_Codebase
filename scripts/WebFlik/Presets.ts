@@ -668,7 +668,7 @@ export function invertEasing(easingString: EasingString): string {
   }
 }
 
-export function getEasing(easingString: EasingString, options: {inverted: boolean} = {inverted: false}): string {
+export function parseEasingString(easingString: EasingString, options: {inverted: boolean} = {inverted: false}): string {
   if (options?.inverted) { return invertEasing(easingString); }
   return easingMap.get(easingString as KeyInEasingMap) ?? easingString;
 }
