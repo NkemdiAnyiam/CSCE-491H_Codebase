@@ -554,12 +554,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   classesToRemoveOnStart: string[] = []; // TODO: Consider order of addition/removal
   pregeneratesKeyframes: boolean = false;
   keyframesGenerators?: {
-    forward: () => Keyframe[];
-    backward: () => Keyframe[];
+    forwardGenerator: () => Keyframe[];
+    backwardGenerator?: () => Keyframe[];
   };
-  keyframeRequesters?: {
-    forward: () => void;
-    backward: () => void;
+  rafLoopMutators?: {
+    forwardMutator: () => void;
+    backwardMutator: () => void;
   };
   computeTween(initialVal: number, finalVal: number): number {
     return initialVal + (finalVal - initialVal) * this.rafLoopsProgress;
@@ -609,27 +609,23 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     let [forwardFrames, backwardFrames]: [Keyframe[], Keyframe[] | undefined] = [[{fontFeatureSettings: 'normal'}], []];
 
     if (this.bankEntry.generateKeyframes) {
+      // if pregenerating, produce F and B frames now
       if (this.pregeneratesKeyframes) {
         [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
       }
     }
     else if (this.bankEntry.generateKeyframeGenerators) {
       const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
+      this.keyframesGenerators = {forwardGenerator, backwardGenerator};
+      // if pregenerating, produce F and B frames now
       if (this.pregeneratesKeyframes) {
-        [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator()];
+        [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator?.()];
       }
-      this.keyframesGenerators = {
-        forward: forwardGenerator,
-        backward: backwardGenerator,
-      };
     }
     else {
       if (this.pregeneratesKeyframes) {
-        const [forwardRequester, backwardRequester] = this.bankEntry.generateRafLoopBodies.call(this, ...animArgs);
-        this.keyframeRequesters = {
-          forward: forwardRequester,
-          backward: backwardRequester,
-        };
+        const [forwardMutator, backwardMutator] = this.bankEntry.generateRafLoopBodies.call(this, ...animArgs);
+        this.rafLoopMutators = { forwardMutator, backwardMutator };
       }
     }
 
@@ -722,30 +718,36 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // After delay phase, then apply class modifications and call onStart functions.
     // Additionally, generate keyframes on 'forward' if keyframe pregeneration is disabled.
     animation.onDelayFinish = () => {
+      const bankEntry = this.bankEntry;
+
       switch(direction) {
         case 'forward':
           this.domElem.classList.add(...this.classesToAddOnStart);
           this.domElem.classList.remove(...this.classesToRemoveOnStart);
           this._onStartForward();
   
-          // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()
-          // can function properly.
+          // If keyframes were not pregenerated, generate them now
+          // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
+          // ...can function properly.
           // TODO: Handle case where only one keyframe is provided
           if (!this.pregeneratesKeyframes) {
-            if (this.bankEntry.generateKeyframes) {
-              let [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
-              this.animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+            // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
+            if (bankEntry.generateKeyframes) {
+              let [forwardFrames, backwardFrames] = bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+              animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
             }
-            else if (this.bankEntry.generateKeyframeGenerators) {
-              this.animation.setForwardFrames(this.keyframesGenerators!.forward());
+            // if generateKeyframeGenerators() is the method of generation, generate f-ward frames
+            else if (bankEntry.generateKeyframeGenerators) {
+              animation.setForwardFrames(this.keyframesGenerators!.forwardGenerator());
             }
-            else if (this.bankEntry.generateRafLoopBodies) {
-              const newLoops = this.bankEntry.generateRafLoopBodies.call(this, ...this.animArgs);
-              this.keyframeRequesters = {forward: newLoops[0], backward: newLoops[1]};
+            // if generateRafLoopBodies() is the method of generation, generate f-ward and b-ward mutators
+            else if (bankEntry.generateRafLoopBodies) {
+              const [forwardMutator, backwardMutator] = bankEntry.generateRafLoopBodies.call(this, ...this.animArgs);
+              this.rafLoopMutators = { forwardMutator, backwardMutator };
             }
           }
 
-          if (this.bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
@@ -757,15 +759,16 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           this.domElem.classList.remove(...this.classesToAddOnFinish);
 
           if (!this.pregeneratesKeyframes) {
-            if (this.bankEntry.generateKeyframes) {
+            if (bankEntry.generateKeyframes) {
               // do nothing (backward keyframes would have already been set during forward direction)
             }
-            else if (this.bankEntry.generateKeyframeGenerators) {
-              this.animation.setBackwardFrames(this.keyframesGenerators!.backward());
+            else if (bankEntry.generateKeyframeGenerators) {
+              const {forwardGenerator, backwardGenerator} = this.keyframesGenerators!;
+              this.animation.setBackwardFrames(backwardGenerator?.() ?? forwardGenerator(), backwardGenerator ? false : true);
             }
           }
 
-          if (this.bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
           break;
   
         default:
@@ -832,12 +835,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   private loop = () => {
+    const rafLoopMutators = this.rafLoopMutators!;
     switch(this.animation.direction) {
       case "forward":
-        this.keyframeRequesters?.forward();
+        rafLoopMutators.forwardMutator();
         break;
       case "backward":
-        this.keyframeRequesters?.backward();
+        rafLoopMutators.backwardMutator();
         break;
       default: throw new Error(`Something very wrong occured for there to be an error here.`);
     }

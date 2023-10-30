@@ -58,7 +58,7 @@ export const presetEntrances = {
 
       return [
         () => [ {translate: computeTranslationStr()}, {translate: `0 0`} ],
-        () => [ {translate: computeTranslationStr()} ]
+        // () => [ {translate: computeTranslationStr()} ]
       ];
     },
     config: {
@@ -176,7 +176,7 @@ export const presetExits = {
 
       return [
         () => [ {translate: computeTranslationStr()} ],
-        () => [ {translate: computeTranslationStr()}, {translate: `0 0`} ]
+        // () => [ {translate: computeTranslationStr()}, {translate: `0 0`} ]
       ];
     },
     config: {

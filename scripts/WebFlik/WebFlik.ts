@@ -9,7 +9,7 @@ type KeyframesGenerator<T extends unknown> = {
 };
 type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframes?: never;
-  generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator: () => Keyframe[]];
+  generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator?: () => Keyframe[]];
   generateRafLoopBodies?: never;
 };
 type ReqAnimFrameLoopsGenerator<T extends unknown> = {
