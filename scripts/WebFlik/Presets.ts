@@ -67,13 +67,6 @@ export const presetEntrances = {
     }
   },
 
-  // [`~fade-in`]: {
-  //   generateFunctions: () => [() => {console.log('F'); return [{opacity: 0}, {opacity: 1}]}, () => {console.log('B'); return [{opacity: 1}, {opacity: 0}]}],
-  //   config: {
-  //     pregeneratesKeyframes: false,
-  //   }
-  // },
-
   [`~pinwheel`]: {
     generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'counterclockwise') {
       // TODO: tweak starting scale and reconsider modifying opacity
