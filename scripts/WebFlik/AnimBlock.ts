@@ -561,7 +561,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     forwardGenerator: () => Keyframe[];
     backwardGenerator?: () => Keyframe[];
   };
-  rafLoopMutators?: {
+  rafMutators?: {
     forwardMutator: () => void;
     backwardMutator: () => void;
   };
@@ -628,8 +628,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     }
     else {
       if (this.pregeneratesKeyframes) {
-        const [forwardMutator, backwardMutator] = this.bankEntry.generateRafLoopBodies.call(this, ...animArgs);
-        this.rafLoopMutators = { forwardMutator, backwardMutator };
+        const [forwardMutator, backwardMutator] = this.bankEntry.generateRafMutators.call(this, ...animArgs);
+        this.rafMutators = { forwardMutator, backwardMutator };
       }
     }
 
@@ -744,14 +744,14 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             else if (bankEntry.generateKeyframeGenerators) {
               animation.setForwardFrames(this.keyframesGenerators!.forwardGenerator());
             }
-            // if generateRafLoopBodies() is the method of generation, generate f-ward and b-ward mutators
-            else if (bankEntry.generateRafLoopBodies) {
-              const [forwardMutator, backwardMutator] = bankEntry.generateRafLoopBodies.call(this, ...this.animArgs);
-              this.rafLoopMutators = { forwardMutator, backwardMutator };
+            // if generateRafMutators() is the method of generation, generate f-ward and b-ward mutators
+            else if (bankEntry.generateRafMutators) {
+              const [forwardMutator, backwardMutator] = bankEntry.generateRafMutators.call(this, ...this.animArgs);
+              this.rafMutators = { forwardMutator, backwardMutator };
             }
           }
 
-          if (bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
@@ -772,7 +772,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             }
           }
 
-          if (bankEntry.generateRafLoopBodies) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
           break;
   
         default:
@@ -839,7 +839,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   private loop = () => {
-    const rafLoopMutators = this.rafLoopMutators!;
+    const rafLoopMutators = this.rafMutators!;
     switch(this.animation.direction) {
       case "forward":
         rafLoopMutators.forwardMutator();

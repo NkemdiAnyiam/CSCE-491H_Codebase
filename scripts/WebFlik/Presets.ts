@@ -521,7 +521,7 @@ function setScrollies(scrollable: Element, target: Element, scrollOptions: Scrol
 
 export const presetScrolls = {
   [`~scroll-self`]: {
-    generateRafLoopBodies(target: Element | null, scrollOptions: Partial<ScrollingOptions> = {}) {
+    generateRafMutators(target: Element | null, scrollOptions: Partial<ScrollingOptions> = {}) {
       if (!target) { throw new Error(); }
       const {
         preserveX = false,

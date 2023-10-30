@@ -5,17 +5,17 @@ import { presetEntrances, presetExits, presetEmphases, presetTranslations, prese
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateKeyframeGenerators?: never;
-  generateRafLoopBodies?: never;
+  generateRafMutators?: never;
 };
 type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator?: () => Keyframe[]];
-  generateRafLoopBodies?: never;
+  generateRafMutators?: never;
 };
 type ReqAnimFrameLoopsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateKeyframeGenerators?: never;
-  generateRafLoopBodies(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
+  generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
 };
 
 export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
@@ -37,7 +37,7 @@ Readonly<
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
   TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateKeyframeGenerators'] : (
-    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafLoopBodies'] : (
+    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafMutators'] : (
       never
     )
   )
@@ -156,7 +156,7 @@ class _WebFlik {
       if (!bank) { return; }
       for (const animName in bank) {
         const entry = bank[animName];
-        const generator = entry.generateKeyframes ?? entry.generateKeyframeGenerators ?? entry.generateRafLoopBodies;
+        const generator = entry.generateKeyframes ?? entry.generateKeyframeGenerators ?? entry.generateRafMutators;
         if (generator.toString().match(/^\(.*\) => .*/)) {
           errors.push(`"${animName}"`);
         }
