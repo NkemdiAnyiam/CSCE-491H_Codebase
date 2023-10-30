@@ -124,21 +124,25 @@ export class AnimTimelineAnimation extends Animation {
     this.forwardEffect.setKeyframes(frames);
     (super.effect as KeyframeEffect).setKeyframes(frames);
     if (this.inProgress) {
-      // TODO: Might need to handle easing as well
       super.effect?.updateTiming({direction: 'normal'});
     }
   }
 
   setBackwardFrames(frames: Keyframe[], backwardIsMirror?: boolean): void {
     this.backwardEffect.setKeyframes(frames);
-    this.backwardEffect.updateTiming({direction: backwardIsMirror ? 'reverse' : 'normal'});
     (super.effect as KeyframeEffect).setKeyframes(frames);
-    // when this function is called during keyframe generation in animate(), we need to update the current effect as well
-    // technically, this ONLY needs to be done once, but implementing that logic is unnecessary
-    if (this.inProgress && backwardIsMirror) {
-      // TODO: Need to handle easing as well
-      super.effect?.updateTiming({direction: 'reverse'});
+    if (backwardIsMirror) {
+      const [direction, easing] = ['reverse' as PlaybackDirection, this.forwardEffect.getTiming().easing];
+      this.backwardEffect.updateTiming({direction, easing});
+      if (this.inProgress) {
+        super.effect?.updateTiming({direction, easing});
+      }
     }
+    // // when this function is called during keyframe generation in animate(), we need to update the current effect as well
+    // // technically, this ONLY needs to be done once, but implementing that logic is unnecessary
+    // if (this.inProgress && backwardIsMirror) {
+    //   // TODO: Need to handle easing as well
+    // }
   }
 
   setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
