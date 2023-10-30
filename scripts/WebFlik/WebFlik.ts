@@ -12,15 +12,15 @@ type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator?: () => Keyframe[]];
   generateRafMutators?: never;
 };
-type ReqAnimFrameLoopsGenerator<T extends unknown> = {
+type RafMutatorsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateKeyframeGenerators?: never;
-  generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardLoop: () => void, backwardLoop: () => void];
+  generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardMutator: () => void, backwardMutator: () => void];
 };
 
 export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
   { config?: Partial<AnimBlockConfig>; }
-  & (KeyframesGenerator<T> | KeyframesFunctionsGenerator<T> | ReqAnimFrameLoopsGenerator<T>)
+  & (KeyframesGenerator<T> | KeyframesFunctionsGenerator<T> | RafMutatorsGenerator<T>)
 >;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
@@ -37,7 +37,7 @@ Readonly<
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
   TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateKeyframeGenerators'] : (
-    TBankEntry extends ReqAnimFrameLoopsGenerator<unknown> ? TBankEntry['generateRafMutators'] : (
+    TBankEntry extends RafMutatorsGenerator<unknown> ? TBankEntry['generateRafMutators'] : (
       never
     )
   )

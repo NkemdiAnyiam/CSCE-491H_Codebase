@@ -533,7 +533,7 @@ export const presetScrolls = {
         toXY: [x_to, y_to]
       } = setScrollies(this.scrollableElem, target, scrollOptions);
 
-      const loopForward = () => {
+      const forwardMutator = () => {
         this.scrollableElem.scrollTo({
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
@@ -541,7 +541,7 @@ export const presetScrolls = {
         });
       };
 
-      const loopBackward = () => {
+      const backwardMutator = () => {
         this.scrollableElem.scrollTo({
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
@@ -549,7 +549,7 @@ export const presetScrolls = {
         });
       };
 
-      return [loopForward, loopBackward];
+      return [forwardMutator, backwardMutator];
     },
     config: {
       pregeneratesKeyframes: false,

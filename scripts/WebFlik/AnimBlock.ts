@@ -839,13 +839,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   private loop = () => {
-    const rafLoopMutators = this.rafMutators!;
+    const rafMutators = this.rafMutators!;
     switch(this.animation.direction) {
       case "forward":
-        rafLoopMutators.forwardMutator();
+        rafMutators.forwardMutator();
         break;
       case "backward":
-        rafLoopMutators.backwardMutator();
+        rafMutators.backwardMutator();
         break;
       default: throw new Error(`Something very wrong occured for there to be an error here.`);
     }
