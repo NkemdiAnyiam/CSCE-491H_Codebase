@@ -1,4 +1,4 @@
-import { AnimBlock, AnimTimelineAnimation } from "./AnimBlock.js";
+import { AnimBlock } from "./AnimBlock.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 
 /**

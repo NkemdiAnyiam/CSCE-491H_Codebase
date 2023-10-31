@@ -80,7 +80,7 @@ type Segment = [
 
 type SegmentsCache = [delayPhaseEnd: Segment, activePhaseEnd: Segment, endDelayPhaseEnd: Segment]
 
-export class AnimTimelineAnimation extends Animation {
+export class WebFlikAnimation extends Animation {
   private _timelineID: number = NaN;
   private _sequenceID: number = NaN;
   direction: 'forward' | 'backward' = 'forward';
@@ -304,7 +304,7 @@ export class AnimTimelineAnimation extends Animation {
       // if the animation is already finished in the given direction, resolve immediately
       if (this.isFinished && this.direction === direction) { resolve(); return; }
 
-      const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = AnimTimelineAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
+      const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = WebFlikAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
       // TODO: Give information on specific location of this animation block
       // check for out of bounds time positions
@@ -396,7 +396,7 @@ export class AnimTimelineAnimation extends Animation {
       return;
     }
     
-    const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = AnimTimelineAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
+    const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = WebFlikAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
     // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
@@ -456,7 +456,7 @@ export class AnimTimelineAnimation extends Animation {
   }
 
   private static computePhaseEmplacement(
-    anim: AnimTimelineAnimation,
+    anim: WebFlikAnimation,
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
@@ -537,7 +537,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   sequenceID: number = NaN; // set to match the id of the parent AnimSequence
   timelineID: number = NaN; // set to match the id of the parent AnimTimeline
   id: number;
-  protected animation: AnimTimelineAnimation = {} as AnimTimelineAnimation;
+  protected animation: WebFlikAnimation = {} as WebFlikAnimation;
   bankEntry: TBankEntry;
   animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
@@ -643,7 +643,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       composite: this.composite,
     };
 
-    this.animation = new AnimTimelineAnimation(
+    this.animation = new WebFlikAnimation(
       new KeyframeEffect(
         this.domElem,
         forwardFrames,

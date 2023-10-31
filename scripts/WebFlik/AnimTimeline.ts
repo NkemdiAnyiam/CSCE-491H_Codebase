@@ -1,4 +1,3 @@
-import { AnimTimelineAnimation } from "./AnimBlock.js";
 import { AnimSequence } from "./AnimSequence.js";
 
 type AnimTimelineConfig = {
