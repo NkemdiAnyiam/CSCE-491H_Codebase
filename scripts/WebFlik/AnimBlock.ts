@@ -138,11 +138,6 @@ export class WebFlikAnimation extends Animation {
         super.effect?.updateTiming({direction, easing});
       }
     }
-    // // when this function is called during keyframe generation in animate(), we need to update the current effect as well
-    // // technically, this ONLY needs to be done once, but implementing that logic is unnecessary
-    // if (this.inProgress && backwardIsMirror) {
-    //   // TODO: Need to handle easing as well
-    // }
   }
 
   setForwardAndBackwardFrames(forwardFrames: Keyframe[], backwardFrames: Keyframe[], backwardIsMirror?: boolean): void {
@@ -195,7 +190,6 @@ export class WebFlikAnimation extends Animation {
     const segments = this.direction === 'forward' ? this.segmentsForward : this.segmentsBackward;
     let roadblocked: boolean | null = null;
     // Traverse live array instead of static length since entries could be added mid-loop
-    // TODO: May need to find a less breakable solution than the length thing.
     for (const segment of segments) {
       const [ endDelay, callbacks, roadblocks, integrityblocks, skipEndDelayUpdation, header ]: Segment = segment;
       header.activated = true;

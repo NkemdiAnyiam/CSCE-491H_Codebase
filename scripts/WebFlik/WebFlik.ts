@@ -45,7 +45,6 @@ TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes']
 >;
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
-// TODO: Handle undo-- prefixes
 // extracts only those strings in an object whose paired value is a KeyframesBankEntry
 export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
   [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];

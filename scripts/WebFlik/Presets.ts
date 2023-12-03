@@ -287,7 +287,6 @@ export const presetEmphases = {
 } satisfies IKeyframesBank<EmphasisBlock>;
 
 
-// TODO: Implement composite: accumulates somewhewre
 export const presetTranslations = {
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {

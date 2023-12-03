@@ -57,8 +57,6 @@ export class Connector extends HTMLElement {
   getBoundingClientRect() {
     return this.gBody.getBoundingClientRect();
   }
-
-  // TODO: Add lifecycle callbacks
   
   constructor() {
     super();
@@ -272,12 +270,11 @@ export class Connector extends HTMLElement {
     this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
-  // TODO: No reason for these to be arrow functions
-  setTrackingInterval = (): void => {
+  setTrackingInterval(): void {
     this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
-  clearTrackingInterval = (): void => {
+  clearTrackingInterval (): void {
     window.cancelAnimationFrame(this.continuousTrackingReqId);
   }
 }

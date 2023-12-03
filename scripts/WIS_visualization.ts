@@ -816,10 +816,6 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       EraseConnector(connector_toCBlock, '~fade-out', []),
       SetConnector(connector_toCBlock, [cBlock, 0.9, 0.5], [cAccessContainer, 0, 0.5], {pointTrackingEnabled: true}),
       DrawConnector(connector_toCBlock, '~trace', ['from-A']),
-      // TODO: Address SetConnector update dilemma. The commented out code won't work, so I stopped writing it partway through
-      // EraseConnector(connector_cAccess, '~fade-out', [], {duration: 0}),
-      // SetConnector(connector_cAccess, [cAccessContainer, 0.5, -0.2], [textbox_cAccess, 0.5, 1], {trackEndpoints: true}),
-      // DrawConnector(connector_cAccess, '~fade-in', [], {duration: 0}),
       Exit(cAccess, '~wipe', ['from-right']),
       Entrance(cEntry, '~wipe', ['from-right']),
 
