@@ -12,7 +12,6 @@ import { Job } from './Job.js';
 
 
 // TODO: Put somewhere better
-const dataDisplay = document.querySelector('.data-display') as HTMLElement;
 const animTimeline = new AnimTimeline({debugMode: true});
 
 const {
@@ -27,6 +26,7 @@ const {
 } = WebFlik.createBanks();
 
 export function generateVisualization (jobsUnsorted: Job[]) {
+  const dataDisplay = document.querySelector('.data-display') as HTMLElement;
   // fade-in visualization screen
   (function() {
     const fadeinVisualization = Entrance(document.querySelector('.visualization'), '~fade-in', [], {duration: 375});
