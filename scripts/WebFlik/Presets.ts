@@ -363,6 +363,7 @@ export const presetConnectorEntrances = {
     },
   },
 
+  // TODO: Fix new bugs surrounding animating custom variables
   [`~trace`]: {
     generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
       const markerIdPrefix = this.connectorElem.markerIdPrefix;
