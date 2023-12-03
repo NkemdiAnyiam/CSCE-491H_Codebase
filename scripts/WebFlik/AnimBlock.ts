@@ -1,7 +1,7 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { EasingString, parseEasingString } from "./Presets.js";
+import { EasingString, useEasing } from "./Presets.js";
 import { mergeArrays } from "./utils.js";
 // import { presetScrolls } from "./Presets.js";
 
@@ -639,7 +639,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       duration: this.duration,
       endDelay: this.endDelay,
       fill: 'forwards',
-      easing: parseEasingString(this.easing),
+      easing: useEasing(this.easing),
       composite: this.composite,
     };
 
@@ -657,7 +657,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // if no backward frames were specified, assume the reverse of the forward frames
           ...(backwardFrames ? {} : {direction: 'reverse'}),
           // if backward frames were specified, easing needs to be inverted
-          ...(backwardFrames ? {easing: parseEasingString(this.easing, {inverted: true})} : {}),
+          ...(backwardFrames ? {easing: useEasing(this.easing, {inverted: true})} : {}),
           // delay & endDelay are of course swapped when we want to play in "reverse"
           delay: keyframeOptions.endDelay,
           endDelay: keyframeOptions.delay,
