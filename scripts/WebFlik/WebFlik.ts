@@ -1,6 +1,6 @@
 import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollBlock } from "./AnimBlock.js";
 import { DrawConnectorBlock, EraseConnectorBlock, Connector, SetConnectorBlock, ConnectorConfig } from "./AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls } from "./Presets.js";
+import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls, useEasing } from "./Presets.js";
 
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -146,6 +146,12 @@ class _WebFlik {
       DrawConnector: BlockCreator<typeof combinedDrawConnectorBank, DrawConnectorBlock, Connector>;
       EraseConnector: BlockCreator<typeof combinedEraseConnectorBank, EraseConnectorBlock, Connector>;
       Scroll: BlockCreator<typeof combinedScrollsBank, ScrollBlock>;
+    };
+  }
+
+  get utils() {
+    return {
+      useEasing,
     };
   }
 
