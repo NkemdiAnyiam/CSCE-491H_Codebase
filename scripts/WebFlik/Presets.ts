@@ -1,7 +1,7 @@
-import { CssLengthUnit, EmphasisBlock, EntranceBlock, ExitBlock, ScrollBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
+import { EmphasisBlock, EntranceBlock, ExitBlock, ScrollBlock, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank } from "./WebFlik.js";
-import { Union, negateNumString } from "./utils.js";
+import { Union, negateNumString, MoveToOptions, TranslateOptions, CssLengthUnit } from "./utils.js";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
@@ -289,7 +289,7 @@ export const presetEmphases = {
 
 export const presetTranslations = {
   ['~move-to']: {
-    generateKeyframes(targetElem: Element | null, translationOptions: Partial<TElem> = {}) {
+    generateKeyframes(targetElem: Element | null, translationOptions: Partial<MoveToOptions> = {}) {
       if (!targetElem) {
         throw new Error(`Target for ~move-to must not be null`); // TODO: Improve error message
       }
@@ -348,7 +348,7 @@ export const presetTranslations = {
   },
 
   ['~translate']: {
-    generateKeyframes(translationOptions: Partial<TNoElem> = {}): [Keyframe[], Keyframe[]] {
+    generateKeyframes(translationOptions: Partial<TranslateOptions> = {}): [Keyframe[], Keyframe[]] {
       const {
         translateX = '0px',
         translateY = '0px',
