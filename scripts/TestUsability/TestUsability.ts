@@ -1,5 +1,5 @@
-import { Connector } from "../AnimBlockLine";
-import { WebFlik } from "../WebFlik";
+import { Connector } from "../WebFlik/AnimBlockLine";
+import { WebFlik } from "../WebFlik/WebFlik";
 
 const {
   Entrance,
