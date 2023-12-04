@@ -31,5 +31,5 @@ export interface MoveToOptions extends TranslationOffset {
 
 export type CssLengthUnit = | 'px' | 'rem' | '%';
 export type CssLength = `${number}${CssLengthUnit}`;
-export type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
-export type CssXAlignment = | 'left' | 'right'; // TODO: more options?
+export type CssYAlignment = | 'top' | 'bottom' | 'center';
+export type CssXAlignment = | 'left' | 'right' | 'center';

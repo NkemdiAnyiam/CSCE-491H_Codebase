@@ -314,11 +314,15 @@ export const presetTranslations = {
       this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
       targetElem.classList.value = targetElem.classList.value.replace(` wbfk-override-hidden`, '');
 
-      // the displacement will start as the difference between the target element's position and our element's position...
-      // ...plus any offset with respect to the target
-      const baseXTrans: number = (preserveX ? 0 : rectTarget[alignmentX] - rectSelf[alignmentX]);
-      const baseYTrans: number = (preserveY ? 0 : rectTarget[alignmentY] - rectSelf[alignmentY]);
+      // the displacement will start as the difference between the target element's position and our element's position
+      const baseXTrans: number = alignmentX === 'center'
+        ? ((rectTarget.left + rectTarget.width/2) - (rectSelf.left + rectSelf.width/2))
+        : (preserveX ? 0 : rectTarget[alignmentX] - rectSelf[alignmentX]);
+      const baseYTrans: number = alignmentY === 'center'
+        ? ((rectTarget.top + rectTarget.height/2) - (rectSelf.top + rectSelf.height/2))
+        : (preserveY ? 0 : rectTarget[alignmentY] - rectSelf[alignmentY]);
 
+      // there may also be additional offset with respect to the target element
       let offsetTargetXTrans = offsetTargetX;
       let offsetTargetYTrans = offsetTargetY;
       if (typeof offsetTargetX === 'string') {
