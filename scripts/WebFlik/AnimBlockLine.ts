@@ -76,8 +76,6 @@ export class Connector extends HTMLElement {
     const htmlString = `
       <style>
         :host {
-          --a-marker: url(#${markerIdPrefix}-a--layer);
-          --b-marker: url(#${markerIdPrefix}-b--layer);
           --a-marker-opacity: 1;
           --b-marker-opacity: 1;
           position: absolute;
@@ -117,8 +115,8 @@ export class Connector extends HTMLElement {
         
         .connector__line--layer {
           stroke-dasharray: 1 !important;
-          marker-start: var(--a-marker);
-          marker-end: var(--b-marker);
+          marker-start: url(#${markerIdPrefix}-a--layer);
+          marker-end: url(#${markerIdPrefix}-b--layer);
         }
         
         marker {
@@ -289,6 +287,22 @@ export class Connector extends HTMLElement {
 }
 
 customElements.define('wbfk-connector', Connector);
+
+if (window.CSS.registerProperty) {
+  window.CSS.registerProperty({
+    name: "--b-marker-opacity",
+    syntax: "<number>",
+    inherits: true,
+    initialValue: '1',
+  });
+
+  window.CSS.registerProperty({
+    name: "--a-marker-opacity",
+    syntax: "<number>",
+    inherits: true,
+    initialValue: '1',
+  });
+}
 
 export class SetConnectorBlock extends AnimBlock {
   connectorElem: Connector;
