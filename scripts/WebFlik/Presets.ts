@@ -384,8 +384,6 @@ export const presetConnectorEntrances = {
   // TODO: Fix new bugs surrounding animating custom variables
   [`~trace`]: {
     generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
-      const markerIdPrefix = this.connectorElem.markerIdPrefix;
-
       // using CSS variables to control marker-end or marker-start opacity with easing step-end
       // makes it possible to instantly hide a marker and re-reveal it at the end
       const fromAFrames = [
@@ -440,8 +438,6 @@ export const presetConnectorExits = {
 
   [`~trace`]: {
     generateKeyframes(direction: 'from-A' | 'from-B' | 'from-top' | 'from-bottom' | 'from-left' | 'from-right' = 'from-A') {
-      const markerIdPrefix = this.connectorElem.markerIdPrefix;
-
       const fromStartFrames = [
         {['--a-marker-opacity']: 1, easing: 'step-start'},
         {strokeDashoffset: 0, offset: 0},
