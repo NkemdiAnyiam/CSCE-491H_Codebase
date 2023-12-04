@@ -78,6 +78,8 @@ export class Connector extends HTMLElement {
         :host {
           --a-marker: url(#${markerIdPrefix}-a--layer);
           --b-marker: url(#${markerIdPrefix}-b--layer);
+          --a-marker-opacity: 1;
+          --b-marker-opacity: 1;
           position: absolute;
           top: 0;
           left: 0;
@@ -121,6 +123,13 @@ export class Connector extends HTMLElement {
         
         marker {
           stroke: none;
+        }
+
+        #${markerIdPrefix}-a--layer {
+          opacity: var(--a-marker-opacity);
+        }
+        #${markerIdPrefix}-b--layer {
+          opacity: var(--b-marker-opacity);
         }
       </style>
 
