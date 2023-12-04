@@ -40,21 +40,20 @@ export interface TNoElem extends TOffset {
   translateY: CssLength;
 }
 
-// TODO: make offset targets CssLengths
 export interface TElem extends TOffset {
   // targetElem: Element; // if specified, translations will be with respect to this target element
   alignmentY: CssYAlignment; // determines vertical alignment with target element
   alignmentX: CssXAlignment; // determines horizontal alignment with target element
-  offsetTargetX: number; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)
-  offsetTargetY: number; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
+  offsetTargetX: CssLength; // offset based on target's width (0.5 pushes us 50% of the target element's width rightward)
+  offsetTargetY: CssLength; // offset based on target's height (0.5 pushes us 50% of the target element's height downward)
   preserveX: boolean; // if true, no horizontal translation with respect to the target element (offsets still apply)
   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
 }
 
-type CssLengthUnit = | 'px' | 'rem' | '%';
-type CssLength = `${number}${CssLengthUnit}`;
-type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
-type CssXAlignment = | 'left' | 'right'; // TODO: more options?
+export type CssLengthUnit = | 'px' | 'rem' | '%';
+export type CssLength = `${number}${CssLengthUnit}`;
+export type CssYAlignment = | 'top' | 'bottom'; // TODO: more options?
+export type CssXAlignment = | 'left' | 'right'; // TODO: more options?
 
 class CommitStylesError extends Error {
   constructor(message: string) {

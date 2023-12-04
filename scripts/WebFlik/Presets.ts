@@ -1,4 +1,4 @@
-import { EmphasisBlock, EntranceBlock, ExitBlock, ScrollBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
+import { CssLengthUnit, EmphasisBlock, EntranceBlock, ExitBlock, ScrollBlock, TElem, TNoElem, TranslationBlock } from "./AnimBlock.js"; // TODO: Clean up TElem/TNoElem import
 import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank } from "./WebFlik.js";
 import { Union, negateNumString } from "./utils.js";
@@ -299,8 +299,8 @@ export const presetTranslations = {
         alignmentY = 'top',
         offsetSelfX = '0px',
         offsetSelfY = '0px',
-        offsetTargetX = 0,
-        offsetTargetY = 0,
+        offsetTargetX = '0px',
+        offsetTargetY = '0px',
         preserveX = false,
         preserveY = false,
       } = translationOptions;
@@ -309,25 +309,40 @@ export const presetTranslations = {
       // TODO: Find better spot for visibility override
       this.domElem.classList.value += ` wbfk-override-hidden`;
       targetElem.classList.value += ` wbfk-override-hidden`;
-      const rectThis = this.domElem.getBoundingClientRect();
+      const rectSelf = this.domElem.getBoundingClientRect();
       const rectTarget = targetElem.getBoundingClientRect();
       this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
       targetElem.classList.value = targetElem.classList.value.replace(` wbfk-override-hidden`, '');
 
       // the displacement will start as the difference between the target element's position and our element's position...
       // ...plus any offset with respect to the target
-      const translateX: number = (preserveX ? 0 : rectTarget[alignmentX] - rectThis[alignmentX])
-        + offsetTargetX * rectTarget.width;
-      const translateY: number = (preserveY ? 0 : rectTarget[alignmentY] - rectThis[alignmentY])
-        + offsetTargetY * rectTarget.height;
+      const baseXTrans: number = (preserveX ? 0 : rectTarget[alignmentX] - rectSelf[alignmentX]);
+      const baseYTrans: number = (preserveY ? 0 : rectTarget[alignmentY] - rectSelf[alignmentY]);
+
+      let offsetTargetXTrans = offsetTargetX;
+      let offsetTargetYTrans = offsetTargetY;
+      if (typeof offsetTargetX === 'string') {
+        const match = offsetTargetX.match(/(-?\d+(?:\.\d*)?)(\D+)/);
+        if (!match) { throw new Error(`Invalid offsetTargetX value ${offsetTargetX}`); }
+        const num = Number(match[1]);
+        const unit = match[2] as CssLengthUnit;
+        if (unit === '%') { offsetTargetXTrans = `${(num/100) * rectTarget.width}px`; }
+      }
+      if (typeof offsetTargetY === 'string') {
+        const match = offsetTargetY.match(/(-?\d+(?:\.\d*)?)(\D+)/);
+        if (!match) { throw new Error(`Invalid offsetTargetY value ${offsetTargetY}`); }
+        const num = Number(match[1]);
+        const unit = match[2] as CssLengthUnit;
+        if (unit === '%') { offsetTargetYTrans = `${(num/100) * rectTarget.height}px`; }
+      }
       
       return [
         // forward
         // TODO: Support returning singular Keyframe instead of Keyframe[]
-        [{translate: `calc(${translateX}px + ${offsetSelfX}) calc(${translateY}px + ${offsetSelfY})`}],
+        [{translate: `calc(${baseXTrans}px + ${offsetSelfX} + ${offsetTargetXTrans}) calc(${baseYTrans}px + ${offsetSelfY} + ${offsetTargetYTrans})`}],
 
         // backward
-        [{translate: `calc(${-translateX}px + ${negateNumString(offsetSelfX)}) calc(${-translateY}px + ${negateNumString(offsetSelfY)})`}],
+        [{translate: `calc(${-baseXTrans}px + ${negateNumString(offsetSelfX)} + ${negateNumString(offsetTargetXTrans)}) calc(${-baseYTrans}px + ${negateNumString(offsetSelfY)} + ${negateNumString(offsetTargetYTrans)})`}],
       ];
     },
   },
