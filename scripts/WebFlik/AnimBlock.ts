@@ -317,6 +317,7 @@ export class WebFlikAnimation extends Animation {
   }
 
   // TODO: Hide from general use
+  /** @internal */
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
@@ -656,7 +657,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get unpause() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
-  get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); } // TODO: Hide from general use
+  /** @internal */
+  get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
   get addRoadblocks() { return this.animation.addRoadblocks.bind(this.animation); }
   // multiplies playback rate of parent timeline and sequence (if exist) with base playback rate
   useCompoundedPlaybackRate() { this.animation.updatePlaybackRate(this.compoundedPlaybackRate); }
