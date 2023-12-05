@@ -1,6 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { equalWithinTol } from "./utils.js";
+import { equalWithinTol } from "./utils/helpers.js";
 
 export type ConnectorConfig = {
   pointTrackingEnabled: boolean;

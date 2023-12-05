@@ -1,9 +1,8 @@
 import { AnimSequence } from "./AnimSequence.js";
 import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { EasingString, useEasing } from "./Presets.js";
-import { mergeArrays } from "./utils.js";
-// import { presetScrolls } from "./Presets.js";
+import { mergeArrays } from "./utils/helpers.js";
+import { EasingString, useEasing } from "./utils/easing.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
