@@ -498,6 +498,17 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   protected category: string = '<unspecificed category>';
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
+  protected prefixErrorMsg(msg: string): string {
+    const parSeq = this.parentSequence;
+    const parTim = this.parentTimeline;
+    return (
+      `\n${msg}` +
+      `\n------------------------------------------------------------` +
+      `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
+      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
+      (parTim ? `\nTimeline: [Id: ${parTim.id}]`  : '')
+    );
+  }
 
   parentSequence?: AnimSequence;
   parentTimeline?: AnimTimeline;
@@ -763,7 +774,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // If forced commit is disabled, do not re-attempt to commit the styles; throw error instead.
           if (!this.commitStylesAttemptForcefully) {
             // TODO: Add specifics about where exactly failure occured
-            rejecter(new CommitStylesError(`Cannot commit animation styles while element is not rendered.\nTo attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true. If the element's ancestor is hidden, this will still fail.`));
+            rejecter(new CommitStylesError(this.prefixErrorMsg(
+              `Cannot commit animation styles while element is not rendered.` +
+              ` To attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true` +
+              ` (however, if the element's ancestor is hidden, this will still fail).`
+            )));
           }
 
           // If forced commit is enabled, attempt to override the hidden state and apply the style.
@@ -775,7 +790,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           }
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
-            rejecter(new CommitStylesError(`Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`));
+            rejecter(new CommitStylesError(this.prefixErrorMsg(
+              `Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`
+            )));
           }
         }
       }
@@ -944,7 +961,7 @@ export class ScrollBlock extends AnimBlock {
 
   constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank) {
     super(scrollableElem, animName, bank);
-    if (!scrollableElem) { throw new Error(`Something very wrong must have occured for this error to be thrown`) }
+    if (!scrollableElem) { throw new Error(this.prefixErrorMsg(`Something very wrong must have occured for this error to be thrown`)); }
     this.scrollableElem = scrollableElem;
   }
 }
