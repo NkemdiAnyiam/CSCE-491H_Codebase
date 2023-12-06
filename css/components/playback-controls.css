@@ -5,6 +5,7 @@
 .playback-buttons {
   position: fixed;
   bottom: 0;
+  z-index: 2000;
   padding: 2rem 4rem;
   background-color: var(--color-gray-lighter);
 
