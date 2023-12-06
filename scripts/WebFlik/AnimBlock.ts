@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { mergeArrays } from "./utils/helpers.js";
 import { EasingString, useEasing } from "./utils/easing.js";
-import { CommitStylesError, InvalidElementError } from "./utils/errors.js";
+import { CommitStylesError, ErrorGenerator, InvalidElementError } from "./utils/errors.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -484,15 +484,26 @@ export class WebFlikAnimation extends Animation {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
   static id: number = 0;
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  public generateError: {
-    <TError extends Error = Error>(error: TError): TError;
-    <TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError;
-  } = <TError extends Error = Error>(ErrorClassOrInstance: (new (message: string) => TError) | TError, msg: string = '<unspecified error>'): TError => {
+  public generateError: ErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
     const postfix = (
@@ -505,13 +516,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       ErrorClassOrInstance.message += postfix;
       return ErrorClassOrInstance;
     }
-    return new ErrorClassOrInstance(
-      `\n${msg}` +
-      `\n------------------------------------------------------------` +
-      `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
-      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
-      (parTim ? `\nTimeline: [Id: ${parTim.id}]`  : '')
-    );
+    return new ErrorClassOrInstance(`\n${msg}` + postfix);
   }
 
   parentSequence?: AnimSequence;

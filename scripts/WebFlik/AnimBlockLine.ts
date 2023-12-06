@@ -1,6 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { InvalidElementError } from "./utils/errors.js";
+import { InvalidElementError, ErrorGenerator } from "./utils/errors.js";
 import { equalWithinTol } from "./utils/helpers.js";
 
 export type ConnectorConfig = {
@@ -195,7 +195,7 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = (errorGenerator?: (...args: Parameters<AnimBlock['generateError']>) => Error): void => {
+  updateEndpoints = (errorGenerator?: ErrorGenerator): void => {
     const pointA = this.pointA;
     const pointB = this.pointB;
     if (!pointA || !pointB) { return; }
@@ -273,12 +273,12 @@ export class Connector extends HTMLElement {
   }
 
   // CHANGE NOTE: Use requestAnimationFrame() loop instead of setInterval() to laglessly update endpoints
-  continuouslyUpdateEndpoints = (errorGenerator: (...args: Parameters<AnimBlock['generateError']>) => Error): void => {
+  continuouslyUpdateEndpoints = (errorGenerator: ErrorGenerator): void => {
     this.updateEndpoints(errorGenerator);
     this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
   }
 
-  setTrackingInterval(errorGenerator: (...args: Parameters<AnimBlock['generateError']>) => Error): void {
+  setTrackingInterval(errorGenerator: ErrorGenerator): void {
     this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
   }
 
