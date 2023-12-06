@@ -559,13 +559,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  // TODO: Remove temporary bankExclusion solution
-  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank | {bankExclusion: true}) {
+  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank) {
     if (!domElem) {
       throw new Error(`Element must not be null`); // TODO: Improve error message
     }
     
-    if ('bankExclusion' in bank) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
+    // if empty bank was passed, generate a bank entry with a no-op animation
+    if (Object.keys(bank).length === 0) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
     else if (!bank[animName]) { throw new Error(`Invalid ${this.category} animation name ${animName}`); }
     else { this.bankEntry = bank[animName] as TBankEntry; }
 

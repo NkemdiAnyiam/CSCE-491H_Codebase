@@ -26,12 +26,12 @@ export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock = AnimBlock> = Readonly<Record<string, KeyframesBankEntry<
-Readonly<
-  Pick<T, 'animName'>
-  & (T extends (DrawConnectorBlock | SetConnectorBlock | EraseConnectorBlock) ? Pick<T, 'connectorElem'> : (
-    T extends ScrollBlock ? Pick<T, 'scrollableElem'> : (
-      Pick<T, 'domElem'>
-    )
+  Readonly<
+    Pick<T, 'animName'>
+    & (T extends (DrawConnectorBlock | SetConnectorBlock | EraseConnectorBlock) ? Pick<T, 'connectorElem'> : (
+      T extends ScrollBlock ? Pick<T, 'scrollableElem'> : (
+        Pick<T, 'domElem'>
+      )
   ))>
 >>>;
 
@@ -121,7 +121,7 @@ class _WebFlik {
         return new TranslationBlock(domElem, animName, combinedTranslationBank).initialize(...params);
       },
       SetConnector: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
-        return new SetConnectorBlock(connectorElem, pointA, pointB, `~set-line-points`, {bankExclusion: true}, connectorConfig).initialize([]);
+        return new SetConnectorBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, connectorConfig).initialize([]);
       },
       DrawConnector: function(connectorElem, animName, ...params) {
         return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank).initialize(...params);

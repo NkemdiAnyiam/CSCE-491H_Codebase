@@ -329,7 +329,7 @@ export class SetConnectorBlock extends AnimBlock {
     pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     animName: string,
-    bank: IKeyframesBank | {bankExclusion: true},
+    bank: IKeyframesBank,
     connectorConfig: Partial<ConnectorConfig> = {},
     ) {
     if (!connectorElem) { throw new Error('Connector element must not be null'); }
