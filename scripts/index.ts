@@ -3,7 +3,7 @@ import { createForm_multiInput, createForm_textarea } from './jobForm.js';
 import { AnimSequence } from './WebFlik/AnimSequence.js';
 import { WebFlik } from './WebFlik/WebFlik.js';
 
-const {Exit, Entrance /*, Scroll*/} = WebFlik.createBanks({});
+const {Exit, Entrance, /*Scroll*/} = WebFlik.createBanks({});
 
 const maxNumJobs = 8;
 const maxTime = 11;
@@ -33,11 +33,11 @@ const constraintOptions = { maxNumJobs, maxTime, maxWeight };
 const {enableForm: enableForm_MI, disableForm: disableForm_MI} = createForm_multiInput(constraintOptions);
 const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_textarea(constraintOptions);
 
-// const scroll = Scroll(document.querySelector('.aaa'), document.querySelector('.chill')!, {scrollableOffset: [0.5, 1], targetOffset: [0.5, 1]}, {duration: 1000});
-// scroll.animation.generateTimePromise('forward', 'activePhase', '50%').then(() => {
-//   scroll.animation.pause();
+// const scroll = Scroll(document.querySelector('.aaa'), '~scroll-self', [document.querySelector('.chill')!, {scrollableOffset: [0.5, 1], targetOffset: [0.5, 1]}], {duration: 1000});
+// scroll.generateTimePromise('forward', 'activePhase', '50%').then(() => {
+//   scroll.pause();
 //   wait(2000).then(() => {
-//     scroll.resume();
+//     scroll.unpause();
 //   });
 // });
 // scroll.addRoadblocks('forward', 'activePhase', '90%', wait(3000));

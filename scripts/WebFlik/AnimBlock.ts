@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { mergeArrays } from "./utils/helpers.js";
 import { EasingString, useEasing } from "./utils/easing.js";
-import { CommitStylesError, ErrorGenerator, InvalidElementError } from "./utils/errors.js";
+import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -72,11 +72,11 @@ export class WebFlikAnimation extends Animation {
   get sequenceID(): number { return this._sequenceID; }
   set sequenceID(id: number) { this._sequenceID = id; }
 
-  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect) {
+  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect, private errorGenerator: ErrorGenerator) {
     super();
 
-    if (!this.forwardEffect.target) { throw new Error(`Animation target must not be null or undefined`); }
-    if (this.forwardEffect.target !== backwardEffect.target) { throw new Error(`Forward and backward keyframe effects must target the same element`); }
+    if (!this.forwardEffect.target) { throw this.errorGenerator(InvalidElementError, `Animation target must not be null or undefined`); }
+    if (this.forwardEffect.target !== backwardEffect.target) { this.errorGenerator(Error, `Forward and backward keyframe effects must target the same element`); }
     
     this.setDirection('forward');
     this.resetPhases('both');
@@ -124,7 +124,7 @@ export class WebFlikAnimation extends Animation {
         super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
         break;
       default:
-        throw new Error(`Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+        throw this.errorGenerator(Error, `Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
   }
   
@@ -242,7 +242,7 @@ export class WebFlikAnimation extends Animation {
         resetForwardPhases();
         resetBackwardPhases();
         break;
-      default: throw new Error(`Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
+      default: throw this.errorGenerator(Error, `Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
     }
   }
 
@@ -264,15 +264,14 @@ export class WebFlikAnimation extends Animation {
 
       const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = WebFlikAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
-      // TODO: Give information on specific location of this animation block
       // check for out of bounds time positions
       if (phaseTimePosition < 0) {
-        if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
-        else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
+        else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
       if (phaseTimePosition > phaseDuration) {
-        if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
-        else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(Error, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+        else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
 
       const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
@@ -303,11 +302,10 @@ export class WebFlikAnimation extends Animation {
       }
 
       // note: this error should never be reached
-      throw new Error('Something very wrong occured for addAwaited() to not be completed.');
+      throw this.errorGenerator(Error, 'Something very wrong occured for addAwaited() to not be completed.');
     });
   }
 
-  // TODO: Hide from general use
   /** @internal */
   addIntegrityblocks(
     direction: 'forward' | 'backward',
@@ -357,15 +355,14 @@ export class WebFlikAnimation extends Animation {
     
     const [segments, initialArrIndex, phaseDuration, phaseEndDelayOffset, phaseTimePosition] = WebFlikAnimation.computePhaseEmplacement(this, direction, phase, timePosition);
 
-    // TODO: Give information on specific location of this animation block
     // check for out of bounds time positions
     if (phaseTimePosition < 0) {
-      if (typeof timePosition === 'number') { throw new Error(`Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
-      else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
+      else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
     if (phaseTimePosition > phaseDuration) {
-      if (typeof timePosition === 'number') { throw new Error(`Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
-      else { throw new Error(`Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+      else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
 
     const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
@@ -411,7 +408,7 @@ export class WebFlikAnimation extends Animation {
     }
 
     // note: this error should never be reached
-    throw new Error('Something very wrong occured for addAwaited() to not be completed.');
+    throw this.errorGenerator(Error, 'Something very wrong occured for addAwaited() to not be completed.');
   }
 
   private static computePhaseEmplacement(
@@ -421,9 +418,18 @@ export class WebFlikAnimation extends Animation {
     timePosition: number | 'beginning' | 'end' | `${number}%`,
     ): [segments: Segment[], initialArrIndex: number, phaseDuration: number, phaseEndDelayOffset: number, phaseTimePosition: number] {
     // compute initial index, phase duration, and endDelay offset based on phase and arguments
-    const [segments, segmentsCache] = direction === 'forward'
-      ? [anim.segmentsForward, anim.segmentsForwardCache]
-      : [anim.segmentsBackward, anim.segmentsBackwardCache];
+    let segments: Segment[];
+    let segmentsCache: SegmentsCache;
+    switch(direction) {
+      case "forward":
+        [segments, segmentsCache] = [anim.segmentsForward, anim.segmentsForwardCache];
+        break;
+      case "backward":
+        [segments, segmentsCache] = [anim.segmentsBackward, anim.segmentsBackwardCache];
+        break;
+      default:
+        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid direction '${direction}'. Must be 'forward' or 'backward'.`);
+    }
     const effect = anim.getEffect(direction);
     const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
     let initialArrIndex: number; // skips to first entry of a given phase
@@ -457,7 +463,7 @@ export class WebFlikAnimation extends Animation {
         phaseEndDelayOffset = -(delay + duration);
         break;
       default:
-        throw new Error(`Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', or 'endDelayPhase'.`);
+        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', 'endDelayPhase', or 'whole'.`);
     }
 
     // COMPUTE TIME POSITION RELATIVE TO PHASE
@@ -468,9 +474,9 @@ export class WebFlikAnimation extends Animation {
     else if (typeof timePosition === 'number') { initialPhaseTimePos = timePosition; }
     else {
       // if timePosition is in percent format, convert to correct time value based on phase
-      const match = timePosition.toString().match(/(-?\d+(\.\d*)?)%/);
+      const match = timePosition.toString().match(/^(-?\d+(\.\d*)?)%$/);
       // note: this error should never occur
-      if (!match) { throw new Error(`Percentage format match not found.`); }
+      if (!match) { throw anim.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value '${timePosition}'.`); }
 
       initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
     }
@@ -650,7 +656,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           delay: keyframeOptions.endDelay,
           endDelay: keyframeOptions.delay,
         },
-      )
+      ),
+      this.generateError
     );
 
     this.animation.pauseForRoadblocks = () => {

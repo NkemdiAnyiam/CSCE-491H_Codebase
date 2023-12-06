@@ -10,9 +10,16 @@ export class CommitStylesError extends Error {
   }
 }
 
-export class InvalidElementError extends Error {
+export class InvalidElementError extends TypeError {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidElementError';
+  }
+}
+
+export class InvalidPhasePositionError extends RangeError {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidPhasePositionError';
   }
 }
