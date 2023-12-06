@@ -1,5 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
+import { InvalidElementError } from "./utils/errors.js";
 import { equalWithinTol } from "./utils/helpers.js";
 
 export type ConnectorConfig = {
@@ -194,7 +195,7 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = (): void => {
+  updateEndpoints = (errorGenerator?: (...args: Parameters<AnimBlock['generateError']>) => Error): void => {
     const pointA = this.pointA;
     const pointB = this.pointB;
     if (!pointA || !pointB) { return; }
@@ -212,7 +213,7 @@ export class Connector extends HTMLElement {
         this.pointTrackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is going to be hidden; this safely pauses the tracking.` : '',
         this.pointTrackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
       ]
-      throw new ConnectorError(errorArr.join(' '));
+      throw errorGenerator ? errorGenerator(ConnectorError, errorArr.join(' ')) : new ConnectorError(errorArr.join(' '));
     }
 
     // The x and y coordinates of the line need to be with respect to the top left of document
@@ -272,13 +273,13 @@ export class Connector extends HTMLElement {
   }
 
   // CHANGE NOTE: Use requestAnimationFrame() loop instead of setInterval() to laglessly update endpoints
-  continuouslyUpdateEndpoints = () => {
-    this.updateEndpoints();
-    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
+  continuouslyUpdateEndpoints = (errorGenerator: (...args: Parameters<AnimBlock['generateError']>) => Error): void => {
+    this.updateEndpoints(errorGenerator);
+    this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
   }
 
-  setTrackingInterval(): void {
-    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
+  setTrackingInterval(errorGenerator: (...args: Parameters<AnimBlock['generateError']>) => Error): void {
+    this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
   }
 
   clearTrackingInterval (): void {
@@ -334,12 +335,12 @@ export class SetConnectorBlock extends AnimBlock {
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
     if (!(pointA?.[0] instanceof Element)) {
-      throw this.generateError(Error, `Point A element must not be null`);
+      throw this.generateError(InvalidElementError, `Point A element must not be null`);
     }
     if (!(pointB?.[0] instanceof Element)) {
-      throw this.generateError(Error, `Point B element must not be null`);
+      throw this.generateError(InvalidElementError, `Point B element must not be null`);
     }
 
     // TODO: Validate offsets?
@@ -389,7 +390,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
     this.connectorElem = connectorElem;
   }
 
@@ -397,7 +398,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval();
+      this.connectorElem.setTrackingInterval(this.generateError);
     }
   }
 
@@ -421,7 +422,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
 
     this.connectorElem = connectorElem;
   }
@@ -433,7 +434,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval();
+      this.connectorElem.setTrackingInterval(this.generateError);
     }
   }
 

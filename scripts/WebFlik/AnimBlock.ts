@@ -3,6 +3,7 @@ import { AnimTimeline } from "./AnimTimeline.js";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { mergeArrays } from "./utils/helpers.js";
 import { EasingString, useEasing } from "./utils/easing.js";
+import { CommitStylesError, InvalidElementError } from "./utils/errors.js";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
@@ -27,15 +28,6 @@ type KeyframeTimingOptions = {
 }
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
-
-class CommitStylesError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'CommitStylesError';
-  }
-}
-
-
 
 type Segment = [
   endDelay: number,
@@ -575,7 +567,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
     
     if (!domElem) {
-      throw this.generateError(Error, `Element must not be null`);
+      throw this.generateError(InvalidElementError, `Element must not be null`);
     }
     
     // if empty bank was passed, generate a bank entry with a no-op animation
