@@ -497,10 +497,22 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  protected generateError<TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError {
+  public generateError<TError extends Error = Error>(error: TError): TError;
+  public generateError<TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError;
+  public generateError<TError extends Error = Error>(ErrorClassOrInstance: (new (message: string) => TError) | TError, msg: string = '<unspecified error>'): TError {
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
-    return new ErrorClass(
+    const postfix = (
+      `\n------------------------------------------------------------` +
+      `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
+      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
+      (parTim ? `\nTimeline: [Id: ${parTim.id}]`  : '')
+    );
+    if (ErrorClassOrInstance instanceof Error) {
+      ErrorClassOrInstance.message += postfix;
+      return ErrorClassOrInstance;
+    }
+    return new ErrorClassOrInstance(
       `\n${msg}` +
       `\n------------------------------------------------------------` +
       `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
