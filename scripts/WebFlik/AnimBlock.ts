@@ -496,12 +496,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   static id: number = 0;
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
-  protected category: string = '<unspecificed category>';
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  protected prefixErrorMsg(msg: string): string {
+  protected generateError<TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError {
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
-    return (
+    return new ErrorClass(
       `\n${msg}` +
       `\n------------------------------------------------------------` +
       `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
@@ -559,18 +558,19 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank) {
+  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank, protected category: string) {
+    this.id = AnimBlock.id++;
+    
     if (!domElem) {
-      throw new Error(`Element must not be null`); // TODO: Improve error message
+      throw this.generateError(Error, `Element must not be null`);
     }
     
     // if empty bank was passed, generate a bank entry with a no-op animation
     if (Object.keys(bank).length === 0) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
-    else if (!bank[animName]) { throw new Error(`Invalid ${this.category} animation name ${animName}`); }
+    else if (!bank[animName]) { throw this.generateError(Error, `Invalid ${this.category} animation name "${animName}"`); }
     else { this.bankEntry = bank[animName] as TBankEntry; }
 
     this.domElem = domElem;
-    this.id = AnimBlock.id++;
   }
 
   initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
@@ -755,7 +755,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           break;
   
         default:
-          throw new Error(`Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
+          throw this.generateError(Error, `Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
       }
     };
 
@@ -773,12 +773,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         catch (_) {
           // If forced commit is disabled, do not re-attempt to commit the styles; throw error instead.
           if (!this.commitStylesAttemptForcefully) {
-            // TODO: Add specifics about where exactly failure occured
-            rejecter(new CommitStylesError(this.prefixErrorMsg(
+            rejecter(this.generateError(CommitStylesError,
               `Cannot commit animation styles while element is not rendered.` +
               ` To attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true` +
               ` (however, if the element's ancestor is hidden, this will still fail).`
-            )));
+            ));
           }
 
           // If forced commit is enabled, attempt to override the hidden state and apply the style.
@@ -790,9 +789,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           }
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
-            rejecter(new CommitStylesError(this.prefixErrorMsg(
+            rejecter(this.generateError(CommitStylesError,
               `Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`
-            )));
+            ));
           }
         }
       }
@@ -832,7 +831,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       case "backward":
         rafMutators.backwardMutator();
         break;
-      default: throw new Error(`Something very wrong occured for there to be an error here.`);
+      default: throw this.generateError(Error, `Something very wrong occured for there to be an error here.`);
     }
 
     if (this.rafLoopsProgress === 1) { return; }
@@ -879,7 +878,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 }
 
 export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  protected category = 'entrance';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -902,7 +900,6 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  protected category = 'exit';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -925,7 +922,6 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
 }
 
 export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  protected category = 'emphasis';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
@@ -937,7 +933,6 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 }
 
 export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  protected category = 'translation';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',
@@ -952,16 +947,15 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
 
 export class ScrollBlock extends AnimBlock {
   scrollableElem: Element;
-  protected category = 'scroll';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
     };
   }
 
-  constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank) {
-    super(scrollableElem, animName, bank);
-    if (!scrollableElem) { throw new Error(this.prefixErrorMsg(`Something very wrong must have occured for this error to be thrown`)); }
+  constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank, category: string) {
+    super(scrollableElem, animName, bank, category);
+    if (!scrollableElem) { throw this.generateError(Error, `Something very wrong must have occured for this error to be thrown`); }
     this.scrollableElem = scrollableElem;
   }
 }

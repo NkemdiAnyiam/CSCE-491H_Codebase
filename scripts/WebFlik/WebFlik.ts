@@ -109,28 +109,28 @@ class _WebFlik {
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
       Entrance: function(domElem, animName, ...params) {
-        return new EntranceBlock(domElem, animName, combinedEntranceBank).initialize(...params);
+        return new EntranceBlock(domElem, animName, combinedEntranceBank, 'Entrance').initialize(...params);
       },
       Exit: function(domElem, animName, ...params) {
-        return new ExitBlock(domElem, animName, combinedExitBank).initialize(...params);
+        return new ExitBlock(domElem, animName, combinedExitBank, 'Exit').initialize(...params);
       },
       Emphasis: function(domElem, animName, ...params) {
-        return new EmphasisBlock(domElem, animName, combinedEmphasisBank).initialize(...params);
+        return new EmphasisBlock(domElem, animName, combinedEmphasisBank, 'Emphasis').initialize(...params);
       },
       Translation: function(domElem, animName, ...params) {
-        return new TranslationBlock(domElem, animName, combinedTranslationBank).initialize(...params);
+        return new TranslationBlock(domElem, animName, combinedTranslationBank, 'Translation').initialize(...params);
       },
       SetConnector: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
-        return new SetConnectorBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, connectorConfig).initialize([]);
+        return new SetConnectorBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Set Connector', connectorConfig).initialize([]);
       },
       DrawConnector: function(connectorElem, animName, ...params) {
-        return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank).initialize(...params);
+        return new DrawConnectorBlock(connectorElem, animName, combinedDrawConnectorBank, 'Draw Connector').initialize(...params);
       },
       EraseConnector: function(connectorElem, animName, ...params) {
-        return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank).initialize(...params);
+        return new EraseConnectorBlock(connectorElem, animName, combinedEraseConnectorBank, 'Erase Connector').initialize(...params);
       },
       Scroll: function(domElem, animName, ...params) {
-        return new ScrollBlock(domElem, animName, combinedScrollsBank).initialize(...params);
+        return new ScrollBlock(domElem, animName, combinedScrollsBank, 'scroll').initialize(...params);
       },
     } satisfies {
       Entrance: BlockCreator<typeof combinedEntranceBank, EntranceBlock>;

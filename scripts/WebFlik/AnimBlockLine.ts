@@ -313,8 +313,6 @@ export class SetConnectorBlock extends AnimBlock {
 
   connectorConfig: ConnectorConfig = {} as ConnectorConfig;
   previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
-
-  protected category = 'connector-setting';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
@@ -330,20 +328,22 @@ export class SetConnectorBlock extends AnimBlock {
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     animName: string,
     bank: IKeyframesBank,
+    category: string,
     connectorConfig: Partial<ConnectorConfig> = {},
     ) {
-    if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
+    super(connectorElem, animName, bank, category);
+
+    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
     if (!(pointA?.[0] instanceof Element)) {
-      throw new Error(`Point A element must not be null`); // TODO: Improve error message
+      throw this.generateError(Error, `Point A element must not be null`);
     }
     if (!(pointB?.[0] instanceof Element)) {
-      throw new Error(`Point B element must not be null`); // TODO: Improve error message
+      throw this.generateError(Error, `Point B element must not be null`);
     }
 
     // TODO: Validate offsets?
 
-    super(connectorElem, animName, bank);
 
     this.connectorElem = connectorElem;
     this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];
@@ -378,7 +378,6 @@ export class SetConnectorBlock extends AnimBlock {
 export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
-  protected category = 'connector-drawing';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -386,11 +385,11 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank) {
-    if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
+  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank, category: string) {
+    super(connectorElem, animName, bank, category);
 
-    super(connectorElem, animName, bank);
+    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
     this.connectorElem = connectorElem;
   }
 
@@ -411,7 +410,6 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
-  protected category = 'connector-erasing';
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -419,11 +417,12 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank) {
-    if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw new Error('Must pass Connector element'); }
+  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank, category: string) {
+    super(connectorElem, animName, bank, category);
 
-    super(connectorElem, animName, bank);
+    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
+    if (!(connectorElem instanceof Connector)) { throw this.generateError(Error, 'Must pass Connector element'); }
+
     this.connectorElem = connectorElem;
   }
 
