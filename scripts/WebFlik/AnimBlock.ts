@@ -497,9 +497,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  public generateError<TError extends Error = Error>(error: TError): TError;
-  public generateError<TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError;
-  public generateError<TError extends Error = Error>(ErrorClassOrInstance: (new (message: string) => TError) | TError, msg: string = '<unspecified error>'): TError {
+  public generateError: {
+    <TError extends Error = Error>(error: TError): TError;
+    <TError extends Error = Error>(ErrorClass: new (message: string) => TError, msg: string): TError;
+  } = <TError extends Error = Error>(ErrorClassOrInstance: (new (message: string) => TError) | TError, msg: string = '<unspecified error>'): TError => {
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
     const postfix = (
