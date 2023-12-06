@@ -348,8 +348,7 @@ export class WebFlikAnimation extends Animation {
   ): void {
     // if the animation is already finished in the given direction, do nothing
     if (this.isFinished && this.direction === direction) {
-      // TODO: Add more details
-      console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+      console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message);
       return;
     }
     
@@ -376,8 +375,7 @@ export class WebFlikAnimation extends Animation {
         // but if the proceeding segement has already been reached in the loop, then the time at which the new promises
         // should be awaited as already passed
         if (currSegment[5].activated) {
-          // TODO: Add block location
-          console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message);
           return;
         }
 
@@ -397,7 +395,7 @@ export class WebFlikAnimation extends Animation {
       if (endDelay === currSegment[0]) {
         // but if curr segment is already completed, the time to await the promises has already passed
         if (currSegment[5].completed) {
-          console.warn(`New ${awaitedType}s added to time position ${timePosition} will not be considered because the time has already passed.`);
+          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message)
           return;
         }
 
@@ -509,7 +507,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  public generateError: ErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
+  protected generateError: ErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
     const postfix = (
