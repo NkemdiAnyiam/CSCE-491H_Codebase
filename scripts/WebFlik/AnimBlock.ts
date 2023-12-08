@@ -512,15 +512,15 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const parTim = this.parentTimeline;
     const postfix = (
       `\n------------------------------------------------------------` +
-      `\nBlock: [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
-      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
-      (parTim ? `\nTimeline: [Id: ${parTim.id}]`  : '')
+      (parTim ? `\nTimeline: [Id: ${parTim.id}] [At Index: ${parTim.findSequenceIndex(parSeq!)}]`  : '') +
+      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [At Index: ${parSeq.findBlockIndex(this)}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
+      `\nBlock:    [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]`
     );
     if (ErrorClassOrInstance instanceof Error) {
       ErrorClassOrInstance.message += postfix;
       return ErrorClassOrInstance;
     }
-    return new ErrorClassOrInstance(`\n${msg}` + postfix);
+    return new ErrorClassOrInstance(`${msg}` + postfix);
   }
 
   parentSequence?: AnimSequence;

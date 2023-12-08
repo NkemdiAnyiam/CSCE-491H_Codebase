@@ -50,6 +50,10 @@ export class AnimTimeline {
     return this;
   }
 
+  findSequenceIndex(animSequence: AnimSequence): number {
+    return this.animSequences.findIndex((_animSequence) => _animSequence === animSequence);
+  }
+
   // CHANGE NOTE: sequences, and blocks now have base playback rates that are then compounded by parents
   setPlaybackRate(rate: number): AnimTimeline {
     this.playbackRate = rate;

@@ -96,6 +96,10 @@ export class AnimSequence implements AnimSequenceConfig {
     return this;
   }
 
+  findBlockIndex(animBlock: AnimBlock): number {
+    return this.animBlocks.findIndex((_animBlock) => _animBlock === animBlock);
+  }
+
   // plays each animBlock contained in this AnimSequence instance in sequential order
   async play(): Promise<void> {
     this.commit();
