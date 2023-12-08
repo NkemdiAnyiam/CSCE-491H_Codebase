@@ -124,7 +124,7 @@ export class WebFlikAnimation extends Animation {
         super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
         break;
       default:
-        throw this.errorGenerator(Error, `Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+        throw this.errorGenerator(RangeError, `Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
     }
   }
   
@@ -242,7 +242,7 @@ export class WebFlikAnimation extends Animation {
         resetForwardPhases();
         resetBackwardPhases();
         break;
-      default: throw this.errorGenerator(Error, `Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
+      default: throw this.errorGenerator(RangeError, `Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
     }
   }
 
@@ -270,7 +270,7 @@ export class WebFlikAnimation extends Animation {
         else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
       if (phaseTimePosition > phaseDuration) {
-        if (typeof timePosition === 'number') { throw this.errorGenerator(Error, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
         else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
 
@@ -581,7 +581,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // if empty bank was passed, generate a bank entry with a no-op animation
     if (Object.keys(bank).length === 0) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
-    else if (!bank[animName]) { throw this.generateError(Error, `Invalid ${this.category} animation name "${animName}"`); }
+    else if (!bank[animName]) { throw this.generateError(RangeError, `Invalid ${this.category} animation name "${animName}"`); }
     else { this.bankEntry = bank[animName] as TBankEntry; }
 
     this.domElem = domElem;
@@ -607,21 +607,30 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     if (this.bankEntry.generateKeyframes) {
       // if pregenerating, produce F and B frames now
       if (this.pregeneratesKeyframes) {
-        [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
+        try {
+          [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
+        }
+        catch (err: unknown) { throw this.generateError(err as Error); }
       }
     }
     else if (this.bankEntry.generateKeyframeGenerators) {
-      const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
-      this.keyframesGenerators = {forwardGenerator, backwardGenerator};
-      // if pregenerating, produce F and B frames now
-      if (this.pregeneratesKeyframes) {
-        [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator?.()];
+      try {
+        const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
+        this.keyframesGenerators = {forwardGenerator, backwardGenerator};
+        // if pregenerating, produce F and B frames now
+        if (this.pregeneratesKeyframes) {
+          [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator?.()];
+        }
       }
+      catch (err: unknown) { throw this.generateError(err as Error); }
     }
     else {
       if (this.pregeneratesKeyframes) {
-        const [forwardMutator, backwardMutator] = this.bankEntry.generateRafMutators.call(this, ...animArgs);
-        this.rafMutators = { forwardMutator, backwardMutator };
+        try {
+          const [forwardMutator, backwardMutator] = this.bankEntry.generateRafMutators.call(this, ...animArgs);
+          this.rafMutators = { forwardMutator, backwardMutator };
+        }
+        catch (err: unknown) { throw this.generateError(err as Error); }
       }
     }
 
@@ -729,20 +738,23 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // ...can function properly.
           // TODO: Handle case where only one keyframe is provided
           if (!this.pregeneratesKeyframes) {
-            // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
-            if (bankEntry.generateKeyframes) {
-              let [forwardFrames, backwardFrames] = bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
-              animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+            try {
+              // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
+              if (bankEntry.generateKeyframes) {
+                let [forwardFrames, backwardFrames] = bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+                animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
+              }
+              // if generateKeyframeGenerators() is the method of generation, generate f-ward frames
+              else if (bankEntry.generateKeyframeGenerators) {
+                animation.setForwardFrames(this.keyframesGenerators!.forwardGenerator());
+              }
+              // if generateRafMutators() is the method of generation, generate f-ward and b-ward mutators
+              else if (bankEntry.generateRafMutators) {
+                const [forwardMutator, backwardMutator] = bankEntry.generateRafMutators.call(this, ...this.animArgs);
+                this.rafMutators = { forwardMutator, backwardMutator };
+              }
             }
-            // if generateKeyframeGenerators() is the method of generation, generate f-ward frames
-            else if (bankEntry.generateKeyframeGenerators) {
-              animation.setForwardFrames(this.keyframesGenerators!.forwardGenerator());
-            }
-            // if generateRafMutators() is the method of generation, generate f-ward and b-ward mutators
-            else if (bankEntry.generateRafMutators) {
-              const [forwardMutator, backwardMutator] = bankEntry.generateRafMutators.call(this, ...this.animArgs);
-              this.rafMutators = { forwardMutator, backwardMutator };
-            }
+            catch (err: unknown) { throw this.generateError(err as Error); }
           }
 
           if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
@@ -757,20 +769,23 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           this.domElem.classList.remove(...this.classesToAddOnFinish);
 
           if (!this.pregeneratesKeyframes) {
-            if (bankEntry.generateKeyframes) {
-              // do nothing (backward keyframes would have already been set during forward direction)
+            try {
+              if (bankEntry.generateKeyframes) {
+                // do nothing (backward keyframes would have already been set during forward direction)
+              }
+              else if (bankEntry.generateKeyframeGenerators) {
+                const {forwardGenerator, backwardGenerator} = this.keyframesGenerators!;
+                this.animation.setBackwardFrames(backwardGenerator?.() ?? forwardGenerator(), backwardGenerator ? false : true);
+              }
             }
-            else if (bankEntry.generateKeyframeGenerators) {
-              const {forwardGenerator, backwardGenerator} = this.keyframesGenerators!;
-              this.animation.setBackwardFrames(backwardGenerator?.() ?? forwardGenerator(), backwardGenerator ? false : true);
-            }
+            catch (err: unknown) { throw this.generateError(err as Error); }
           }
 
           if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
           break;
   
         default:
-          throw this.generateError(Error, `Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
+          throw this.generateError(RangeError, `Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
       }
     };
 
@@ -839,15 +854,18 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
   private loop = () => {
     const rafMutators = this.rafMutators!;
-    switch(this.animation.direction) {
-      case "forward":
-        rafMutators.forwardMutator();
-        break;
-      case "backward":
-        rafMutators.backwardMutator();
-        break;
-      default: throw this.generateError(Error, `Something very wrong occured for there to be an error here.`);
+    try {
+      switch(this.animation.direction) {
+        case "forward":
+          rafMutators.forwardMutator();
+          break;
+        case "backward":
+          rafMutators.backwardMutator();
+          break;
+        default: throw this.generateError(Error, `Something very wrong occured for there to be an error here.`);
+      }
     }
+    catch (err: unknown) { throw this.generateError(err as Error); }
 
     if (this.rafLoopsProgress === 1) { return; }
     requestAnimationFrame(this.loop);
