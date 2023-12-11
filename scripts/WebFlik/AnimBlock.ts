@@ -15,7 +15,7 @@ type CustomKeyframeEffectOptions = {
   classesToAddOnFinish: string[];
   classesToAddOnStart: string[];
   classesToRemoveOnFinish: string[];
-  classesToRemoveOnStart: string[]; // TODO: Consider order of addition/removal
+  classesToRemoveOnStart: string[];
   pregeneratesKeyframes: boolean;
 }
 
@@ -130,7 +130,7 @@ export class WebFlikAnimation extends Animation {
   
   async play(): Promise<void> {
     // If animation is already in progress and is just paused, resume the animation directly.
-    // TODO: might need to rework this considering unpause()
+    // TODO: might need to rework this considering unpause(). What happens if unPause() while not in progress?
     if (super.playState === 'paused') {
       super.play();
       return;
@@ -546,7 +546,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   classesToAddOnFinish: string[] = [];
   classesToAddOnStart: string[] = [];
   classesToRemoveOnFinish: string[] = [];
-  classesToRemoveOnStart: string[] = []; // TODO: Consider order of addition/removal
+  classesToRemoveOnStart: string[] = [];
   pregeneratesKeyframes: boolean = false;
   keyframesGenerators?: {
     forwardGenerator: () => Keyframe[];

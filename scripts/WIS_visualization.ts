@@ -11,7 +11,6 @@ import { Job } from './Job.js';
 // (\s*)(\[ 'line)
 
 
-// TODO: Put somewhere better
 const animTimeline = new AnimTimeline({debugMode: true});
 
 const {
@@ -587,8 +586,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown: Connector, parent
 function animateJobCard(jobCard: HTMLElement): any;
 function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, parentArrowSource?: Element, aboveBullet?: Element) {
   if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
-  // TODO: Add error-checking?
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
+  if (isNaN(SJNum)) { throw new Error(`Invalid SJ number found while reading from a jobCard.dataset.sjnum`); }
   const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
   const SJNumLabel = jobCardContent.querySelector('.job-card-SJ-num-label');
   const MAccessContainer = jobCard.querySelector('.M-access-container');
@@ -677,7 +676,6 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
     if (parentArrowDown && parentArrowSource && aboveBullet) {
       const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as Connector;
       animSequence.addBlocks(
-        // TODO: need to address the fact that jobCard needs to be revealed first or SJNumLabel's position won't be available below
         Entrance(jobCard, '~fade-in', [], {startsNextBlock: true}),
         SetConnector(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
         DrawConnector(parentArrowDown, '~trace', ['from-A'], {startsNextBlock: true}),
@@ -1052,7 +1050,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: Connector, paren
       tag: 'replace formula container contents',
     })
     .addBlocks(
-      // TODO: Address
+      // // TODO: Address the fact that line updation needs to be on both sides of the exit+entrance combo
       // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
 
       Exit(formulaComputation, '~wipe', ['from-right']),
