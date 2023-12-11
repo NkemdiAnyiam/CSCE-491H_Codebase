@@ -195,7 +195,7 @@ export class Connector extends HTMLElement {
     this.mask = this.gBody.querySelector('mask') as SVGMaskElement;
   }
 
-  updateEndpoints = (errorGenerator?: ErrorGenerator): void => {
+  updateEndpoints = (/*errorGenerator?: ErrorGenerator*/): void => {
     const pointA = this.pointA;
     const pointB = this.pointB;
     if (!pointA || !pointB) { return; }
@@ -204,16 +204,24 @@ export class Connector extends HTMLElement {
     
     // CHANGE NOTE: Use offsetParent instead of direct parent to properly get nearest positioned ancestor
     const offsetParent = this.offsetParent;
+
+    // if offsetParent is null, then the connector or an ancestory is invisible (so no point in updating)
     if (!offsetParent) {
-      this.clearTrackingInterval();
-      // TODO: Add specifics about where exactly failure occured
-      const errorArr = [
-        `Cannot call updateEndpoints() while the connector or its parent is invisible.`,
-        this.pointTrackingEnabled ? `\nThis connector was also tracking its endpoints, so we disabled it.` : '',
-        this.pointTrackingEnabled ? `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is going to be hidden; this safely pauses the tracking.` : '',
-        this.pointTrackingEnabled ? `If this connector does not need to continuously update its endpoints, try setting its 'trackEndpoints' config setting to false.` : '',
-      ]
-      throw errorGenerator ? errorGenerator(ConnectorError, errorArr.join(' ')) : new ConnectorError(errorArr.join(' '));
+      return;
+      // this.clearTrackingInterval();
+      // const parentElement = this.parentElement;
+      // const parentInvisible = parentElement && !parentElement.offsetParent
+      //   && (parentElement !== document.documentElement)
+      //   && (parentElement !== document.querySelector('body'))
+      //   && (getComputedStyle(parentElement).position !== 'fixed');
+      // const errorArr = [
+      //   `Cannot call updateEndpoints() while the connector or its parent element is invisible.${parentInvisible ? ` In this case, the parent was found to be hidden.` : ''}`,
+      //   this.pointTrackingEnabled ? `\nThis connector also has points-tracking enabled (which allows it to continuously update its endpoings), so we have disabled it.` : '',
+      //   this.pointTrackingEnabled ? `If this connector does not need to continuously update its endpoints, you can set its 'pointTrackingEnabled' config setting to false to prevent this error.` : '',
+      //   this.pointTrackingEnabled && parentInvisible ?
+      //     `If this connector needs to continuously update its endpoints, make sure to Exit it if its parent is about to be hidden—this safely pauses the tracking until the connector is visible again.` : '',
+      // ]
+      // throw errorGenerator ? errorGenerator(ConnectorError, errorArr.join(' ')) : new ConnectorError(errorArr.join(' '));
     }
 
     // The x and y coordinates of the line need to be with respect to the top left of document
@@ -273,13 +281,13 @@ export class Connector extends HTMLElement {
   }
 
   // CHANGE NOTE: Use requestAnimationFrame() loop instead of setInterval() to laglessly update endpoints
-  continuouslyUpdateEndpoints = (errorGenerator: ErrorGenerator): void => {
-    this.updateEndpoints(errorGenerator);
-    this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
+  continuouslyUpdateEndpoints = (): void => {
+    this.updateEndpoints();
+    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
-  setTrackingInterval(errorGenerator: ErrorGenerator): void {
-    this.continuousTrackingReqId = window.requestAnimationFrame(() => this.continuouslyUpdateEndpoints(errorGenerator));
+  setTrackingInterval(): void {
+    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
   clearTrackingInterval (): void {
@@ -398,7 +406,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval(this.generateError);
+      this.connectorElem.setTrackingInterval();
     }
   }
 
@@ -434,7 +442,7 @@ export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyfram
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval(this.generateError);
+      this.connectorElem.setTrackingInterval();
     }
   }
 
