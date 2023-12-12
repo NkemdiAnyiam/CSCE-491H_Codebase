@@ -741,7 +741,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
             try {
               // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
               if (bankEntry.generateKeyframes) {
-                let [forwardFrames, backwardFrames] = bankEntry.generateKeyframes.call(this, ...this.animArgs); // TODO: extract generateKeyframes
+                let [forwardFrames, backwardFrames] = bankEntry.generateKeyframes.call(this, ...this.animArgs);
                 animation.setForwardAndBackwardFrames(forwardFrames, backwardFrames ?? [...forwardFrames], backwardFrames ? false : true);
               }
               // if generateKeyframeGenerators() is the method of generation, generate f-ward frames
