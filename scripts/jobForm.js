@@ -1,10 +1,9 @@
 import { stoi, stof, enableButton, disableButton, getRandInt, getRandIntRange } from './utility.js';
 import { Job } from './Job.js';
 import { generateVisualization } from "./WIS_visualization.js";
-import { AnimBlock } from './WebFlik/AnimBlock.js';
 import { WebFlik } from './WebFlik/WebFlik.js';
 
-const {Entrance, Exit} = WebFlik.createBanks({});
+const {Exit} = WebFlik.createBanks({});
 
 
 /****************************************/
@@ -216,10 +215,10 @@ export function createForm_multiInput({maxNumJobs, maxWeight, maxTime}) {
 /* TEXTAREA FUNCTIONS */
 /****************************************/
 export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
-  const jobFormEl = document.querySelector('.job-form--textarea') as HTMLFormElement;
+  const jobFormEl = document.querySelector('.job-form--textarea');
   const textarea = jobFormEl.querySelector('.job-form__textarea--user');
   const generateButton = jobFormEl.querySelector('.job-form__button--submit');
-  const jobTuplesValues: [startTime: number, finishTime: number, weight: number][] = []; // holds arrays of the form [startTime, finishTime, weight]
+  const jobTuplesValues = []; // holds arrays of the form [startTime, finishTime, weight]
 
   // provide an initial job entry in textarea
   textarea.value = `{0, ${maxTime}, 1}`;
@@ -324,14 +323,14 @@ export function createForm_textarea({maxNumJobs, maxWeight, maxTime}) {
     return {startTime, finishTime, weight, isValid};
   }
 
-  function submit(e: SubmitEvent) {
+  function submit(e) {
     e.preventDefault();
     if (jobFormEl.checkValidity()) {
-      const jobsUnsorted: Job[] = [];
+      const jobsUnsorted = [];
       jobTuplesValues.forEach(([startTime, finishTime, weight]) => jobsUnsorted.push(new Job(startTime, finishTime, weight)));
 
       disableForm();
-      const mainMenuEl = document.querySelector('.main-menu')!;
+      const mainMenuEl = document.querySelector('.main-menu');
       const fadeoutMainMenu = Exit(mainMenuEl, '~fade-out', [], {duration: 375});
       fadeoutMainMenu.play()
         .then(() => {
