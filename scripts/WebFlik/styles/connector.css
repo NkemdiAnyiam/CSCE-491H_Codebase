@@ -1,0 +1,45 @@
+:host {
+  --a-marker-opacity: 1;
+  --b-marker-opacity: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: initial;
+  line-height: 0 !important;
+  overflow: visible !important;
+  visibility: hidden !important;
+}
+
+.connector__svg {
+  visibility: hidden !important;
+  overflow: visible !important;
+}
+       
+.connector__g-body {
+  visibility: initial;
+}
+
+.connector__mask-group {
+  stroke: white !important;
+  fill: white !important;
+}
+
+.connector__layer-group {
+          
+}
+
+.connector__line {
+  fill: none;
+}
+
+.connector__line--mask {
+  stroke-dashoffset: 0 !important;
+}
+
+.connector__line--layer {
+  stroke-dasharray: 1 !important;
+}
+
+marker {
+  stroke: none;
+}

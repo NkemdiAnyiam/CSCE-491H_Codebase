@@ -75,53 +75,12 @@ export class Connector extends HTMLElement {
 
     // TODO: Improve marker sizing configuration
     const htmlString = `
-      <style>
-        :host {
-          --a-marker-opacity: 1;
-          --b-marker-opacity: 1;
-          position: absolute;
-          top: 0;
-          left: 0;
-          display: initial;
-          line-height: 0 !important;
-          overflow: visible !important;
-          visibility: hidden !important;
-        }
-        
-        .connector__svg {
-          visibility: hidden !important;
-          overflow: visible !important;
-        }
-        
-        .connector__g-body {
-          visibility: initial;
-        }
-        
-        .connector__mask-group {
-          stroke: white !important;
-          fill: white !important;
-        }
-        
-        .connector__layer-group {
-          
-        }
+      <link rel="stylesheet" href="/scripts/WebFlik/styles/connector.css">
 
-        .connector__line {
-          fill: none;
-        }
-        
-        .connector__line--mask {
-          stroke-dashoffset: 0 !important;
-        }
-        
+      <style>
         .connector__line--layer {
-          stroke-dasharray: 1 !important;
           marker-start: url(#${markerIdPrefix}-a--layer);
           marker-end: url(#${markerIdPrefix}-b--layer);
-        }
-        
-        marker {
-          stroke: none;
         }
 
         #${markerIdPrefix}-a--layer {
