@@ -2,9 +2,25 @@ import { AnimSequence } from "./AnimSequence.js";
 
 type AnimTimelineConfig = {
   debugMode: boolean;
+  timelineName: string;
 };
 
 type SequenceOperation = (sequence: AnimSequence) => void;
+
+// playback button class constants
+const PRESSED = 'playback-button--pressed';
+const PRESSED2 = 'playback-button--pressed--alt-color';
+const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
+const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStepping'; // disables pointer
+const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
+const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
+
+// detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
+const isLeftClickOrKey = (event: MouseEvent) => event.which === 1 || event.which === undefined;
+
+let holdingFastKey = false;
+let holdingFastButton = false;
+
 
 class WbfkButton extends HTMLElement {
   type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
@@ -41,18 +57,17 @@ class WbfkButton extends HTMLElement {
       <style>
       </style>
 
-      <div class="playback-button playback-button--backward playback-button--disabledFromTimelineEdge">
-        <svg class="playback-button__symbol" xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
-          <rect width="81.83" height="81.83" transform="translate(81.83 81.83) rotate(-180)" fill="none"/>
-          ${buttonShapeHtmlStr}
-        </svg>
-      </div>
+      <svg class="playback-button__symbol" xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+        <rect width="81.83" height="81.83" transform="translate(81.83 81.83) rotate(-180)" fill="none"/>
+        ${buttonShapeHtmlStr}
+      </svg>
     `;
 
     const template = document.createElement('template');
     template.innerHTML = htmlString;
     const element = template.content.cloneNode(true);
     shadow.append(element);
+    this.classList.add('playback-button');
   }
 }
 customElements.define('wbfk-button', WbfkButton);
@@ -74,6 +89,12 @@ export class AnimTimeline {
   // CHANGE NOTE: AnimTimeline now stores references to in-progress sequences and also does not act directly on individual animations
   inProgressSequences: Map<number, AnimSequence> = new Map();
 
+  forwardButton: WbfkButton | null = null;
+  pauseButton: WbfkButton | null = null;
+  backwardButton: WbfkButton | null = null;
+  fastForwardButton: WbfkButton | null = null;
+  toggleSkippingButton: WbfkButton | null = null;
+
   get numSequences(): number { return this.animSequences.length; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
   get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
@@ -87,8 +108,104 @@ export class AnimTimeline {
 
     this.config = {
       debugMode: false,
+      timelineName: '',
       ...config,
     };
+
+    this.setupPlaybackControls();
+  }
+
+  setupPlaybackControls() {
+    const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-forward"]`);
+    console.log(forwardButton)
+    const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-backward"]`);
+    const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[type="pause"]`);
+    const fastForwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="fast-forward"]`);
+    const toggleSkippingButton: WbfkButton | null = document.querySelector(`wbfk-button[type="toggle-skipping"]`);
+
+    forwardButton?.addEventListener('mousedown', e => {
+      if (isLeftClickOrKey(e)) {
+        if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
+        
+        forwardButton.classList.add(PRESSED);
+        backwardButton?.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
+        backwardButton?.classList.add(DISABLED_FROM_STEPPING);
+        forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+  
+        this.step('forward')
+        .then(() => {
+          forwardButton.classList.remove(PRESSED);
+          forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+          backwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+          if (this.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+        });
+      }
+    });
+
+    backwardButton?.addEventListener('mousedown', e => {
+      if (isLeftClickOrKey(e)) {
+        if (this.getIsStepping() || this.getIsPaused() || this.atBeginning) { return; }
+  
+        backwardButton.classList.add(PRESSED);
+        forwardButton?.classList.remove(DISABLED_FROM_EDGE);
+        forwardButton?.classList.add(DISABLED_FROM_STEPPING);
+        backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+  
+        this.step('backward')
+        .then(() => {
+          backwardButton.classList.remove(PRESSED);
+          forwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+          backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+          if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+        });
+      }
+    });
+
+    pauseButton?.addEventListener('mousedown', e => {
+      if (isLeftClickOrKey(e)) {
+        if (this.togglePause()) {
+          pauseButton.classList.add(PRESSED);
+          forwardButton?.classList.add(DISABLED_FROM_PAUSE);
+          backwardButton?.classList.add(DISABLED_FROM_PAUSE);
+        }
+        else {
+          pauseButton.classList.remove(PRESSED);
+          forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
+          backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
+        }
+      }
+    });
+
+    fastForwardButton?.addEventListener('mousedown', e => {
+      if (isLeftClickOrKey(e)) {
+        if (e.which === 1) { holdingFastButton = true };
+        fastForwardButton.classList.add(PRESSED2);
+        this.setPlaybackRate(7);
+        document.addEventListener('mouseup', () => {
+          holdingFastButton = false;
+          if (!(holdingFastButton || holdingFastKey)) {
+            fastForwardButton.classList.remove(PRESSED2);
+            this.setPlaybackRate(1);
+          }
+        }, {once: true});
+      }
+    });
+
+    toggleSkippingButton?.addEventListener('mousedown', e => {
+      if (isLeftClickOrKey(e)) {
+        if (this.toggleSkipping())
+          { toggleSkippingButton.classList.add(PRESSED); }
+        else
+          { toggleSkippingButton.classList.remove(PRESSED); }
+      }
+    });
+
+    this.forwardButton = forwardButton;
+    this.backwardButton = backwardButton;
+    this.backwardButton?.classList.add(DISABLED_FROM_EDGE);
+    this.pauseButton = pauseButton;
+    this.fastForwardButton = fastForwardButton;
+    this.toggleSkippingButton = toggleSkippingButton;
   }
 
   addSequences(...animSequences: AnimSequence[]): AnimTimeline {

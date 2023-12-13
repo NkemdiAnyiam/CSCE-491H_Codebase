@@ -1,4 +1,5 @@
 export const setupPlaybackControls = (animTimeline) => {
+  return;
   // playback buttons
   const forwardButton = document.querySelector('.playback-button--forward');
   const backwardButton = document.querySelector('.playback-button--backward');
