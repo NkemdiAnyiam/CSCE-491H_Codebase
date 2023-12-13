@@ -6,6 +6,57 @@ type AnimTimelineConfig = {
 
 type SequenceOperation = (sequence: AnimSequence) => void;
 
+class WbfkButton extends HTMLElement {
+  type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
+
+  constructor() {
+    super();
+    const shadow = this.attachShadow({mode: 'open'});
+    
+    const type = this.getAttribute('type') as typeof this.type;
+    let buttonShapeHtmlStr: string;
+    switch(type) {
+      case "step-forward":
+        buttonShapeHtmlStr = `<polygon points="22.468 81.83 67.404 40.915 22.468 0 22.468 81.83"/>`;
+        break;
+      case "step-backward":
+        buttonShapeHtmlStr = `<polygon points="59.362 81.83 14.426 40.915 59.362 0 59.362 81.83"/>`;
+        break;
+      case "pause":
+        buttonShapeHtmlStr = `<path d="M13.753,0h17.43V81.83H13.753ZM49.974,81.83H67.4V0H49.974Z"/>`;
+        break;
+      case "fast-forward":
+        buttonShapeHtmlStr = `<path d="M0,0,36.936,40.915,0,81.83ZM44.936,81.83,81.872,40.915,44.936,0Z"/>`;
+        break;
+      case "toggle-skipping":
+        buttonShapeHtmlStr = `<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
+        break;
+      default: throw new RangeError(`Invalid type attribute value ${type} for WebFlik playback button.`);
+    }
+    this.type = type;
+
+    const htmlString = `
+      <link rel="stylesheet" href="/scripts/WebFlik/styles/playback-buttons.css">
+
+      <style>
+      </style>
+
+      <div class="playback-button playback-button--backward playback-button--disabledFromTimelineEdge">
+        <svg class="playback-button__symbol" xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
+          <rect width="81.83" height="81.83" transform="translate(81.83 81.83) rotate(-180)" fill="none"/>
+          ${buttonShapeHtmlStr}
+        </svg>
+      </div>
+    `;
+
+    const template = document.createElement('template');
+    template.innerHTML = htmlString;
+    const element = template.content.cloneNode(true);
+    shadow.append(element);
+  }
+}
+customElements.define('wbfk-button', WbfkButton);
+
 export class AnimTimeline {
   static id = 0;
 

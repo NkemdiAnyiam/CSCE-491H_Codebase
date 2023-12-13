@@ -1,0 +1,65 @@
+.playback-button {
+  width: 8rem;
+  height: 8rem;
+  display: inline-block;
+  background-color: var(--color-gray-darker);
+  padding: 0.5rem;
+
+  box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
+  transform: scale(1);
+  transition: all 0.02s;
+
+  cursor: pointer;
+}
+
+.playback-button--disabledPointerFromPause,
+.playback-button--disabledPointerFromStepping {
+  cursor: not-allowed;
+}
+
+.playback-button--disabledFromTimelineEdge,
+.playback-button--disabledFromPause,
+.playback-button--disabledFromStepping {
+  background-color: var(--color-gray);
+  cursor: not-allowed;
+}
+
+.playback-button--pressed,
+.playback-button--pressed--alt-color {
+  transform: scale(0.90);
+  box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
+}
+
+.playback-button--pressed {
+  background-color: var(--color-red);
+}
+
+.playback-button--pressed--alt-color {
+  background-color: var(--color-green);
+}
+
+.playback-button--forward {
+  /* background-color: var(--color-yellow); */
+}
+
+.playback-button--pause {
+  /* background-color: var(--color-green); */
+}
+
+.playback-button--backward {
+  /* background-color: var(--color-red); */
+}
+
+.playback-button--enable-skipping {
+  
+}
+
+.playback-button--fast-forward {
+  margin-left: 16rem;
+}
+
+.playback-button__symbol {
+  width: 100%;
+  height: auto;
+  fill: var(--color-gray-lightest);
+}
