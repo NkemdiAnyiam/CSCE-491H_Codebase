@@ -19,11 +19,11 @@ const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 const isLeftClickOrKey = (event: MouseEvent) => event.which === 1 || event.which === undefined;
 
 let holdingFastKey = false;
-let holdingFastButton = false;
 
 
 class WbfkButton extends HTMLElement {
   type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
+  held: boolean = false;
 
   constructor() {
     super();
@@ -117,7 +117,6 @@ export class AnimTimeline {
 
   setupPlaybackControls() {
     const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-forward"]`);
-    console.log(forwardButton)
     const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-backward"]`);
     const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[type="pause"]`);
     const fastForwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="fast-forward"]`);
@@ -178,12 +177,12 @@ export class AnimTimeline {
 
     fastForwardButton?.addEventListener('mousedown', e => {
       if (isLeftClickOrKey(e)) {
-        if (e.which === 1) { holdingFastButton = true };
+        if (e.which === 1) { fastForwardButton.held = true; };
         fastForwardButton.classList.add(PRESSED2);
         this.setPlaybackRate(7);
         document.addEventListener('mouseup', () => {
-          holdingFastButton = false;
-          if (!(holdingFastButton || holdingFastKey)) {
+          fastForwardButton.held = false;
+          if (!(fastForwardButton.held || holdingFastKey)) {
             fastForwardButton.classList.remove(PRESSED2);
             this.setPlaybackRate(1);
           }
