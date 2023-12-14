@@ -72,7 +72,6 @@ class WbfkButton extends HTMLElement {
     template.innerHTML = htmlString;
     const element = template.content.cloneNode(true);
     shadow.append(element);
-    this.classList.add('playback-button');
 
     this.setUpListeners();
   }

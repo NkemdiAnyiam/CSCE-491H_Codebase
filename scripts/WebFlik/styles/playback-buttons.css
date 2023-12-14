@@ -1,4 +1,4 @@
-:host(.playback-button) {
+:host {
   width: 8rem;
   height: 8rem;
   display: inline-block;
