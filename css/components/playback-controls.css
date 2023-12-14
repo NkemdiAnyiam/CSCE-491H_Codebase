@@ -13,6 +13,6 @@
   gap: 6rem;
 }
 
-.playback-button--fast-forward {
+wbfk-button[type="fast-forward"] {
   /* margin-left: 16rem; */
 }

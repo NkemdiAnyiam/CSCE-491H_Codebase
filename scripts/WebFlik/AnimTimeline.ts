@@ -27,7 +27,7 @@ class WbfkButton extends HTMLElement {
     super();
     const shadow = this.attachShadow({mode: 'open'});
     
-    this.shortcut = this.getAttribute('shortcut')?.toLowerCase() ?? null;
+    this.shortcut = this.getAttribute('shortcut') ?? null;
     // TODO: fix type
     this.triggerMode = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
     this.setAttribute('trigger', this.triggerMode);
@@ -82,6 +82,8 @@ class WbfkButton extends HTMLElement {
     if (this.shortcut) {
       window.addEventListener('keydown', this.handleShortcutPress);
       window.addEventListener('keyup', this.handleShortcutRelease);
+      const typeTitleCase = this.type.split('-').map(stringFrag => stringFrag[0].toUpperCase()+stringFrag.slice(1)).join(' ');
+      this.title = `${typeTitleCase} (${this.triggerMode === 'hold' ? 'Hold ' : ''}${this.shortcut})`;
     }
     
     // handle button activation with mouse click
@@ -113,7 +115,7 @@ class WbfkButton extends HTMLElement {
   }
 
   private handleShortcutPress = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== this.shortcut) { return; }
+    if (e.key.toLowerCase() !== this.shortcut?.toLowerCase() && e.code !== this.shortcut) { return; }
     // if the key is held down and holding is not allowed, return
     if (e.repeat && !this.allowHolding) { return; }
 
@@ -127,7 +129,7 @@ class WbfkButton extends HTMLElement {
   }
 
   private handleShortcutRelease = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== this.shortcut) { return; }
+    if (e.key.toLowerCase() !== this.shortcut?.toLowerCase() && e.code !== this.shortcut) { return; }
     if (!this.shortcutHeld) { return; }
     this.shortcutHeld = false;
     if (this.mouseHeld) { return; }
