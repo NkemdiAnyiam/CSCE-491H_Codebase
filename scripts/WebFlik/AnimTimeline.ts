@@ -146,8 +146,9 @@ customElements.define('wbfk-button', WbfkButton);
 
 
 
-
-
+type PlaybackButtons = {
+  [key in `${'forward' | 'backward' | 'pause' | 'toggleSkipping' | 'fastForward'}Button`]: WbfkButton | null;
+};
 
 export class AnimTimeline {
   static id = 0;
@@ -166,11 +167,7 @@ export class AnimTimeline {
   // CHANGE NOTE: AnimTimeline now stores references to in-progress sequences and also does not act directly on individual animations
   inProgressSequences: Map<number, AnimSequence> = new Map();
 
-  forwardButton: WbfkButton | null = null;
-  pauseButton: WbfkButton | null = null;
-  backwardButton: WbfkButton | null = null;
-  fastForwardButton: WbfkButton | null = null;
-  toggleSkippingButton: WbfkButton | null = null;
+  playbackButtons: PlaybackButtons;
 
   get numSequences(): number { return this.animSequences.length; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
@@ -189,10 +186,10 @@ export class AnimTimeline {
       ...config,
     };
 
-    this.setupPlaybackControls();
+    this.playbackButtons = this.setupPlaybackControls();
   }
 
-  setupPlaybackControls() {
+  setupPlaybackControls(): typeof this.playbackButtons {
     const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-forward"]`);
     const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-backward"]`);
     const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[action="pause"]`);
@@ -235,6 +232,8 @@ export class AnimTimeline {
           if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
         });
       };
+
+      backwardButton.classList.add(DISABLED_FROM_EDGE);
     }
 
     if (pauseButton) {
@@ -280,12 +279,9 @@ export class AnimTimeline {
       };
     }
 
-    this.forwardButton = forwardButton;
-    this.backwardButton = backwardButton;
-    this.backwardButton?.classList.add(DISABLED_FROM_EDGE);
-    this.pauseButton = pauseButton;
-    this.fastForwardButton = fastForwardButton;
-    this.toggleSkippingButton = toggleSkippingButton;
+    return {
+      forwardButton, backwardButton, pauseButton, fastForwardButton, toggleSkippingButton,
+    };
   }
 
   addSequences(...animSequences: AnimSequence[]): AnimTimeline {
