@@ -9,15 +9,10 @@ type SequenceOperation = (sequence: AnimSequence) => void;
 
 // playback button class constants
 const PRESSED = 'playback-button--pressed';
-const PRESSED2 = 'playback-button--pressed--alt-color';
 const DISABLED_FROM_STEPPING = 'playback-button--disabledFromStepping';
 const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStepping'; // disables pointer
 const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
 const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
-
-// detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
-const isLeftClickOrKey = (event: MouseEvent) => event.which === 1 || event.which === undefined;
-
 
 class WbfkButton extends HTMLElement {
   type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
@@ -34,6 +29,7 @@ class WbfkButton extends HTMLElement {
     this.shortcut = this.getAttribute('shortcut')?.toLowerCase() ?? null;
     // TODO: fix type
     this.trigger = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
+    this.setAttribute('trigger', this.trigger);
     if (this.hasAttribute('allow-holding')) { this.allowHolding = true; }
     
     const type = this.getAttribute('type') as typeof this.type;
@@ -247,12 +243,12 @@ export class AnimTimeline {
 
     if (fastForwardButton) {
       fastForwardButton.activate = () => {
-        fastForwardButton.classList.add(PRESSED2);
+        fastForwardButton.classList.add(PRESSED);
         this.setPlaybackRate(7);
       };
       fastForwardButton.deactivate = () => {
         if (!(fastForwardButton.mouseHeld || fastForwardButton.shortcutHeld)) {
-          fastForwardButton.classList.remove(PRESSED2);
+          fastForwardButton.classList.remove(PRESSED);
           this.setPlaybackRate(1);
         }
       };

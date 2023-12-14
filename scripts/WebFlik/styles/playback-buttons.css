@@ -24,17 +24,16 @@
   cursor: not-allowed;
 }
 
-:host(.playback-button--pressed),
-:host(.playback-button--pressed--alt-color) {
+:host(.playback-button--pressed) {
   transform: scale(0.90);
   box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
 }
 
-:host(.playback-button--pressed) {
+:host(.playback-button--pressed[trigger="press"]) {
   background-color: var(--color-red);
 }
 
-:host(.playback-button--pressed--alt-color) {
+:host(.playback-button--pressed[trigger="hold"]) {
   background-color: var(--color-green);
 }
 
