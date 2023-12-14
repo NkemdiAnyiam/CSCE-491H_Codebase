@@ -15,7 +15,7 @@ const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disab
 const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 
 class WbfkButton extends HTMLElement {
-  type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
+  action: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
   mouseHeld: boolean = false;
   shortcutHeld: boolean = false;
   shortcut: KeyboardEvent['key'] | null;
@@ -33,10 +33,10 @@ class WbfkButton extends HTMLElement {
     this.setAttribute('trigger', this.triggerMode);
     if (this.hasAttribute('allow-holding')) { this.allowHolding = true; }
     
-    const type = this.getAttribute('type') as typeof this.type;
+    const action = this.getAttribute('action') as typeof this.action;
 
     let buttonShapeHtmlStr: string;
-    switch(type) {
+    switch(action) {
       case "step-forward":
         buttonShapeHtmlStr = `<polygon points="22.468 81.83 67.404 40.915 22.468 0 22.468 81.83"/>`;
         break;
@@ -52,9 +52,9 @@ class WbfkButton extends HTMLElement {
       case "toggle-skipping":
         buttonShapeHtmlStr = `<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
         break;
-      default: throw new RangeError(`Invalid type attribute value ${type} for WebFlik playback button.`);
+      default: throw new RangeError(`Invalid action attribute value ${action} for WebFlik playback button.`);
     }
-    this.type = type;
+    this.action = action;
 
     const htmlString = `
       <link rel="stylesheet" href="/scripts/WebFlik/styles/playback-buttons.css">
@@ -82,8 +82,8 @@ class WbfkButton extends HTMLElement {
     if (this.shortcut) {
       window.addEventListener('keydown', this.handleShortcutPress);
       window.addEventListener('keyup', this.handleShortcutRelease);
-      const typeTitleCase = this.type.split('-').map(stringFrag => stringFrag[0].toUpperCase()+stringFrag.slice(1)).join(' ');
-      this.title = `${typeTitleCase} (${this.triggerMode === 'hold' ? 'Hold ' : ''}${this.shortcut})`;
+      const actionTitleCase = this.action.split('-').map(stringFrag => stringFrag[0].toUpperCase()+stringFrag.slice(1)).join(' ');
+      this.title = `${actionTitleCase} (${this.triggerMode === 'hold' ? 'Hold ' : ''}${this.shortcut})`;
     }
     
     // handle button activation with mouse click
@@ -193,11 +193,11 @@ export class AnimTimeline {
   }
 
   setupPlaybackControls() {
-    const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-forward"]`);
-    const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="step-backward"]`);
-    const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[type="pause"]`);
-    const fastForwardButton: WbfkButton | null = document.querySelector(`wbfk-button[type="fast-forward"]`);
-    const toggleSkippingButton: WbfkButton | null = document.querySelector(`wbfk-button[type="toggle-skipping"]`);
+    const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-forward"]`);
+    const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-backward"]`);
+    const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[action="pause"]`);
+    const fastForwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="fast-forward"]`);
+    const toggleSkippingButton: WbfkButton | null = document.querySelector(`wbfk-button[action="toggle-skipping"]`);
 
     if (forwardButton) {
       forwardButton.activate = () => {

@@ -13,6 +13,6 @@
   gap: 6rem;
 }
 
-wbfk-button[type="fast-forward"] {
+wbfk-button[action="fast-forward"] {
   /* margin-left: 16rem; */
 }
