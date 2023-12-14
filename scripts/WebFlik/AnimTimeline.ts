@@ -28,13 +28,17 @@ class WbfkButton extends HTMLElement {
     const shadow = this.attachShadow({mode: 'open'});
     
     this.shortcutKey = this.getAttribute('shortcut') ?? null;
-    // TODO: fix type
-    this.triggerMode = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
-    this.setAttribute('trigger', this.triggerMode);
-    if (this.hasAttribute('allow-holding')) { this.allowHolding = true; }
+    this.allowHolding = this.hasAttribute('allow-holding');
+    const triggerMode = this.getAttribute('trigger') as typeof this.triggerMode ?? 'press';
+    switch(triggerMode) {
+      case "press": break;
+      case "hold": break;
+      default: throw new RangeError(`Invalid trigger attribute value ${triggerMode} for WebFlik playback button. Must be 'press' or 'hold'.`)
+    }
+    this.setAttribute('trigger', triggerMode);
+    this.triggerMode = triggerMode;
     
     const action = this.getAttribute('action') as typeof this.action;
-
     let buttonShapeHtmlStr: string;
     switch(action) {
       case "step-forward":
@@ -52,7 +56,7 @@ class WbfkButton extends HTMLElement {
       case "toggle-skipping":
         buttonShapeHtmlStr = `<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
         break;
-      default: throw new RangeError(`Invalid action attribute value ${action} for WebFlik playback button.`);
+      default: throw new RangeError(`Invalid action attribute value ${action} for WebFlik playback button. Must be 'step-forward', 'step-backward', 'pause', 'fast-forward', or 'toggle-skipping'.`);
     }
     this.action = action;
 
