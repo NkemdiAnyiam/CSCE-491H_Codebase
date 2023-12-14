@@ -19,8 +19,9 @@ class WbfkButton extends HTMLElement {
   mouseHeld: boolean = false;
   shortcutHeld: boolean = false;
   shortcut: KeyboardEvent['key'] | null;
-  trigger: 'press' | 'hold' = 'press';
+  triggerMode: 'press' | 'hold' = 'press';
   allowHolding: boolean = false;
+  active: boolean | null = null;
 
   constructor() {
     super();
@@ -28,8 +29,8 @@ class WbfkButton extends HTMLElement {
     
     this.shortcut = this.getAttribute('shortcut')?.toLowerCase() ?? null;
     // TODO: fix type
-    this.trigger = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
-    this.setAttribute('trigger', this.trigger);
+    this.triggerMode = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
+    this.setAttribute('trigger', this.triggerMode);
     if (this.hasAttribute('allow-holding')) { this.allowHolding = true; }
     
     const type = this.getAttribute('type') as typeof this.type;
@@ -89,13 +90,16 @@ class WbfkButton extends HTMLElement {
 
   }
 
-  activate = (): void => {};
-  deactivate = (): void => {};
+  activate: () => void = (): void => {};
+  deactivate?: () => void = (): void => {};
 
   private handleMousePress = (e: MouseEvent): void => {
     if (e.button !== 0) { return; } // only allow left mouse click
     this.mouseHeld = true;
     if (this.shortcutHeld) { return; }
+    if (this.triggerMode === 'press' && this.active === true && this.deactivate) {
+      return this.deactivate();
+    }
     this.activate();
   }
 
@@ -104,7 +108,8 @@ class WbfkButton extends HTMLElement {
     if (!this.mouseHeld) { return; }
     this.mouseHeld = false;
     if (this.shortcutHeld) { return; }
-    this.deactivate();
+    if (this.triggerMode !== 'hold') { return; }
+    this.deactivate?.();
   }
 
   private handleShortcutPress = (e: KeyboardEvent): void => {
@@ -115,6 +120,9 @@ class WbfkButton extends HTMLElement {
     e.preventDefault();
     this.shortcutHeld = true;
     if (this.mouseHeld) { return; }
+    if (this.triggerMode === 'press' && this.active === true && this.deactivate) {
+      return this.deactivate();
+    }
     this.activate();
   }
 
@@ -123,7 +131,8 @@ class WbfkButton extends HTMLElement {
     if (!this.shortcutHeld) { return; }
     this.shortcutHeld = false;
     if (this.mouseHeld) { return; }
-    this.deactivate();
+    if (this.triggerMode !== 'hold') { return; }
+    this.deactivate?.();
   }
 }
 customElements.define('wbfk-button', WbfkButton);
@@ -228,39 +237,45 @@ export class AnimTimeline {
 
     if (pauseButton) {
       pauseButton.activate = () => {
-        if (this.togglePause()) {
-          pauseButton.classList.add(PRESSED);
-          forwardButton?.classList.add(DISABLED_FROM_PAUSE);
-          backwardButton?.classList.add(DISABLED_FROM_PAUSE);
-        }
-        else {
-          pauseButton.classList.remove(PRESSED);
-          forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
-          backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
-        }
+        pauseButton.active = true;
+        pauseButton.classList.add(PRESSED);
+        forwardButton?.classList.add(DISABLED_FROM_PAUSE);
+        backwardButton?.classList.add(DISABLED_FROM_PAUSE);
+        this.togglePause(true);
+      };
+      pauseButton.deactivate = () => {
+        pauseButton.active = false;
+        pauseButton.classList.remove(PRESSED);
+        forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
+        backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
+        this.togglePause(false);
       };
     }
 
     if (fastForwardButton) {
       fastForwardButton.activate = () => {
+        fastForwardButton.active = true;
         fastForwardButton.classList.add(PRESSED);
         this.setPlaybackRate(7);
       };
       fastForwardButton.deactivate = () => {
-        if (!(fastForwardButton.mouseHeld || fastForwardButton.shortcutHeld)) {
-          fastForwardButton.classList.remove(PRESSED);
-          this.setPlaybackRate(1);
-        }
+        fastForwardButton.active = false;
+        fastForwardButton.classList.remove(PRESSED);
+        this.setPlaybackRate(1);
       };
     }
 
     if (toggleSkippingButton) {
       toggleSkippingButton.activate = () => {
-        if (this.toggleSkipping())
-          { toggleSkippingButton.classList.add(PRESSED); }
-        else
-          { toggleSkippingButton.classList.remove(PRESSED); }
+        toggleSkippingButton.classList.add(PRESSED);
+        toggleSkippingButton.active = true;
+        this.toggleSkipping(true);
       }
+      toggleSkippingButton.deactivate = () => {
+        toggleSkippingButton.classList.remove(PRESSED);
+        toggleSkippingButton.active = false;
+        this.toggleSkipping(false);
+      };
     }
 
     this.forwardButton = forwardButton;
