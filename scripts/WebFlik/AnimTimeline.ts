@@ -18,18 +18,26 @@ const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 // detects if a button was left-clicked (event.which === 1) or a mapped key was pressed (event.which === undefined)
 const isLeftClickOrKey = (event: MouseEvent) => event.which === 1 || event.which === undefined;
 
-let holdingFastKey = false;
-
 
 class WbfkButton extends HTMLElement {
   type: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
   held: boolean = false;
+  shortcutHeld: boolean = false;
+  shortcut: KeyboardEvent['key'] | null;
+  trigger: 'click' | 'hold' = 'click';
+  allowHolding: boolean = false;
 
   constructor() {
     super();
     const shadow = this.attachShadow({mode: 'open'});
     
+    this.shortcut = this.getAttribute('shortcut')?.toLowerCase() ?? null;
+    // TODO: fix type
+    this.trigger = this.getAttribute('trigger') as 'click' | 'hold' ?? 'click';
+    if (this.hasAttribute('allow-holding')) { this.allowHolding = true; }
+    
     const type = this.getAttribute('type') as typeof this.type;
+
     let buttonShapeHtmlStr: string;
     switch(type) {
       case "step-forward":
@@ -68,9 +76,31 @@ class WbfkButton extends HTMLElement {
     const element = template.content.cloneNode(true);
     shadow.append(element);
     this.classList.add('playback-button');
+
+    if (this.shortcut) {
+      window.addEventListener('keydown', this.handleShortcutPress);
+    }
+  }
+
+  handleShortcutPress = (e: KeyboardEvent) => {
+    if (e.key.toLowerCase() !== this.shortcut) { return; }
+    // if the key is held down and holding is not allowed, return
+    if (e.repeat && !this.allowHolding) { return; }
+    e.preventDefault();
+    this.dispatchEvent(new Event('mousedown'));
   }
 }
 customElements.define('wbfk-button', WbfkButton);
+
+
+
+
+
+
+
+
+
+
 
 export class AnimTimeline {
   static id = 0;
@@ -123,80 +153,75 @@ export class AnimTimeline {
     const toggleSkippingButton: WbfkButton | null = document.querySelector(`wbfk-button[type="toggle-skipping"]`);
 
     forwardButton?.addEventListener('mousedown', e => {
-      if (isLeftClickOrKey(e)) {
-        if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
-        
-        forwardButton.classList.add(PRESSED);
-        backwardButton?.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
-        backwardButton?.classList.add(DISABLED_FROM_STEPPING);
-        forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
-  
-        this.step('forward')
-        .then(() => {
-          forwardButton.classList.remove(PRESSED);
-          forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-          backwardButton?.classList.remove(DISABLED_FROM_STEPPING);
-          if (this.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
-        });
-      }
+      if (!isLeftClickOrKey(e)) { return; }
+      if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
+      
+      forwardButton.classList.add(PRESSED);
+      backwardButton?.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
+      backwardButton?.classList.add(DISABLED_FROM_STEPPING);
+      forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+
+      this.step('forward')
+      .then(() => {
+        forwardButton.classList.remove(PRESSED);
+        forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+        backwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+        if (this.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+      });
     });
 
     backwardButton?.addEventListener('mousedown', e => {
-      if (isLeftClickOrKey(e)) {
-        if (this.getIsStepping() || this.getIsPaused() || this.atBeginning) { return; }
-  
-        backwardButton.classList.add(PRESSED);
-        forwardButton?.classList.remove(DISABLED_FROM_EDGE);
-        forwardButton?.classList.add(DISABLED_FROM_STEPPING);
-        backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
-  
-        this.step('backward')
-        .then(() => {
-          backwardButton.classList.remove(PRESSED);
-          forwardButton?.classList.remove(DISABLED_FROM_STEPPING);
-          backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-          if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
-        });
-      }
+      if (!isLeftClickOrKey(e)) { return; }
+      if (this.getIsStepping() || this.getIsPaused() || this.atBeginning) { return; }
+
+      backwardButton.classList.add(PRESSED);
+      forwardButton?.classList.remove(DISABLED_FROM_EDGE);
+      forwardButton?.classList.add(DISABLED_FROM_STEPPING);
+      backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
+
+      this.step('backward')
+      .then(() => {
+        backwardButton.classList.remove(PRESSED);
+        forwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+        backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+        if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+      });
     });
 
     pauseButton?.addEventListener('mousedown', e => {
-      if (isLeftClickOrKey(e)) {
-        if (this.togglePause()) {
-          pauseButton.classList.add(PRESSED);
-          forwardButton?.classList.add(DISABLED_FROM_PAUSE);
-          backwardButton?.classList.add(DISABLED_FROM_PAUSE);
-        }
-        else {
-          pauseButton.classList.remove(PRESSED);
-          forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
-          backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
-        }
+      if (!isLeftClickOrKey(e)) { return; }
+      if (this.togglePause()) {
+        pauseButton.classList.add(PRESSED);
+        forwardButton?.classList.add(DISABLED_FROM_PAUSE);
+        backwardButton?.classList.add(DISABLED_FROM_PAUSE);
+      }
+      else {
+        pauseButton.classList.remove(PRESSED);
+        forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
+        backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
       }
     });
 
     fastForwardButton?.addEventListener('mousedown', e => {
-      if (isLeftClickOrKey(e)) {
-        if (e.which === 1) { fastForwardButton.held = true; };
-        fastForwardButton.classList.add(PRESSED2);
-        this.setPlaybackRate(7);
-        document.addEventListener('mouseup', () => {
-          fastForwardButton.held = false;
-          if (!(fastForwardButton.held || holdingFastKey)) {
-            fastForwardButton.classList.remove(PRESSED2);
-            this.setPlaybackRate(1);
-          }
-        }, {once: true});
-      }
+      if (!isLeftClickOrKey(e)) { return; }
+      if (e.which === 1) { fastForwardButton.held = true; };
+      fastForwardButton.classList.add(PRESSED2);
+      this.setPlaybackRate(7);
+      document.addEventListener('mouseup', () => {
+        fastForwardButton.held = false;
+        if (!(fastForwardButton.held || fastForwardButton.shortcutHeld)) {
+          fastForwardButton.classList.remove(PRESSED2);
+          this.setPlaybackRate(1);
+        }
+      }, {once: true});
     });
 
     toggleSkippingButton?.addEventListener('mousedown', e => {
-      if (isLeftClickOrKey(e)) {
-        if (this.toggleSkipping())
-          { toggleSkippingButton.classList.add(PRESSED); }
-        else
-          { toggleSkippingButton.classList.remove(PRESSED); }
-      }
+      if (!isLeftClickOrKey(e)) { return; }
+      if (this.toggleSkipping())
+        { toggleSkippingButton.classList.add(PRESSED); }
+      else
+        { toggleSkippingButton.classList.remove(PRESSED); }
     });
 
     this.forwardButton = forwardButton;
