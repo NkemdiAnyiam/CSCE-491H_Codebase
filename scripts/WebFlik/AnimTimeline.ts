@@ -18,16 +18,16 @@ class WbfkButton extends HTMLElement {
   action: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
   mouseHeld: boolean = false;
   shortcutHeld: boolean = false;
-  shortcut: KeyboardEvent['key'] | null;
+  shortcutKey: KeyboardEvent['key'] | null;
   triggerMode: 'press' | 'hold' = 'press';
-  allowHolding: boolean = false;
+  allowHolding: boolean = false; // repeat key
   active: boolean | null = null;
 
   constructor() {
     super();
     const shadow = this.attachShadow({mode: 'open'});
     
-    this.shortcut = this.getAttribute('shortcut') ?? null;
+    this.shortcutKey = this.getAttribute('shortcut') ?? null;
     // TODO: fix type
     this.triggerMode = this.getAttribute('trigger') as 'press' | 'hold' ?? 'press';
     this.setAttribute('trigger', this.triggerMode);
@@ -78,11 +78,11 @@ class WbfkButton extends HTMLElement {
 
   setUpListeners(): void {
     // handle button activation with keyboard shortcut
-    if (this.shortcut) {
+    if (this.shortcutKey) {
       window.addEventListener('keydown', this.handleShortcutPress);
       window.addEventListener('keyup', this.handleShortcutRelease);
       const actionTitleCase = this.action.split('-').map(stringFrag => stringFrag[0].toUpperCase()+stringFrag.slice(1)).join(' ');
-      this.title = `${actionTitleCase} (${this.triggerMode === 'hold' ? 'Hold ' : ''}${this.shortcut})`;
+      this.title = `${actionTitleCase} (${this.triggerMode === 'hold' ? 'Hold ' : ''}${this.shortcutKey})`;
     }
     
     // handle button activation with mouse click
@@ -114,7 +114,7 @@ class WbfkButton extends HTMLElement {
   }
 
   private handleShortcutPress = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== this.shortcut?.toLowerCase() && e.code !== this.shortcut) { return; }
+    if (e.key.toLowerCase() !== this.shortcutKey?.toLowerCase() && e.code !== this.shortcutKey) { return; }
     // if the key is held down and holding is not allowed, return
     if (e.repeat && !this.allowHolding) { return; }
 
@@ -128,7 +128,7 @@ class WbfkButton extends HTMLElement {
   }
 
   private handleShortcutRelease = (e: KeyboardEvent): void => {
-    if (e.key.toLowerCase() !== this.shortcut?.toLowerCase() && e.code !== this.shortcut) { return; }
+    if (e.key.toLowerCase() !== this.shortcutKey?.toLowerCase() && e.code !== this.shortcutKey) { return; }
     if (!this.shortcutHeld) { return; }
     this.shortcutHeld = false;
     if (this.mouseHeld) { return; }
