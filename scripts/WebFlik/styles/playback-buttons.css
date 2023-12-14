@@ -37,26 +37,6 @@
   background-color: var(--color-green);
 }
 
-.playback-button--forward {
-  /* background-color: var(--color-yellow); */
-}
-
-.playback-button--pause {
-  /* background-color: var(--color-green); */
-}
-
-.playback-button--backward {
-  /* background-color: var(--color-red); */
-}
-
-.playback-button--enable-skipping {
-  
-}
-
-.playback-button--fast-forward {
-  margin-left: 16rem;
-}
-
 .playback-button__symbol {
   width: 100%;
   height: auto;

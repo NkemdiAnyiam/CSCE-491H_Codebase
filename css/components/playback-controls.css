@@ -12,3 +12,7 @@
   display: flex;
   gap: 6rem;
 }
+
+.playback-button--fast-forward {
+  /* margin-left: 16rem; */
+}
