@@ -1,4 +1,3 @@
-import { setupPlaybackControls } from './playbackControls.js';
 import { JobScheduler } from './JobScheduler.js';
 import { SceneCreator } from './SceneCreator.js';
 import { AnimSequence } from './WebFlik/AnimSequence.js';
@@ -54,7 +53,7 @@ export function generateVisualization (jobsUnsorted: Job[]) {
   setUpDataDisplayScroll(dataDisplay);
   animateDataDisplay(dataDisplay, jobScheduler);
   animateJobCard(document.querySelector('.job-card') as HTMLElement); // naturally starts at the root job card
-  setupPlaybackControls(animTimeline);
+  // setupPlaybackControls(animTimeline);
 };
 
 // allows the data display (left view with the time graph and arrays) to scroll horizontally
@@ -1247,3 +1246,34 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: Connector, parent
     animTimeline.addSequences(animSequence);
   }
 };
+
+
+
+
+
+
+
+
+
+  // // animTimeline.skipTo('focus comp 2');
+  // // animTimeline.skipTo('found max');
+  // // animTimeline.skipTo('OPT point 1');
+  // // animTimeline.skipTo('start');
+  // // animTimeline.skipTo('finish a main card');
+  // // animTimeline.skipTo('replace formula container contents');
+  // // animTimeline.skipTo('explain naive');
+  // // animTimeline.skipTo('introduce memoization');
+
+  // // skips to tag and checks to see if DISABLED_FROM_EDGE should be added or removed from forward/backward buttons
+  // const skipTo = (tag: string, offset: number) => {
+  //   animTimeline.skipTo(tag, offset)
+  //   .then(() => {
+  //     // if (animTimeline.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
+  //     // else { backwardButton.classList.remove(DISABLED_FROM_EDGE); }
+
+  //     // if (animTimeline.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+  //     // else { forwardButton.classList.remove(DISABLED_FROM_EDGE); }
+  //   })
+  // };
+
+  // // skipTo('start');
