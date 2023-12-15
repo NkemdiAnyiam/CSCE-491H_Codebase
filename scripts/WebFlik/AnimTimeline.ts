@@ -14,13 +14,13 @@ const DISABLED_POINTER_FROM_STEPPING = 'playback-button--disabledPointerFromStep
 const DISABLED_FROM_EDGE = 'playback-button--disabledFromTimelineEdge'; // disables pointer and grays out button
 const DISABLED_FROM_PAUSE = 'playback-button--disabledFromPause';
 
-class WbfkButton extends HTMLElement {
+class WbfkPlaybackButton extends HTMLElement {
   action: `step-${'forward' | 'backward'}` | 'pause' | 'fast-forward' | 'toggle-skipping';
-  mouseHeld: boolean = false;
-  shortcutHeld: boolean = false;
   shortcutKey: KeyboardEvent['key'] | null;
   triggerMode: 'press' | 'hold' = 'press';
   allowHolding: boolean = false; // repeat key
+  mouseHeld: boolean = false;
+  shortcutHeld: boolean = false;
   active: boolean | null = null;
 
   constructor() {
@@ -140,7 +140,7 @@ class WbfkButton extends HTMLElement {
     this.deactivate?.();
   }
 }
-customElements.define('wbfk-button', WbfkButton);
+customElements.define('wbfk-button', WbfkPlaybackButton);
 
 
 
@@ -150,7 +150,7 @@ customElements.define('wbfk-button', WbfkButton);
 
 
 type PlaybackButtons = {
-  [key in `${'forward' | 'backward' | 'pause' | 'toggleSkipping' | 'fastForward'}Button`]: WbfkButton | null;
+  [key in `${'forward' | 'backward' | 'pause' | 'toggleSkipping' | 'fastForward'}Button`]: WbfkPlaybackButton | null;
 };
 
 export class AnimTimeline {
@@ -193,11 +193,11 @@ export class AnimTimeline {
   }
 
   setupPlaybackControls(): typeof this.playbackButtons {
-    const forwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-forward"]`);
-    const backwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="step-backward"]`);
-    const pauseButton: WbfkButton | null = document.querySelector(`wbfk-button[action="pause"]`);
-    const fastForwardButton: WbfkButton | null = document.querySelector(`wbfk-button[action="fast-forward"]`);
-    const toggleSkippingButton: WbfkButton | null = document.querySelector(`wbfk-button[action="toggle-skipping"]`);
+    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="step-forward"]`);
+    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="step-backward"]`);
+    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="pause"]`);
+    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="fast-forward"]`);
+    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="toggle-skipping"]`);
 
     if (forwardButton) {
       forwardButton.activate = () => {

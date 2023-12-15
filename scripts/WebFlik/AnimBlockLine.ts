@@ -1,6 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
 import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { InvalidElementError, ErrorGenerator } from "./utils/errors.js";
+import { InvalidElementError } from "./utils/errors.js";
 import { equalWithinTol } from "./utils/helpers.js";
 
 export type WbfkConnectorConfig = {
