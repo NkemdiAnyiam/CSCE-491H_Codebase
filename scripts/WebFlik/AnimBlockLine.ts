@@ -3,12 +3,12 @@ import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
 import { InvalidElementError, ErrorGenerator } from "./utils/errors.js";
 import { equalWithinTol } from "./utils/helpers.js";
 
-export type ConnectorConfig = {
+export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
 };
 
 // CHANGE NOTE: Completely get rid of obsolete AnimBlockLineUpdater
-export class Connector extends HTMLElement {
+export class WbfkConnector extends HTMLElement {
   private static staticId: number = 0;
 
   private connectorId: number = 0;
@@ -54,7 +54,7 @@ export class Connector extends HTMLElement {
   
   constructor() {
     super();
-    this.connectorId = Connector.staticId++;
+    this.connectorId = WbfkConnector.staticId++;
     const shadow = this.attachShadow({mode: 'open'});
 
     const markerIdPrefix = `markerArrow--${this.connectorId}`;
@@ -248,7 +248,7 @@ export class Connector extends HTMLElement {
   }
 }
 
-customElements.define('wbfk-connector', Connector);
+customElements.define('wbfk-connector', WbfkConnector);
 
 if (window.CSS.registerProperty) {
   window.CSS.registerProperty({
@@ -267,14 +267,14 @@ if (window.CSS.registerProperty) {
 }
 
 export class ConnectorSetterBlock extends AnimBlock {
-  connectorElem: Connector;
+  connectorElem: WbfkConnector;
   previousPointA?: [elemA: Element, leftOffset: number, topOffset: number];
   previousPointB?: [elemB: Element, leftOffset: number, topOffset: number];
   pointA: [elemA: Element, leftOffset: number, topOffset: number];
   pointB: [elemB: Element, leftOffset: number, topOffset: number];
 
-  connectorConfig: ConnectorConfig = {} as ConnectorConfig;
-  previousConnectorConfig: ConnectorConfig = {} as ConnectorConfig;
+  connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
+  previousConnectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       duration: 0,
@@ -285,18 +285,18 @@ export class ConnectorSetterBlock extends AnimBlock {
   }
   
   constructor(
-    connectorElem: Connector | null,
+    connectorElem: WbfkConnector | null,
     pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     animName: string,
     bank: IKeyframesBank,
     category: string,
-    connectorConfig: Partial<ConnectorConfig> = {},
+    connectorConfig: Partial<WbfkConnectorConfig> = {},
     ) {
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
     if (!(pointA?.[0] instanceof Element)) {
       throw this.generateError(InvalidElementError, `Point A element must not be null`);
     }
@@ -329,7 +329,7 @@ export class ConnectorSetterBlock extends AnimBlock {
     this.connectorElem.pointTrackingEnabled = this.previousConnectorConfig.pointTrackingEnabled;
   }
 
-  applyLineConfig(connectorConfig: Partial<ConnectorConfig>): ConnectorConfig {
+  applyLineConfig(connectorConfig: Partial<WbfkConnectorConfig>): WbfkConnectorConfig {
     return {
       pointTrackingEnabled: this.connectorElem.pointTrackingEnabled,
       ...connectorConfig,
@@ -338,7 +338,7 @@ export class ConnectorSetterBlock extends AnimBlock {
 }
 
 export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  connectorElem: Connector;
+  connectorElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -347,11 +347,11 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
     this.connectorElem = connectorElem;
   }
 
@@ -370,7 +370,7 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
 }
 
 export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  connectorElem: Connector;
+  connectorElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -379,11 +379,11 @@ export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     };
   }
 
-  constructor(connectorElem: Connector | null, public animName: string, bank: IKeyframesBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
     super(connectorElem, animName, bank, category);
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof Connector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
 
     this.connectorElem = connectorElem;
   }

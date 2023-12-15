@@ -1,4 +1,4 @@
-import { Connector } from "../WebFlik/AnimBlockLine";
+import { WbfkConnector } from "../WebFlik/AnimBlockLine";
 import { WebFlik } from "../WebFlik/WebFlik";
 
 const {
@@ -39,8 +39,8 @@ const {
 const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500});
 Entrance(someHtmlElement, '~wipe', ['from-left']);
-ConnectorSetter(new Connector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
-ConnectorEntrance(new Connector(), '~trace', ['from-A'])
+ConnectorSetter(new WbfkConnector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
+ConnectorEntrance(new WbfkConnector(), '~trace', ['from-A'])
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])

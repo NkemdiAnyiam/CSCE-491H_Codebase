@@ -1,5 +1,5 @@
 import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollerBlock } from "./AnimBlock.js";
-import { ConnectorEntranceBlock, ConnectorExitBlock, Connector, ConnectorSetterBlock, ConnectorConfig } from "./AnimBlockLine.js";
+import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine.js";
 import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls } from "./Presets.js";
 import { useEasing } from "./utils/easing.js";
 
@@ -120,7 +120,7 @@ class _WebFlik {
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank, 'Translation').initialize(...params);
       },
-      ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as ConnectorConfig) {
+      ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as WbfkConnectorConfig) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Set Connector', connectorConfig).initialize([]);
       },
       ConnectorEntrance: function(connectorElem, animName, ...params) {
@@ -138,13 +138,13 @@ class _WebFlik {
       Emphasis: BlockCreator<typeof combinedEmphasisBank, EmphasisBlock>;
       Translation: BlockCreator<typeof combinedTranslationBank, TranslationBlock>;
       ConnectorSetter: (
-        connectorElem: Connector,
+        connectorElem: WbfkConnector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
         pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
-        connectorConfig: ConnectorConfig
+        connectorConfig: WbfkConnectorConfig
       ) => ConnectorSetterBlock;
-      ConnectorEntrance: BlockCreator<typeof combinedDrawConnectorBank, ConnectorEntranceBlock, Connector>;
-      ConnectorExit: BlockCreator<typeof combinedEraseConnectorBank, ConnectorExitBlock, Connector>;
+      ConnectorEntrance: BlockCreator<typeof combinedDrawConnectorBank, ConnectorEntranceBlock, WbfkConnector>;
+      ConnectorExit: BlockCreator<typeof combinedEraseConnectorBank, ConnectorExitBlock, WbfkConnector>;
       Scroller: BlockCreator<typeof combinedScrollsBank, ScrollerBlock>;
     };
   }
