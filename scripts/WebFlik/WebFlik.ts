@@ -90,7 +90,7 @@ class _WebFlik {
       Translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
-  ) /* TODO: Add coherent return type */ {
+  ) {
     _WebFlik.#checkBanksFormatting(Entrances, Exits, Emphases, Translations);
 
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
