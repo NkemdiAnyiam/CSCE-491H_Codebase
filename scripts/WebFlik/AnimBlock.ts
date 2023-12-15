@@ -591,7 +591,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   /** @internal */
-  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
+  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): this {
     this.animArgs = animArgs;
     const mergedConfig = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
     Object.assign(this, mergedConfig);
@@ -857,7 +857,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     });
   }
 
-  private loop = () => {
+  private loop = (): void => {
     const rafMutators = this.rafMutators!;
     try {
       switch(this.animation.direction) {
