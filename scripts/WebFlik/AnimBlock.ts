@@ -503,7 +503,7 @@ export class WebFlikAnimation extends Animation {
 
 
 export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
-  static id: number = 0;
+  private static id: number = 0;
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
@@ -532,6 +532,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   bankEntry: TBankEntry;
   animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
+  /** @internal */
   get rafLoopsProgress(): number {
     const { progress, direction } = this.animation.effect!.getComputedTiming();
     // ?? 1 because during the active phase (the only time when raf runs), null progress means finished
@@ -548,10 +549,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   classesToRemoveOnFinish: string[] = [];
   classesToRemoveOnStart: string[] = [];
   pregeneratesKeyframes: boolean = false;
+  /** @internal */
   keyframesGenerators?: {
     forwardGenerator: () => Keyframe[];
     backwardGenerator?: () => Keyframe[];
   };
+  /** @internal */
   rafMutators?: {
     forwardMutator: () => void;
     backwardMutator: () => void;
@@ -587,6 +590,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.domElem = domElem;
   }
 
+  /** @internal */
   initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): typeof this {
     this.animArgs = animArgs;
     const mergedConfig = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
@@ -679,6 +683,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return this;
   }
 
+  /** @internal */
   setID(idSeq: number, idTimeline: number): void {
     [this.sequenceID, this.timelineID] = [idSeq, idTimeline];
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];

@@ -154,7 +154,7 @@ type PlaybackButtons = {
 };
 
 export class AnimTimeline {
-  static id = 0;
+  private static id = 0;
 
   id; // used to uniquely identify this specific timeline
   animSequences: AnimSequence[] = []; // array of every AnimSequence in this timeline
@@ -438,7 +438,7 @@ export class AnimTimeline {
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
-  doForInProgressSequences(operation: SequenceOperation): void {
+  private doForInProgressSequences(operation: SequenceOperation): void {
     for (const sequence of this.inProgressSequences.values()) {
       operation(sequence);
     }

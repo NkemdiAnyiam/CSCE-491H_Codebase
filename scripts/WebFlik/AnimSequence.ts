@@ -43,7 +43,7 @@ type AnimSequenceConfig = {
 type AnimationOperation = (animation: AnimBlock) => void; 
 
 export class AnimSequence implements AnimSequenceConfig {
-  static id = 0;
+  private static id = 0;
   
   id: number;
   timelineID: number = NaN; // set to match the id of the AnimTimeline to which it belongs
@@ -217,9 +217,9 @@ export class AnimSequence implements AnimSequenceConfig {
     this.doForInProgressBlocks(animBlock => animBlock.finish());
   }
 
-  static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
-  static activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
-  static endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime;
+  private static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;
+  private static activeFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.activeFinishTime - blockB.activeFinishTime;
+  private static endDelayFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockA.fullFinishTime - blockB.fullFinishTime;
 
   // TODO: Complete this method
   commit(): AnimSequence {
@@ -288,7 +288,7 @@ export class AnimSequence implements AnimSequenceConfig {
   }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
-  doForInProgressBlocks(operation: AnimationOperation): void {
+  private doForInProgressBlocks(operation: AnimationOperation): void {
     for (const animBlock of this.inProgressBlocks.values()) {
       operation(animBlock);
     }

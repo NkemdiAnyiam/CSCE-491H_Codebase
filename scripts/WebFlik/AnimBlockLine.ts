@@ -7,16 +7,9 @@ export type ConnectorConfig = {
   pointTrackingEnabled: boolean;
 };
 
-class ConnectorError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ConnectorUpdateError';
-  }
-}
-
 // CHANGE NOTE: Completely get rid of obsolete AnimBlockLineUpdater
 export class Connector extends HTMLElement {
-  static staticId: number = 0;
+  private static staticId: number = 0;
 
   private connectorId: number = 0;
   readonly markerIdPrefix: string;
@@ -245,6 +238,7 @@ export class Connector extends HTMLElement {
     this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
+  // TODO: determine whether this method is useless
   setTrackingInterval(): void {
     this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
