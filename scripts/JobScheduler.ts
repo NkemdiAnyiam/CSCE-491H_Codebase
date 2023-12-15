@@ -1,12 +1,19 @@
 import { Job } from "./Job";
 
+type TreeNodeData = {
+  job: Job;
+  computationResult1?: number;
+  computationResult2?: number;
+  MEntry: number;
+};
+
 export class TreeNode {
-  data;
-  children = [];
+  data: TreeNodeData = {} as TreeNodeData;
+  children: TreeNode[] = [];
   isLeaf = false;
   isRoot = false;
 
-  addChild(childNode) { this.children.push(childNode); }
+  addChild(childNode: TreeNode) { this.children.push(childNode); }
 }
 
 export class JobScheduler {
@@ -71,7 +78,8 @@ export class JobScheduler {
     this.computeOPT(this.getNumJobs(), null);
   }
 
-  private computeOPT(j: number, parentNode): number {
+  private computeOPT(j: number, parentNode: TreeNode | null): number {
+    // if there is no parent node, then we must be at the root
     const treeNode = parentNode ? new TreeNode() : this._treeRootNode;
     parentNode?.addChild(treeNode);
 
