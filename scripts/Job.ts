@@ -4,6 +4,7 @@ export class Job {
   private jobLetter: string;
   private sortedJobNum = -1;
   private compatibleJobNum = -1;
+  private _jobBarEl: HTMLElement | null = null;
 
   constructor(private start: number, private finish: number, private weight: number) {
     this.jobLetter = Job.currJobLetter;
@@ -21,7 +22,7 @@ export class Job {
 
   setCompatibleJobNum(compatibleJobNum: number) { this.compatibleJobNum = compatibleJobNum; }
   setSortedJobNum(sortedJobNum: number) { this.sortedJobNum = sortedJobNum; }
-  setJobBar(jobBarEl) { this._jobBarEl = jobBarEl; }
+  setJobBar(jobBarEl: HTMLElement) { this._jobBarEl = jobBarEl; }
 
   toStr(): string {
     return `jobLetter: ${this.jobLetter}; sortedNum: ${this.sortedJobNum}, start: ${this.start}, finish: ${this.finish}, weight: ${this.weight}`;

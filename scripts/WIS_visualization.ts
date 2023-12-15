@@ -104,7 +104,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       EraseConnector(connector_placeBars, '~trace', ['from-B'], {startsNextBlock: true}),
     );
     jobsUnsorted.forEach((job) => {
-      const jobBarEl = job.getJobBar();
+      const jobBarEl = job.getJobBar()!;
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
       const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"] .time-graph__cell--${jobBarEl.dataset.start}`) as HTMLElement;
@@ -148,7 +148,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Move job bars back onto the time graph (sorted by finish time) and update time graph row headers'
     });
     jobsSorted.forEach((job) => {
-      const jobBarEl = job.getJobBar();
+      const jobBarEl = job.getJobBar()!;
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
       const row = document.querySelector(`.time-graph__row[data-joblettersorted="${jobLetter}"]`) as HTMLElement;
@@ -243,7 +243,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
   const timeGraphArrowEl = timeGraphEl.querySelector('wbfk-connector') as Connector; // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
-    const jobBarEl = job.getJobBar();
+    const jobBarEl = job.getJobBar()!;
     // get j array block corresponding to current job bar
     const jBlock = document.querySelector(`.array-group--j-and-c .array--j .array__array-block--${jobBarEl.dataset.sjnum}`);
     // Find job bar corresponding to the job that's compatible with the current job (if it exists)
