@@ -19,9 +19,18 @@ class WbfkPlaybackButton extends HTMLElement {
   shortcutKey: KeyboardEvent['key'] | null;
   triggerMode: 'press' | 'hold' = 'press';
   allowHolding: boolean = false; // repeat key
-  mouseHeld: boolean = false;
-  shortcutHeld: boolean = false;
-  active: boolean | null = null;
+  private _mouseHeld: boolean = false;
+  private _shortcutHeld: boolean = false;
+  private _active: boolean = false;
+  public get mouseHeld(): boolean { return this._mouseHeld; }
+  /** @internal */
+  public set mouseHeld(value: boolean) { this._mouseHeld = value; }
+  public get shortcutHeld(): boolean { return this._shortcutHeld; }
+  /** @internal */
+  public set shortcutHeld(value: boolean) { this._shortcutHeld = value; }
+  public get active(): boolean { return this._active; }
+  /** @internal */
+  public set active(value: boolean) { this._active = value; }
 
   constructor() {
     super();

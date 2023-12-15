@@ -923,11 +923,6 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
     };
   }
 
-  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-  //   if (!bankEntry) { throw new Error(`Invalid entrance animation name ${animName}`); }
-  //   super(domElem, animName, bankEntry);
-  // }
-
   protected _onStartForward(): void {
     this.domElem.classList.remove('wbfk-hidden');
   }
@@ -945,11 +940,6 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntr
     };
   }
 
-  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-  //   if (!bankEntry) { throw new Error(`Invalid exit animation name ${animName}`); }
-  //   super(domElem, animName, bankEntry);
-  // }
-
   protected _onFinishForward(): void {
     this.domElem.classList.add('wbfk-hidden');
   }
@@ -963,11 +953,6 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
-
-  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-  //   if (!bankEntry) { throw new Error(`Invalid emphasis animation name ${animName}`); }
-  //   super(domElem, animName, bankEntry);
-  // }
 }
 
 export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
@@ -976,11 +961,6 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
       composite: 'accumulate',
     };
   }
-
-  // constructor(domElem: Element | null, animName: string, bankEntry: TBankEntry) {
-  //   if (!bankEntry) { throw new Error(`Invalid translation animation name ${animName}`); }
-  //   super(domElem, animName, bankEntry);
-  // }
 }
 
 export class ScrollerBlock extends AnimBlock {
