@@ -266,7 +266,7 @@ if (window.CSS.registerProperty) {
   });
 }
 
-export class SetConnectorBlock extends AnimBlock {
+export class ConnectorSetterBlock extends AnimBlock {
   connectorElem: Connector;
   previousPointA?: [elemA: Element, leftOffset: number, topOffset: number];
   previousPointB?: [elemB: Element, leftOffset: number, topOffset: number];
@@ -337,7 +337,7 @@ export class SetConnectorBlock extends AnimBlock {
   }
 }
 
-export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -369,7 +369,7 @@ export class DrawConnectorBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 }
 
-export class EraseConnectorBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   connectorElem: Connector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {

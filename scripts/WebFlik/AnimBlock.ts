@@ -983,7 +983,7 @@ export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesB
   // }
 }
 
-export class ScrollBlock extends AnimBlock {
+export class ScrollerBlock extends AnimBlock {
   scrollableElem: Element;
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {

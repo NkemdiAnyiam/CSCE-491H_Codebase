@@ -1,5 +1,5 @@
-import { EmphasisBlock, EntranceBlock, ExitBlock, ScrollBlock, TranslationBlock } from "./AnimBlock.js";
-import { DrawConnectorBlock, EraseConnectorBlock } from "./AnimBlockLine.js";
+import { EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, TranslationBlock } from "./AnimBlock.js";
+import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank } from "./WebFlik.js";
 import { negateNumString } from "./utils/helpers.js";
 import { MoveToOptions, TranslateOptions, CssLengthUnit } from "./utils/interfaces.js";
@@ -426,7 +426,7 @@ export const presetConnectorEntrances = {
       }
     },
   },
-} satisfies IKeyframesBank<DrawConnectorBlock>;
+} satisfies IKeyframesBank<ConnectorEntranceBlock>;
 
 export const presetConnectorExits = {
   [`~fade-out`]: {
@@ -478,7 +478,7 @@ export const presetConnectorExits = {
       }
     },
   },
-} satisfies IKeyframesBank<EraseConnectorBlock>;
+} satisfies IKeyframesBank<ConnectorExitBlock>;
 
 
 
@@ -593,4 +593,4 @@ export const presetScrolls = {
       pregeneratesKeyframes: false,
     }
   },
-} satisfies IKeyframesBank<ScrollBlock>
+} satisfies IKeyframesBank<ScrollerBlock>

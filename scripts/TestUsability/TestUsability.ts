@@ -6,8 +6,8 @@ const {
   Exit,
   Emphasis,
   Translation,
-  SetConnector,
-  DrawConnector,
+  ConnectorSetter,
+  ConnectorEntrance,
 } = WebFlik.createBanks({
   Entrances: {
     [`super-jump`]: {
@@ -39,8 +39,8 @@ const {
 const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500});
 Entrance(someHtmlElement, '~wipe', ['from-left']);
-SetConnector(new Connector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
-DrawConnector(new Connector(), '~trace', ['from-A'])
+ConnectorSetter(new Connector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
+ConnectorEntrance(new Connector(), '~trace', ['from-A'])
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])
