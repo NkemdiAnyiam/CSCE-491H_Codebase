@@ -238,12 +238,7 @@ export class WbfkConnector extends HTMLElement {
     this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
   }
 
-  // TODO: determine whether this method is useless
-  setTrackingInterval(): void {
-    this.continuousTrackingReqId = window.requestAnimationFrame(this.continuouslyUpdateEndpoints);
-  }
-
-  clearTrackingInterval (): void {
+  cancelContinuousUpdates (): void {
     window.cancelAnimationFrame(this.continuousTrackingReqId);
   }
 }
@@ -359,12 +354,12 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval();
+      this.connectorElem.continuouslyUpdateEndpoints();
     }
   }
 
   protected _onFinishBackward(): void {
-    this.connectorElem.clearTrackingInterval();
+    this.connectorElem.cancelContinuousUpdates();
     this.domElem.classList.add('wbfk-hidden');
   }
 }
@@ -388,22 +383,16 @@ export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.connectorElem = connectorElem;
   }
 
-  // protected _onStartForward(): void {
-  // }
-
   protected _onStartBackward(): void {
     this.domElem.classList.remove('wbfk-hidden');
     this.connectorElem.updateEndpoints();
     if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.setTrackingInterval();
+      this.connectorElem.continuouslyUpdateEndpoints();
     }
   }
 
-  // protected _onFinishBackward(): void {
-  // }
-
   protected _onFinishForward(): void {
-    this.connectorElem.clearTrackingInterval();
+    this.connectorElem.cancelContinuousUpdates();
     this.domElem.classList.add('wbfk-hidden');
   }
 }
