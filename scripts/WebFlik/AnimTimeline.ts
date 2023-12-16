@@ -149,7 +149,7 @@ class WbfkPlaybackButton extends HTMLElement {
     this.deactivate?.();
   }
 }
-customElements.define('wbfk-button', WbfkPlaybackButton);
+customElements.define('wbfk-playback-button', WbfkPlaybackButton);
 
 
 
@@ -202,11 +202,11 @@ export class AnimTimeline {
   }
 
   setupPlaybackControls(): typeof this.playbackButtons {
-    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="step-forward"]`);
-    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="step-backward"]`);
-    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="pause"]`);
-    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="fast-forward"]`);
-    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-button[action="toggle-skipping"]`);
+    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-forward"]`);
+    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-backward"]`);
+    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="pause"]`);
+    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="fast-forward"]`);
+    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="toggle-skipping"]`);
 
     if (forwardButton) {
       forwardButton.activate = () => {
