@@ -63,10 +63,9 @@ export class WbfkConnector extends HTMLElement {
     this.usesMarkerA = this.hasAttribute('a-marker');
     this.usesMarkerB = this.hasAttribute('b-marker');
     this.pointTrackingEnabled = !this.hasAttribute('tracking-disabled');
-    const markerWidth = 5;
-    const markerHeight = 7;
+    const markerWidth: number = Number(this.getAttribute('marker-width')) || 5;
+    const markerHeight: number = Number(this.getAttribute('marker-height')) || 7;
 
-    // TODO: Improve marker sizing configuration
     const htmlString = `
       <link rel="stylesheet" href="/scripts/WebFlik/styles/connector.css">
 
