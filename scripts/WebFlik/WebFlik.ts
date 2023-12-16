@@ -121,16 +121,16 @@ class _WebFlik {
         return new TranslationBlock(domElem, animName, combinedTranslationBank, 'Translation').initialize(...params);
       },
       ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as WbfkConnectorConfig) {
-        return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Set Connector', connectorConfig).initialize([]);
+        return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
       },
       ConnectorEntrance: function(connectorElem, animName, ...params) {
-        return new ConnectorEntranceBlock(connectorElem, animName, combinedDrawConnectorBank, 'Draw Connector').initialize(...params);
+        return new ConnectorEntranceBlock(connectorElem, animName, combinedDrawConnectorBank, 'Connector Entrance').initialize(...params);
       },
       ConnectorExit: function(connectorElem, animName, ...params) {
-        return new ConnectorExitBlock(connectorElem, animName, combinedEraseConnectorBank, 'Erase Connector').initialize(...params);
+        return new ConnectorExitBlock(connectorElem, animName, combinedEraseConnectorBank, 'Connector Exit').initialize(...params);
       },
       Scroller: function(domElem, animName, ...params) {
-        return new ScrollerBlock(domElem, animName, combinedScrollsBank, 'scroll').initialize(...params);
+        return new ScrollerBlock(domElem, animName, combinedScrollsBank, 'Scroller').initialize(...params);
       },
     } satisfies {
       Entrance: BlockCreator<typeof combinedEntranceBank, EntranceBlock>;
