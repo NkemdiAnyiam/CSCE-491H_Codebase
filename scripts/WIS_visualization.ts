@@ -707,7 +707,6 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkConnector, p
     const animSequence = new AnimSequence({
       description: 'Point to M block array entry',
     })
-    // animSequence.addOneBlock([ 'line', connector_toMBlock, '~wipe', ['right'], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ]);
     .addBlocks(
       ConnectorSetter(connector_toMBlock, [MAccessContainer, 0, 0.5], [MBlock, 0.9, 0.5], {pointTrackingEnabled: true}),
       ConnectorEntrance(connector_toMBlock, '~trace', ['from-A']),
@@ -1049,13 +1048,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkConnector, p
       tag: 'replace formula container contents',
     })
     .addBlocks(
-      // // TODO: Address the fact that line updation needs to be on both sides of the exit+entrance combo
-      // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
-
       Exit(formulaComputation, '~wipe', ['from-right']),
       Entrance(formulaResult, '~wipe', ['from-right'], {startsNextBlock: true}),
-
-      // [ 'line', connector_formulaComputation, 'updateEndpoints', formulaContainer, [0.5, 0], null, [0.5, 1] ],
   
       Exit(paragraph_formulaComputation_max, '~fade-out', [], { duration: 250 }),
       Entrance(paragraph_formulaComputation_found, '~fade-in', [], { duration: 250 }),
@@ -1215,8 +1209,6 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkConnector, pa
       ConnectorExit(connector_toMBlock, '~fade-out', []),
       ConnectorSetter(connector_toMBlock, [MBlock, 0.9, 0.5], [MAccessContainer, 0, 0.5]),
       ConnectorEntrance(connector_toMBlock, '~trace', ['from-A']),
-      // [ 'line', connector_toMBlock, '~fade-out', [], MAccessContainer, [0, 0.5], MBlock, [0.9, 0.5], {lineOptions: {trackEndpoints: true}} ],
-      // [ 'line', connector_toMBlock, '~wipe', ['left'], MBlock, [0.9, 0.5], MAccessContainer, [0, 0.5], {lineOptions: {trackEndpoints: true}} ],
       Exit(MAccess, '~wipe', ['from-right']),
       Entrance(MEntry, '~wipe', ['from-right']),
       Exit(textbox_MAccess_p1, '~fade-out', [], {duration: 250, startsNextBlock: true}),
