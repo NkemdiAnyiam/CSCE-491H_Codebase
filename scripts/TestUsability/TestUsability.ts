@@ -9,7 +9,7 @@ const {
   ConnectorSetter,
   ConnectorEntrance,
 } = WebFlik.createBanks({
-  Entrances: {
+  entrances: {
     [`super-jump`]: {
       generateKeyframes: (penut: string) => [[{opacity: '1'}], []],
     },
@@ -22,7 +22,7 @@ const {
     // [`preset-anim-name`]: [{fontSize: '4px'}],
   },
 
-  Exits: {
+  exits: {
     [`super-jump-prime`]: {
       generateKeyframes: (name: string) => [[{opacity: '1'}]],
     },

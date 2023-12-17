@@ -82,26 +82,26 @@ class _WebFlik {
     IncludePresets extends boolean = true
   >
   (
-    { Entrances, Exits, Emphases, Translations }:
-    {
-      Entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
-      Exits?: UserExitBank & IKeyframesBank<ExitBlock>;
-      Emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
-      Translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
+    customBankAddons: {
+      entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
+      exits?: UserExitBank & IKeyframesBank<ExitBlock>;
+      emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
+      translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) {
-    _WebFlik.#checkBanksFormatting(Entrances, Exits, Emphases, Translations);
+    const {entrances, exits, emphases, translations} = customBankAddons;
+    _WebFlik.#checkBanksFormatting(entrances, exits, emphases, translations);
 
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
     const combineBanks = <P, U>(presets: P, userDefined: U) => ({...(includePresets ? presets : {}), ...(userDefined ?? {})}) as TogglePresets<P, U>;
     
     // Add the keyframes groups to the static banks of the block classes
-    const combinedEntranceBank = combineBanks(presetEntrances, Entrances as UserEntranceBank);
-    const combinedExitBank = combineBanks(presetExits, Exits as UserExitBank);
-    const combinedEmphasisBank = combineBanks(presetEmphases, Emphases as UserEmphasisBank);
-    const combinedTranslationBank = combineBanks(presetTranslations, Translations as UserTranslationBank);
+    const combinedEntranceBank = combineBanks(presetEntrances, entrances as UserEntranceBank);
+    const combinedExitBank = combineBanks(presetExits, exits as UserExitBank);
+    const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
+    const combinedTranslationBank = combineBanks(presetTranslations, translations as UserTranslationBank);
     const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
     const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
     const combinedScrollsBank = combineBanks({}, presetScrolls);
