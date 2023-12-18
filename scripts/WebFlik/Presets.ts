@@ -27,7 +27,7 @@ export const presetEntrances = {
     generateKeyframes() {
       return [[
         {opacity: '0'},
-        {opacity: '1'},
+        {},
       ]];
     },
   },
@@ -71,18 +71,13 @@ export const presetEntrances = {
 
   [`~pinwheel`]: {
     generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'counterclockwise') {
-      // TODO: tweak starting scale and reconsider modifying opacity
       return [[
         {
-          rotate: `z 0deg`,
+          rotate: `z ${360 * numSpins * (direction === 'clockwise' ? -1 : 1)}deg`,
           scale: 0,
           opacity: 0,
         },
-        {
-          rotate: `z ${360 * numSpins * (direction === 'clockwise' ? 1 : -1)}deg`,
-          scale: 1,
-          opacity: 1,
-        },
+        {},
       ]]
     },
   },
@@ -95,7 +90,7 @@ export const presetEntrances = {
             {translate: `0 ${window.innerHeight - top}px`, opacity: 0, easing: useEasing('power2-out')},
             {translate: `0 -25px`, offset: 0.83333},
             {translate: `0 -25px`, offset: 0.86, easing: useEasing('power1-in')},
-            {translate: `0 0`, opacity: 1},
+            {translate: `0 0`},
           ],
         ];
     },
@@ -151,7 +146,7 @@ export const presetExits = {
   [`~fade-out`]: {
     generateKeyframes() {
       return [[
-        {opacity: '1'},
+        {},
         {opacity: '0'},
       ]]
     },
@@ -196,13 +191,8 @@ export const presetExits = {
 
   [`~pinwheel`]: {
     generateKeyframes(numSpins: number = 2, direction: 'clockwise' | 'counterclockwise' = 'clockwise') {
-      // TODO: tweak starting scale and reconsider modifying opacity
       return [[
-        {
-          rotate: `z 0deg`,
-          scale: 1,
-          opacity: 1,
-        },
+        {},
         {
           rotate: `z ${360 * numSpins * (direction === 'clockwise' ? 1 : -1)}deg`,
           scale: 0,
@@ -217,7 +207,7 @@ export const presetExits = {
         const {top} = this.domElem.getBoundingClientRect();
         return [
           () => [
-            {translate: `0 0`, opacity: 1, easing: useEasing('power1-out')},
+            {translate: `0 0`, easing: useEasing('power1-out')},
             {translate: `0 -25px`, offset: 0.14 },
             {translate: `0 -25px`, easing: useEasing('power2-in'), offset: 0.16666666},
             {translate: `0 ${window.innerHeight - top}px`, opacity: 0},
@@ -378,7 +368,7 @@ export const presetConnectorEntrances = {
     generateKeyframes() {
       return [[
         {opacity: '0'},
-        {opacity: '1'},
+        {},
       ]];
     },
   },
@@ -432,7 +422,7 @@ export const presetConnectorExits = {
   [`~fade-out`]: {
     generateKeyframes() {
       return [[
-        {opacity: '1'},
+        {},
         {opacity: '0'},
       ]];
     },
