@@ -1,6 +1,6 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollerBlock, ChangeBlock } from "./AnimBlock.js";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, MotionBlock, ScrollerBlock, TransitionBlock } from "./AnimBlock.js";
 import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetChanges } from "./Presets.js";
+import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./Presets.js";
 import { useEasing } from "./utils/easing.js";
 
 type KeyframesGenerator<T extends unknown> = {
@@ -86,7 +86,7 @@ class _WebFlik {
       entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
       exits?: UserExitBank & IKeyframesBank<ExitBlock>;
       emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
-      translations?: UserTranslationBank & IKeyframesBank<TranslationBlock>;
+      translations?: UserTranslationBank & IKeyframesBank<MotionBlock>;
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) {
@@ -101,8 +101,8 @@ class _WebFlik {
     const combinedEntranceBank = combineBanks(presetEntrances, entrances as UserEntranceBank);
     const combinedExitBank = combineBanks(presetExits, exits as UserExitBank);
     const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
-    const combinedTranslationBank = combineBanks(presetTranslations, translations as UserTranslationBank);
-    const combinedChangeBank = combineBanks({}, presetChanges);
+    const combinedMotionBank = combineBanks(presetMotions, translations as UserTranslationBank);
+    const combinedTransitionBank = combineBanks({}, presetTransitions);
     const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
     const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
     const combinedScrollsBank = combineBanks({}, presetScrolls);
@@ -118,11 +118,11 @@ class _WebFlik {
       Emphasis: function(domElem, animName, ...params) {
         return new EmphasisBlock(domElem, animName, combinedEmphasisBank, 'Emphasis').initialize(...params);
       },
-      Translation: function(domElem, animName, ...params) {
-        return new TranslationBlock(domElem, animName, combinedTranslationBank, 'Translation').initialize(...params);
+      Motion: function(domElem, animName, ...params) {
+        return new MotionBlock(domElem, animName, combinedMotionBank, 'Motion').initialize(...params);
       },
-      Change: function(domElem, direction, ...params) {
-        return new ChangeBlock(domElem, direction, combinedChangeBank, 'Change').initialize(...params);
+      Transition: function(domElem, direction, ...params) {
+        return new TransitionBlock(domElem, direction, combinedTransitionBank, 'Transition').initialize(...params);
       },
       ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as WbfkConnectorConfig) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
@@ -140,8 +140,8 @@ class _WebFlik {
       Entrance: BlockCreator<typeof combinedEntranceBank, EntranceBlock>;
       Exit: BlockCreator<typeof combinedExitBank, ExitBlock>;
       Emphasis: BlockCreator<typeof combinedEmphasisBank, EmphasisBlock>;
-      Translation: BlockCreator<typeof combinedTranslationBank, TranslationBlock>;
-      Change: BlockCreator<typeof combinedChangeBank, ChangeBlock>;
+      Motion: BlockCreator<typeof combinedMotionBank, MotionBlock>;
+      Transition: BlockCreator<typeof combinedTransitionBank, TransitionBlock>;
       ConnectorSetter: (
         connectorElem: WbfkConnector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],

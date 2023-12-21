@@ -1,4 +1,4 @@
-import { ChangeBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, TranslationBlock } from "./AnimBlock.js";
+import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock } from "./AnimBlock.js";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank } from "./WebFlik.js";
 import { negateNumString } from "./utils/helpers.js";
@@ -279,7 +279,7 @@ export const presetEmphases = {
 } satisfies IKeyframesBank<EmphasisBlock>;
 
 
-export const presetTranslations = {
+export const presetMotions = {
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null, translationOptions: Partial<MoveToOptions> = {}) {
       if (!targetElem) {
@@ -361,10 +361,10 @@ export const presetTranslations = {
       ];
     },
   },
-} satisfies IKeyframesBank<TranslationBlock>;
+} satisfies IKeyframesBank<MotionBlock>;
 
 
-export const presetChanges = {
+export const presetTransitions = {
   ['~from']: {
     generateKeyframes(keyframe: Keyframe) {
       return [ [{...keyframe}, {}] ];
@@ -383,7 +383,7 @@ export const presetChanges = {
       return [ [original, {...keyframe}] ];
     },
   },
-} satisfies IKeyframesBank<ChangeBlock>;
+} satisfies IKeyframesBank<TransitionBlock>;
 
 
 export const presetConnectorEntrances = {

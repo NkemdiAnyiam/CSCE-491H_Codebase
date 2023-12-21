@@ -16,7 +16,7 @@ const {
   Entrance,
   Exit,
   Emphasis,
-  Translation,
+  Motion,
   ConnectorSetter,
   ConnectorEntrance,
   ConnectorExit,
@@ -108,7 +108,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       // set up options for moving job bars to correct location
       const jobLetter = jobBarEl.dataset.jobletter;
       const startCell = document.querySelector(`.time-graph__row[data-jobletterunsorted="${jobLetter}"] .time-graph__cell--${jobBarEl.dataset.start}`) as HTMLElement;
-      animSequence.addBlocks(Translation(jobBarEl, '~move-to', [startCell]));
+      animSequence.addBlocks(Motion(jobBarEl, '~move-to', [startCell]));
     });
     animSequence.addBlocks(
       Exit(paragraph_placeBars_unorder, '~fade-out', [], {duration: 250}),
@@ -133,7 +133,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     const jobBarsInitialArea = document.querySelector('.time-graph__job-bars') as HTMLElement;
     jobsUnsorted.forEach((job) => {
       const jobBarEl = job.getJobBar();
-      animSequence.addBlocks(Translation(jobBarEl, '~move-to', [jobBarsInitialArea], {startsNextBlock: true}));
+      animSequence.addBlocks(Motion(jobBarEl, '~move-to', [jobBarsInitialArea], {startsNextBlock: true}));
     });
 
     animTimeline.addSequences(animSequence);
@@ -160,7 +160,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       const rowSortedLetter = row.querySelector('.time-graph__job-letter--sorted');
       
       animSequence.addBlocks(
-        Translation(jobBarEl, '~move-to', [startCell]),
+        Motion(jobBarEl, '~move-to', [startCell]),
         Exit(rowUnsortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true}),
         Entrance(rowSJNum, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true, delay: 250}),
         Entrance(rowSortedLetter, '~wipe', ['from-right'], {duration: 250, startsWithPrevious: true}),
@@ -265,7 +265,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addBlocks(
-        Translation(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesAttemptForcefully: true}),
+        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesAttemptForcefully: true}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
         Entrance(cBar, '~wipe', ['from-top']),
@@ -287,7 +287,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`) as HTMLElement;
         rowSJNum = row.querySelector('.time-graph__SJ-num');
         animSequence.addBlocks(
-          Translation(cBar, '~move-to', [compatibleJobBarEl, {alignmentX: 'right', preserveY: true}]),
+          Motion(cBar, '~move-to', [compatibleJobBarEl, {alignmentX: 'right', preserveY: true}]),
           Emphasis(compatibleJobBarEl, '~highlight', []),
         );
         animSequence2.addBlocks(
@@ -299,7 +299,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       // Then point arrow from bottom of cbar to current c-array entry
       else {
         animSequence.addBlocks(
-          Translation(cBar, '~move-to', [timeGraphEl, {alignmentX: 'left', preserveY: true}]),
+          Motion(cBar, '~move-to', [timeGraphEl, {alignmentX: 'left', preserveY: true}]),
         );
         animSequence2.addBlocks(
           ConnectorSetter(timeGraphArrowEl, [cBar, 0, 1], [cBlock, 0.5, 0]),
@@ -381,7 +381,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'show naive',
     })
     .addBlocks(
-      Translation(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: '100%', offsetSelfY: '10rem'}], {duration: 0, commitStylesAttemptForcefully: true}),
+      Motion(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: '100%', offsetSelfY: '10rem'}], {duration: 0, commitStylesAttemptForcefully: true}),
       ConnectorSetter(connector_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       ConnectorEntrance(connector_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
@@ -401,7 +401,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive',
     })
     .addBlocks(
-      Translation(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem'}],
+      Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem'}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term1, '~highlight', []),
       ConnectorSetter(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
@@ -423,7 +423,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive p2'
     })
     .addBlocks(
-      Translation(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '100%', offsetSelfX: '-10rem', alignmentX: 'right'}],
+      Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '100%', offsetSelfX: '-10rem', alignmentX: 'right'}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term2, '~highlight', []),
       ConnectorSetter(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
@@ -466,7 +466,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Explain why naive approach is bad',
     })
     .addBlocks(
-      Translation(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem'}],
+      Motion(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem'}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       ConnectorSetter(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       ConnectorEntrance(connector_explainNaiveBad, '~trace', ['from-top']),
@@ -550,7 +550,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Show memoized algorithm',
     })
     .addBlocks(
-      Translation(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: '100%', offsetSelfX: '6.25rem', preserveY: true}],
+      Motion(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: '100%', offsetSelfX: '6.25rem', preserveY: true}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       ConnectorSetter(connector_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       ConnectorEntrance(connector_showMemoized, '~trace', ['from-A']),

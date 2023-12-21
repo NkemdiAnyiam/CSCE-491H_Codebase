@@ -955,7 +955,7 @@ export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 }
 
-export class TranslationBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class MotionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',
@@ -978,7 +978,7 @@ export class ScrollerBlock extends AnimBlock {
   }
 }
 
-export class ChangeBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class TransitionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }

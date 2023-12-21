@@ -5,7 +5,7 @@ const {
   Entrance,
   Exit,
   Emphasis,
-  Translation,
+  Motion,
   ConnectorSetter,
   ConnectorEntrance,
 } = WebFlik.createBanks({
