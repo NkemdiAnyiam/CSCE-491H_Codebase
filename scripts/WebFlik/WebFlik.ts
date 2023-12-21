@@ -1,6 +1,6 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollerBlock } from "./AnimBlock.js";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, TranslationBlock, ScrollerBlock, ChangeBlock } from "./AnimBlock.js";
 import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine.js";
-import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls } from "./Presets.js";
+import { presetEntrances, presetExits, presetEmphases, presetTranslations, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetChanges } from "./Presets.js";
 import { useEasing } from "./utils/easing.js";
 
 type KeyframesGenerator<T extends unknown> = {
@@ -102,6 +102,7 @@ class _WebFlik {
     const combinedExitBank = combineBanks(presetExits, exits as UserExitBank);
     const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
     const combinedTranslationBank = combineBanks(presetTranslations, translations as UserTranslationBank);
+    const combinedChangeBank = combineBanks({}, presetChanges);
     const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
     const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
     const combinedScrollsBank = combineBanks({}, presetScrolls);
@@ -120,6 +121,9 @@ class _WebFlik {
       Translation: function(domElem, animName, ...params) {
         return new TranslationBlock(domElem, animName, combinedTranslationBank, 'Translation').initialize(...params);
       },
+      Change: function(domElem, direction, ...params) {
+        return new ChangeBlock(domElem, direction, combinedChangeBank, 'Change').initialize(...params);
+      },
       ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as WbfkConnectorConfig) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
       },
@@ -137,6 +141,7 @@ class _WebFlik {
       Exit: BlockCreator<typeof combinedExitBank, ExitBlock>;
       Emphasis: BlockCreator<typeof combinedEmphasisBank, EmphasisBlock>;
       Translation: BlockCreator<typeof combinedTranslationBank, TranslationBlock>;
+      Change: BlockCreator<typeof combinedChangeBank, ChangeBlock>;
       ConnectorSetter: (
         connectorElem: WbfkConnector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],

@@ -1,4 +1,4 @@
-import { EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, TranslationBlock } from "./AnimBlock.js";
+import { ChangeBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, TranslationBlock } from "./AnimBlock.js";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine.js";
 import { IKeyframesBank } from "./WebFlik.js";
 import { negateNumString } from "./utils/helpers.js";
@@ -362,6 +362,29 @@ export const presetTranslations = {
     },
   },
 } satisfies IKeyframesBank<TranslationBlock>;
+
+
+export const presetChanges = {
+  ['~from']: {
+    generateKeyframes(keyframe: Keyframe) {
+      return [ [{...keyframe}, {}] ];
+    },
+    config: {
+      commitsStyles: false,
+    }
+  },
+
+  ['~to']: {
+    generateKeyframes(keyframe: Keyframe) {
+      const computedStyles = getComputedStyle(this.domElem);
+      const original = Object.keys(keyframe).reduce((acc, key) => {
+        return {...acc, [key]: computedStyles[key as keyof CSSStyleDeclaration]};
+      }, {});
+      return [ [original, {...keyframe}] ];
+    },
+  },
+} satisfies IKeyframesBank<ChangeBlock>;
+
 
 export const presetConnectorEntrances = {
   [`~fade-in`]: {

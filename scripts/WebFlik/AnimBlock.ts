@@ -977,3 +977,9 @@ export class ScrollerBlock extends AnimBlock {
     this.scrollableElem = scrollableElem;
   }
 }
+
+export class ChangeBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  protected get defaultConfig(): Partial<AnimBlockConfig> {
+    return {};
+  }
+}
