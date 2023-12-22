@@ -1,10 +1,10 @@
-import { JobScheduler } from './JobScheduler.js';
-import { SceneCreator } from './SceneCreator.js';
-import { AnimSequence } from './WebFlik/AnimSequence.js';
-import { AnimTimeline } from "./WebFlik/AnimTimeline.js";
-import { WebFlik } from './WebFlik/WebFlik.js';
-import { WbfkConnector } from './WebFlik/AnimBlockLine.js';
-import { Job } from './Job.js';
+import { JobScheduler } from './JobScheduler';
+import { SceneCreator } from './SceneCreator';
+import { AnimSequence } from './WebFlik/AnimSequence';
+import { AnimTimeline } from "./WebFlik/AnimTimeline";
+import { WebFlik } from './WebFlik/WebFlik';
+import { WbfkConnector } from './WebFlik/AnimBlockLine';
+import { Job } from './Job';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
 // (\s*)(\[ 'line)

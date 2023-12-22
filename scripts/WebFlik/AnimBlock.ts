@@ -1,9 +1,9 @@
-import { AnimSequence } from "./AnimSequence.js";
-import { AnimTimeline } from "./AnimTimeline.js";
-import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { mergeArrays } from "./utils/helpers.js";
-import { EasingString, useEasing } from "./utils/easing.js";
-import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors.js";
+import { AnimSequence } from "./AnimSequence";
+import { AnimTimeline } from "./AnimTimeline";
+import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
+import { mergeArrays } from "./utils/helpers";
+import { EasingString, useEasing } from "./utils/easing";
+import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors";
 
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {

@@ -1,5 +1,5 @@
-import { AnimBlock } from "./AnimBlock.js";
-import { AnimTimeline } from "./AnimTimeline.js";
+import { AnimBlock } from "./AnimBlock";
+import { AnimTimeline } from "./AnimTimeline";
 
 /**
  * This is the description of the interface

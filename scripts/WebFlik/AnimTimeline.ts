@@ -1,4 +1,4 @@
-import { AnimSequence } from "./AnimSequence.js";
+import { AnimSequence } from "./AnimSequence";
 
 type AnimTimelineConfig = {
   debugMode: boolean;

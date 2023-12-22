@@ -1,9 +1,9 @@
-import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock } from "./AnimBlock.js";
-import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine.js";
-import { IKeyframesBank } from "./WebFlik.js";
-import { negateNumString } from "./utils/helpers.js";
-import { MoveToOptions, TranslateOptions, CssLengthUnit } from "./utils/interfaces.js";
-import { useEasing } from "./utils/easing.js";
+import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock } from "./AnimBlock";
+import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
+import { IKeyframesBank } from "./WebFlik";
+import { negateNumString } from "./utils/helpers";
+import { MoveToOptions, TranslateOptions, CssLengthUnit } from "./utils/interfaces";
+import { useEasing } from "./utils/easing";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 

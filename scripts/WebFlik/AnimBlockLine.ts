@@ -1,7 +1,7 @@
-import { AnimBlock, AnimBlockConfig } from "./AnimBlock.js";
-import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik.js";
-import { InvalidElementError } from "./utils/errors.js";
-import { equalWithinTol } from "./utils/helpers.js";
+import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
+import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
+import { InvalidElementError } from "./utils/errors";
+import { equalWithinTol } from "./utils/helpers";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
