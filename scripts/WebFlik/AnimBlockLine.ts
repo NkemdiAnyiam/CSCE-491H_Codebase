@@ -66,11 +66,54 @@ export class WbfkConnector extends HTMLElement {
     const markerWidth: number = Number(this.getAttribute('marker-width')) || 5;
     const markerHeight: number = Number(this.getAttribute('marker-height')) || 7;
 
-    // TODO: Remember to change url in the actual package
     const htmlString = `
-      <link rel="stylesheet" href="/scripts/WebFlik/styles/connector.css">
-
       <style>
+        :host {
+          --a-marker-opacity: 1;
+          --b-marker-opacity: 1;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          display: initial;
+          line-height: 0 !important;
+          overflow: visible !important;
+          visibility: hidden !important;
+        }
+        
+        .connector__svg {
+          visibility: hidden !important;
+          overflow: visible !important;
+        }
+              
+        .connector__g-body {
+          visibility: initial;
+        }
+        
+        .connector__mask-group {
+          stroke: white !important;
+          fill: white !important;
+        }
+        
+        .connector__layer-group {
+                  
+        }
+        
+        .connector__line {
+          fill: none;
+        }
+        
+        .connector__line--mask {
+          stroke-dashoffset: 0 !important;
+        }
+        
+        .connector__line--layer {
+          stroke-dasharray: 1 !important;
+        }
+        
+        marker {
+          stroke: none;
+        }
+      
         .connector__line--layer {
           marker-start: url(#${markerIdPrefix}-a--layer);
           marker-end: url(#${markerIdPrefix}-b--layer);

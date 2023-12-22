@@ -69,11 +69,52 @@ class WbfkPlaybackButton extends HTMLElement {
     }
     this.action = action;
 
-    // TODO: Remember to change url in the actual package
     const htmlString = `
-      <link rel="stylesheet" href="/scripts/WebFlik/styles/playback-buttons.css">
-
       <style>
+        :host {
+          width: 8rem;
+          height: 8rem;
+          display: inline-block;
+          background-color: var(--color-gray-darker);
+          padding: 0.5rem !important;
+        
+          box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
+          transform: scale(1);
+          transition: all 0.02s;
+        
+          cursor: pointer;
+        }
+        
+        :host(.playback-button--disabledPointerFromPause),
+        :host(.playback-button--disabledPointerFromStepping) {
+          cursor: not-allowed;
+        }
+        
+        :host(.playback-button--disabledFromTimelineEdge),
+        :host(.playback-button--disabledFromPause),
+        :host(.playback-button--disabledFromStepping) {
+          background-color: var(--color-gray);
+          cursor: not-allowed;
+        }
+        
+        :host(.playback-button--pressed) {
+          transform: scale(0.90);
+          box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
+        }
+        
+        :host(.playback-button--pressed[trigger="press"]) {
+          background-color: var(--color-red);
+        }
+        
+        :host(.playback-button--pressed[trigger="hold"]) {
+          background-color: var(--color-green);
+        }
+        
+        .playback-button__symbol {
+          width: 100%;
+          height: auto;
+          fill: var(--color-gray-lightest);
+        }
       </style>
 
       <svg class="playback-button__symbol" xmlns="http://www.w3.org/2000/svg" width="81.83" height="81.83" viewBox="0 0 81.83 81.83">
@@ -153,7 +194,23 @@ class WbfkPlaybackButton extends HTMLElement {
 customElements.define('wbfk-playback-button', WbfkPlaybackButton);
 
 
+// function addCss(fileName: string) {
 
+//   var head = document.head;
+//   var link = document.createElement("link");
+
+//   link.type = "text/css";
+//   link.rel = "stylesheet";
+//   link.href = fileName;
+
+//   head.appendChild(link);
+// }
+
+// addCss('./styles/playback-buttons.css');
+
+// let sheet = document.createElement('style')
+// sheet.innerHTML = "div {border: 2px solid black; background-color: blue;}";
+// document.body.appendChild(sheet);
 
 
 
