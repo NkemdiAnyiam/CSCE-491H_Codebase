@@ -69,6 +69,7 @@ class WbfkPlaybackButton extends HTMLElement {
     }
     this.action = action;
 
+    // TODO: Remember to change url in the actual package
     const htmlString = `
       <link rel="stylesheet" href="/scripts/WebFlik/styles/playback-buttons.css">
 

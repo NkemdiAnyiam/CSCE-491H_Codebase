@@ -66,6 +66,7 @@ export class WbfkConnector extends HTMLElement {
     const markerWidth: number = Number(this.getAttribute('marker-width')) || 5;
     const markerHeight: number = Number(this.getAttribute('marker-height')) || 7;
 
+    // TODO: Remember to change url in the actual package
     const htmlString = `
       <link rel="stylesheet" href="/scripts/WebFlik/styles/connector.css">
 
