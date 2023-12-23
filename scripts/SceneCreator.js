@@ -72,7 +72,7 @@ export class SceneCreator {
     const numJobs = this._jobScheduler.getNumJobs();
 
     for (let i = 0; i <= numJobs; ++i) {
-      const jBlockString = `<div class="array__array-block array__array-block--${i} highlightable">${i}</div>`
+      const jBlockString = `<div class="array__array-block array__array-block--${i}">${i}</div>`
       array_J1.insertAdjacentHTML('beforeend', jBlockString);
       array_J2.insertAdjacentHTML('beforeend', jBlockString);
       

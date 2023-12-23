@@ -260,7 +260,7 @@ export const presetEmphases = {
       ]];
     },
     config: {
-      classesToAddOnStart: [`highlightable`],
+      classesToAddOnStart: [`wbfk-highlightable`],
       // invalidProp: 4,
     },
   },
@@ -273,7 +273,7 @@ export const presetEmphases = {
       ]];
     },
     config: {
-      classesToRemoveOnFinish: [`highlightable`],
+      classesToRemoveOnFinish: [`wbfk-highlightable`],
     },
   },
 } satisfies IKeyframesBank<EmphasisBlock>;

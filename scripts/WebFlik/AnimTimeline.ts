@@ -224,7 +224,7 @@ sheet.innerHTML = `
     visibility: hidden !important;
   }
 
-  .highlightable {
+  .wbfk-highlightable {
     background-image: linear-gradient(to right, var(--wbfk-highlight-color) 50%, transparent 50%);
     background-size: 202%;
     background-position-x: 100%;
