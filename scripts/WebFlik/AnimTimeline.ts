@@ -194,43 +194,8 @@ class WbfkPlaybackButton extends HTMLElement {
 customElements.define('wbfk-playback-button', WbfkPlaybackButton);
 
 
-function addCss(fileName: string) {
 
-  var head = document.head;
-  var link = document.createElement("link");
 
-  link.type = "text/css";
-  link.rel = "stylesheet";
-  link.href = fileName;
-
-  head.appendChild(link);
-}
-
-addCss('./styles/playback-buttons.css');
-
-let sheet = document.createElement('style');
-sheet.id = `wbfk-global-styles`;
-sheet.innerHTML = `
-  /* Using :where makes it possible to easily for developer to override the default color */
-  :where(:root) {
-    --wbfk-highlight-color: #F9F278;
-  }
-
-  .wbfk-hidden:not(.wbfk-override-hidden) {
-    display: none !important;
-  }
-
-  .wbfk-invisible:not(.wbfk-override-hidden) {
-    visibility: hidden !important;
-  }
-
-  .wbfk-highlightable {
-    background-image: linear-gradient(to right, var(--wbfk-highlight-color) 50%, transparent 50%);
-    background-size: 202%;
-    background-position-x: 100%;
-  }
-`;
-document.body.appendChild(sheet);
 
 
 

@@ -2,6 +2,7 @@ import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, Mo
 import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine";
 import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./Presets";
 import { useEasing } from "./utils/easing";
+import { createStyles } from "./utils/helpers";
 
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -185,3 +186,23 @@ class _WebFlik {
 }
 
 export const WebFlik = new _WebFlik();
+
+createStyles(`
+/* Using :where makes it possible to easily for developer to override the default color */
+:where(:root) {
+  --wbfk-highlight-color: #F9F278;
+}
+
+.wbfk-hidden:not(.wbfk-override-hidden) {
+  display: none !important;
+}
+
+.wbfk-invisible:not(.wbfk-override-hidden) {
+  visibility: hidden !important;
+}
+
+.wbfk-highlightable {
+  background-image: linear-gradient(to right, var(--wbfk-highlight-color) 50%, transparent 50%);
+  background-size: 202%;
+  background-position-x: 100%;
+}`);
