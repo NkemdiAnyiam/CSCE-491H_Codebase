@@ -92,7 +92,7 @@ class _WebFlik {
     includePresets: IncludePresets | void = true as IncludePresets
   ) {
     const {entrances, exits, emphases, translations} = customBankAddons;
-    _WebFlik.#checkBanksFormatting(entrances, exits, emphases, translations);
+    _WebFlik.checkBanksFormatting(entrances, exits, emphases, translations);
 
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
@@ -161,7 +161,7 @@ class _WebFlik {
     };
   }
 
-  static #checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
+  private static checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
     const errors: string[] = [];
     
     const checkForArrowFunctions = (bank?: IKeyframesBank) => {
