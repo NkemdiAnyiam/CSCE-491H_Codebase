@@ -288,7 +288,9 @@ export class WbfkConnector extends HTMLElement {
 
 customElements.define('wbfk-connector', WbfkConnector);
 
+/* @ts-ignore */
 if (window.CSS.registerProperty) {
+  /* @ts-ignore */
   window.CSS.registerProperty({
     name: "--b-marker-opacity",
     syntax: "<number>",
@@ -296,6 +298,7 @@ if (window.CSS.registerProperty) {
     initialValue: '1',
   });
 
+  /* @ts-ignore */
   window.CSS.registerProperty({
     name: "--a-marker-opacity",
     syntax: "<number>",

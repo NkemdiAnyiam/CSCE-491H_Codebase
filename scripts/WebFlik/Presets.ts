@@ -586,6 +586,7 @@ export const presetScrolls = {
 
       const forwardMutator = () => {
         this.scrollableElem.scrollTo({
+          /* @ts-ignore */
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
           ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
@@ -594,6 +595,7 @@ export const presetScrolls = {
 
       const backwardMutator = () => {
         this.scrollableElem.scrollTo({
+          /* @ts-ignore */
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
           ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
