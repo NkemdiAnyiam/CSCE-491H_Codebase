@@ -41,20 +41,6 @@ input {
   visibility: hidden;
 }
 
-.wbfk-hidden:not(.wbfk-override-hidden) {
-  display: none !important;
-}
-
-.wbfk-invisible:not(.wbfk-override-hidden) {
-  visibility: hidden !important;
-}
-
-.highlightable {
-  background-image: linear-gradient(to right, var(--color-yellow) 50%, transparent 50%);
-  background-size: 202%;
-  background-position-x: 100%;
-}
-
 .SJ-num,
 .SJ-related {
   color: var(--color-red);
