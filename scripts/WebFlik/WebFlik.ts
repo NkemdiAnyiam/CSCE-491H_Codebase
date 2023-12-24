@@ -79,7 +79,7 @@ class _WebFlik {
     UserEntranceBank extends IKeyframesBank = {},
     UserExitBank extends IKeyframesBank = {},
     UserEmphasisBank extends IKeyframesBank = {},
-    UserTranslationBank extends IKeyframesBank = {},
+    UserMotionBank extends IKeyframesBank = {},
     IncludePresets extends boolean = true
   >
   (
@@ -87,12 +87,12 @@ class _WebFlik {
       entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
       exits?: UserExitBank & IKeyframesBank<ExitBlock>;
       emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
-      translations?: UserTranslationBank & IKeyframesBank<MotionBlock>;
+      motions?: UserMotionBank & IKeyframesBank<MotionBlock>;
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) {
-    const {entrances, exits, emphases, translations} = customBankAddons;
-    _WebFlik.checkBanksFormatting(entrances, exits, emphases, translations);
+    const {entrances, exits, emphases, motions} = customBankAddons;
+    _WebFlik.checkBanksFormatting(entrances, exits, emphases, motions);
 
     type TogglePresets<TPresetBank, TUserBank> = Readonly<(IncludePresets extends true ? TPresetBank : {}) & TUserBank>;
 
@@ -102,7 +102,7 @@ class _WebFlik {
     const combinedEntranceBank = combineBanks(presetEntrances, entrances as UserEntranceBank);
     const combinedExitBank = combineBanks(presetExits, exits as UserExitBank);
     const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
-    const combinedMotionBank = combineBanks(presetMotions, translations as UserTranslationBank);
+    const combinedMotionBank = combineBanks(presetMotions, motions as UserMotionBank);
     const combinedTransitionBank = combineBanks({}, presetTransitions);
     const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
     const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
