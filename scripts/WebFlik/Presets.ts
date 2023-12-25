@@ -84,16 +84,19 @@ export const presetEntrances = {
 
   [`~rise-up`]: {
     generateKeyframeGenerators() {
-        const {top} = this.domElem.getBoundingClientRect();
-        return [
-          () => [
-            {translate: `0 ${window.innerHeight - top}px`, opacity: 0, easing: useEasing('power2-out')},
-            {translate: `0 -25px`, offset: 0.83333},
-            {translate: `0 -25px`, offset: 0.86, easing: useEasing('power1-in')},
-            {translate: `0 0`},
-          ],
-        ];
+      const {top} = this.domElem.getBoundingClientRect();
+      return [
+        () => [
+          {translate: `0 ${window.innerHeight - top}px`, opacity: 0, easing: useEasing('power2-out')},
+          {translate: `0 -25px`, offset: 0.83333},
+          {translate: `0 -25px`, offset: 0.86, easing: useEasing('power1-in')},
+          {translate: `0 0`},
+        ],
+      ];
     },
+    config: {
+      composite: 'accumulate',
+    }
   },
 
   [`~wipe`]: {
@@ -204,16 +207,19 @@ export const presetExits = {
 
   [`~sink-down`]: {
     generateKeyframeGenerators() {
-        const {top} = this.domElem.getBoundingClientRect();
-        return [
-          () => [
-            {translate: `0 0`, easing: useEasing('power1-out')},
-            {translate: `0 -25px`, offset: 0.14 },
-            {translate: `0 -25px`, easing: useEasing('power2-in'), offset: 0.16666666},
-            {translate: `0 ${window.innerHeight - top}px`, opacity: 0},
-          ],
-        ];
+      const {top} = this.domElem.getBoundingClientRect();
+      return [
+        () => [
+          {translate: `0 0`, easing: useEasing('power1-out')},
+          {translate: `0 -25px`, offset: 0.14 },
+          {translate: `0 -25px`, easing: useEasing('power2-in'), offset: 0.16666666},
+          {translate: `0 ${window.innerHeight - top}px`, opacity: 0},
+        ],
+      ];
     },
+    config: {
+      composite: 'accumulate',
+    }
   },
   
   [`~wipe`]: {
