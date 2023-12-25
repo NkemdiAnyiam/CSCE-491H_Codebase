@@ -159,8 +159,6 @@ export class SceneCreator {
       c[ j ] = ${job.getCompatibleJobNum()}`;
     jobBarEl.style.width = `calc(${18 * job.getDuration()}rem + 1px)`;
 
-    job.setJobBar(jobBarEl);
-
     return jobBarEl;
   }
   
