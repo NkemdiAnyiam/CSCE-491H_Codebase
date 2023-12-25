@@ -191,6 +191,11 @@ createStyles(`
 /* Using :where makes it possible to easily for developer to override the default color */
 :where(:root) {
   --wbfk-highlight-color: #F9F278;
+  --wbfk-playback-button-press-color: #db0000;
+  --wbfk-playback-button-hold-color: #62B720;
+  --wbfk-playback-button-disabled-color: gray;
+  --wbfk-playback-button-background-color: #444;
+  --wbfk-playback-button-symbol-color: white;
 }
 
 .wbfk-hidden:not(.wbfk-override-hidden) {

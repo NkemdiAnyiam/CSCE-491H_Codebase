@@ -75,7 +75,7 @@ class WbfkPlaybackButton extends HTMLElement {
           width: 8rem;
           height: 8rem;
           display: inline-block;
-          background-color: var(--color-gray-darker);
+          background-color: var(--wbfk-playback-button-background-color);
           padding: 0.5rem !important;
         
           box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
@@ -93,7 +93,7 @@ class WbfkPlaybackButton extends HTMLElement {
         :host(.playback-button--disabledFromTimelineEdge),
         :host(.playback-button--disabledFromPause),
         :host(.playback-button--disabledFromStepping) {
-          background-color: var(--color-gray);
+          background-color: var(--wbfk-playback-button-disabled-color);
           cursor: not-allowed;
         }
         
@@ -103,17 +103,17 @@ class WbfkPlaybackButton extends HTMLElement {
         }
         
         :host(.playback-button--pressed[trigger="press"]) {
-          background-color: var(--color-red);
+          background-color: var(--wbfk-playback-button-press-color);
         }
         
         :host(.playback-button--pressed[trigger="hold"]) {
-          background-color: var(--color-green);
+          background-color: var(--wbfk-playback-button-hold-color);
         }
         
         .playback-button__symbol {
           width: 100%;
           height: auto;
-          fill: var(--color-gray-lightest);
+          fill: var(--wbfk-playback-button-symbol-color);
         }
       </style>
 

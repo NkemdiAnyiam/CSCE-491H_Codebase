@@ -74,6 +74,8 @@ export class WbfkConnector extends HTMLElement {
           position: absolute !important;
           top: 0 !important;
           left: 0 !important;
+          stroke: black;
+          fill: black;
           display: initial;
           line-height: 0 !important;
           overflow: visible !important;
