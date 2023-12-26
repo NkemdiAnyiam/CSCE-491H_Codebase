@@ -345,6 +345,18 @@ export class AnimTimeline {
       };
     }
 
+    const warnButton = (button: WbfkPlaybackButton | null, purpose: string) => {
+      if (!button) {
+        console.warn(`${purpose} button for timeline named "${this.config.timelineName}" not found.`);
+      }
+    }
+
+    warnButton(forwardButton, 'Step Forward');
+    warnButton(pauseButton, 'Pause');
+    warnButton(backwardButton, 'Step Backward');
+    warnButton(fastForwardButton, 'Fast Forward');
+    warnButton(toggleSkippingButton, 'Toggle Skipping');
+
     return {
       forwardButton, backwardButton, pauseButton, fastForwardButton, toggleSkippingButton,
     };
