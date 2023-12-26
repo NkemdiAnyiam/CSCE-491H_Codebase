@@ -510,14 +510,22 @@ export class AnimTimeline {
       { throw new Error(`Skipping to tag "${tag}" with offset "${offset}" goes out of timeline bounds`); }
 
     this.usingSkipTo = true;
-    let wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then pause
+    let wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then re-pause
+    if (wasPaused) { this.togglePause(false); }
+    this.playbackButtons.toggleSkippingButton?.styleActivation();
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
-    if (wasPaused) { this.togglePause(); }
-    if (this.nextSeqIndex <= tagIndex)
-      { while (this.nextSeqIndex < tagIndex) { await this.stepForward(); } } // could be <= to play the sequence as well
-    else
-      { while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); } } // could be tagIndex+1 to prevent the sequence from being undone
-    if (wasPaused) { this.togglePause(); }
+    if (this.nextSeqIndex <= tagIndex) {
+      this.playbackButtons.forwardButton?.styleActivation();
+      while (this.nextSeqIndex < tagIndex) { await this.stepForward(); }
+      this.playbackButtons.forwardButton?.styleDeactivation();
+    } // could be <= to play the sequence as well
+    else {
+      this.playbackButtons.backwardButton?.styleActivation();
+      while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); }
+      this.playbackButtons.backwardButton?.styleDeactivation();
+    } // could be tagIndex+1 to prevent the sequence from being undone
+    this.playbackButtons.toggleSkippingButton?.styleDeactivation();
+    if (wasPaused) { this.togglePause(true); }
 
     this.usingSkipTo = false;
   }
