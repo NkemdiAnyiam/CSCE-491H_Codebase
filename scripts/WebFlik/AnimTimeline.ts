@@ -149,6 +149,8 @@ class WbfkPlaybackButton extends HTMLElement {
 
   activate: () => void = (): void => {};
   deactivate?: () => void = (): void => {};
+  styleActivation: () => void = (): void => {};
+  styleDeactivation: () => void = (): void => {};
 
   private handleMousePress = (e: MouseEvent): void => {
     if (e.button !== 0) { return; } // only allow left mouse click
@@ -265,37 +267,42 @@ export class AnimTimeline {
       forwardButton.activate = () => {
         if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
         
+        forwardButton.styleActivation();
+        this.step('forward', {viaButton: true}).then(() => { forwardButton.styleDeactivation(); });
+      }
+      forwardButton.styleActivation = () => {
         forwardButton.classList.add(PRESSED);
         backwardButton?.classList.remove(DISABLED_FROM_EDGE); // if stepping forward, we of course won't be at the left edge of timeline
         backwardButton?.classList.add(DISABLED_FROM_STEPPING);
         forwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
-
-        this.step('forward')
-        .then(() => {
-          forwardButton.classList.remove(PRESSED);
-          forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-          backwardButton?.classList.remove(DISABLED_FROM_STEPPING);
-          if (this.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
-        });
-      }
+      };
+      forwardButton.styleDeactivation = () => {
+        forwardButton.classList.remove(PRESSED);
+        forwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+        backwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+        if (this.atEnd) { forwardButton.classList.add(DISABLED_FROM_EDGE); }
+      };
     }
 
     if (backwardButton) {
       backwardButton.activate = () => {
         if (this.getIsStepping() || this.getIsPaused() || this.atBeginning) { return; }
 
+        backwardButton.styleActivation();
+        this.step('backward', {viaButton: true}).then(() => { backwardButton.styleDeactivation(); });
+      };
+
+      backwardButton.styleActivation = () => {
         backwardButton.classList.add(PRESSED);
         forwardButton?.classList.remove(DISABLED_FROM_EDGE);
         forwardButton?.classList.add(DISABLED_FROM_STEPPING);
         backwardButton.classList.add(DISABLED_POINTER_FROM_STEPPING);
-
-        this.step('backward')
-        .then(() => {
-          backwardButton.classList.remove(PRESSED);
-          forwardButton?.classList.remove(DISABLED_FROM_STEPPING);
-          backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
-          if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
-        });
+      };
+      backwardButton.styleDeactivation = () => {
+        backwardButton.classList.remove(PRESSED);
+        forwardButton?.classList.remove(DISABLED_FROM_STEPPING);
+        backwardButton.classList.remove(DISABLED_POINTER_FROM_STEPPING);
+        if (this.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
       };
 
       backwardButton.classList.add(DISABLED_FROM_EDGE);
@@ -303,44 +310,64 @@ export class AnimTimeline {
 
     if (pauseButton) {
       pauseButton.activate = () => {
+        pauseButton.styleActivation();
+        this.togglePause(true, {viaButton: true});
+      };
+      pauseButton.deactivate = () => {
+        pauseButton.styleDeactivation();
+        this.togglePause(false, {viaButton: true});
+      };
+
+      pauseButton.styleActivation = () => {
         pauseButton.active = true;
         pauseButton.classList.add(PRESSED);
         forwardButton?.classList.add(DISABLED_FROM_PAUSE);
         backwardButton?.classList.add(DISABLED_FROM_PAUSE);
-        this.togglePause(true);
       };
-      pauseButton.deactivate = () => {
+      pauseButton.styleDeactivation = () => {
         pauseButton.active = false;
         pauseButton.classList.remove(PRESSED);
         forwardButton?.classList.remove(DISABLED_FROM_PAUSE);
         backwardButton?.classList.remove(DISABLED_FROM_PAUSE);
-        this.togglePause(false);
       };
     }
 
     if (fastForwardButton) {
       fastForwardButton.activate = () => {
-        fastForwardButton.active = true;
-        fastForwardButton.classList.add(PRESSED);
+        fastForwardButton.styleActivation();
         this.setPlaybackRate(7);
       };
       fastForwardButton.deactivate = () => {
+        fastForwardButton.styleDeactivation();
+        this.setPlaybackRate(1);
+      };
+
+      fastForwardButton.styleActivation = () => {
+        fastForwardButton.active = true;
+        fastForwardButton.classList.add(PRESSED);
+      };
+      fastForwardButton.styleDeactivation = () => {
         fastForwardButton.active = false;
         fastForwardButton.classList.remove(PRESSED);
-        this.setPlaybackRate(1);
       };
     }
 
     if (toggleSkippingButton) {
       toggleSkippingButton.activate = () => {
-        toggleSkippingButton.classList.add(PRESSED);
-        toggleSkippingButton.active = true;
-        this.toggleSkipping(true);
+        toggleSkippingButton.styleActivation();
+        this.toggleSkipping(true, {viaButton: true});
       }
       toggleSkippingButton.deactivate = () => {
+        toggleSkippingButton.styleDeactivation();
+        this.toggleSkipping(false, {viaButton: true});
+      };
+      toggleSkippingButton.styleActivation = () => {
+        toggleSkippingButton.classList.add(PRESSED);
+        toggleSkippingButton.active = true;
+      };
+      toggleSkippingButton.styleDeactivation = () => {
         toggleSkippingButton.classList.remove(PRESSED);
         toggleSkippingButton.active = false;
-        this.toggleSkipping(false);
       };
     }
 
@@ -390,7 +417,10 @@ export class AnimTimeline {
   getIsPaused() { return this.isPaused; }
 
   // steps forward or backward and does error-checking
-  async step(direction: 'forward' | 'backward'): Promise<typeof direction> {
+  async step(direction: 'forward' | 'backward'): Promise<typeof direction>;
+  /** @internal */
+  async step(direction: 'forward' | 'backward', options: {viaButton: boolean}): Promise<typeof direction>;
+  async step(direction: 'forward' | 'backward', options?: {viaButton: boolean}): Promise<typeof direction> {
     if (this.isPaused) { throw new Error('Cannot step while playback is paused'); }
     if (this.isStepping) { throw new Error('Cannot step while already animating'); }
     this.isStepping = true;
@@ -398,15 +428,19 @@ export class AnimTimeline {
     let continueOn;
     switch(direction) {
       case 'forward':
+        if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleActivation(); }
         // reject promise if trying to step forward at the end of the timeline
         if (this.atEnd) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
         do {continueOn = await this.stepForward();} while(continueOn);
+        if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleDeactivation(); }
         break;
 
       case 'backward':
+        if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleActivation(); }
         // reject promise if trying to step backward at the beginning of the timeline
         if (this.atBeginning) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
         do {continueOn = await this.stepBackward();} while(continueOn);
+        if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleDeactivation(); }
         break;
 
       default:
@@ -488,8 +522,15 @@ export class AnimTimeline {
     this.usingSkipTo = false;
   }
 
-  toggleSkipping(isSkipping?: boolean): boolean {
+  toggleSkipping(isSkipping?: boolean): boolean;
+  /** @internal */
+  toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean;
+  toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean {
     this.isSkipping = isSkipping ?? !this.isSkipping;
+    if (!options?.viaButton) {
+      const button = this.playbackButtons.toggleSkippingButton;
+      this.isSkipping ? button?.styleActivation() : button?.styleDeactivation();
+    }
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
     if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipInProgressSequences(); }
     return this.isSkipping;
@@ -499,12 +540,17 @@ export class AnimTimeline {
   // tells the current AnimSequence to instantly finish its animations
 
   // pauses or unpauses playback
-  togglePause(isPaused?: boolean): boolean {
+  togglePause(isPaused?: boolean): boolean;
+  /** @internal */
+  togglePause(isPaused?: boolean, options?: { viaButton: boolean }): boolean;
+  togglePause(isPaused?: boolean, options?: { viaButton: boolean }): boolean {
     this.isPaused = isPaused ?? !this.isPaused;
     if (this.isPaused) {
+      if (!options?.viaButton) { this.playbackButtons.pauseButton?.styleActivation(); }
       this.doForInProgressSequences(sequence => sequence.pause());
     }
     else {
+      if (!options?.viaButton) { this.playbackButtons.pauseButton?.styleDeactivation(); }
       this.doForInProgressSequences(sequence => sequence.unpause());
       if (this.isSkipping) { this.skipInProgressSequences(); }
     }
