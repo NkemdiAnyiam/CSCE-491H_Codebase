@@ -261,7 +261,6 @@ export class AnimTimeline {
     const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="fast-forward"][timeline-name="${this.config.timelineName}"]`);
     const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="toggle-skipping"][timeline-name="${this.config.timelineName}"]`);
 
-    // TODO: log warning when buttons are not found
     if (forwardButton) {
       forwardButton.activate = () => {
         if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
@@ -422,7 +421,7 @@ export class AnimTimeline {
   }
 
   // plays current AnimSequence and increments nextSeqIndex
-  async stepForward(): Promise<boolean> {
+  private async stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
     const sequences = this.animSequences;
 
@@ -443,7 +442,7 @@ export class AnimTimeline {
   }
 
   // decrements nextSeqIndex and rewinds the AnimSequence
-  async stepBackward(): Promise<boolean> {
+  private async stepBackward(): Promise<boolean> {
     this.currDirection = 'backward';
     const prevSeqIndex = --this.nextSeqIndex;
     const sequences = this.animSequences;
