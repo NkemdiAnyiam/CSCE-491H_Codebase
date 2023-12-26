@@ -554,9 +554,11 @@ export class AnimTimeline {
     this.usingSkipTo = true;
     // if paused, then unpause to perform the skipping; then re-pause
     let wasPaused = this.isPaused;
-
     if (wasPaused) { this.togglePause(false); }
-    this.playbackButtons.toggleSkippingButton?.styleActivation();
+    // if skipping is not currently enabled, activate skipping button styling
+    let wasSkipping = this.isSkipping;
+    if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleActivation(); }
+
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
     if (this.nextSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
@@ -568,7 +570,8 @@ export class AnimTimeline {
       while (this.nextSeqIndex > targetIndex) { await this.stepBackward(); }
       this.playbackButtons.backwardButton?.styleDeactivation(); // could be tagIndex+1 to prevent the sequence from being undone
     }
-    this.playbackButtons.toggleSkippingButton?.styleDeactivation();
+
+    if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleDeactivation(); }
     if (wasPaused) { this.togglePause(true); }
 
     this.usingSkipTo = false;
