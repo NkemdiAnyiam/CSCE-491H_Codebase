@@ -3,6 +3,7 @@ import { AnimSequence } from "./AnimSequence";
 type AnimTimelineConfig = {
   debugMode: boolean;
   timelineName: string;
+  findsButtons: boolean;
 };
 
 type SequenceOperation = (sequence: AnimSequence) => void;
@@ -222,7 +223,13 @@ export class AnimTimeline {
   // CHANGE NOTE: AnimTimeline now stores references to in-progress sequences and also does not act directly on individual animations
   inProgressSequences: Map<number, AnimSequence> = new Map();
 
-  playbackButtons: PlaybackButtons;
+  playbackButtons: PlaybackButtons = {
+    backwardButton: null,
+    fastForwardButton: null,
+    forwardButton: null,
+    pauseButton: null,
+    toggleSkippingButton: null
+  };
 
   get numSequences(): number { return this.animSequences.length; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
@@ -238,19 +245,23 @@ export class AnimTimeline {
     this.config = {
       debugMode: false,
       timelineName: '',
+      findsButtons: true,
       ...config,
     };
 
-    this.playbackButtons = this.setupPlaybackControls();
+    if (this.config.findsButtons) {
+      this.playbackButtons = this.setupPlaybackControls();
+    }
   }
 
   setupPlaybackControls(): typeof this.playbackButtons {
-    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-forward"]`);
-    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-backward"]`);
-    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="pause"]`);
-    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="fast-forward"]`);
-    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="toggle-skipping"]`);
+    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-forward"][timeline-name="${this.config.timelineName}"]`);
+    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-backward"][timeline-name="${this.config.timelineName}"]`);
+    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="pause"][timeline-name="${this.config.timelineName}"]`);
+    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="fast-forward"][timeline-name="${this.config.timelineName}"]`);
+    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="toggle-skipping"][timeline-name="${this.config.timelineName}"]`);
 
+    // TODO: log warning when buttons are not found
     if (forwardButton) {
       forwardButton.activate = () => {
         if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }

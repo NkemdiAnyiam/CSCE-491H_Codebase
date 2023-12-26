@@ -10,7 +10,7 @@ import { Job } from './Job';
 // (\s*)(\[ 'line)
 
 
-const animTimeline = new AnimTimeline({debugMode: true});
+const animTimeline = new AnimTimeline({debugMode: true, timelineName: 'wis-viz'});
 
 const {
   Entrance,
