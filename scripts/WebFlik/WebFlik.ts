@@ -27,13 +27,7 @@ export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
 export type IKeyframesBank<T extends AnimBlock = AnimBlock> = Readonly<Record<string, KeyframesBankEntry<
-  Readonly<
-    Pick<T, 'animName'>
-    & (T extends (ConnectorEntranceBlock | ConnectorSetterBlock | ConnectorExitBlock) ? Pick<T, 'connectorElem'> : (
-      T extends ScrollerBlock ? Pick<T, 'scrollableElem'> : (
-        Pick<T, 'domElem'>
-      )
-  ))>
+  Readonly<Pick<T, 'animName' | 'domElem'>>
 >>>;
 
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
@@ -104,9 +98,9 @@ class _WebFlik {
     const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
     const combinedMotionBank = combineBanks(presetMotions, motions as UserMotionBank);
     const combinedTransitionBank = combineBanks({}, presetTransitions);
-    const combinedDrawConnectorBank = combineBanks({}, presetConnectorEntrances);
-    const combinedEraseConnectorBank = combineBanks({}, presetConnectorExits);
-    const combinedScrollsBank = combineBanks({}, presetScrolls);
+    const combinedDrawConnectorBank = combineBanks(presetConnectorEntrances, {});
+    const combinedEraseConnectorBank = combineBanks(presetConnectorExits, {});
+    const combinedScrollsBank = combineBanks(presetScrolls, {});
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {

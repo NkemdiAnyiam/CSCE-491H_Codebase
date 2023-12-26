@@ -963,18 +963,11 @@ export class MotionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEn
   }
 }
 
-export class ScrollerBlock extends AnimBlock {
-  scrollableElem: Element;
+export class ScrollerBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
     };
-  }
-
-  constructor(scrollableElem: Element | null, animName: string, bank: IKeyframesBank, category: string) {
-    super(scrollableElem, animName, bank, category);
-    if (!scrollableElem) { throw this.generateError(Error, `Something very wrong must have occured for this error to be thrown`); }
-    this.scrollableElem = scrollableElem;
   }
 }
 

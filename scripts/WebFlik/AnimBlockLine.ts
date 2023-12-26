@@ -310,7 +310,7 @@ if (window.CSS.registerProperty) {
 }
 
 export class ConnectorSetterBlock extends AnimBlock {
-  connectorElem: WbfkConnector;
+  domElem: WbfkConnector;
   previousPointA?: [elemA: Element, leftOffset: number, topOffset: number];
   previousPointB?: [elemB: Element, leftOffset: number, topOffset: number];
   pointA: [elemA: Element, leftOffset: number, topOffset: number];
@@ -350,7 +350,7 @@ export class ConnectorSetterBlock extends AnimBlock {
     // TODO: Validate offsets?
 
 
-    this.connectorElem = connectorElem;
+    this.domElem = connectorElem;
     this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];
     this.pointB = pointB as [elemB: Element, leftOffset: number, topOffset: number];
 
@@ -358,30 +358,30 @@ export class ConnectorSetterBlock extends AnimBlock {
   }
 
   protected _onStartForward(): void {
-    this.previousPointA = this.connectorElem.pointA;
-    this.previousPointB = this.connectorElem.pointB;
-    this.previousConnectorConfig.pointTrackingEnabled = this.connectorElem.pointTrackingEnabled;
-    this.connectorElem.pointA = this.pointA;
-    this.connectorElem.pointB = this.pointB;
-    this.connectorElem.pointTrackingEnabled = this.connectorConfig.pointTrackingEnabled;
+    this.previousPointA = this.domElem.pointA;
+    this.previousPointB = this.domElem.pointB;
+    this.previousConnectorConfig.pointTrackingEnabled = this.domElem.pointTrackingEnabled;
+    this.domElem.pointA = this.pointA;
+    this.domElem.pointB = this.pointB;
+    this.domElem.pointTrackingEnabled = this.connectorConfig.pointTrackingEnabled;
   }
 
   protected _onStartBackward(): void {
-    this.connectorElem.pointA = this.previousPointA;
-    this.connectorElem.pointB = this.previousPointB;
-    this.connectorElem.pointTrackingEnabled = this.previousConnectorConfig.pointTrackingEnabled;
+    this.domElem.pointA = this.previousPointA;
+    this.domElem.pointB = this.previousPointB;
+    this.domElem.pointTrackingEnabled = this.previousConnectorConfig.pointTrackingEnabled;
   }
 
   applyLineConfig(connectorConfig: Partial<WbfkConnectorConfig>): WbfkConnectorConfig {
     return {
-      pointTrackingEnabled: this.connectorElem.pointTrackingEnabled,
+      pointTrackingEnabled: this.domElem.pointTrackingEnabled,
       ...connectorConfig,
     };
   }
 }
 
 export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  connectorElem: WbfkConnector;
+  domElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -395,25 +395,25 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
 
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
-    this.connectorElem = connectorElem;
+    this.domElem = connectorElem;
   }
 
   protected _onStartForward(): void {
     this.domElem.classList.remove('wbfk-hidden');
-    this.connectorElem.updateEndpoints();
-    if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.continuouslyUpdateEndpoints();
+    this.domElem.updateEndpoints();
+    if (this.domElem.pointTrackingEnabled) {
+      this.domElem.continuouslyUpdateEndpoints();
     }
   }
 
   protected _onFinishBackward(): void {
-    this.connectorElem.cancelContinuousUpdates();
+    this.domElem.cancelContinuousUpdates();
     this.domElem.classList.add('wbfk-hidden');
   }
 }
 
 export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  connectorElem: WbfkConnector;
+  domElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
@@ -428,19 +428,19 @@ export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // if (!connectorElem) { throw new Error('Connector element must not be null'); }
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
 
-    this.connectorElem = connectorElem;
+    this.domElem = connectorElem;
   }
 
   protected _onStartBackward(): void {
     this.domElem.classList.remove('wbfk-hidden');
-    this.connectorElem.updateEndpoints();
-    if (this.connectorElem.pointTrackingEnabled) {
-      this.connectorElem.continuouslyUpdateEndpoints();
+    this.domElem.updateEndpoints();
+    if (this.domElem.pointTrackingEnabled) {
+      this.domElem.continuouslyUpdateEndpoints();
     }
   }
 
   protected _onFinishForward(): void {
-    this.connectorElem.cancelContinuousUpdates();
+    this.domElem.cancelContinuousUpdates();
     this.domElem.classList.add('wbfk-hidden');
   }
 }

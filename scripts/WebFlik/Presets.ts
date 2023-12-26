@@ -429,16 +429,16 @@ export const presetConnectorEntrances = {
           return [fromBFrames];
 
         case 'from-top':
-          return [this.connectorElem.ay <= this.connectorElem.by ? fromAFrames : fromBFrames];
+          return [this.domElem.ay <= this.domElem.by ? fromAFrames : fromBFrames];
 
         case 'from-bottom':
-          return [this.connectorElem.ay >= this.connectorElem.by ? fromAFrames : fromBFrames];
+          return [this.domElem.ay >= this.domElem.by ? fromAFrames : fromBFrames];
 
         case 'from-left':
-          return [this.connectorElem.ax <= this.connectorElem.bx ? fromAFrames : fromBFrames];
+          return [this.domElem.ax <= this.domElem.bx ? fromAFrames : fromBFrames];
 
         case 'from-right':
-          return [this.connectorElem.ax >= this.connectorElem.bx ? fromAFrames : fromBFrames];
+          return [this.domElem.ax >= this.domElem.bx ? fromAFrames : fromBFrames];
 
         default:
           throw new RangeError(`Invalid direction '${direction}' used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
@@ -481,16 +481,16 @@ export const presetConnectorExits = {
           return [fromEndFrames];
 
         case 'from-top':
-          return [this.connectorElem.ay <= this.connectorElem.by ? fromStartFrames : fromEndFrames];
+          return [this.domElem.ay <= this.domElem.by ? fromStartFrames : fromEndFrames];
 
         case 'from-bottom':
-          return [this.connectorElem.ay >= this.connectorElem.by ? fromStartFrames : fromEndFrames];
+          return [this.domElem.ay >= this.domElem.by ? fromStartFrames : fromEndFrames];
 
         case 'from-left':
-          return [this.connectorElem.ax <= this.connectorElem.bx ? fromStartFrames : fromEndFrames];
+          return [this.domElem.ax <= this.domElem.bx ? fromStartFrames : fromEndFrames];
 
         case 'from-right':
-          return [this.connectorElem.ax >= this.connectorElem.bx ? fromStartFrames : fromEndFrames];
+          return [this.domElem.ax >= this.domElem.bx ? fromStartFrames : fromEndFrames];
 
         default:
           throw new RangeError(`Invalid direction '${direction}' used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
@@ -588,10 +588,10 @@ export const presetScrolls = {
       const {
         fromXY: [x_from, y_from],
         toXY: [x_to, y_to]
-      } = setScrollies(this.scrollableElem, target, scrollOptions);
+      } = setScrollies(this.domElem, target, scrollOptions);
 
       const forwardMutator = () => {
-        this.scrollableElem.scrollTo({
+        this.domElem.scrollTo({
           /* @ts-ignore */
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
@@ -600,7 +600,7 @@ export const presetScrolls = {
       };
 
       const backwardMutator = () => {
-        this.scrollableElem.scrollTo({
+        this.domElem.scrollTo({
           /* @ts-ignore */
           behavior: "instant",
           ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
