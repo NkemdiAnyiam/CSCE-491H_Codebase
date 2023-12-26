@@ -1244,8 +1244,18 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkConnector, pa
 
 
 
-
-
+// wait(5000).then(async () => {
+//   await animTimeline.step('forward');
+//   await wait(1000);
+//   animTimeline.step('backward');
+//   await wait(200);
+//   animTimeline.togglePause();
+//   await wait(1000);
+//   animTimeline.togglePause();
+//   animTimeline.toggleSkipping();
+//   await wait(500);
+//   animTimeline.skipTo({position: 'end', offset: -1});
+// })
 
 
 
