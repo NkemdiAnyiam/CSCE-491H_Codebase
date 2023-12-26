@@ -496,34 +496,78 @@ export class AnimTimeline {
     return autorewindPrevious;
   }
 
-  // immediately skips to first AnimSequence in animSequences with matching tag field
-  async skipTo(tag: string, offset: number = 0): Promise<void> {
+  // immediately skips to first AnimSequence in animSequences with either matching tag field or position
+  async skipTo(options: Partial<{tag: string, position: never, offset: number}>): Promise<void>;
+  async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
+  async skipTo(options: Partial<{tag: string, position: 'beginning' | 'end', offset: number}> = {}): Promise<void> {
     if (this.isStepping) { throw new Error('Cannot use skipTo() while currently animating'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline'); }
-    if (!Number.isSafeInteger(offset)) { throw new Error(`Invalid offset "${offset}". Value must be an integer.`); }
 
-    // get nextSeqIndex corresponding to matching AnimSequence
-    const tagIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
-    if (tagIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found`); }
-    if (tagIndex < 0 || tagIndex  > this.numSequences)
-      { throw new Error(`Skipping to tag "${tag}" with offset "${offset}" goes out of timeline bounds`); }
+    const {
+      tag,
+      offset = 0,
+      position
+    } = options;
+
+    // cannot specify both tag and position
+    if (tag !== undefined && position !== undefined) {
+      throw new TypeError(`Skipping must be done while specifying either the tag or the position, not both. Received tag="${tag}" and position="${position}."`);
+    }
+    // can only specify one of tag or position, not both
+    if (tag === undefined && position === undefined) {
+      throw new TypeError(`Skipping must be done while specifying either the tag or the position. Neither were received.`);
+    }
+    if (!Number.isSafeInteger(offset)) { throw new TypeError(`Invalid offset "${offset}". Value must be an integer.`); }
+
+    let targetIndex: number;
+
+    // find target index based on finding sequence with matching tag
+    if (tag) {
+      // get nextSeqIndex corresponding to matching AnimSequence
+      targetIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
+      if (targetIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found`); }
+    }
+    // find target index based on either the beginning or end of the timeline
+    else {
+      switch(position!) {
+        case "beginning":
+          targetIndex = 0 + offset;
+          break;
+        case "end":
+          targetIndex = this.numSequences + offset;
+          break;
+        default: throw new RangeError(`Invalid skipTo() position "${position}". Must be "beginning" or "end".`);
+      }
+    }
+
+    // check to see if requested target index is within timeline bounds
+    {
+      const errorPrefixString = `Skipping to ${tag ? `tag "${tag}"` : `position "${position}"`} with offset "${offset}" goes`;
+      const errorPostfixString = `but requested index was ${targetIndex}.`;
+      if (targetIndex < 0)
+      { throw new RangeError(`${errorPrefixString} before timeline bounds. Minimium index = 0, ${errorPostfixString}`); }
+      if (targetIndex > this.numSequences)
+        { throw new RangeError(`${errorPrefixString} ahead of timeline bounds. Max index = ${this.numSequences}, ${errorPostfixString}`); }
+    }
 
     this.usingSkipTo = true;
-    let wasPaused = this.isPaused; // if paused, then unpause to perform the skipping; then re-pause
+    // if paused, then unpause to perform the skipping; then re-pause
+    let wasPaused = this.isPaused;
+
     if (wasPaused) { this.togglePause(false); }
     this.playbackButtons.toggleSkippingButton?.styleActivation();
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
-    if (this.nextSeqIndex <= tagIndex) {
+    if (this.nextSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
-      while (this.nextSeqIndex < tagIndex) { await this.stepForward(); }
+      while (this.nextSeqIndex < targetIndex) { await this.stepForward(); } // could be <= to play the sequence as well
       this.playbackButtons.forwardButton?.styleDeactivation();
-    } // could be <= to play the sequence as well
+    }
     else {
       this.playbackButtons.backwardButton?.styleActivation();
-      while (this.nextSeqIndex > tagIndex) { await this.stepBackward(); }
-      this.playbackButtons.backwardButton?.styleDeactivation();
-    } // could be tagIndex+1 to prevent the sequence from being undone
+      while (this.nextSeqIndex > targetIndex) { await this.stepBackward(); }
+      this.playbackButtons.backwardButton?.styleDeactivation(); // could be tagIndex+1 to prevent the sequence from being undone
+    }
     this.playbackButtons.toggleSkippingButton?.styleDeactivation();
     if (wasPaused) { this.togglePause(true); }
 
