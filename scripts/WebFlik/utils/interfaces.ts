@@ -22,6 +22,17 @@ export interface MoveToOptions extends TranslationOffset {
   preserveY: boolean; // if true, no vertical translation with respect to the target element (offsets still apply)
 }
 
+export type ScrollingOptions = {
+  scrollableOffset?: [x: number, y: number];
+  scrollableOffsetX?: number;
+  scrollableOffsetY?: number;
+  targetOffset?: [x: number, y: number];
+  targetOffsetX?: number;
+  targetOffsetY?: number;
+  preserveX?: boolean;
+  preserveY?: boolean;
+};
+
 export type CssLengthUnit = | 'px' | 'rem' | '%';
 export type CssLength = `${number}${CssLengthUnit}`;
 export type CssYAlignment = | 'top' | 'bottom' | 'center';
