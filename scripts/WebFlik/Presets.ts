@@ -1,8 +1,8 @@
 import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
 import { IKeyframesBank } from "./WebFlik";
-import { computeSelfScrollingBounds, negateNumString } from "./utils/helpers";
-import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions } from "./utils/interfaces";
+import { computeSelfScrollingBounds, negateNumString, splitXYAlignmentString, splitXYTupleString } from "./utils/helpers";
+import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions, CssXAlignment, CssYAlignment, CssLength } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
 
 /* JUMPING TABLE OF CONTENTS */
@@ -304,13 +304,17 @@ export const presetMotions = {
         throw new TypeError(`Target for ~move-to must not be null`);
       }
 
+      const alignmentComponents = splitXYAlignmentString(translationOptions.alignment);
+      const offsetSelfComponents = splitXYTupleString(translationOptions.offsetSelf);
+      const offsetTargetComponents = splitXYTupleString(translationOptions.offsetTarget);
+
       const {
-        alignmentX = 'left',
-        alignmentY = 'top',
-        offsetSelfX = '0px',
-        offsetSelfY = '0px',
-        offsetTargetX = '0px',
-        offsetTargetY = '0px',
+        alignmentX = alignmentComponents?.[0] ?? 'left',
+        alignmentY = alignmentComponents?.[1] ?? 'top',
+        offsetSelfX = offsetSelfComponents?.[0] ?? '0px',
+        offsetSelfY = offsetSelfComponents?.[1] ?? '0px',
+        offsetTargetX = offsetTargetComponents?.[0] ?? '0px',
+        offsetTargetY = offsetTargetComponents?.[1] ?? '0px',
         preserveX = false,
         preserveY = false,
       } = translationOptions;
@@ -363,11 +367,14 @@ export const presetMotions = {
 
   ['~translate']: {
     generateKeyframes(translationOptions: Partial<TranslateOptions> = {}): [Keyframe[], Keyframe[]] {
+      const translationComponents = splitXYTupleString(translationOptions.translate);
+      const offsetSelfComponents =  splitXYTupleString(translationOptions.offsetSelf);
+
       const {
-        translateX = '0px',
-        translateY = '0px',
-        offsetSelfX = '0px',
-        offsetSelfY = '0px',
+        translateX = translationComponents?.[0] ?? '0px',
+        translateY = translationComponents?.[1] ?? '0px',
+        offsetSelfX = offsetSelfComponents?.[0] ?? '0px',
+        offsetSelfY = offsetSelfComponents?.[1] ?? '0px',
       } = translationOptions;
       
       return [

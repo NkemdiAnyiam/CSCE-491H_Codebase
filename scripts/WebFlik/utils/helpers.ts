@@ -1,4 +1,4 @@
-import { ScrollingOptions } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -8,6 +8,13 @@ export const createStyles = (rules: string = ''): void => {
   sheet.id = `wbfk-global-styles`;
   sheet.innerHTML = rules;
   document.body.appendChild(sheet);
+}
+
+export const splitXYTupleString = (tupleStr: `${CssLength}, ${CssLength}` | undefined): [x: CssLength, y: CssLength] | undefined => {
+  return tupleStr?.split(', ') as [x: CssLength, y: CssLength] | undefined;
+}
+export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignment}` | undefined): [x: CssXAlignment, y: CssYAlignment] | undefined => {
+  return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 }
 
 export function computeSelfScrollingBounds(scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} {

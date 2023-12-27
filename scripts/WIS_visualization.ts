@@ -414,7 +414,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive',
     })
     .addBlocks(
-      Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem'}],
+      Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem', alignmentX: 'left'}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term1, '~highlight', []),
       ConnectorSetter(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
@@ -436,7 +436,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'explain naive p2'
     })
     .addBlocks(
-      Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '100%', offsetSelfX: '-10rem', alignmentX: 'right'}],
+      Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetSelf: '-10rem, 10rem', offsetTarget: '100%, 100%', alignmentX: 'right'}],
         {duration: 0, commitStylesAttemptForcefully: true}),
       Emphasis(algorithm_term2, '~highlight', []),
       ConnectorSetter(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
