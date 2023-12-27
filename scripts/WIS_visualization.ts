@@ -9,6 +9,17 @@ import { Job } from './Job';
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
 // (\s*)(\[ 'line)
 
+/* JUMPING TABLE OF CONTENTS */
+{() => {
+  generateVisualization
+  setUpDataDisplayScroll
+  animateDataDisplay
+  animateJobCard
+  animateJobStub
+}}
+
+
+
 
 const animTimeline = new AnimTimeline({debugMode: true, timelineName: 'wis-viz'});
 

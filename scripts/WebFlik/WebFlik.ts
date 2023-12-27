@@ -4,6 +4,29 @@ import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConn
 import { useEasing } from "./utils/easing";
 import { createStyles } from "./utils/helpers";
 
+/* JUMPING TABLE OF CONTENTS */
+{() => {
+type a =
+  KeyframesGenerator<any> |
+  KeyframesFunctionsGenerator<any> |
+  RafMutatorsGenerator<any> |
+  GeneratorParams<any>
+
+type b =
+  KeyframesBankEntry |
+  IKeyframesBank
+
+type c =
+  AnimationNameIn<any> |
+  BlockInitParams<any> |
+  BlockCreator<any>
+
+_WebFlik
+}}
+
+
+
+
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateKeyframeGenerators?: never;

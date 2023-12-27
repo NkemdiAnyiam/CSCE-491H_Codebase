@@ -3,9 +3,45 @@ import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { InvalidElementError } from "./utils/errors";
 import { equalWithinTol } from "./utils/helpers";
 
+/* JUMPING TABLE OF CONTENTS */
+() => {{
+type a =
+  WbfkConnectorConfig
+
+WbfkConnector;
+
+{
+  ConnectorSetterBlock;
+  ConnectorEntranceBlock;
+  ConnectorExitBlock;
+}
+}}
+
+
+
+
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
 };
+
+/* @ts-ignore */
+if (window.CSS.registerProperty) {
+  /* @ts-ignore */
+  window.CSS.registerProperty({
+    name: "--b-marker-opacity",
+    syntax: "<number>",
+    inherits: true,
+    initialValue: '1',
+  });
+
+  /* @ts-ignore */
+  window.CSS.registerProperty({
+    name: "--a-marker-opacity",
+    syntax: "<number>",
+    inherits: true,
+    initialValue: '1',
+  });
+}
 
 // CHANGE NOTE: Completely get rid of obsolete AnimBlockLineUpdater
 export class WbfkConnector extends HTMLElement {
@@ -289,25 +325,6 @@ export class WbfkConnector extends HTMLElement {
 }
 
 customElements.define('wbfk-connector', WbfkConnector);
-
-/* @ts-ignore */
-if (window.CSS.registerProperty) {
-  /* @ts-ignore */
-  window.CSS.registerProperty({
-    name: "--b-marker-opacity",
-    syntax: "<number>",
-    inherits: true,
-    initialValue: '1',
-  });
-
-  /* @ts-ignore */
-  window.CSS.registerProperty({
-    name: "--a-marker-opacity",
-    syntax: "<number>",
-    inherits: true,
-    initialValue: '1',
-  });
-}
 
 export class ConnectorSetterBlock extends AnimBlock {
   domElem: WbfkConnector;
