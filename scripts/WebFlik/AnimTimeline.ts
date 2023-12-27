@@ -371,9 +371,12 @@ export class AnimTimeline {
       };
     }
 
+    let wasWarned = false;
+
     const warnButton = (button: WbfkPlaybackButton | null, purpose: string) => {
       if (!button) {
         console.warn(`${purpose} button for timeline named "${this.config.timelineName}" not found.`);
+        wasWarned = true;
       }
     }
 
@@ -382,6 +385,12 @@ export class AnimTimeline {
     warnButton(backwardButton, 'Step Backward');
     warnButton(fastForwardButton, 'Fast Forward');
     warnButton(toggleSkippingButton, 'Toggle Skipping');
+    if (wasWarned) {
+      console.warn(
+        `For <wbfk-playback-button> tags to be detected, their timeline-name attributes must match this timeline's timelineName config option.`
+        + ` If this timeline does not need to detect any buttons, you may set its findsButtons config option to false.`
+      );
+    }
 
     return {
       forwardButton, backwardButton, pauseButton, fastForwardButton, toggleSkippingButton,
