@@ -1,20 +1,6 @@
 import { AnimBlock } from "./AnimBlock";
 import { AnimTimeline } from "./AnimTimeline";
 
-/* JUMPING TABLE OF CONTENTS */
-() => {{
-type a =
-  AnimSequenceConfig
-
-type b =
-  AnimationOperation
-
-AnimSequence;
-}}
-
-
-
-
 /**
  * This is the description of the interface
  *

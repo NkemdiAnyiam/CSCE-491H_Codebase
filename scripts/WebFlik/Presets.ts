@@ -5,18 +5,6 @@ import { computeSelfScrollingBounds, negateNumString, splitXYAlignmentString, sp
 import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions, CssXAlignment, CssYAlignment, CssLength } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
 
-/* JUMPING TABLE OF CONTENTS */
-{() => {
-presetEntrances
-presetExits
-presetEmphases
-presetMotions
-presetTransitions
-presetConnectorEntrances
-presetConnectorExits
-presetScrolls
-}}
-
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 type OrthoDirection = 'left' | 'top' | 'right' | 'bottom';

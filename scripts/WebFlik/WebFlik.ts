@@ -4,10 +4,6 @@ import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConn
 import { useEasing } from "./utils/easing";
 import { createStyles } from "./utils/helpers";
 
-
-
-
-
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateKeyframeGenerators?: never;

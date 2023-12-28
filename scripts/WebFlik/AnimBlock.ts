@@ -5,32 +5,6 @@ import { mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
 import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors";
 
-/* JUMPING TABLE OF CONTENTS */
-{() => {
-type a =
-  CustomKeyframeEffectOptions |
-  KeyframeTimingOptions |
-  AnimBlockConfig
-
-type b =
-  SegmentsCache
-
-WebFlikAnimation;
-
-AnimBlock;
-{
-  EntranceBlock;
-  ExitBlock;
-  EmphasisBlock;
-  MotionBlock;
-  ScrollerBlock;
-  TransitionBlock;
-}
-}}
-
-
-
-
 // TODO: Potentially create multiple extendable interfaces to separate different types of customization
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;

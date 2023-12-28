@@ -1,24 +1,5 @@
 import { AnimSequence } from "./AnimSequence";
 
-/* JUMPING TABLE OF CONTENTS */
-{() => {
-type a =
-  AnimTimelineConfig
-
-type b =
-  SequenceOperation
-
-type c =
-  PlaybackButtons
-
-WbfkPlaybackButton;
-
-AnimTimeline;
-}}
-
-
-
-
 type AnimTimelineConfig = {
   debugMode: boolean;
   timelineName: string;

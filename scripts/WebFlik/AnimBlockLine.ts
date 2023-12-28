@@ -3,23 +3,6 @@ import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { InvalidElementError } from "./utils/errors";
 import { equalWithinTol } from "./utils/helpers";
 
-/* JUMPING TABLE OF CONTENTS */
-() => {{
-type a =
-  WbfkConnectorConfig
-
-WbfkConnector;
-
-{
-  ConnectorSetterBlock;
-  ConnectorEntranceBlock;
-  ConnectorExitBlock;
-}
-}}
-
-
-
-
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
 };
