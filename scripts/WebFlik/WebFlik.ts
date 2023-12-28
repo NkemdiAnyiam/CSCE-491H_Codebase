@@ -4,25 +4,6 @@ import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConn
 import { useEasing } from "./utils/easing";
 import { createStyles } from "./utils/helpers";
 
-/* JUMPING TABLE OF CONTENTS */
-{() => {
-type a =
-  KeyframesGenerator<any> |
-  KeyframesFunctionsGenerator<any> |
-  RafMutatorsGenerator<any> |
-  GeneratorParams<any>
-
-type b =
-  KeyframesBankEntry |
-  IKeyframesBank
-
-type c =
-  AnimationNameIn<any> |
-  BlockInitParams<any> |
-  BlockCreator<any>
-
-_WebFlik
-}}
 
 
 
@@ -69,24 +50,6 @@ export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
   [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];
 }, string>;
 
-type BlockInitParams<
-  TBlock extends AnimBlock<TBank[AnimName]>,
-  TBank extends IKeyframesBank = IKeyframesBank<TBlock>,
-  AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>,
-> = Parameters<TBlock['initialize']>;
-
-type BlockCreator<
-  TBank extends IKeyframesBank,
-  TBlock extends AnimBlock = AnimBlock<TBank[AnimationNameIn<TBank>]>,
-  TElemType extends Element = Element,
-> = <AnimName extends AnimationNameIn<TBank> = AnimationNameIn<TBank>>(
-  domElem: TElemType | null,
-  animName: AnimName,
-  ...params: BlockInitParams<AnimBlock<TBank[AnimName]>, TBank, AnimName>
-) => TBlock;
-
-// type ShiftTuple<T extends any[]> =
-//   T extends [T[0], ...infer R] ? R : never;
 
 class _WebFlik {
   createBanks
@@ -97,6 +60,10 @@ class _WebFlik {
     UserExitBank extends IKeyframesBank = {},
     UserEmphasisBank extends IKeyframesBank = {},
     UserMotionBank extends IKeyframesBank = {},
+    _EmptyTransitionBank extends IKeyframesBank = {},
+    _EmptyConnectorEntranceBank extends IKeyframesBank = {},
+    _EmptyConnectorExitBank extends IKeyframesBank = {},
+    _EmptyScrollerBank extends IKeyframesBank = {},
     IncludePresets extends boolean = true
   >
   (
@@ -120,55 +87,67 @@ class _WebFlik {
     const combinedExitBank = combineBanks(presetExits, exits as UserExitBank);
     const combinedEmphasisBank = combineBanks(presetEmphases, emphases as UserEmphasisBank);
     const combinedMotionBank = combineBanks(presetMotions, motions as UserMotionBank);
-    const combinedTransitionBank = combineBanks({}, presetTransitions);
-    const combinedDrawConnectorBank = combineBanks(presetConnectorEntrances, {});
-    const combinedEraseConnectorBank = combineBanks(presetConnectorExits, {});
-    const combinedScrollsBank = combineBanks(presetScrolls, {});
+    const combinedTransitionBank = combineBanks(presetTransitions, {} as _EmptyTransitionBank);
+    const combinedConnectorEntranceBank = combineBanks(presetConnectorEntrances, {} as _EmptyConnectorEntranceBank);
+    const combinedConnectorExitBank = combineBanks(presetConnectorExits, {} as _EmptyConnectorExitBank);
+    const combinedScrollerBank = combineBanks(presetScrolls, {} as _EmptyScrollerBank);
 
     // return functions that can be used to instantiate AnimBlocks with intellisense for the combined banks
     return {
-      Entrance: function(domElem, animName, ...params) {
-        return new EntranceBlock(domElem, animName, combinedEntranceBank, 'Entrance').initialize(...params);
+      Entrance: function<
+        BankType extends typeof combinedEntranceBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(domElem: Element | null, animName: AnimName, ...params: Parameters<EntranceBlock<EntryType>['initialize']>) {
+        return new EntranceBlock<EntryType>(domElem, animName, combinedEntranceBank, 'Entrance').initialize(...params);
       },
-      Exit: function(domElem, animName, ...params) {
-        return new ExitBlock(domElem, animName, combinedExitBank, 'Exit').initialize(...params);
+
+      Exit: function<
+        BankType extends typeof combinedExitBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(domElem: Element | null, animName: AnimName, ...params: Parameters<ExitBlock<EntryType>['initialize']>) {
+        return new ExitBlock<EntryType>(domElem, animName, combinedExitBank, 'Exit').initialize(...params);
       },
-      Emphasis: function(domElem, animName, ...params) {
-        return new EmphasisBlock(domElem, animName, combinedEmphasisBank, 'Emphasis').initialize(...params);
+
+      Emphasis: function<
+        BankType extends typeof combinedEmphasisBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(domElem: Element | null, animName: AnimName, ...params: Parameters<EmphasisBlock<EntryType>['initialize']>) {
+        return new EmphasisBlock<EntryType>(domElem, animName, combinedEmphasisBank, 'Emphasis').initialize(...params);
       },
-      Motion: function(domElem, animName, ...params) {
-        return new MotionBlock(domElem, animName, combinedMotionBank, 'Motion').initialize(...params);
+
+      Motion: function<
+        BankType extends typeof combinedMotionBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(domElem: Element | null, animName: AnimName, ...params: Parameters<MotionBlock<EntryType>['initialize']>) {
+        return new MotionBlock<EntryType>(domElem, animName, combinedMotionBank, 'Motion').initialize(...params);
       },
-      Transition: function(domElem, direction, ...params) {
-        return new TransitionBlock(domElem, direction, combinedTransitionBank, 'Transition').initialize(...params);
+
+      Transition: function<
+        BankType extends typeof combinedTransitionBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(domElem: Element | null, animName: AnimName, ...params: Parameters<TransitionBlock<EntryType>['initialize']>) {
+        return new TransitionBlock<EntryType>(domElem, animName, combinedTransitionBank, 'Transition').initialize(...params);
       },
-      ConnectorSetter: function(connectorElem, pointA, pointB, connectorConfig = {} as WbfkConnectorConfig) {
-        return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
-      },
-      ConnectorEntrance: function(connectorElem, animName, ...params) {
-        return new ConnectorEntranceBlock(connectorElem, animName, combinedDrawConnectorBank, 'Connector Entrance').initialize(...params);
-      },
-      ConnectorExit: function(connectorElem, animName, ...params) {
-        return new ConnectorExitBlock(connectorElem, animName, combinedEraseConnectorBank, 'Connector Exit').initialize(...params);
-      },
-      Scroller: function(domElem, animName, ...params) {
-        return new ScrollerBlock(domElem, animName, combinedScrollsBank, 'Scroller').initialize(...params);
-      },
-    } satisfies {
-      Entrance: BlockCreator<typeof combinedEntranceBank, EntranceBlock>;
-      Exit: BlockCreator<typeof combinedExitBank, ExitBlock>;
-      Emphasis: BlockCreator<typeof combinedEmphasisBank, EmphasisBlock>;
-      Motion: BlockCreator<typeof combinedMotionBank, MotionBlock>;
-      Transition: BlockCreator<typeof combinedTransitionBank, TransitionBlock>;
-      ConnectorSetter: (
+
+      ConnectorSetter: function(
         connectorElem: WbfkConnector,
         pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
         pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
-        connectorConfig: WbfkConnectorConfig
-      ) => ConnectorSetterBlock;
-      ConnectorEntrance: BlockCreator<typeof combinedDrawConnectorBank, ConnectorEntranceBlock, WbfkConnector>;
-      ConnectorExit: BlockCreator<typeof combinedEraseConnectorBank, ConnectorExitBlock, WbfkConnector>;
-      Scroller: BlockCreator<typeof combinedScrollsBank, ScrollerBlock>;
+        connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig
+      ) {
+        return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
+      },
+
+      ConnectorEntrance: function<
+        BankType extends typeof combinedConnectorEntranceBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
+      >(connectorElem: WbfkConnector | null, animName: AnimName, ...params: Parameters<ConnectorEntranceBlock<EntryType>['initialize']>) {
+        return new ConnectorEntranceBlock<EntryType>(connectorElem, animName, combinedConnectorEntranceBank, 'Connector Entrance').initialize(...params);
+      },
+
+      ConnectorExit: function<BankType extends typeof combinedConnectorExitBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]>
+      (connectorElem: WbfkConnector | null, animName: AnimName, ...params: Parameters<ConnectorExitBlock<EntryType>['initialize']>)
+      { return new ConnectorExitBlock<EntryType>(connectorElem, animName, combinedConnectorExitBank, 'Connector Exit').initialize(...params); },
+      
+      Scroller: function
+      <BankType extends typeof combinedScrollerBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]>
+      (domElem: Element | null, animName: AnimName, ...params: Parameters<ScrollerBlock<EntryType>['initialize']>) {
+        return new ScrollerBlock<EntryType>(domElem, animName, combinedScrollerBank, 'Scroller').initialize(...params);
+      },
     };
   }
 
