@@ -96,10 +96,10 @@ export function invertEasing(easingString: EasingString): string {
       if (str.includes('start')) { return str.replace('start', 'end'); }
     }
   
-    throw new Error(`Invalid easing string ${easingString}`);
+    throw new Error(`Invalid easing string "${easingString}".`);
   }
   catch (err) {
-    throw new Error(`Invalid easing string ${easingString}.`);
+    throw new Error(`Invalid easing string "${easingString}".`);
   }
 }
 

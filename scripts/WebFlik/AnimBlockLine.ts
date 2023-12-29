@@ -338,13 +338,12 @@ export class ConnectorSetterBlock extends AnimBlock {
     ) {
     super(connectorElem, animName, bank, category);
 
-    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
     if (!(pointA?.[0] instanceof Element)) {
-      throw this.generateError(InvalidElementError, `Point A element must not be null`);
+      throw this.generateError(InvalidElementError, `Point A element must not be null or undefined.`);
     }
     if (!(pointB?.[0] instanceof Element)) {
-      throw this.generateError(InvalidElementError, `Point B element must not be null`);
+      throw this.generateError(InvalidElementError, `Point B element must not be null or undefined.`);
     }
 
     this.domElem = connectorElem;
@@ -390,8 +389,7 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
   constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
     super(connectorElem, animName, bank, category);
 
-    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
     this.domElem = connectorElem;
   }
 
@@ -422,8 +420,7 @@ export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
     super(connectorElem, animName, bank, category);
 
-    // if (!connectorElem) { throw new Error('Connector element must not be null'); }
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, 'Must pass Connector element'); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
 
     this.domElem = connectorElem;
   }

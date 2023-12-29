@@ -40,7 +40,7 @@ class WbfkPlaybackButton extends HTMLElement {
     switch(triggerMode) {
       case "press": break;
       case "hold": break;
-      default: throw new RangeError(`Invalid trigger attribute value ${triggerMode} for WebFlik playback button. Must be 'press' or 'hold'.`)
+      default: throw new RangeError(`Invalid 'trigger' attribute value "${triggerMode}" for WebFlik playback button. Must be "press" or "hold".`)
     }
     this.setAttribute('trigger', triggerMode);
     this.triggerMode = triggerMode;
@@ -63,7 +63,7 @@ class WbfkPlaybackButton extends HTMLElement {
       case "toggle-skipping":
         buttonShapeHtmlStr = `<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
         break;
-      default: throw new RangeError(`Invalid action attribute value ${action} for WebFlik playback button. Must be 'step-forward', 'step-backward', 'pause', 'fast-forward', or 'toggle-skipping'.`);
+      default: throw new RangeError(`Invalid 'action' attribute value "${action}" for WebFlik playback button. Must be "step-forward", "step-backward", "pause", "fast-forward", or "toggle-skipping".`);
     }
     this.action = action;
 
@@ -384,8 +384,8 @@ export class AnimTimeline {
     warnButton(toggleSkippingButton, 'Toggle Skipping');
     if (wasWarned) {
       console.warn(
-        `For <wbfk-playback-button> tags to be detected, their timeline-name attributes must match this timeline's timelineName config option.`
-        + ` If this timeline does not need to detect any buttons, you may set its findsButtons config option to false.`
+        `For <wbfk-playback-button> tags to be detected, their 'timeline-name' attributes must match this timeline's 'timelineName' config option.`
+        + ` If this timeline does not need to detect any buttons, you may set its 'findsButtons' config option to false.`
       );
     }
 
@@ -426,8 +426,8 @@ export class AnimTimeline {
   async step(direction: 'forward' | 'backward'): Promise<typeof direction>;
   /**@internal*/async step(direction: 'forward' | 'backward', options: {viaButton: boolean}): Promise<typeof direction>;
   async step(direction: 'forward' | 'backward', options?: {viaButton: boolean}): Promise<typeof direction> {
-    if (this.isPaused) { throw new Error('Cannot step while playback is paused'); }
-    if (this.isStepping) { throw new Error('Cannot step while already animating'); }
+    if (this.isPaused) { throw new Error('Cannot step while playback is paused.'); }
+    if (this.isStepping) { throw new Error('Cannot step while already animating.'); }
     this.isStepping = true;
 
     let continueOn;
@@ -435,7 +435,7 @@ export class AnimTimeline {
       case 'forward':
         if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleActivation(); }
         // reject promise if trying to step forward at the end of the timeline
-        if (this.atEnd) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline')}); }
+        if (this.atEnd) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline.')}); }
         do {continueOn = await this.stepForward();} while(continueOn);
         if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleDeactivation(); }
         break;
@@ -443,13 +443,13 @@ export class AnimTimeline {
       case 'backward':
         if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleActivation(); }
         // reject promise if trying to step backward at the beginning of the timeline
-        if (this.atBeginning) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline')}); }
+        if (this.atBeginning) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline.')}); }
         do {continueOn = await this.stepBackward();} while(continueOn);
         if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleDeactivation(); }
         break;
 
       default:
-        throw new Error(`Error: Invalid step direction '${direction}'. Must be 'forward' or 'backward'`);
+        throw new Error(`Invalid step direction "${direction}". Must be "forward" or "backward".`);
     }
 
     // TODO: Potentially rewrite async/await syntax
@@ -505,9 +505,9 @@ export class AnimTimeline {
   async skipTo(options: Partial<{tag: string, position: never, offset: number}>): Promise<void>;
   async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
   async skipTo(options: Partial<{tag: string, position: 'beginning' | 'end', offset: number}> = {}): Promise<void> {
-    if (this.isStepping) { throw new Error('Cannot use skipTo() while currently animating'); }
+    if (this.isStepping) { throw new Error('Cannot use skipTo() while currently animating.'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
-    if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline'); }
+    if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline.'); }
 
     const {
       tag,
@@ -531,7 +531,7 @@ export class AnimTimeline {
     if (tag) {
       // get nextSeqIndex corresponding to matching AnimSequence
       targetIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
-      if (targetIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found`); }
+      if (targetIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found.`); }
     }
     // find target index based on either the beginning or end of the timeline
     else {

@@ -54,7 +54,7 @@ export const presetEntrances = {
           case 'from-top-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-top')}px`;
           case 'from-bottom-left': return `${computeOrthoDist('from-left')}px ${computeOrthoDist('from-bottom')}px`;
           case 'from-bottom-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-bottom')}px`;
-          default: throw new RangeError(`Invalid fromDirection ${direction}. Must be 'from-left', 'from-right', 'from-top', 'from-bottom', 'from-top-left', 'from-top-right', 'from-bottom-left', or 'from-bottom-right'.`);
+          default: throw new RangeError(`Invalid fromDirection "${direction}". Must be "from-left", "from-right", "from-top", "from-bottom", "from-top-left", "from-top-right", "from-bottom-left", or "from-bottom-right".`);
         }
       };
 
@@ -127,7 +127,7 @@ export const presetEntrances = {
           ]];
 
         default:
-          throw new RangeError(`Invalid direction '${direction}' used in ~wipe. Must be 'from-top', 'from-right', 'from-bottom', or 'from-left'`);
+          throw new RangeError(`Invalid direction "${direction}". Must be "from-top", "from-right", "from-bottom", or "from-left"`);
       }
     }
   },
@@ -177,7 +177,7 @@ export const presetExits = {
           case 'to-top-right': return `${computeOrthoDist('to-right')}px ${computeOrthoDist('to-top')}px`;
           case 'to-bottom-left': return `${computeOrthoDist('to-left')}px ${computeOrthoDist('to-bottom')}px`;
           case 'to-bottom-right': return `${computeOrthoDist('to-right')}px ${computeOrthoDist('to-bottom')}px`;
-          default: throw new RangeError(`Invalid fromDirection ${direction}. Must be 'to-left', 'to-right', 'to-top', 'to-bottom', 'to-top-left', 'to-top-right', 'to-bottom-left', or 'to-bottom-right'.`);
+          default: throw new RangeError(`Invalid fromDirection "${direction}". Must be "to-left", "to-right", "to-top", "to-bottom", "to-top-left", "to-top-right", "to-bottom-left", or "to-bottom-right".`);
         }
       };
 
@@ -250,7 +250,7 @@ export const presetExits = {
           ]];
 
         default:
-          throw new RangeError(`Invalid direction '${direction}' used in ~wipe. Must be 'from-top', 'from-right', 'from-bottom', or 'from-left'`);
+          throw new RangeError(`Invalid direction "${direction}". Must be "from-top", "from-right", "from-bottom", or "from-left"`);
       }
     }
   },
@@ -446,7 +446,7 @@ export const presetConnectorEntrances = {
           return [this.domElem.ax >= this.domElem.bx ? fromAFrames : fromBFrames];
 
         default:
-          throw new RangeError(`Invalid direction '${direction}' used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new RangeError(`Invalid direction "${direction}". Must be "from-A", "from-B", "from-top", "from-bottom", "from-left", or "from-right"`);
       }
     },
   },
@@ -499,7 +499,7 @@ export const presetConnectorExits = {
           return [this.domElem.ax >= this.domElem.bx ? fromStartFrames : fromEndFrames];
 
         default:
-          throw new RangeError(`Invalid direction '${direction}' used in ~trace. Must be 'from-A', 'from-B', 'from-top', 'from-bottom', 'from-left', or 'from-right'`);
+          throw new RangeError(`Invalid direction "${direction}". Must be "from-A", "from-B", "from-top", "from-bottom", "from-left", or "from-right"`);
       }
     },
   },

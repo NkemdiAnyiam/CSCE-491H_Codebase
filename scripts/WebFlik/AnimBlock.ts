@@ -126,7 +126,7 @@ export class WebFlikAnimation extends Animation {
         super.effect = new KeyframeEffect(backwardEffect.target, backwardEffect.getKeyframes(), {...backwardEffect.getTiming(), composite: backwardEffect.composite});
         break;
       default:
-        throw this.errorGenerator(RangeError, `Invalid direction '${direction}' passed to setDirection(). Must be 'forward' or 'backward'`);
+        throw this.errorGenerator(RangeError, `Invalid direction "${direction}" passed to setDirection(). Must be "forward" or "backward".`);
     }
   }
   
@@ -244,7 +244,7 @@ export class WebFlikAnimation extends Animation {
         resetForwardPhases();
         resetBackwardPhases();
         break;
-      default: throw this.errorGenerator(RangeError, `Invalid direction '${direction}' used in resetPromises(). Must be 'forward', 'backward', or 'both'`);
+      default: throw this.errorGenerator(RangeError, `Invalid direction "${direction}" used in resetPromises(). Must be "forward", "backward", or "both."`);
     }
   }
 
@@ -268,11 +268,11 @@ export class WebFlikAnimation extends Animation {
 
       // check for out of bounds time positions
       if (phaseTimePosition < 0) {
-        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
+        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
         else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
       if (phaseTimePosition > phaseDuration) {
-        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
         else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
 
@@ -350,7 +350,7 @@ export class WebFlikAnimation extends Animation {
   ): void {
     // if the animation is already finished in the given direction, do nothing
     if (this.isFinished && this.direction === direction) {
-      console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message);
+      console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position "${timePosition}" will not be used because the time "${timePosition}" has already passed.`).message);
       return;
     }
     
@@ -358,11 +358,11 @@ export class WebFlikAnimation extends Animation {
 
     // check for out of bounds time positions
     if (phaseTimePosition < 0) {
-      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase '${phase}' resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`);}
+      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
       else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
     if (phaseTimePosition > phaseDuration) {
-      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase '${phase}'. Must be in the range [0, ${phaseDuration}] for this '${phase}'.`); }
+      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
       else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
 
@@ -377,7 +377,7 @@ export class WebFlikAnimation extends Animation {
         // but if the proceeding segement has already been reached in the loop, then the time at which the new promises
         // should be awaited as already passed
         if (currSegment[5].activated) {
-          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message);
+          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position "${timePosition}" will not be used because the time "${timePosition}" has already passed.`).message);
           return;
         }
 
@@ -397,7 +397,7 @@ export class WebFlikAnimation extends Animation {
       if (endDelay === currSegment[0]) {
         // but if curr segment is already completed, the time to await the promises has already passed
         if (currSegment[5].completed) {
-          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position '${timePosition}' will not be used because the time '${timePosition}' has already passed.`).message)
+          console.warn(this.errorGenerator(Error, `The new ${awaitedType}s set for time position "${timePosition}" will not be used because the time "${timePosition}" has already passed.`).message);
           return;
         }
 
@@ -428,7 +428,7 @@ export class WebFlikAnimation extends Animation {
         [segments, segmentsCache] = [anim.segmentsBackward, anim.segmentsBackwardCache];
         break;
       default:
-        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid direction '${direction}'. Must be 'forward' or 'backward'.`);
+        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid direction "${direction}". Must be "forward" or "backward".`);
     }
     const effect = anim.getEffect(direction);
     const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
@@ -463,7 +463,7 @@ export class WebFlikAnimation extends Animation {
         phaseEndDelayOffset = -(delay + duration);
         break;
       default:
-        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid phase '${phase}'. Must be 'delayPhase', 'activePhase', 'endDelayPhase', or 'whole'.`);
+        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid phase "${phase}". Must be "delayPhase", "activePhase", "endDelayPhase", or "whole".`);
     }
 
     // COMPUTE TIME POSITION RELATIVE TO PHASE
@@ -476,7 +476,7 @@ export class WebFlikAnimation extends Animation {
       // if timePosition is in percent format, convert to correct time value based on phase
       const match = timePosition.toString().match(/^(-?\d+(\.\d*)?)%$/);
       // note: this error should never occur
-      if (!match) { throw anim.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value '${timePosition}'.`); }
+      if (!match) { throw anim.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value "${timePosition}".`); }
 
       initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
     }
@@ -579,12 +579,12 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.id = AnimBlock.id++;
     
     if (!domElem) {
-      throw this.generateError(InvalidElementError, `Element must not be null`);
+      throw this.generateError(InvalidElementError, `Element must not be null or undefined.`);
     }
     
     // if empty bank was passed, generate a bank entry with a no-op animation
     if (Object.keys(bank).length === 0) { this.bankEntry = AnimBlock.emptyBankEntry as TBankEntry; }
-    else if (!bank[animName]) { throw this.generateError(RangeError, `Invalid ${this.category} animation name "${animName}"`); }
+    else if (!bank[animName]) { throw this.generateError(RangeError, `Invalid ${this.category} animation name "${animName}".`); }
     else { this.bankEntry = bank[animName] as TBankEntry; }
 
     this.domElem = domElem;
@@ -787,7 +787,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           break;
   
         default:
-          throw this.generateError(RangeError, `Invalid direction '${direction}' passed to animate(). Must be 'forward' or 'backward'`);
+          throw this.generateError(RangeError, `Invalid direction "${direction}" passed to animate(). Must be "forward" or "backward".`);
       }
     };
 
@@ -809,7 +809,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
               `Cannot commit animation styles while element is not rendered.` +
               ` To temporarily (instantly) override the hidden state, set the 'commitStylesForcefully' config option to true` +
               ` (however, if the element's ancestor is unrendered, this will still fail).` +
-              `\nTip: By default, Exit()'s config options use exitType: 'display-none', which unrenders the element. To just make the element invisible, change exitType to 'visibility-hidden'.`
+              `\nTip: By default, Exit()'s config options use exitType: "display-none", which unrenders the element. To just make the element invisible, change exitType to "visibility-hidden".`
             ));
           }
 
@@ -982,7 +982,7 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
 
     const exitType = userConfig.exitType ?? this.bankEntry.config?.exitType ?? this.defaultConfig.exitType!;
     if (exitType !== 'display-none' && exitType !== 'visibility-hidden') {
-      throw this.generateError(RangeError, `Invalid 'exitType' config value "${exitType}". Must be "display-none" or "visibility-hidden"`);
+      throw this.generateError(RangeError, `Invalid 'exitType' config value "${exitType}". Must be "display-none" or "visibility-hidden".`);
     }
     this.exitType = exitType;
 
