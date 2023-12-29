@@ -31,7 +31,7 @@ const {
         return [[{opacity: '1'}]]
       },
       config: {
-        exitType: 'visibility: hidden'
+        exitType: 'visibility-hidden'
       }
     },
     // 4: [{opacity: '1'}]

@@ -29,7 +29,7 @@ type KeyframeTimingOptions = {
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
 export type ExitBlockConfig = AnimBlockConfig & {
-  exitType: 'display: none' | 'visibility: hidden'
+  exitType: 'display-none' | 'visibility-hidden'
 };
 
 type Segment = [
@@ -813,8 +813,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           if (!this.commitStylesAttemptForcefully) {
             rejecter(this.generateError(CommitStylesError,
               `Cannot commit animation styles while element is not rendered.` +
-              ` To attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config setting to true` +
-              ` (however, if the element's ancestor is hidden, this will still fail).`
+              ` To attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config option to true` +
+              ` (however, if the element's ancestor is hidden, this will still fail).` +
+              `\nTip: By default, Exit()'s config options use exitType: 'display-none', which unrenders the element. To just make the element invisible, change exitType to 'visibility-hidden'.`
             ));
           }
 
@@ -828,7 +829,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
             rejecter(this.generateError(CommitStylesError,
-              `Failed to override element's hidden state with 'commitStylesAttemptForcefully to commit styles. Cannot commit styles if element is hidden by an ancestor.`
+              `Failed to commit styles by overriding element's hidden state with 'commitStylesAttemptForcefully'. Cannot commit styles if element is unrendered because of an unrendered ancestor.`
             ));
           }
         }
@@ -930,11 +931,11 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 
   protected _onStartForward(): void {
     if (this.domElem.classList.contains('wbfk-hidden')) {
-      this.backwardsHidingMethod = 'display: none';
+      this.backwardsHidingMethod = 'display-none';
       this.domElem.classList.remove('wbfk-hidden');
     }
     else if (this.domElem.classList.contains('wbfk-invisible')) {
-      this.backwardsHidingMethod = 'visibility: hidden';
+      this.backwardsHidingMethod = 'visibility-hidden';
       this.domElem.classList.remove('wbfk-invisible');
     }
     // TODO: throw specific error here
@@ -945,8 +946,8 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
 
   protected _onFinishBackward(): void {
     switch(this.backwardsHidingMethod) {
-      case "display: none": this.domElem.classList.add('wbfk-hidden'); break;
-      case "visibility: hidden": this.domElem.classList.add('wbfk-invisible'); break;
+      case "display-none": this.domElem.classList.add('wbfk-hidden'); break;
+      case "visibility-hidden": this.domElem.classList.add('wbfk-invisible'); break;
       default: throw this.generateError(Error, `This error should NEVER be reached`);
     }
   }
@@ -959,7 +960,7 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
     return {
       commitsStyles: false,
       pregeneratesKeyframes: true,
-      exitType: 'display: none',
+      exitType: 'display-none',
     };
   }
 
@@ -973,15 +974,15 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
 
   protected _onFinishForward(): void {
     switch(this.exitType) {
-      case "display: none": this.domElem.classList.add('wbfk-hidden'); break;
-      case "visibility: hidden": this.domElem.classList.add('wbfk-invisible'); break;
+      case "display-none": this.domElem.classList.add('wbfk-hidden'); break;
+      case "visibility-hidden": this.domElem.classList.add('wbfk-invisible'); break;
     }
   }
 
   protected _onStartBackward(): void {
     switch(this.exitType) {
-      case "display: none": this.domElem.classList.remove('wbfk-hidden'); break;
-      case "visibility: hidden": this.domElem.classList.remove('wbfk-invisible'); break;
+      case "display-none": this.domElem.classList.remove('wbfk-hidden'); break;
+      case "visibility-hidden": this.domElem.classList.remove('wbfk-invisible'); break;
     }
   }
 }
