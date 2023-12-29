@@ -813,7 +813,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           if (!this.commitStylesForcefully) {
             rejecter(this.generateError(CommitStylesError,
               `Cannot commit animation styles while element is not rendered.` +
-              ` To temporarily (instantly) override the hidden state, set the 'commitStylesAttemptForcefully' config option to true` +
+              ` To temporarily (instantly) override the hidden state, set the 'commitStylesForcefully' config option to true` +
               ` (however, if the element's ancestor is unrendered, this will still fail).` +
               `\nTip: By default, Exit()'s config options use exitType: 'display-none', which unrenders the element. To just make the element invisible, change exitType to 'visibility-hidden'.`
             ));
