@@ -1,7 +1,7 @@
 import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
 import { IKeyframesBank } from "./WebFlik";
-import { computeSelfScrollingBounds, negateNumString, splitXYAlignmentString, splitXYTupleString } from "./utils/helpers";
+import { computeSelfScrollingBounds, negateNumString, overrideHidden, splitXYAlignmentString, splitXYTupleString, unOverrideHidden } from "./utils/helpers";
 import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
 
@@ -308,13 +308,11 @@ export const presetMotions = {
       } = translationOptions;
       
       // get the bounding boxes of our DOM element and the target element
-      // TODO: Find better spot for visibility override
-      this.domElem.classList.value += ` wbfk-override-hidden`;
-      targetElem.classList.value += ` wbfk-override-hidden`;
+      // TODO: Make available to developers a way to forcefully get the bounding rect
+      overrideHidden(this.domElem, targetElem);
       const rectSelf = this.domElem.getBoundingClientRect();
       const rectTarget = targetElem.getBoundingClientRect();
-      this.domElem.classList.value = this.domElem.classList.value.replace(` wbfk-override-hidden`, '');
-      targetElem.classList.value = targetElem.classList.value.replace(` wbfk-override-hidden`, '');
+      unOverrideHidden(this.domElem, targetElem);
 
       // the displacement will start as the difference between the target element's position and our element's position
       const baseXTrans: number = alignmentX === 'center'

@@ -1,7 +1,7 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { InvalidElementError } from "./utils/errors";
-import { equalWithinTol } from "./utils/helpers";
+import { equalWithinTol, overrideHidden, unOverrideHidden } from "./utils/helpers";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -254,12 +254,12 @@ export class WbfkConnector extends HTMLElement {
     // the override class is appended without classList.add() so that multiple applications...
     // of the class do not interfere with each other upon removal
     const [aHidden, bHidden] = [pointA[0].classList.value.includes('wbfk-hidden'), pointB[0].classList.value.includes('wbfk-hidden')];
-    if (aHidden) pointA[0].classList.value += ` wbfk-override-hidden`;
-    if (bHidden) pointB[0].classList.value += ` wbfk-override-hidden`;
+    if (aHidden) overrideHidden(pointA[0]);
+    if (bHidden) overrideHidden(pointB[0]);
     const {left: aLeft, right: aRight, top: aTop, bottom: aBottom} = pointA[0].getBoundingClientRect();
     const {left: bLeft, right: bRight, top: bTop, bottom: bBottom} = pointB[0].getBoundingClientRect();
-    if (aHidden) pointA[0].classList.value = pointA[0].classList.value.replace(` wbfk-override-hidden`, '');
-    if (bHidden) pointB[0].classList.value = pointB[0].classList.value.replace(` wbfk-override-hidden`, '');
+    if (aHidden) unOverrideHidden(pointA[0]);
+    if (bHidden) unOverrideHidden(pointB[0]);
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
@@ -346,9 +346,6 @@ export class ConnectorSetterBlock extends AnimBlock {
     if (!(pointB?.[0] instanceof Element)) {
       throw this.generateError(InvalidElementError, `Point B element must not be null`);
     }
-
-    // TODO: Validate offsets?
-
 
     this.domElem = connectorElem;
     this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];

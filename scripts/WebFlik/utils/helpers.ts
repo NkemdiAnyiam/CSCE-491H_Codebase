@@ -4,11 +4,11 @@ export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
 export const negateNumString = (str: string): string => str[0] === '-' ? str.slice(1) : `-${str}`;
 export const createStyles = (rules: string = ''): void => {
-  let sheet = document.createElement('style');
+  const sheet = document.createElement('style');
   sheet.id = `wbfk-global-styles`;
   sheet.innerHTML = rules;
   document.body.appendChild(sheet);
-}
+};
 
 export const getOpeningTag = (element: Element): string => {
   const htmlText = element.outerHTML;
@@ -17,14 +17,17 @@ export const getOpeningTag = (element: Element): string => {
   return htmlText.substring(start, end + 1);
 };
 
+export const overrideHidden = (...elements: Element[]): void => { for (const element of elements) {element.classList.value += ` wbfk-override-hidden`} };
+export const unOverrideHidden = (...elements: Element[]): void => { for (const element of elements) {element.classList.value = element.classList.value.replace(` wbfk-override-hidden`, '')} };
+
 export const splitXYTupleString = (tupleStr: `${CssLength}, ${CssLength}` | undefined): [x: CssLength, y: CssLength] | undefined => {
   return tupleStr?.split(', ') as [x: CssLength, y: CssLength] | undefined;
-}
+};
 export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignment}` | undefined): [x: CssXAlignment, y: CssYAlignment] | undefined => {
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
-}
+};
 
-export function computeSelfScrollingBounds(scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} {
+export const computeSelfScrollingBounds = (scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} => {
   // determines the intersection point of the target
   const offsetPercX: number = scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? 0;
   const offsetPercY: number = scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? 0;
@@ -86,4 +89,4 @@ export function computeSelfScrollingBounds(scrollable: Element, target: Element,
   }
 
   return {fromXY, toXY};
-}
+};
