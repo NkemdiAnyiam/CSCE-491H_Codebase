@@ -20,15 +20,18 @@ type RafMutatorsGenerator<T extends unknown> = {
   generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardMutator: () => void, backwardMutator: () => void];
 };
 
-export type KeyframesBankEntry<T extends unknown = unknown> = Readonly<
-  { config?: Partial<AnimBlockConfig>; }
-  & (KeyframesGenerator<T> | KeyframesFunctionsGenerator<T> | RafMutatorsGenerator<T>)
+export type KeyframesBankEntry<TBlockThis extends unknown = unknown, TConfig extends unknown = unknown> = Readonly<
+  { config?: Partial<TConfig>; }
+  & (KeyframesGenerator<TBlockThis> | KeyframesFunctionsGenerator<TBlockThis> | RafMutatorsGenerator<TBlockThis>)
 >;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
-export type IKeyframesBank<T extends AnimBlock = AnimBlock> = Readonly<Record<string, KeyframesBankEntry<
-  Readonly<Pick<T, 'animName' | 'domElem'>>
->>>;
+export type IKeyframesBank<TBlock extends AnimBlock = AnimBlock, TBlockConfig extends unknown = AnimBlockConfig> = Readonly<
+  Record<string, KeyframesBankEntry<
+    Readonly<Pick<TBlock, 'animName' | 'domElem'>>,
+    TBlockConfig
+  >>
+>;
 
 export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
