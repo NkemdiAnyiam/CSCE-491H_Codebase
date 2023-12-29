@@ -1,5 +1,4 @@
-import { WbfkConnector } from "../WebFlik/AnimBlockLine";
-import { WebFlik } from "../WebFlik/WebFlik";
+import { WebFlik, WbfkConnector } from "../WebFlik";
 
 const {
   Entrance,

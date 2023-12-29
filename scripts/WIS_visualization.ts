@@ -1,9 +1,6 @@
 import { JobScheduler } from './JobScheduler';
 import { SceneCreator } from './SceneCreator';
-import { AnimSequence } from './WebFlik/AnimSequence';
-import { AnimTimeline } from "./WebFlik/AnimTimeline";
-import { WebFlik } from './WebFlik/WebFlik';
-import { WbfkConnector } from './WebFlik/AnimBlockLine';
+import { WebFlik, AnimTimeline, AnimSequence, WbfkConnector } from './WebFlik';
 import { Job } from './Job';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
