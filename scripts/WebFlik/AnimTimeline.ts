@@ -23,15 +23,12 @@ class WbfkPlaybackButton extends HTMLElement {
   private _mouseHeld: boolean = false;
   private _shortcutHeld: boolean = false;
   private _active: boolean = false;
-  public get mouseHeld(): boolean { return this._mouseHeld; }
-  /** @internal */
-  public set mouseHeld(value: boolean) { this._mouseHeld = value; }
-  public get shortcutHeld(): boolean { return this._shortcutHeld; }
-  /** @internal */
-  public set shortcutHeld(value: boolean) { this._shortcutHeld = value; }
-  public get active(): boolean { return this._active; }
-  /** @internal */
-  public set active(value: boolean) { this._active = value; }
+  get mouseHeld(): boolean { return this._mouseHeld; }
+  /**@internal*/set mouseHeld(value: boolean) { this._mouseHeld = value; }
+  get shortcutHeld(): boolean { return this._shortcutHeld; }
+  /**@internal*/set shortcutHeld(value: boolean) { this._shortcutHeld = value; }
+  get active(): boolean { return this._active; }
+  /**@internal*/set active(value: boolean) { this._active = value; }
 
   constructor() {
     super();
@@ -427,8 +424,7 @@ export class AnimTimeline {
 
   // steps forward or backward and does error-checking
   async step(direction: 'forward' | 'backward'): Promise<typeof direction>;
-  /** @internal */
-  async step(direction: 'forward' | 'backward', options: {viaButton: boolean}): Promise<typeof direction>;
+  /**@internal*/async step(direction: 'forward' | 'backward', options: {viaButton: boolean}): Promise<typeof direction>;
   async step(direction: 'forward' | 'backward', options?: {viaButton: boolean}): Promise<typeof direction> {
     if (this.isPaused) { throw new Error('Cannot step while playback is paused'); }
     if (this.isStepping) { throw new Error('Cannot step while already animating'); }
@@ -587,8 +583,7 @@ export class AnimTimeline {
   }
 
   toggleSkipping(isSkipping?: boolean): boolean;
-  /** @internal */
-  toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean;
+  /**@internal*/toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean;
   toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean {
     this.isSkipping = isSkipping ?? !this.isSkipping;
     if (!options?.viaButton) {
@@ -605,8 +600,7 @@ export class AnimTimeline {
 
   // pauses or unpauses playback
   togglePause(isPaused?: boolean): boolean;
-  /** @internal */
-  togglePause(isPaused?: boolean, options?: { viaButton: boolean }): boolean;
+  /**@internal*/togglePause(isPaused?: boolean, options?: { viaButton: boolean }): boolean;
   togglePause(isPaused?: boolean, options?: { viaButton: boolean }): boolean {
     this.isPaused = isPaused ?? !this.isPaused;
     if (this.isPaused) {

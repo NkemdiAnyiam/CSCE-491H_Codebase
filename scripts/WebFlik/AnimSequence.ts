@@ -208,7 +208,7 @@ export class AnimSequence implements AnimSequenceConfig {
     this.useCompoundedPlaybackRate();
   }
 
-  useCompoundedPlaybackRate() {
+  /**@internal*/useCompoundedPlaybackRate() {
     this.doForInProgressBlocks(animBlock => animBlock.useCompoundedPlaybackRate());
   }
 

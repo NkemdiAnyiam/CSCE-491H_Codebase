@@ -308,7 +308,6 @@ export class WebFlikAnimation extends Animation {
     });
   }
 
-  /** @internal */
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
@@ -316,6 +315,7 @@ export class WebFlikAnimation extends Animation {
     ...promises: Promise<unknown>[]
   ): void;
   addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<unknown>[]): void;
+  /**@internal*/
   addIntegrityblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
@@ -535,8 +535,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   bankEntry: TBankEntry;
   animArgs: GeneratorParams<TBankEntry> = {} as GeneratorParams<TBankEntry>;
   domElem: Element;
-  /** @internal */
-  get rafLoopsProgress(): number {
+  /**@internal*/get rafLoopsProgress(): number {
     const { progress, direction } = this.animation.effect!.getComputedTiming();
     // ?? 1 because during the active phase (the only time when raf runs), null progress means finished
     return direction === 'normal' ? (progress ?? 1) : 1 - (progress ?? 1);
@@ -552,13 +551,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   classesToRemoveOnFinish: string[] = [];
   classesToRemoveOnStart: string[] = [];
   pregeneratesKeyframes: boolean = false;
-  /** @internal */
-  keyframesGenerators?: {
+  /**@internal*/keyframesGenerators?: {
     forwardGenerator: () => Keyframe[];
     backwardGenerator?: () => Keyframe[];
   };
-  /** @internal */
-  rafMutators?: {
+  /**@internal*/rafMutators?: {
     forwardMutator: () => void;
     backwardMutator: () => void;
   };
@@ -592,9 +589,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 
     this.domElem = domElem;
   }
-
-  /** @internal */
-  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): this {
+  
+  /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<AnimBlockConfig> = {}): this {
     this.animArgs = animArgs;
     const mergedConfig = this.mergeConfigs(userConfig, this.bankEntry.config ?? {});
     Object.assign(this, mergedConfig);
@@ -686,8 +682,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return this;
   }
 
-  /** @internal */
-  setID(idSeq: number, idTimeline: number): void {
+  /**@internal*/setID(idSeq: number, idTimeline: number): void {
     [this.sequenceID, this.timelineID] = [idSeq, idTimeline];
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }
@@ -699,11 +694,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get unpause() { return this.animation.play.bind(this.animation); }
   get finish() { return this.animation.finish.bind(this.animation); }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
-  /** @internal */
-  get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
+  /**@internal*/get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
   get addRoadblocks() { return this.animation.addRoadblocks.bind(this.animation); }
   // multiplies playback rate of parent timeline and sequence (if exist) with base playback rate
-  useCompoundedPlaybackRate() { this.animation.updatePlaybackRate(this.compoundedPlaybackRate); }
+  /**@internal*/useCompoundedPlaybackRate() { this.animation.updatePlaybackRate(this.compoundedPlaybackRate); }
 
   // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
@@ -714,8 +708,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected async animate(direction: 'forward' | 'backward'): Promise<void> {
     const animation = this.animation;
     animation.setDirection(direction);
-    // If keyframes are generated here, clear the current frames to prevent interference with
-    // generators
+    // If keyframes are generated here, clear the current frames to prevent interference with generators
     if (!this.pregeneratesKeyframes && direction === 'forward') {
       animation.setForwardAndBackwardFrames([{fontFeatureSettings: 'normal'}], []);
     }
@@ -725,6 +718,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     let resolver: (value: void | PromiseLike<void>) => void;
     let rejecter: (reason?: any) => void;
     
+    // NEXT REMINDER: Give AnimSequence its own fields for detecting skipping and then use them here
     const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
     if (skipping) { animation.finish(); }
     else { animation.play(); }
@@ -964,7 +958,7 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
     };
   }
 
-  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<ExitBlockConfig> = {}) {
+  /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<ExitBlockConfig> = {}) {
     super.initialize(animArgs, userConfig);
 
     this.exitType = userConfig.exitType ?? this.bankEntry.config?.exitType ?? this.defaultConfig.exitType!;
