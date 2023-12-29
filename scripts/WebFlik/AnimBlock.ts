@@ -10,7 +10,7 @@ type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
   startsWithPrevious: boolean;
   commitsStyles: boolean;
-  commitStylesAttemptForcefully: boolean; // attempt to unhide, commit, then re-hide
+  commitStylesForcefully: boolean; // attempt to unhide, commit, then re-hide
   composite: CompositeOperation;
   classesToAddOnFinish: string[];
   classesToAddOnStart: string[];
@@ -545,7 +545,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   startsNextBlock: boolean = false;
   startsWithPrevious: boolean = false;
   commitsStyles: boolean = true;
-  commitStylesAttemptForcefully: boolean = false; // attempt to unhide, commit, then re-hide
+  commitStylesForcefully: boolean = false; // attempt to unhide, commit, then re-hide
   composite: CompositeOperation = 'replace';
   classesToAddOnFinish: string[] = [];
   classesToAddOnStart: string[] = [];
@@ -800,7 +800,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // After active phase, then handle commit settings, apply class modifications, and call onFinish functions.
     animation.onActiveFinish = () => {
       // CHANGE NOTE: Move hidden class stuff here
-      if (this.commitsStyles || this.commitStylesAttemptForcefully) {
+      if (this.commitsStyles || this.commitStylesForcefully) {
         // Attempt to apply the styles to the element.
         try {
           animation.commitStyles();
@@ -810,11 +810,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
         // If commitStyles() fails, it's because the element is not rendered.
         catch (_) {
           // If forced commit is disabled, do not re-attempt to commit the styles; throw error instead.
-          if (!this.commitStylesAttemptForcefully) {
+          if (!this.commitStylesForcefully) {
             rejecter(this.generateError(CommitStylesError,
               `Cannot commit animation styles while element is not rendered.` +
-              ` To attempt to temporarily override the hidden state, set the 'commitStylesAttemptForcefully' config option to true` +
-              ` (however, if the element's ancestor is hidden, this will still fail).` +
+              ` To temporarily (instantly) override the hidden state, set the 'commitStylesAttemptForcefully' config option to true` +
+              ` (however, if the element's ancestor is unrendered, this will still fail).` +
               `\nTip: By default, Exit()'s config options use exitType: 'display-none', which unrenders the element. To just make the element invisible, change exitType to 'visibility-hidden'.`
             ));
           }
