@@ -27,18 +27,8 @@ input {
   display: inline-block;
 }
 
-.hidden:not(.text-box):not(.time-graph__c-bar) {
-  display: none!important;
-}
-
 .button-disabled {
   cursor: not-allowed!important;
-}
-
-/* TODO: Remove .hidden and add separate form of invisibility */
-.text-box.hidden,
-.time-graph__c-bar.hidden {
-  visibility: hidden;
 }
 
 .SJ-num,
