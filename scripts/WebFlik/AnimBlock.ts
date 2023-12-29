@@ -1,7 +1,7 @@
 import { AnimSequence } from "./AnimSequence";
 import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
-import { mergeArrays } from "./utils/helpers";
+import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
 import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors";
 
@@ -517,7 +517,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       `\n------------------------------------------------------------` +
       (parTim ? `\nTimeline: [Id: ${parTim.id}] [At Index: ${parTim.findSequenceIndex(parSeq!)}]`  : '') +
       (parSeq ? `\nSequence: [Id: ${parSeq.id}] [At Index: ${parSeq.findBlockIndex(this)}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
-      `\nBlock:    [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]`
+      `\nBlock:    [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
+      `\nDOM Tag:  ${getOpeningTag(this.domElem)}`
     );
     if (ErrorClassOrInstance instanceof Error) {
       ErrorClassOrInstance.message += postfix;

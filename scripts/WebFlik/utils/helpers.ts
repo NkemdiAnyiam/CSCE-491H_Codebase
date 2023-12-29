@@ -10,6 +10,13 @@ export const createStyles = (rules: string = ''): void => {
   document.body.appendChild(sheet);
 }
 
+export const getOpeningTag = (element: Element): string => {
+  const htmlText = element.outerHTML;
+  const start  = htmlText.search(/</);
+  const end  = htmlText.search(/>/);
+  return htmlText.substring(start, end + 1);
+};
+
 export const splitXYTupleString = (tupleStr: `${CssLength}, ${CssLength}` | undefined): [x: CssLength, y: CssLength] | undefined => {
   return tupleStr?.split(', ') as [x: CssLength, y: CssLength] | undefined;
 }
