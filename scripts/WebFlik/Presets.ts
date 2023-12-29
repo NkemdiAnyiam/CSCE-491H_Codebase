@@ -1,8 +1,8 @@
-import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock } from "./AnimBlock";
+import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
 import { IKeyframesBank } from "./WebFlik";
 import { computeSelfScrollingBounds, negateNumString, splitXYAlignmentString, splitXYTupleString } from "./utils/helpers";
-import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions, CssXAlignment, CssYAlignment, CssLength } from "./utils/interfaces";
+import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
 
 // type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
@@ -254,7 +254,7 @@ export const presetExits = {
       }
     }
   },
-} satisfies IKeyframesBank<ExitBlock>;
+} satisfies IKeyframesBank<ExitBlock, ExitBlockConfig>;
 
 
 export const presetEmphases = {

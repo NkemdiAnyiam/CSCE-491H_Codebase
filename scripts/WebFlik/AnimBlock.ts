@@ -28,6 +28,9 @@ type KeyframeTimingOptions = {
 }
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
+export type ExitBlockConfig = AnimBlockConfig & {
+  exitType: 'display: none' | 'visibility: hidden'
+};
 
 type Segment = [
   endDelay: number,
@@ -916,6 +919,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
 }
 
 export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  private backwardsHidingMethod: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
+
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -924,28 +929,60 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 
   protected _onStartForward(): void {
-    this.domElem.classList.remove('wbfk-hidden');
+    if (this.domElem.classList.contains('wbfk-hidden')) {
+      this.backwardsHidingMethod = 'display: none';
+      this.domElem.classList.remove('wbfk-hidden');
+    }
+    else if (this.domElem.classList.contains('wbfk-invisible')) {
+      this.backwardsHidingMethod = 'visibility: hidden';
+      this.domElem.classList.remove('wbfk-invisible');
+    }
+    // TODO: throw specific error here
+    else {
+      throw this.generateError(Error, `Bla bla bla element was not hidden with valid exit class`);
+    }
   }
 
   protected _onFinishBackward(): void {
-    this.domElem.classList.add('wbfk-hidden');
+    switch(this.backwardsHidingMethod) {
+      case "display: none": this.domElem.classList.add('wbfk-hidden'); break;
+      case "visibility: hidden": this.domElem.classList.add('wbfk-invisible'); break;
+      default: throw this.generateError(Error, `This error should NEVER be reached`);
+    }
   }
 }
 
-export class ExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
-  protected get defaultConfig(): Partial<AnimBlockConfig> {
+export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBlockConfig> = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+  private exitType: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
+
+  protected get defaultConfig(): Partial<ExitBlockConfig> {
     return {
       commitsStyles: false,
       pregeneratesKeyframes: true,
+      exitType: 'display: none',
     };
   }
 
+  initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<ExitBlockConfig> = {}) {
+    super.initialize(animArgs, userConfig);
+
+    this.exitType = userConfig.exitType ?? this.bankEntry.config?.exitType ?? this.defaultConfig.exitType!;
+
+    return this;
+  }
+
   protected _onFinishForward(): void {
-    this.domElem.classList.add('wbfk-hidden');
+    switch(this.exitType) {
+      case "display: none": this.domElem.classList.add('wbfk-hidden'); break;
+      case "visibility: hidden": this.domElem.classList.add('wbfk-invisible'); break;
+    }
   }
 
   protected _onStartBackward(): void {
-    this.domElem.classList.remove('wbfk-hidden');
+    switch(this.exitType) {
+      case "display: none": this.domElem.classList.remove('wbfk-hidden'); break;
+      case "visibility: hidden": this.domElem.classList.remove('wbfk-invisible'); break;
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, MotionBlock, ScrollerBlock, TransitionBlock } from "./AnimBlock";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, MotionBlock, ScrollerBlock, TransitionBlock, ExitBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine";
 import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./Presets";
 import { useEasing } from "./utils/easing";
@@ -56,7 +56,7 @@ class _WebFlik {
    // default = {} ensures intellisense for a given bank still works
    // without specifying the field (why? not sure)
     UserEntranceBank extends IKeyframesBank = {},
-    UserExitBank extends IKeyframesBank = {},
+    UserExitBank extends IKeyframesBank<ExitBlock, ExitBlockConfig> = {},
     UserEmphasisBank extends IKeyframesBank = {},
     UserMotionBank extends IKeyframesBank = {},
     _EmptyTransitionBank extends IKeyframesBank = {},
@@ -68,7 +68,7 @@ class _WebFlik {
   (
     customBankAddons: {
       entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
-      exits?: UserExitBank & IKeyframesBank<ExitBlock>;
+      exits?: UserExitBank & IKeyframesBank<ExitBlock, ExitBlockConfig>;
       emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
       motions?: UserMotionBank & IKeyframesBank<MotionBlock>;
     } = {},

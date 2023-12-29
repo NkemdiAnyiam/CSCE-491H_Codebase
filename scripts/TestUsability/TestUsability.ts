@@ -30,6 +30,9 @@ const {
       generateKeyframes(age: number) {
         return [[{opacity: '1'}]]
       },
+      config: {
+        exitType: 'visibility: hidden'
+      }
     },
     // 4: [{opacity: '1'}]
   },
