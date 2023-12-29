@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidPhasePositionError } from "./utils/errors";
+import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError } from "./utils/errors";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -932,9 +932,28 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
       this.backwardsHidingMethod = 'visibility-hidden';
       this.domElem.classList.remove('wbfk-invisible');
     }
-    // TODO: throw specific error here
     else {
-      throw this.generateError(Error, `Bla bla bla element was not hidden with valid exit class`);
+      const { display, visibility } = getComputedStyle(this.domElem);
+      let str = ``;
+      if (display === 'none') {
+        str = `The element being entered is hidden with CSS 'display: none', but it was not using the class "wbfk-hidden".` +
+        ` An element needs to be unrendered using the class "wbfk-hidden" in order for Entrance() to act on it.`;
+      }
+      else if (visibility === 'hidden') {
+        str = `The element being entered is hidden with CSS 'visibility: hidden', but it was not using the class "wbfk-invisible".` +
+        ` An element needs to be unrendered using the class "wbfk-invisible" in order for Entrance() to act on it.`;
+      }
+      else {
+        str = `Entrance() can only act on elements that are already hidden, but this element was not hidden.` +
+        ` To hide an element, you can exit it with Exit() or add either "wbfk-hidden" or "wbfk-invisible" to its class list in the HTML.`;
+      }
+      throw this.generateError(InvalidEntranceAttempt,
+        str +
+        `\nTip: "wbfk-hidden" applies a 'display: none' CSS style, which completely unrenders an element.` +
+        ` "wbfk-invisible" applies a 'visibility: hidden' CSS style, which just makes the element invisible while still taking up space.` +
+        ` When using Exit(), you may set the config option 'exitType' to "display-none" (the default) or "visibility-hidden", but behind the scenes, this just determines whether to add` +
+        ` the class "wbfk-hidden" or the class "wbfk-invisible" at the end of the animation.`
+      );
     }
   }
 
@@ -942,7 +961,7 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
     switch(this.backwardsHidingMethod) {
       case "display-none": this.domElem.classList.add('wbfk-hidden'); break;
       case "visibility-hidden": this.domElem.classList.add('wbfk-invisible'); break;
-      default: throw this.generateError(Error, `This error should NEVER be reached`);
+      default: throw this.generateError(Error, `This error should NEVER be reached.`);
     }
   }
 }
@@ -961,7 +980,11 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
   /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<ExitBlockConfig> = {}) {
     super.initialize(animArgs, userConfig);
 
-    this.exitType = userConfig.exitType ?? this.bankEntry.config?.exitType ?? this.defaultConfig.exitType!;
+    const exitType = userConfig.exitType ?? this.bankEntry.config?.exitType ?? this.defaultConfig.exitType!;
+    if (exitType !== 'display-none' && exitType !== 'visibility-hidden') {
+      throw this.generateError(RangeError, `Invalid 'exitType' config value "${exitType}". Must be "display-none" or "visibility-hidden"`);
+    }
+    this.exitType = exitType;
 
     return this;
   }

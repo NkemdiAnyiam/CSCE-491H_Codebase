@@ -17,6 +17,13 @@ export class InvalidElementError extends TypeError {
   }
 }
 
+export class InvalidEntranceAttempt extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidEntranceAttempt'
+  }
+}
+
 export class InvalidPhasePositionError extends RangeError {
   constructor(message: string) {
     super(message);
