@@ -266,7 +266,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addBlocks(
-        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesAttemptForcefully: true}),
+        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesForcefully: true}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
         Entrance(cBar, '~wipe', ['from-top']),
@@ -382,7 +382,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       tag: 'show naive',
     })
     .addBlocks(
-      Motion(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: '100%', offsetSelfY: '10rem'}], {duration: 0, commitStylesAttemptForcefully: true}),
+      Motion(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: '100%', offsetSelfY: '10rem'}], {duration: 0, commitStylesForcefully: true}),
       ConnectorSetter(connector_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       ConnectorEntrance(connector_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
@@ -403,7 +403,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem', alignmentX: 'left'}],
-        {duration: 0, commitStylesAttemptForcefully: true}),
+        {duration: 0, commitStylesForcefully: true}),
       Emphasis(algorithm_term1, '~highlight', []),
       ConnectorSetter(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
       ConnectorEntrance(connector_explainNaive1, '~trace', ['from-top']),
@@ -425,7 +425,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetSelf: '-10rem, 10rem', offsetTarget: '100%, 100%', alignmentX: 'right'}],
-        {duration: 0, commitStylesAttemptForcefully: true}),
+        {duration: 0, commitStylesForcefully: true}),
       Emphasis(algorithm_term2, '~highlight', []),
       ConnectorSetter(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
       ConnectorEntrance(connector_explainNaive2, '~trace', ['from-top']),
@@ -468,7 +468,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Motion(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem'}],
-        {duration: 0, commitStylesAttemptForcefully: true}),
+        {duration: 0, commitStylesForcefully: true}),
       ConnectorSetter(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       ConnectorEntrance(connector_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', []),
@@ -552,7 +552,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
     })
     .addBlocks(
       Motion(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: '100%', offsetSelfX: '6.25rem', preserveY: true}],
-        {duration: 0, commitStylesAttemptForcefully: true}),
+        {duration: 0, commitStylesForcefully: true}),
       ConnectorSetter(connector_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       ConnectorEntrance(connector_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),
