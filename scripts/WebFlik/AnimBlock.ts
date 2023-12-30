@@ -703,7 +703,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   rewind(): Promise<void> { return this.animate('backward'); }
   get pause() { return this.animation.pause.bind(this.animation); }
   get unpause() { return this.animation.play.bind(this.animation); }
-  get finish() { return this.animation.finish.bind(this.animation); }
+  finish() { if (!this.isAnimating) { this.play(); } return this.animation.finish(); }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
   /**@internal*/get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
   get addRoadblocks() { return this.animation.addRoadblocks.bind(this.animation); }
@@ -730,7 +730,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     let rejecter: (reason?: any) => void;
     
     // NEXT REMINDER: Give AnimSequence its own fields for detecting skipping and then use them here
-    const skipping = this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo;
+    this.isAnimating = true;
+    const skipping = this.parentSequence?.isSkipping;
     if (skipping) { animation.finish(); }
     else { animation.play(); }
     if (this.parentSequence?.isPaused) { animation.pause(); }
@@ -860,6 +861,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // After endDelay phase, then cancel animation, remove this block from the timeline, and resolve overall promise.
     animation.onEndDelayFinish = () => {
+      this.isAnimating = false;
       animation.cancel();
       resolver();
     };
