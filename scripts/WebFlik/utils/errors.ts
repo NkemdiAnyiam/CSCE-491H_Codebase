@@ -30,3 +30,7 @@ export class InvalidPhasePositionError extends RangeError {
     this.name = 'InvalidPhasePositionError';
   }
 }
+
+export const errorTip = (tip: string) => {
+  return `\n${'*'.repeat(10)}\n${tip}\n${'*'.repeat(10)}`;
+};

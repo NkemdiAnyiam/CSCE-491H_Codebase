@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError } from "./utils/errors";
+import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip } from "./utils/errors";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -513,11 +513,22 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     const parSeq = this.parentSequence;
     const parTim = this.parentTimeline;
     const postfix = (
-      `\n------------------------------------------------------------` +
-      (parTim ? `\nTimeline: [Id: ${parTim.id}] [At Index: ${parTim.findSequenceIndex(parSeq!)}]`  : '') +
-      (parSeq ? `\nSequence: [Id: ${parSeq.id}] [At Index: ${parSeq.findBlockIndex(this)}] [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]`  : '') +
-      `\nBlock:    [Id: ${this.id}] [Category: ${this.category}] [Animation: ${this.animName}]` +
-      `\nDOM Tag:  ${getOpeningTag(this.domElem)}`
+      `\n\n${'-'.repeat(25)}LOCATION${'-'.repeat(25)}` +
+      (parTim
+        ? `\nTimeline: [Timeline Name: ${parTim.config.timelineName}]` +
+          `\n          [At Index ${parTim.findSequenceIndex(parSeq!)}]` +
+          `\n${'-'.repeat(20)}`
+        : ''
+      ) +
+      (parSeq
+        ? `\nSequence: [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]` +
+          `\n          [At Index ${parSeq.findBlockIndex(this)}]` +
+          `\n${'-'.repeat(20)}`
+        : ''
+      ) +
+      `\nBlock:    [Category: ${this.category}] [Animation: ${this.animName}]` +
+      `\nDOM Tag:  ${getOpeningTag(this.domElem)}` +
+      `\n${'-'.repeat(58)}`
     );
     if (ErrorClassOrInstance instanceof Error) {
       ErrorClassOrInstance.message += postfix;
@@ -809,7 +820,11 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
               `Cannot commit animation styles while element is not rendered.` +
               ` To temporarily (instantly) override the hidden state, set the 'commitStylesForcefully' config option to true` +
               ` (however, if the element's ancestor is unrendered, this will still fail).` +
-              `\nTip: By default, Exit()'s config options use exitType: "display-none", which unrenders the element. To just make the element invisible, change exitType to "visibility-hidden".`
+              `${errorTip(
+                `Tip: By default, Exit()'s config option for 'exitType' is set to "display-none", which unrenders the element.` +
+                ` To just make the element invisible, set 'exitType' to "visibility-hidden".` +
+                `\nExample: Exit(elem, 'fade-out', [], {exitType: "visibility-hidden"})`
+              )}`
             ));
           }
 
@@ -949,10 +964,12 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
       }
       throw this.generateError(InvalidEntranceAttempt,
         str +
-        `\nTip: "wbfk-hidden" applies a 'display: none' CSS style, which completely unrenders an element.` +
-        ` "wbfk-invisible" applies a 'visibility: hidden' CSS style, which just makes the element invisible while still taking up space.` +
-        ` When using Exit(), you may set the config option 'exitType' to "display-none" (the default) or "visibility-hidden", but behind the scenes, this just determines whether to add` +
-        ` the class "wbfk-hidden" or the class "wbfk-invisible" at the end of the animation.`
+        `${errorTip(
+          `Tip: "wbfk-hidden" applies a 'display: none' CSS style, which completely unrenders an element.` +
+          ` "wbfk-invisible" applies a 'visibility: hidden' CSS style, which just makes the element invisible while still taking up space.` +
+          ` When using Exit(), you may set the config option 'exitType' to "display-none" (the default) or "visibility-hidden", but behind the scenes, this just determines whether to add` +
+          ` the class "wbfk-hidden" or the class "wbfk-invisible" at the end of the animation.`
+        )}`
       );
     }
   }
