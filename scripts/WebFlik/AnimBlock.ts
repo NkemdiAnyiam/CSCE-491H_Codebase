@@ -747,7 +747,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     
     // NEXT REMINDER: Give AnimSequence its own fields for detecting skipping and then use them here
     this.isAnimating = true;
-    const skipping = this.parentSequence?.isSkipping;
+    const skipping = this.parentSequence?.skippingOn;
     if (skipping) { animation.finish(); }
     else { animation.play(); }
     if (this.parentSequence?.isPaused) { animation.pause(); }
