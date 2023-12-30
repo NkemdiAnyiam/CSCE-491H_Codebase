@@ -233,12 +233,8 @@ export class AnimTimeline {
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
   get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
 
-  constructor(config: Partial<AnimTimelineConfig & {animSequences: AnimSequence[]}> = {}) {
+  constructor(config: Partial<AnimTimelineConfig> = {}) {
     this.id = AnimTimeline.id++;
-
-    if (config.animSequences) {
-      this.addSequences(...config.animSequences);
-    }
 
     this.config = {
       debugMode: false,
