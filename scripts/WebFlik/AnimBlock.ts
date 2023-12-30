@@ -202,7 +202,11 @@ export class WebFlikAnimation extends Animation {
 
     this.isExpediting = true;
     // Calling finish() on an unplayed animation should play and finish the animation
-    if (!this.inProgress) { this.play(); }
+    // ONLY if the animation is about to go forwards
+    if (!this.inProgress) {
+      if (this.direction === 'forward') { this.play(); }
+      else { return; }
+    }
     // If animation is already in progress, expedite its current segment.
     // From there, it will continue expediting using isExpediting
     else { super.finish(); }
@@ -574,6 +578,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     return initialVal + (finalVal - initialVal) * this.rafLoopsProgress;
   }
 
+  private isAnimating = false;
   duration: number = 500;
   delay: number = 0;
   endDelay: number = 0;
@@ -703,7 +708,14 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   rewind(): Promise<void> { return this.animate('backward'); }
   get pause() { return this.animation.pause.bind(this.animation); }
   get unpause() { return this.animation.play.bind(this.animation); }
-  finish() { if (!this.isAnimating) { this.play(); } return this.animation.finish(); }
+  finish(): void {
+    // needs to play if not in progress
+    if (this.isAnimating) { this.animation.finish(); }
+    else if (this.animation.direction === 'forward') {
+      this.play();
+      this.animation.finish();
+    }
+  }
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
   /**@internal*/get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
   get addRoadblocks() { return this.animation.addRoadblocks.bind(this.animation); }
