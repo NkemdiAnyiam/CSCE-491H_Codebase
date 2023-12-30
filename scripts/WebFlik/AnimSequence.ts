@@ -57,7 +57,7 @@ export class AnimSequence implements AnimSequenceConfig {
   inProgress = false;
   /**@internal*/wasPlayed = false;
   /**@internal*/wasRewinded = false;
-  get isSkipping() { return this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo || this.usingFinish; }
+  get skippingOn() { return this.parentTimeline?.skippingOn || this.parentTimeline?.usingSkipTo || this.usingFinish; }
   get compoundedPlaybackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 

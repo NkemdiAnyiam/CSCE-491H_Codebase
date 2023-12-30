@@ -211,11 +211,10 @@ export class AnimTimeline {
   id; // used to uniquely identify this specific timeline
   animSequences: AnimSequence[] = []; // array of every AnimSequence in this timeline
   nextSeqIndex = 0; // index into animSequences
-  isStepping = false;
-  isSkipping = false; // used to determine whether or not all animations should be instantaneous
+  isAnimating = false; // true if currently in the middle of executing animations; false otherwise
+  skippingOn = false; // used to determine whether or not all animations should be instantaneous
   isPaused = false;
   currDirection: 'forward' | 'backward' = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
-  isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   usingSkipTo = false; // true if currently using skipTo()
   playbackRate = 1;
   config: AnimTimelineConfig;
@@ -262,7 +261,7 @@ export class AnimTimeline {
 
     if (forwardButton) {
       forwardButton.activate = () => {
-        if (this.getIsStepping() || this.getIsPaused() || this.atEnd) { return; }
+        if (this.isAnimating || this.isPaused || this.atEnd) { return; }
         
         forwardButton.styleActivation();
         this.step('forward', {viaButton: true}).then(() => { forwardButton.styleDeactivation(); });
@@ -283,7 +282,7 @@ export class AnimTimeline {
 
     if (backwardButton) {
       backwardButton.activate = () => {
-        if (this.getIsStepping() || this.getIsPaused() || this.atBeginning) { return; }
+        if (this.isAnimating || this.isPaused || this.atBeginning) { return; }
 
         backwardButton.styleActivation();
         this.step('backward', {viaButton: true}).then(() => { backwardButton.styleDeactivation(); });
@@ -418,24 +417,20 @@ export class AnimTimeline {
   }
   getPlaybackRate() { return this.playbackRate; }
 
-  getCurrDirection() { return this.currDirection; }
-  getIsStepping() { return this.isStepping; }
-  getIsPaused() { return this.isPaused; }
-
   // steps forward or backward and does error-checking
   async step(direction: 'forward' | 'backward'): Promise<typeof direction>;
   /**@internal*/async step(direction: 'forward' | 'backward', options: {viaButton: boolean}): Promise<typeof direction>;
   async step(direction: 'forward' | 'backward', options?: {viaButton: boolean}): Promise<typeof direction> {
     if (this.isPaused) { throw new Error('Cannot step while playback is paused.'); }
-    if (this.isStepping) { throw new Error('Cannot step while already animating.'); }
-    this.isStepping = true;
+    if (this.isAnimating) { throw new Error('Cannot step while already animating.'); }
+    this.isAnimating = true;
 
     let continueOn;
     switch(direction) {
       case 'forward':
         if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleActivation(); }
         // reject promise if trying to step forward at the end of the timeline
-        if (this.atEnd) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepForward() at end of timeline.')}); }
+        if (this.atEnd) { return new Promise((_, reject) => {this.isAnimating = false; reject('Cannot stepForward() at end of timeline.')}); }
         do {continueOn = await this.stepForward();} while(continueOn);
         if (!options?.viaButton) { this.playbackButtons.forwardButton?.styleDeactivation(); }
         break;
@@ -443,7 +438,7 @@ export class AnimTimeline {
       case 'backward':
         if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleActivation(); }
         // reject promise if trying to step backward at the beginning of the timeline
-        if (this.atBeginning) { return new Promise((_, reject) => {this.isStepping = false; reject('Cannot stepBackward() at beginning of timeline.')}); }
+        if (this.atBeginning) { return new Promise((_, reject) => {this.isAnimating = false; reject('Cannot stepBackward() at beginning of timeline.')}); }
         do {continueOn = await this.stepBackward();} while(continueOn);
         if (!options?.viaButton) { this.playbackButtons.backwardButton?.styleDeactivation(); }
         break;
@@ -454,7 +449,7 @@ export class AnimTimeline {
 
     // TODO: Potentially rewrite async/await syntax
     return new Promise(resolve => {
-      this.isStepping = false;
+      this.isAnimating = false;
       resolve(direction);
     });
   }
@@ -505,7 +500,7 @@ export class AnimTimeline {
   async skipTo(options: Partial<{tag: string, position: never, offset: number}>): Promise<void>;
   async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
   async skipTo(options: Partial<{tag: string, position: 'beginning' | 'end', offset: number}> = {}): Promise<void> {
-    if (this.isStepping) { throw new Error('Cannot use skipTo() while currently animating.'); }
+    if (this.isAnimating) { throw new Error('Cannot use skipTo() while currently animating.'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline.'); }
 
@@ -561,7 +556,7 @@ export class AnimTimeline {
     let wasPaused = this.isPaused;
     if (wasPaused) { this.togglePause(false); }
     // if skipping is not currently enabled, activate skipping button styling
-    let wasSkipping = this.isSkipping;
+    let wasSkipping = this.skippingOn;
     if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleActivation(); }
 
     // keep skipping forwards or backwards depending on direction of nextSeqIndex
@@ -585,14 +580,14 @@ export class AnimTimeline {
   toggleSkipping(isSkipping?: boolean): boolean;
   /**@internal*/toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean;
   toggleSkipping(isSkipping?: boolean, options?: {viaButton: boolean}): boolean {
-    this.isSkipping = isSkipping ?? !this.isSkipping;
+    this.skippingOn = isSkipping ?? !this.skippingOn;
     if (!options?.viaButton) {
       const button = this.playbackButtons.toggleSkippingButton;
-      this.isSkipping ? button?.styleActivation() : button?.styleDeactivation();
+      this.skippingOn ? button?.styleActivation() : button?.styleDeactivation();
     }
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping && !this.isPaused) { this.finishInProgressSequences(); }
-    return this.isSkipping;
+    if (this.skippingOn && this.isAnimating && !this.isPaused) { this.finishInProgressSequences(); }
+    return this.skippingOn;
   }
 
   // tells the current AnimSequence(s) (really just 1 in this project iteration) to instantly finish its animations
@@ -610,13 +605,13 @@ export class AnimTimeline {
     else {
       if (!options?.viaButton) { this.playbackButtons.pauseButton?.styleDeactivation(); }
       this.doForInProgressSequences(sequence => sequence.unpause());
-      if (this.isSkipping) { this.finishInProgressSequences(); }
+      if (this.skippingOn) { this.finishInProgressSequences(); }
     }
     return this.isPaused;
   }
 
   pause(): void { this.togglePause(true); }
-  unpause(): void {this.togglePause(false);}
+  unpause(): void { this.togglePause(false); }
 
   // get all currently running animations that belong to this timeline and perform operation() with them
   private doForInProgressSequences(operation: SequenceOperation): void {
