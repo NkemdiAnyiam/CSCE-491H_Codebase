@@ -263,7 +263,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addBlocks(
-        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0}),
+        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitStylesForcefully: true}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextBlock: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextBlock: true}),
         Entrance(cBar, '~wipe', ['from-top']),
