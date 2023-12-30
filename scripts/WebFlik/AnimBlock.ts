@@ -703,7 +703,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }
 
-  // TODO: prevent calls to play/rewind while already animating
+  // TODO: prevent plain calls to these if this block is part of a sequence
   play(): Promise<boolean> { return this.animate('forward'); }
   rewind(): Promise<boolean> { return this.animate('backward'); }
   pause(): void { this.animation.pause(); }
