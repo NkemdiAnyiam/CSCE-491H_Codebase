@@ -706,11 +706,13 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   // TODO: prevent calls to play/rewind while already animating
   play(): Promise<boolean> { return this.animate('forward'); }
   rewind(): Promise<boolean> { return this.animate('backward'); }
-  get pause() { return this.animation.pause.bind(this.animation); }
-  get unpause() { return this.animation.play.bind(this.animation); }
+  pause(): void { this.animation.pause(); }
+  unpause(): void { this.animation.play(); }
   finish(): void {
     // needs to play if not in progress
-    if (this.isAnimating) { this.animation.finish(); }
+    if (this.isAnimating) {
+      this.animation.finish();
+    }
     else if (this.animation.direction === 'forward') {
       this.play();
       this.animation.finish();
