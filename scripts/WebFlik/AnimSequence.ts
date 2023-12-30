@@ -23,7 +23,6 @@ type AnimSequenceConfig = {
    * This string can be used as an argument to AnimTimeline.prototype.skipTo().
    * @defaultValue `''`
   */
-
   tag: string;
 
   /**
@@ -54,6 +53,11 @@ export class AnimSequence implements AnimSequenceConfig {
   autoplays: boolean = false;
   basePlaybackRate: number = 1;
   isPaused = false;
+  private usingFinish = false;
+  inProgress = false;
+  /**@internal*/wasPlayed = false;
+  /**@internal*/wasRewinded = false;
+  get isSkipping() { return this.parentTimeline?.isSkipping || this.parentTimeline?.usingSkipTo || this.usingFinish; }
   get compoundedPlaybackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 
@@ -101,7 +105,11 @@ export class AnimSequence implements AnimSequenceConfig {
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
+  // TODO: Add boolean to promise to indicate whether play was actually done (false if returned early at the beginning)
   async play(): Promise<void> {
+    if (this.inProgress) { return; }
+    this.inProgress = true;
+
     this.commit();
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
     // const activeGroupings2 = this.animBlockGroupings_endDelayFinishOrder;
@@ -142,10 +150,17 @@ export class AnimSequence implements AnimSequenceConfig {
       }
       await Promise.all(parallelBlocks);
     }
+    this.inProgress = false;
+    this.wasPlayed = true;
+    this.wasRewinded = false;
+    this.usingFinish = false;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
   async rewind(): Promise<void> {
+    if (this.inProgress) { return; }
+    this.inProgress = true;
+
     const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
     const numGroupings = activeGroupings.length;
 
@@ -192,6 +207,10 @@ export class AnimSequence implements AnimSequenceConfig {
       }
       await Promise.all(parallelBlocks);
     }
+    this.inProgress = false;
+    this.wasPlayed = false;
+    this.wasRewinded = true;
+    this.usingFinish = false;
   }
   
   pause(): void {
@@ -203,18 +222,31 @@ export class AnimSequence implements AnimSequenceConfig {
     this.doForInProgressBlocks(animBlock => animBlock.unpause());
   }
 
-  updatePlaybackRate(newRate: number) {
+  updatePlaybackRate(newRate: number): void {
     this.basePlaybackRate = newRate;
     this.useCompoundedPlaybackRate();
   }
 
-  /**@internal*/useCompoundedPlaybackRate() {
+  /**@internal*/useCompoundedPlaybackRate(): void {
     this.doForInProgressBlocks(animBlock => animBlock.useCompoundedPlaybackRate());
   }
 
   // used to skip currently running animation so they don't run at regular speed while using skipping
-  skipInProgressAnimations(): void {
+  finishInProgressAnimations(): void {
     this.doForInProgressBlocks(animBlock => animBlock.finish());
+  }
+  
+  // TODO: probably want to make this async
+  finish(): void {
+    if (this.usingFinish || this.isPaused) { return; }
+    this.usingFinish = true; // resets to false at the end of play() and rewind()
+    // if in progress, finish the current blocks and let the proceeding ones read from this.isSkipping
+    if (this.inProgress) { this.finishInProgressAnimations(); }
+    // else, if this sequence is ready to play forward, just play (then all blocks will read from this.isSkipping)
+    else if (!this.wasPlayed || this.wasRewinded) { this.play(); }
+    // If sequence is at the end of its playback, finish() does nothing.
+    // AnimTimeline calling AnimSequence.finish() in its method for finishing current sequences should still work
+    // because that method is only called when sequences are already playing (so it hits the first if-statement)
   }
 
   private static activeBackwardFinishComparator = (blockA: AnimBlock, blockB: AnimBlock) => blockB.activeStartTime - blockA.activeStartTime;

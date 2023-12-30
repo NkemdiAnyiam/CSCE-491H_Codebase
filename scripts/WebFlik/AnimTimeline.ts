@@ -591,12 +591,12 @@ export class AnimTimeline {
       this.isSkipping ? button?.styleActivation() : button?.styleDeactivation();
     }
     // if skipping is enabled in the middle of animating, force currently running AnimSequence to finish
-    if (this.isSkipping && this.isStepping && !this.isPaused) { this.skipInProgressSequences(); }
+    if (this.isSkipping && this.isStepping && !this.isPaused) { this.finishInProgressSequences(); }
     return this.isSkipping;
   }
 
-  skipInProgressSequences(): void { this.doForInProgressSequences(sequence => sequence.skipInProgressAnimations()); }
-  // tells the current AnimSequence to instantly finish its animations
+  // tells the current AnimSequence(s) (really just 1 in this project iteration) to instantly finish its animations
+  finishInProgressSequences(): void { this.doForInProgressSequences(sequence => sequence.finish()); }
 
   // pauses or unpauses playback
   togglePause(isPaused?: boolean): boolean;
@@ -610,10 +610,13 @@ export class AnimTimeline {
     else {
       if (!options?.viaButton) { this.playbackButtons.pauseButton?.styleDeactivation(); }
       this.doForInProgressSequences(sequence => sequence.unpause());
-      if (this.isSkipping) { this.skipInProgressSequences(); }
+      if (this.isSkipping) { this.finishInProgressSequences(); }
     }
     return this.isPaused;
   }
+
+  pause(): void { this.togglePause(true); }
+  unpause(): void {this.togglePause(false);}
 
   // get all currently running animations that belong to this timeline and perform operation() with them
   private doForInProgressSequences(operation: SequenceOperation): void {
