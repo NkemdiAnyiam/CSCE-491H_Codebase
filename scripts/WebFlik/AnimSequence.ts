@@ -105,9 +105,8 @@ export class AnimSequence implements AnimSequenceConfig {
   }
 
   // plays each animBlock contained in this AnimSequence instance in sequential order
-  // TODO: Add boolean to promise to indicate whether play was actually done (false if returned early at the beginning)
-  async play(): Promise<void> {
-    if (this.inProgress) { return; }
+  async play(): Promise<boolean> {
+    if (this.inProgress) { return false; }
     this.inProgress = true;
 
     this.commit();
@@ -154,11 +153,12 @@ export class AnimSequence implements AnimSequenceConfig {
     this.wasPlayed = true;
     this.wasRewinded = false;
     this.usingFinish = false;
+    return true;
   }
 
   // rewinds each animBlock contained in this AnimSequence instance in reverse order
-  async rewind(): Promise<void> {
-    if (this.inProgress) { return; }
+  async rewind(): Promise<boolean> {
+    if (this.inProgress) { return false; }
     this.inProgress = true;
 
     const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
@@ -211,6 +211,7 @@ export class AnimSequence implements AnimSequenceConfig {
     this.wasPlayed = false;
     this.wasRewinded = true;
     this.usingFinish = false;
+    return true;
   }
   
   pause(): void {

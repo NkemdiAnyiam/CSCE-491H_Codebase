@@ -704,8 +704,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 
   // TODO: prevent calls to play/rewind while already animating
-  play(): Promise<void> { return this.animate('forward'); }
-  rewind(): Promise<void> { return this.animate('backward'); }
+  play(): Promise<boolean> { return this.animate('forward'); }
+  rewind(): Promise<boolean> { return this.animate('backward'); }
   get pause() { return this.animation.pause.bind(this.animation); }
   get unpause() { return this.animation.play.bind(this.animation); }
   finish(): void {
@@ -728,7 +728,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   protected _onStartBackward(): void {};
   protected _onFinishBackward(): void {};
 
-  protected async animate(direction: 'forward' | 'backward'): Promise<void> {
+  protected async animate(direction: 'forward' | 'backward'): Promise<boolean> {
+    if (this.isAnimating) { return false; }
+
     const animation = this.animation;
     animation.setDirection(direction);
     // If keyframes are generated here, clear the current frames to prevent interference with generators
@@ -738,7 +740,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     this.useCompoundedPlaybackRate();
 
     // used as resolve() and reject() in the eventually returned promise
-    let resolver: (value: void | PromiseLike<void>) => void;
+    let resolver: (value: boolean | PromiseLike<boolean>) => void;
     let rejecter: (reason?: any) => void;
     
     // NEXT REMINDER: Give AnimSequence its own fields for detecting skipping and then use them here
@@ -851,7 +853,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
             rejecter(this.generateError(CommitStylesError,
-              `Failed to commit styles by overriding element's hidden state with 'commitStylesAttemptForcefully'. Cannot commit styles if element is unrendered because of an unrendered ancestor.`
+              `Failed to commit styles by overriding element's hidden state with 'commitStylesAttemptForcefully'.` +
+              ` Cannot commit styles if element is unrendered because of an unrendered ancestor.`
             ));
           }
         }
@@ -875,10 +878,10 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     animation.onEndDelayFinish = () => {
       this.isAnimating = false;
       animation.cancel();
-      resolver();
+      resolver(true);
     };
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       resolver = resolve;
       rejecter = reject;
     });
