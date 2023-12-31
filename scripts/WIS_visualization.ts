@@ -1250,7 +1250,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkConnector, pa
 //   animTimeline.togglePause();
 //   animTimeline.toggleSkipping();
 //   await wait(500);
-//   animTimeline.skipTo({position: 'end', offset: -1});
+//   animTimeline.skipTo({position: 'end', offset: 0});
 // })
 
 
