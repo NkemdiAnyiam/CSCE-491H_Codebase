@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { ChildPlaybackError, CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip } from "./utils/errors";
+import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, GeneralErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -74,7 +74,7 @@ export class WebFlikAnimation extends Animation {
   get sequenceID(): number { return this._sequenceID; }
   set sequenceID(id: number) { this._sequenceID = id; }
 
-  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect, private errorGenerator: ErrorGenerator) {
+  constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect, private errorGenerator: BlockErrorGenerator) {
     super();
 
     if (!this.forwardEffect.target) { throw this.errorGenerator(InvalidElementError, `Animation target must not be null or undefined`); }
@@ -518,32 +518,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  protected generateError: ErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
-    const parSeq = this.parentSequence;
-    const parTim = this.parentTimeline;
-    const postfix = (
-      `\n\n${'-'.repeat(25)}LOCATION${'-'.repeat(25)}` +
-      (parTim
-        ? `\nTimeline: [Timeline Name: ${parTim.config.timelineName}]` +
-          `\n          [At Index ${parTim.findSequenceIndex(parSeq!)}]` +
-          `\n${'-'.repeat(20)}`
-        : ''
-      ) +
-      (parSeq
-        ? `\nSequence: [Tag: ${parSeq.tag}] [Description: ${parSeq.description}]` +
-          `\n          [At Index ${parSeq.findBlockIndex(this)}]` +
-          `\n${'-'.repeat(20)}`
-        : ''
-      ) +
-      `\nBlock:    [Category: ${this.category}] [Animation: ${this.animName}]` +
-      `\nDOM Tag:  ${getOpeningTag(this.domElem)}` +
-      `\n${'-'.repeat(58)}`
-    );
-    if (ErrorClassOrInstance instanceof Error) {
-      ErrorClassOrInstance.message += postfix;
-      return ErrorClassOrInstance;
-    }
-    return new ErrorClassOrInstance(`${msg}` + postfix);
+  protected generateError: BlockErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
+    return generateError(ErrorClassOrInstance, msg as string, {timeline: this.parentTimeline, sequence: this.parentSequence, block: this});
   }
   private throwChildPlaybackError(funcName: string): never {
     throw this.generateError(ChildPlaybackError, `Cannot directly call ${funcName}() on an animation block while is is part of a sequence.`);
@@ -599,7 +575,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank, protected category: string) {
+  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank, public category: string) {
     this.id = AnimBlock.id++;
     
     if (!domElem) {
