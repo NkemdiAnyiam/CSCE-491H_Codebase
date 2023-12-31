@@ -79,16 +79,14 @@ export class AnimSequence implements AnimSequenceConfig {
   
   setDescription(description: string): AnimSequence { this.description = description; return this; }
   setTag(tag: string): AnimSequence { this.tag = tag; return this; }
-  setID(id: number) {
+  /**@internal*/setID(id: number) {
     this.timelineID = id;
     for (const animBlock of this.animBlocks) {
-      animBlock.setID(this.id, this.timelineID);
+      animBlock.setID(this.id, this.timelineID); // timelineID is really the only thing new there
       animBlock.parentTimeline = this.parentTimeline;
-      animBlock.parentSequence = this;
     }
   }
 
-  // TODO: Review implementation
   addBlocks(...animBlocks: AnimBlock[]): AnimSequence {
     // CHANGE NOTE: removed addOneBlock()
     for (const animBlock of animBlocks) {
