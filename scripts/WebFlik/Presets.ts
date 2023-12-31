@@ -22,7 +22,6 @@ export const presetEntrances = {
     }
   },
 
-  // TODO: Rename to just 'fade'
   [`~fade-in`]: {
     generateKeyframes() {
       return [[
@@ -342,7 +341,6 @@ export const presetMotions = {
       
       return [
         // forward
-        // TODO: Support returning singular Keyframe instead of Keyframe[]
         [{translate: `calc(${baseXTrans}px + ${offsetSelfX} + ${offsetTargetXTrans}) calc(${baseYTrans}px + ${offsetSelfY} + ${offsetTargetYTrans})`}],
 
         // backward

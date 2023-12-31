@@ -443,11 +443,8 @@ export class AnimTimeline {
         throw new Error(`Invalid step direction "${direction}". Must be "forward" or "backward".`);
     }
 
-    // TODO: Potentially rewrite async/await syntax
-    return new Promise(resolve => {
-      this.isAnimating = false;
-      resolve(direction);
-    });
+    this.isAnimating = false;
+    return direction;
   }
 
   // plays current AnimSequence and increments nextSeqIndex

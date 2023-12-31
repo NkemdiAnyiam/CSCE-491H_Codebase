@@ -285,7 +285,9 @@ export class WbfkConnector extends HTMLElement {
       this.by = by;
       changedY = true;
     }
-    // TODO: Document purpose of manipulating mask
+    // When modifying the coordinates of the <line> within the <mask>, the mask bounds apparently are not updated.
+    // This causes the line to be cut off, so the width, height, and location of the mask need to be changed
+    // to properly frame the masked line. 25px of padding are added to account for markers.
     if (changedX) {
       this.mask.width.baseVal.valueAsString = `${Math.abs(bx - ax) + 50}`;
       this.mask.x.baseVal.valueAsString = `${Math.min(ax, bx) - 25}`;

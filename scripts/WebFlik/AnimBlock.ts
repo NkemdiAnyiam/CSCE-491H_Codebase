@@ -597,8 +597,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     // cannot be exactly 0 because that causes some Animation-related bugs that can't be easily worked around
     this.duration = Math.max(this.duration as number, 0.01);
 
-    // TODO: Handle case where only one keyframe is provided
-
     // The fontFeatureSettings part handles a very strange Firefox bug that causes animations to run without any visual changes
     // when the animation is finished, setKeyframes() is called, and the animation continues after extending the runtime using
     // endDelay. It appears that the bug only occurs when the keyframes field contains nothing that will actually affect the
@@ -735,7 +733,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   // multiplies playback rate of parent timeline and sequence (if exist) with base playback rate
   /**@internal*/useCompoundedPlaybackRate() { this.animation.updatePlaybackRate(this.compoundedPlaybackRate); }
 
-  // TODO: Figure out good way to implement XNOR
   protected _onStartForward(): void {};
   protected _onFinishForward(): void {};
   protected _onStartBackward(): void {};
@@ -776,7 +773,6 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
           // If keyframes were not pregenerated, generate them now
           // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
           // ...can function properly.
-          // TODO: Handle case where only one keyframe is provided
           if (!this.pregeneratesKeyframes) {
             try {
               // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
