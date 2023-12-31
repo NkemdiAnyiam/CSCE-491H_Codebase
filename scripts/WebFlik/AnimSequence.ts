@@ -213,10 +213,12 @@ export class AnimSequence implements AnimSequenceConfig {
   }
   
   pause(): void {
+    if (this.isPaused) { return; }
     this.isPaused = true;
     this.doForInProgressBlocks(animBlock => animBlock.pause());
   }
   unpause(): void {
+    if (!this.isPaused) { return; }
     this.isPaused = false;
     this.doForInProgressBlocks(animBlock => animBlock.unpause());
   }

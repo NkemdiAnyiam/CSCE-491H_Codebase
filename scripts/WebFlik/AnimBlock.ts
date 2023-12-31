@@ -132,7 +132,7 @@ export class WebFlikAnimation extends Animation {
   
   async play(): Promise<void> {
     // If animation is already in progress and is just paused, resume the animation directly.
-    // TODO: might need to rework this considering unpause(). What happens if unPause() while not in progress?
+    // Through AnimBlock, the only time this can happen is when using AnimBlock.unpause()
     if (super.playState === 'paused') {
       super.play();
       return;
@@ -706,8 +706,8 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   // TODO: prevent plain calls to these if this block is part of a sequence
   play(): Promise<boolean> { return this.animate('forward'); }
   rewind(): Promise<boolean> { return this.animate('backward'); }
-  pause(): void { this.animation.pause(); }
-  unpause(): void { this.animation.play(); }
+  pause(): void { if (this.isAnimating) { this.animation.pause(); } }
+  unpause(): void { if (!this.isAnimating) { this.animation.play(); } }
   finish(): void {
     // needs to play if not in progress
     if (this.isAnimating) {
