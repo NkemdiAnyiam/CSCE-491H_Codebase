@@ -197,14 +197,16 @@ export class WebFlikAnimation extends Animation {
     this.isExpediting = false;
   }
 
-  finish(): void {
+  finish(): void;
+  /**@internal*/finish(forced: boolean): void;
+  finish(forced?: boolean): void {
     if (this.isExpediting) { return; }
 
     this.isExpediting = true;
     // Calling finish() on an unplayed animation should play and finish the animation
     // ONLY if the animation is about to go forwards
     if (!this.inProgress) {
-      if (this.direction === 'forward') { this.play(); }
+      if (this.direction === 'forward' || forced) { this.play(); }
       else { return; }
     }
     // If animation is already in progress, expedite its current segment.
@@ -745,10 +747,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     let resolver: (value: boolean | PromiseLike<boolean>) => void;
     let rejecter: (reason?: any) => void;
     
-    // NEXT REMINDER: Give AnimSequence its own fields for detecting skipping and then use them here
     this.isAnimating = true;
     const skipping = this.parentSequence?.skippingOn;
-    if (skipping) { animation.finish(); }
+    if (skipping) { animation.finish(true); }
     else { animation.play(); }
     if (this.parentSequence?.isPaused) { animation.pause(); }
     
