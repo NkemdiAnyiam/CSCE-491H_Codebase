@@ -207,7 +207,10 @@ export class WebFlikAnimation extends Animation {
     // ONLY if the animation is about to go forwards
     if (!this.inProgress) {
       if (this.direction === 'forward' || forced) { this.play(); }
-      else { return; }
+      else {
+        this.isExpediting = false;
+        return;
+      }
     }
     // If animation is already in progress, expedite its current segment.
     // From there, it will continue expediting using isExpediting
