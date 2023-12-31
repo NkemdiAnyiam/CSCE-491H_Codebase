@@ -31,6 +31,13 @@ export class InvalidPhasePositionError extends RangeError {
   }
 }
 
+export class ChildPlaybackError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ChildPlaybackError';
+  }
+}
+
 export const errorTip = (tip: string) => {
   return `\n${'*'.repeat(10)}\n${tip}\n${'*'.repeat(10)}`;
 };

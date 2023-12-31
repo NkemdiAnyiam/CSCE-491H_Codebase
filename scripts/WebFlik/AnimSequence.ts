@@ -131,7 +131,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const grouping = this.animBlock_forwardGroupings[i];
       const firstBlock = grouping[0];
       this.inProgressBlocks.set(firstBlock.id, firstBlock);
-      parallelBlocks.push(firstBlock.play()
+      parallelBlocks.push(firstBlock.play(this)
         .then(() => {this.inProgressBlocks.delete(firstBlock.id)})
       );
 
@@ -141,7 +141,7 @@ export class AnimSequence implements AnimSequenceConfig {
         await grouping[j-1].generateTimePromise('forward', 'activePhase', 'beginning');
         const currAnimBlock = grouping[j];
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
-        parallelBlocks.push(currAnimBlock.play()
+        parallelBlocks.push(currAnimBlock.play(this)
           .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
         );
       }
@@ -181,7 +181,7 @@ export class AnimSequence implements AnimSequenceConfig {
       const groupingLength = grouping.length;
       const lastBlock = grouping[groupingLength - 1];
       this.inProgressBlocks.set(lastBlock.id, lastBlock);
-      parallelBlocks.push(lastBlock.rewind()
+      parallelBlocks.push(lastBlock.rewind(this)
         .then(() => {this.inProgressBlocks.delete(lastBlock.id)})
       );
 
@@ -199,7 +199,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
         // once waiting period above is over, begin rewinding current block
         this.inProgressBlocks.set(currAnimBlock.id, currAnimBlock);
-        parallelBlocks.push(currAnimBlock.rewind()
+        parallelBlocks.push(currAnimBlock.rewind(this)
           .then(() => {this.inProgressBlocks.delete(currAnimBlock.id)})
         );
       }
@@ -215,12 +215,12 @@ export class AnimSequence implements AnimSequenceConfig {
   pause(): void {
     if (this.isPaused) { return; }
     this.isPaused = true;
-    this.doForInProgressBlocks(animBlock => animBlock.pause());
+    this.doForInProgressBlocks(animBlock => animBlock.pause(this));
   }
   unpause(): void {
     if (!this.isPaused) { return; }
     this.isPaused = false;
-    this.doForInProgressBlocks(animBlock => animBlock.unpause());
+    this.doForInProgressBlocks(animBlock => animBlock.unpause(this));
   }
 
   updatePlaybackRate(newRate: number): void {
@@ -234,7 +234,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
   // used to skip currently running animation so they don't run at regular speed while using skipping
   finishInProgressAnimations(): void {
-    this.doForInProgressBlocks(animBlock => animBlock.finish());
+    this.doForInProgressBlocks(animBlock => animBlock.finish(this));
   }
   
   // TODO: probably want to make this async

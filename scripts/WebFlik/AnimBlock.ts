@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip } from "./utils/errors";
+import { ChildPlaybackError, CommitStylesError, ErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip } from "./utils/errors";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -545,6 +545,9 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     }
     return new ErrorClassOrInstance(`${msg}` + postfix);
   }
+  private throwChildPlaybackError(funcName: string): never {
+    throw this.generateError(ChildPlaybackError, `Cannot directly call ${funcName}() on an animation block while is is part of a sequence.`);
+  }
 
   parentSequence?: AnimSequence;
   parentTimeline?: AnimTimeline;
@@ -708,12 +711,38 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     [this.animation.sequenceID, this.animation.timelineID] = [idSeq, idTimeline];
   }
 
-  // TODO: prevent plain calls to these if this block is part of a sequence
-  play(): Promise<boolean> { return this.animate('forward'); }
-  rewind(): Promise<boolean> { return this.animate('backward'); }
-  pause(): void { if (this.isAnimating) { this.animation.pause(); } }
-  unpause(): void { if (!this.isAnimating) { this.animation.play(); } }
-  finish(): void {
+  play(): Promise<boolean>;
+  /**@internal*/play(parentSequence: AnimSequence): Promise<boolean>;
+  play(parentSequence?: AnimSequence): Promise<boolean> {
+    if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('play'); }
+    return this.animate('forward');
+  }
+
+  rewind(): Promise<boolean>;
+  /**@internal*/rewind(parentSequence: AnimSequence): Promise<boolean>;
+  rewind(parentSequence?: AnimSequence): Promise<boolean> {
+    if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('rewind'); }
+    return this.animate('backward');
+  }
+
+  pause(): void;
+  /**@internal*/pause(parentSequence: AnimSequence): void;
+  pause(parentSequence?: AnimSequence): void {
+    if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('pause'); }
+    if (this.isAnimating) { this.animation.pause(); }
+  }
+
+  unpause(): void;
+  /**@internal*/unpause(parentSequence: AnimSequence): void;
+  unpause(parentSequence?: AnimSequence): void {
+    if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('unpause'); }
+    if (!this.isAnimating) { this.animation.play(); }
+  }
+
+  finish(): void;
+  /**@internal*/finish(parentSequence: AnimSequence): void;
+  finish(parentSequence?: AnimSequence): void {
+    if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('finish'); }
     // needs to play if not in progress
     if (this.isAnimating) {
       this.animation.finish();
@@ -723,6 +752,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
       this.animation.finish();
     }
   }
+
   get generateTimePromise() { return this.animation.generateTimePromise.bind(this.animation); }
   /**@internal*/get addIntegrityblocks() { return this.animation.addIntegrityblocks.bind(this.animation); }
   get addRoadblocks() { return this.animation.addRoadblocks.bind(this.animation); }
