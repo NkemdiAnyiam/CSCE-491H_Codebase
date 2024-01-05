@@ -3,7 +3,7 @@ import { Job } from './Job';
 import { generateVisualization } from "./WIS_visualization";
 import { WebFlik } from './WebFlik';
 
-const {Exit} = WebFlik.createBanks({});
+const {Exit} = WebFlik.createAnimationBanks({});
 
 
 /****************************************/

@@ -17,7 +17,7 @@ const {
   ConnectorEntrance,
   ConnectorExit,
   Scroller,
-} = WebFlik.createBanks();
+} = WebFlik.createAnimationBanks();
 
 export function generateVisualization (jobsUnsorted: Job[]) {
   const dataDisplay = document.querySelector('.data-display') as HTMLElement;

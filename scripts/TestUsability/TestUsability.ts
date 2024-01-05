@@ -7,7 +7,7 @@ const {
   Motion,
   ConnectorSetter,
   ConnectorEntrance,
-} = WebFlik.createBanks({
+} = WebFlik.createAnimationBanks({
   entrances: {
     [`super-jump`]: {
       generateKeyframes: (penut: string) => [[{opacity: '1'}], []],

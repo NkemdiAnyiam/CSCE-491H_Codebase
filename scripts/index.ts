@@ -3,7 +3,7 @@ import { enableButton, disableButton} from './utility';
 import { createForm_multiInput, createForm_textarea } from './jobForm';
 import { WebFlik, AnimSequence } from './WebFlik';
 
-const {Exit, Entrance, /* Scroller */} = WebFlik.createBanks({});
+const {Exit, Entrance, /* Scroller */} = WebFlik.createAnimationBanks({});
 
 const maxNumJobs = 8;
 const maxTime = 11;

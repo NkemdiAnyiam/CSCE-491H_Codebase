@@ -51,7 +51,7 @@ export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
 
 
 class _WebFlik {
-  createBanks
+  createAnimationBanks
   <
    // default = {} ensures intellisense for a given bank still works
    // without specifying the field (why? not sure)
