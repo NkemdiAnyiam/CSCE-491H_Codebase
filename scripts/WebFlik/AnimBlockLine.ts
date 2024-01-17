@@ -1,5 +1,5 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
-import { IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
+import { AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { InvalidElementError } from "./utils/errors";
 import { equalWithinTol, overrideHidden, unOverrideHidden } from "./utils/helpers";
 
@@ -334,7 +334,7 @@ export class ConnectorSetterBlock extends AnimBlock {
     pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     animName: string,
-    bank: IKeyframesBank,
+    bank: AnimationBank,
     category: string,
     connectorConfig: Partial<WbfkConnectorConfig> = {},
     ) {
@@ -378,7 +378,7 @@ export class ConnectorSetterBlock extends AnimBlock {
   }
 }
 
-export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ConnectorEntranceBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   domElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -388,7 +388,7 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: string) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
@@ -409,7 +409,7 @@ export class ConnectorEntranceBlock<TBankEntry extends KeyframesBankEntry = Keyf
   }
 }
 
-export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ConnectorExitBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   domElem: WbfkConnector;
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -419,7 +419,7 @@ export class ConnectorExitBlock<TBankEntry extends KeyframesBankEntry = Keyframe
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: IKeyframesBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: string) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }

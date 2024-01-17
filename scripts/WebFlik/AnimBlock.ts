@@ -1,6 +1,6 @@
 import { AnimSequence } from "./AnimSequence";
 import { AnimTimeline } from "./AnimTimeline";
-import { GeneratorParams, IKeyframesBank, KeyframesBankEntry } from "./WebFlik";
+import { GeneratorParams, AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
 import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, GeneralErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
@@ -513,9 +513,9 @@ export class WebFlikAnimation extends Animation {
 
 
 
-export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> implements AnimBlockConfig {
+export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> implements AnimBlockConfig {
   private static id: number = 0;
-  private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as KeyframesBankEntry; }
+  private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as AnimationBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
   protected generateError: BlockErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
@@ -575,7 +575,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, bank: IKeyframesBank, public category: string) {
+  constructor(domElem: Element | null, public animName: string, bank: AnimationBank, public category: string) {
     this.id = AnimBlock.id++;
     
     if (!domElem) {
@@ -953,7 +953,7 @@ export abstract class AnimBlock<TBankEntry extends KeyframesBankEntry = Keyframe
   }
 }
 
-export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class EntranceBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   private backwardsHidingMethod: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
 
   protected get defaultConfig(): Partial<AnimBlockConfig> {
@@ -1008,7 +1008,7 @@ export class EntranceBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 }
 
-export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBlockConfig> = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ExitBlock<TBankEntry extends AnimationBankEntry<ExitBlock, ExitBlockConfig> = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   private exitType: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
 
   protected get defaultConfig(): Partial<ExitBlockConfig> {
@@ -1046,13 +1046,13 @@ export class ExitBlock<TBankEntry extends KeyframesBankEntry<ExitBlock, ExitBloc
   }
 }
 
-export class EmphasisBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class EmphasisBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }
 }
 
-export class MotionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class MotionBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       composite: 'accumulate',
@@ -1060,7 +1060,7 @@ export class MotionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEn
   }
 }
 
-export class ScrollerBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class ScrollerBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
@@ -1068,7 +1068,7 @@ export class ScrollerBlock<TBankEntry extends KeyframesBankEntry = KeyframesBank
   }
 }
 
-export class TransitionBlock<TBankEntry extends KeyframesBankEntry = KeyframesBankEntry> extends AnimBlock<TBankEntry> {
+export class TransitionBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {};
   }

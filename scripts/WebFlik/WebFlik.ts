@@ -20,20 +20,20 @@ type RafMutatorsGenerator<T extends unknown> = {
   generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardMutator: () => void, backwardMutator: () => void];
 };
 
-export type KeyframesBankEntry<TBlockThis extends unknown = unknown, TConfig extends unknown = unknown> = Readonly<
+export type AnimationBankEntry<TBlockThis extends unknown = unknown, TConfig extends unknown = unknown> = Readonly<
   { config?: Partial<TConfig>; }
   & (KeyframesGenerator<TBlockThis> | KeyframesFunctionsGenerator<TBlockThis> | RafMutatorsGenerator<TBlockThis>)
 >;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
-export type IKeyframesBank<TBlock extends AnimBlock = AnimBlock, TBlockConfig extends unknown = AnimBlockConfig> = Readonly<
-  Record<string, KeyframesBankEntry<
+export type AnimationBank<TBlock extends AnimBlock = AnimBlock, TBlockConfig extends unknown = AnimBlockConfig> = Readonly<
+  Record<string, AnimationBankEntry<
     Readonly<Pick<TBlock, 'animName' | 'domElem'>>,
     TBlockConfig
   >>
 >;
 
-export type GeneratorParams<TBankEntry extends KeyframesBankEntry> = Parameters<
+export type GeneratorParams<TBankEntry extends AnimationBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
   TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateKeyframeGenerators'] : (
     TBankEntry extends RafMutatorsGenerator<unknown> ? TBankEntry['generateRafMutators'] : (
@@ -45,8 +45,8 @@ TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes']
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // extracts only those strings in an object whose paired value is a KeyframesBankEntry
-export type AnimationNameIn<TBank extends IKeyframesBank> = Extract<keyof {
-  [key in keyof TBank as TBank[key] extends KeyframesBankEntry ? key : never]: TBank[key];
+export type AnimationNameIn<TBank extends AnimationBank> = Extract<keyof {
+  [key in keyof TBank as TBank[key] extends AnimationBankEntry ? key : never]: TBank[key];
 }, string>;
 
 
@@ -55,22 +55,22 @@ class _WebFlik {
   <
    // default = {} ensures intellisense for a given bank still works
    // without specifying the field (why? not sure)
-    UserEntranceBank extends IKeyframesBank = {},
-    UserExitBank extends IKeyframesBank<ExitBlock, ExitBlockConfig> = {},
-    UserEmphasisBank extends IKeyframesBank = {},
-    UserMotionBank extends IKeyframesBank = {},
-    _EmptyTransitionBank extends IKeyframesBank = {},
-    _EmptyConnectorEntranceBank extends IKeyframesBank = {},
-    _EmptyConnectorExitBank extends IKeyframesBank = {},
-    _EmptyScrollerBank extends IKeyframesBank = {},
+    UserEntranceBank extends AnimationBank = {},
+    UserExitBank extends AnimationBank<ExitBlock, ExitBlockConfig> = {},
+    UserEmphasisBank extends AnimationBank = {},
+    UserMotionBank extends AnimationBank = {},
+    _EmptyTransitionBank extends AnimationBank = {},
+    _EmptyConnectorEntranceBank extends AnimationBank = {},
+    _EmptyConnectorExitBank extends AnimationBank = {},
+    _EmptyScrollerBank extends AnimationBank = {},
     IncludePresets extends boolean = true
   >
   (
     customBankAddons: {
-      entrances?: UserEntranceBank & IKeyframesBank<EntranceBlock>;
-      exits?: UserExitBank & IKeyframesBank<ExitBlock, ExitBlockConfig>;
-      emphases?: UserEmphasisBank & IKeyframesBank<EmphasisBlock>;
-      motions?: UserMotionBank & IKeyframesBank<MotionBlock>;
+      entrances?: UserEntranceBank & AnimationBank<EntranceBlock>;
+      exits?: UserExitBank & AnimationBank<ExitBlock, ExitBlockConfig>;
+      emphases?: UserEmphasisBank & AnimationBank<EmphasisBlock>;
+      motions?: UserMotionBank & AnimationBank<MotionBlock>;
     } = {},
     includePresets: IncludePresets | void = true as IncludePresets
   ) {
@@ -156,10 +156,10 @@ class _WebFlik {
     };
   }
 
-  private static checkBanksFormatting(...banks: (IKeyframesBank | undefined)[]) {
+  private static checkBanksFormatting(...banks: (AnimationBank | undefined)[]) {
     const errors: string[] = [];
     
-    const checkForArrowFunctions = (bank?: IKeyframesBank) => {
+    const checkForArrowFunctions = (bank?: AnimationBank) => {
       if (!bank) { return; }
       for (const animName in bank) {
         const entry = bank[animName];

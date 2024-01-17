@@ -1,6 +1,6 @@
 import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
-import { IKeyframesBank } from "./WebFlik";
+import { AnimationBank } from "./WebFlik";
 import { computeSelfScrollingBounds, negateNumString, overrideHidden, splitXYAlignmentString, splitXYTupleString, unOverrideHidden } from "./utils/helpers";
 import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
@@ -132,7 +132,7 @@ export const presetEntrances = {
   },
 
   // invalidProperty: 5,
-} satisfies IKeyframesBank<EntranceBlock>;
+} satisfies AnimationBank<EntranceBlock>;
 
 
 export const presetExits = {
@@ -253,7 +253,7 @@ export const presetExits = {
       }
     }
   },
-} satisfies IKeyframesBank<ExitBlock, ExitBlockConfig>;
+} satisfies AnimationBank<ExitBlock, ExitBlockConfig>;
 
 
 export const presetEmphases = {
@@ -281,7 +281,7 @@ export const presetEmphases = {
       classesToRemoveOnFinish: [`wbfk-highlightable`],
     },
   },
-} satisfies IKeyframesBank<EmphasisBlock>;
+} satisfies AnimationBank<EmphasisBlock>;
 
 
 export const presetMotions = {
@@ -370,7 +370,7 @@ export const presetMotions = {
       ];
     },
   },
-} satisfies IKeyframesBank<MotionBlock>;
+} satisfies AnimationBank<MotionBlock>;
 
 
 export const presetTransitions = {
@@ -392,7 +392,7 @@ export const presetTransitions = {
       return [ [original, {...keyframe}] ];
     },
   },
-} satisfies IKeyframesBank<TransitionBlock>;
+} satisfies AnimationBank<TransitionBlock>;
 
 
 export const presetConnectorEntrances = {
@@ -448,7 +448,7 @@ export const presetConnectorEntrances = {
       }
     },
   },
-} satisfies IKeyframesBank<ConnectorEntranceBlock>;
+} satisfies AnimationBank<ConnectorEntranceBlock>;
 
 
 export const presetConnectorExits = {
@@ -501,7 +501,7 @@ export const presetConnectorExits = {
       }
     },
   },
-} satisfies IKeyframesBank<ConnectorExitBlock>;
+} satisfies AnimationBank<ConnectorExitBlock>;
 
 
 export const presetScrolls = {
@@ -542,4 +542,4 @@ export const presetScrolls = {
       pregeneratesKeyframes: false,
     }
   },
-} satisfies IKeyframesBank<ScrollerBlock>;
+} satisfies AnimationBank<ScrollerBlock>;
