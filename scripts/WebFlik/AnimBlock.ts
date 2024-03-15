@@ -5,6 +5,7 @@ import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
 import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, GeneralErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
 import { AnimationCategory } from "./utils/interfaces";
+import { WbfkConnector } from "./AnimBlockLine";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -583,6 +584,16 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
 
   constructor(domElem: Element | null, public animName: string, bank: AnimationBank, public category: AnimationCategory) {
     this.id = AnimBlock.id++;
+    
+    if ((category === 'Entrance' || category === 'Exit') && domElem instanceof WbfkConnector) {
+      throw this.generateError(InvalidElementError,
+        `Connectors cannot be animated using ${category}().` +
+        `${errorTip(`WbfkConnector elements cannot be animated using Entrance() or Exit() because many of the animations are not really applicable.` +
+          ` Instead, any entrance or exit animations that make sense for connectors are defined in ConnectorEntrance() and ConnectorExit().`
+        )}`,
+        domElem
+      );
+    }
     
     if (!domElem) {
       throw this.generateError(InvalidElementError, `Element must not be null or undefined.`);
