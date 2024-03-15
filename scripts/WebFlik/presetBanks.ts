@@ -396,6 +396,15 @@ export const presetTransitions = {
 
 
 export const presetConnectorEntrances = {
+  [`~appear`]: {
+    generateKeyframes() {
+      return [[]];
+    },
+    config: {
+      duration: 0
+    }
+  },
+
   [`~fade-in`]: {
     generateKeyframes() {
       return [[
@@ -452,6 +461,15 @@ export const presetConnectorEntrances = {
 
 
 export const presetConnectorExits = {
+  [`~disappear`]: {
+    generateKeyframes() {
+      return [[]];
+    },
+    config: {
+      duration: 0
+    }
+  },
+
   [`~fade-out`]: {
     generateKeyframes() {
       return [[
