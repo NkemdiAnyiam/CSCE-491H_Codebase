@@ -1,9 +1,9 @@
 import { AnimSequence } from "./AnimSequence";
 import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, AnimationBank, AnimationBankEntry } from "./WebFlik";
-import { getOpeningTag, mergeArrays } from "./utils/helpers";
+import { mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, GeneralErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
+import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
 import { AnimationCategory } from "./utils/interfaces";
 import { WbfkConnector } from "./AnimBlockLine";
 
