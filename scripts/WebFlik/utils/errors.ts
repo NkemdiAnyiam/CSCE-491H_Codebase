@@ -5,14 +5,15 @@ import { getOpeningTag } from "./helpers";
 
 export type BlockErrorGenerator = {
   <TError extends Error>(error: TError): TError;
-  <TError extends Error>(ErrorClass: new (message: string) => TError, msg: string): TError;
+  // elementOverride is used only in the constructor where this.domElem is not yet defined
+  <TError extends Error>(ErrorClass: new (message: string) => TError, msg: string, elementOverride?: Element): TError;
 };
 
 export type GeneralErrorGenerator = {
   <TError extends Error>(
     ErrorClassOrInstance: TError | (new (message: string) => TError),
     msg: string,
-    components?: {timeline?: AnimTimeline, sequence?: AnimSequence, block?: AnimBlock}): TError;
+    components?: {timeline?: AnimTimeline, sequence?: AnimSequence, block?: AnimBlock, element?: Element}): TError,
 };
 
 export class CommitStylesError extends Error {
@@ -55,7 +56,7 @@ export const errorTip = (tip: string) => {
 };
 
 export const generateError: GeneralErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>', components = {}) => {
-  const {timeline, sequence, block} = components!;
+  const {timeline, sequence, block, element} = components!;
   const postfix = (
     `\n\n${'-'.repeat(25)}LOCATION${'-'.repeat(25)}` +
     (timeline
@@ -72,7 +73,7 @@ export const generateError: GeneralErrorGenerator = (ErrorClassOrInstance, msg =
     ) +
     (block
       ? `\nBlock:    [Category: ${block.category}] [Animation: ${block.animName}]` +
-        `\nDOM Tag:  ${getOpeningTag(block.domElem)}`
+        `\nDOM Tag:  ${getOpeningTag(element)}`
       : ''
     ) +
     `\n${'-'.repeat(58)}`
