@@ -4,6 +4,7 @@ import { GeneratorParams, AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { getOpeningTag, mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
 import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, GeneralErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
+import { AnimationCategory } from "./utils/interfaces";
 
 type CustomKeyframeEffectOptions = {
   startsNextBlock: boolean;
@@ -575,7 +576,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, bank: AnimationBank, public category: string) {
+  constructor(domElem: Element | null, public animName: string, bank: AnimationBank, public category: AnimationCategory) {
     this.id = AnimBlock.id++;
     
     if (!domElem) {

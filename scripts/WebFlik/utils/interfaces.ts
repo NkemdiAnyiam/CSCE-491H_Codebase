@@ -41,3 +41,5 @@ export type CssLengthUnit = | 'px' | 'rem' | '%';
 export type CssLength = `${number}${CssLengthUnit}`;
 export type CssYAlignment = | 'top' | 'bottom' | 'center';
 export type CssXAlignment = | 'left' | 'right' | 'center';
+
+export type AnimationCategory = `${'Connector ' | ''}Entrance` | `${'Connector ' | ''}Exit` | 'Emphasis' | 'Motion' | 'Transition' | 'Connector Setter' | 'Scroller'

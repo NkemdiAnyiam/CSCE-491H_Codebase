@@ -2,6 +2,7 @@ import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { InvalidElementError } from "./utils/errors";
 import { equalWithinTol, overrideHidden, unOverrideHidden } from "./utils/helpers";
+import { AnimationCategory } from "./utils/interfaces";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -335,7 +336,7 @@ export class ConnectorSetterBlock extends AnimBlock {
     pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
     animName: string,
     bank: AnimationBank,
-    category: string,
+    category: AnimationCategory,
     connectorConfig: Partial<WbfkConnectorConfig> = {},
     ) {
     super(connectorElem, animName, bank, category);
@@ -388,7 +389,7 @@ export class ConnectorEntranceBlock<TBankEntry extends AnimationBankEntry = Anim
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
@@ -419,7 +420,7 @@ export class ConnectorExitBlock<TBankEntry extends AnimationBankEntry = Animatio
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: string) {
+  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
