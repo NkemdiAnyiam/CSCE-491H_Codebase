@@ -10,7 +10,8 @@ export const createStyles = (rules: string = ''): void => {
   document.body.appendChild(sheet);
 };
 
-export const getOpeningTag = (element: Element): string => {
+export const getOpeningTag = (element: Element | null | undefined): string => {
+  if (!element) { return String(element); }
   const htmlText = element.outerHTML;
   const start  = htmlText.search(/</);
   const end  = htmlText.search(/>/);
