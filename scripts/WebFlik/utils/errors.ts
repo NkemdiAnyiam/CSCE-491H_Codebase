@@ -16,40 +16,48 @@ export type GeneralErrorGenerator = {
     components?: {timeline?: AnimTimeline, sequence?: AnimSequence, block?: AnimBlock, element?: Element}): TError,
 };
 
-export class CommitStylesError extends Error {
+class CommitStylesError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'CommitStylesError';
   }
 }
 
-export class InvalidElementError extends TypeError {
+class InvalidElementError extends TypeError {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidElementError';
   }
 }
 
-export class InvalidEntranceAttempt extends Error {
+class InvalidEntranceAttempt extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidEntranceAttempt'
   }
 }
 
-export class InvalidPhasePositionError extends RangeError {
+class InvalidPhasePositionError extends RangeError {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidPhasePositionError';
   }
 }
 
-export class ChildPlaybackError extends Error {
+class ChildPlaybackError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ChildPlaybackError';
   }
 }
+
+export const CustomErrors = {
+  CommitStylesError,
+  InvalidElementError,
+  InvalidEntranceAttempt,
+  InvalidPhasePositionError,
+  ChildPlaybackError,
+};
 
 export const errorTip = (tip: string) => {
   return `\n${'*'.repeat(10)}\n${tip}\n${'*'.repeat(10)}`;

@@ -1,6 +1,6 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { AnimationBank, AnimationBankEntry } from "./WebFlik";
-import { InvalidElementError } from "./utils/errors";
+import { CustomErrors } from "./utils/errors";
 import { equalWithinTol, overrideHidden, unOverrideHidden } from "./utils/helpers";
 import { AnimationCategory } from "./utils/interfaces";
 
@@ -341,12 +341,12 @@ export class ConnectorSetterBlock extends AnimBlock {
     ) {
     super(connectorElem, animName, bank, category);
 
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
     if (!(pointA?.[0] instanceof Element)) {
-      throw this.generateError(InvalidElementError, `Point A element must not be null or undefined.`);
+      throw this.generateError(CustomErrors.InvalidElementError, `Point A element must not be null or undefined.`);
     }
     if (!(pointB?.[0] instanceof Element)) {
-      throw this.generateError(InvalidElementError, `Point B element must not be null or undefined.`);
+      throw this.generateError(CustomErrors.InvalidElementError, `Point B element must not be null or undefined.`);
     }
 
     this.domElem = connectorElem;
@@ -392,7 +392,7 @@ export class ConnectorEntranceBlock<TBankEntry extends AnimationBankEntry = Anim
   constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
     this.domElem = connectorElem;
   }
 
@@ -423,7 +423,7 @@ export class ConnectorExitBlock<TBankEntry extends AnimationBankEntry = Animatio
   constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
-    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
+    if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
 
     this.domElem = connectorElem;
   }

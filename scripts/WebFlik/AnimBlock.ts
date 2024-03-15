@@ -3,7 +3,7 @@ import { AnimTimeline } from "./AnimTimeline";
 import { GeneratorParams, AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { mergeArrays } from "./utils/helpers";
 import { EasingString, useEasing } from "./utils/easing";
-import { ChildPlaybackError, CommitStylesError, BlockErrorGenerator, InvalidElementError, InvalidEntranceAttempt, InvalidPhasePositionError, errorTip, generateError } from "./utils/errors";
+import { CustomErrors, BlockErrorGenerator, errorTip, generateError } from "./utils/errors";
 import { AnimationCategory } from "./utils/interfaces";
 import { WbfkConnector } from "./AnimBlockLine";
 
@@ -79,7 +79,7 @@ export class WebFlikAnimation extends Animation {
   constructor(private forwardEffect: KeyframeEffect, private backwardEffect: KeyframeEffect, private errorGenerator: BlockErrorGenerator) {
     super();
 
-    if (!this.forwardEffect.target) { throw this.errorGenerator(InvalidElementError, `Animation target must not be null or undefined`); }
+    if (!this.forwardEffect.target) { throw this.errorGenerator(CustomErrors.InvalidElementError, `Animation target must not be null or undefined`); }
     if (this.forwardEffect.target !== backwardEffect.target) { this.errorGenerator(Error, `Forward and backward keyframe effects must target the same element`); }
     
     this.setDirection('forward');
@@ -279,12 +279,12 @@ export class WebFlikAnimation extends Animation {
 
       // check for out of bounds time positions
       if (phaseTimePosition < 0) {
-        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
-        else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
+        else { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
       if (phaseTimePosition > phaseDuration) {
-        if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
-        else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+        if (typeof timePosition === 'number') { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
+        else { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
       }
 
       const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
@@ -369,12 +369,12 @@ export class WebFlikAnimation extends Animation {
 
     // check for out of bounds time positions
     if (phaseTimePosition < 0) {
-      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
-      else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      if (typeof timePosition === 'number') { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Negative timePosition ${timePosition} for phase "${phase}" resulted in invalid time ${phaseTimePosition}. Must be in the range [0, ${phaseDuration}] for this "${phase}".`);}
+      else { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
     if (phaseTimePosition > phaseDuration) {
-      if (typeof timePosition === 'number') { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
-      else { throw this.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
+      if (typeof timePosition === 'number') { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition} for phase "${phase}". Must be in the range [0, ${phaseDuration}] for this "${phase}".`); }
+      else { throw this.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value ${timePosition}. Percentages must be in the range [0%, 100%].`); }
     }
 
     const endDelay: number = phaseEndDelayOffset + phaseTimePosition;
@@ -439,7 +439,7 @@ export class WebFlikAnimation extends Animation {
         [segments, segmentsCache] = [anim.segmentsBackward, anim.segmentsBackwardCache];
         break;
       default:
-        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid direction "${direction}". Must be "forward" or "backward".`);
+        throw anim.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid direction "${direction}". Must be "forward" or "backward".`);
     }
     const effect = anim.getEffect(direction);
     const { duration, delay } = effect.getTiming() as {duration: number, delay: number};
@@ -474,7 +474,7 @@ export class WebFlikAnimation extends Animation {
         phaseEndDelayOffset = -(delay + duration);
         break;
       default:
-        throw anim.errorGenerator(InvalidPhasePositionError, `Invalid phase "${phase}". Must be "delayPhase", "activePhase", "endDelayPhase", or "whole".`);
+        throw anim.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid phase "${phase}". Must be "delayPhase", "activePhase", "endDelayPhase", or "whole".`);
     }
 
     // COMPUTE TIME POSITION RELATIVE TO PHASE
@@ -487,7 +487,7 @@ export class WebFlikAnimation extends Animation {
       // if timePosition is in percent format, convert to correct time value based on phase
       const match = timePosition.toString().match(/^(-?\d+(\.\d*)?)%$/);
       // note: this error should never occur
-      if (!match) { throw anim.errorGenerator(InvalidPhasePositionError, `Invalid timePosition value "${timePosition}".`); }
+      if (!match) { throw anim.errorGenerator(CustomErrors.InvalidPhasePositionError, `Invalid timePosition value "${timePosition}".`); }
 
       initialPhaseTimePos = phaseDuration * (Number(match[1]) / 100);
     }
@@ -529,7 +529,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     });
   }
   private throwChildPlaybackError(funcName: string): never {
-    throw this.generateError(ChildPlaybackError, `Cannot directly call ${funcName}() on an animation block while is is part of a sequence.`);
+    throw this.generateError(CustomErrors.ChildPlaybackError, `Cannot directly call ${funcName}() on an animation block while is is part of a sequence.`);
   }
 
   parentSequence?: AnimSequence;
@@ -586,7 +586,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     this.id = AnimBlock.id++;
     
     if ((category === 'Entrance' || category === 'Exit') && domElem instanceof WbfkConnector) {
-      throw this.generateError(InvalidElementError,
+      throw this.generateError(CustomErrors.InvalidElementError,
         `Connectors cannot be animated using ${category}().` +
         `${errorTip(`WbfkConnector elements cannot be animated using Entrance() or Exit() because many of the animations are not really applicable.` +
           ` Instead, any entrance or exit animations that make sense for connectors are defined in ConnectorEntrance() and ConnectorExit().`
@@ -596,7 +596,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     }
     
     if (!domElem) {
-      throw this.generateError(InvalidElementError, `Element must not be null or undefined.`);
+      throw this.generateError(CustomErrors.InvalidElementError, `Element must not be null or undefined.`);
     }
     
     // if empty bank was passed, generate a bank entry with a no-op animation
@@ -856,7 +856,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
         catch (_) {
           // If forced commit is disabled, do not re-attempt to commit the styles; throw error instead.
           if (!this.commitStylesForcefully) {
-            rejecter(this.generateError(CommitStylesError,
+            rejecter(this.generateError(CustomErrors.CommitStylesError,
               `Cannot commit animation styles while element is not rendered.` +
               ` To temporarily (instantly) override the hidden state, set the 'commitStylesForcefully' config option to true` +
               ` (however, if the element's ancestor is unrendered, this will still fail).` +
@@ -877,7 +877,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
           }
           // If this fails, then the element's parent is hidden. Do not attempt to remedy; throw error instead.
           catch (err) {
-            rejecter(this.generateError(CommitStylesError,
+            rejecter(this.generateError(CustomErrors.CommitStylesError,
               `Failed to commit styles by overriding element's hidden state with 'commitStylesAttemptForcefully'.` +
               ` Cannot commit styles if element is unrendered because of an unrendered ancestor.`
             ));
@@ -1004,7 +1004,7 @@ export class EntranceBlock<TBankEntry extends AnimationBankEntry = AnimationBank
         str = `Entrance() can only act on elements that are already hidden, but this element was not hidden.` +
         ` To hide an element, you can exit it with Exit() or add either "wbfk-hidden" or "wbfk-invisible" to its class list in the HTML.`;
       }
-      throw this.generateError(InvalidEntranceAttempt,
+      throw this.generateError(CustomErrors.InvalidEntranceAttempt,
         str +
         `${errorTip(
           `Tip: "wbfk-hidden" applies a 'display: none' CSS style, which completely unrenders an element.` +
