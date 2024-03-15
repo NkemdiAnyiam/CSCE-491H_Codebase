@@ -705,6 +705,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   play(): Promise<boolean>;
   /**@internal*/play(parentSequence: AnimSequence): Promise<boolean>;
   play(parentSequence?: AnimSequence): Promise<boolean> {
+    // both parentSequence vars should either be undefined or the same AnimSequence
     if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('play'); }
     return this.animate('forward');
   }
@@ -739,7 +740,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
       this.animation.finish();
     }
     else if (this.animation.direction === 'forward') {
-      this.play();
+      this.play(parentSequence!); // TODO: Fine cleaner looking solution (perhaps simple if-else)
       this.animation.finish();
     }
   }
