@@ -108,6 +108,8 @@ export class AnimSequence implements AnimSequenceConfig {
     this.inProgress = true;
 
     this.commit();
+
+    if (this.animBlocks.length === 0) { return true; }
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
     // const activeGroupings2 = this.animBlockGroupings_endDelayFinishOrder;
     const numGroupings = activeGroupings.length;
@@ -158,6 +160,7 @@ export class AnimSequence implements AnimSequenceConfig {
   async rewind(): Promise<boolean> {
     if (this.inProgress) { return false; }
     this.inProgress = true;
+    if (this.animBlocks.length === 0) { return true; }
 
     const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
     const numGroupings = activeGroupings.length;
