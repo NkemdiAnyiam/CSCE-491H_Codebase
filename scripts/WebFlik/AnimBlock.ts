@@ -519,8 +519,13 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   private static get emptyBankEntry() { return {generateKeyframes() { return [[], []]; }} as AnimationBankEntry; }
 
   protected abstract get defaultConfig(): Partial<AnimBlockConfig>;
-  protected generateError: BlockErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>') => {
-    return generateError(ErrorClassOrInstance, msg as string, {timeline: this.parentTimeline, sequence: this.parentSequence, block: this});
+  protected generateError: BlockErrorGenerator = (ErrorClassOrInstance, msg = '<unspecified error>', elementOverride?: Element) => {
+    return generateError(ErrorClassOrInstance, msg as string, {
+      timeline: this.parentTimeline,
+      sequence: this.parentSequence,
+      block: this,
+      element: elementOverride ? elementOverride : this.domElem
+    });
   }
   private throwChildPlaybackError(funcName: string): never {
     throw this.generateError(ChildPlaybackError, `Cannot directly call ${funcName}() on an animation block while is is part of a sequence.`);
