@@ -232,6 +232,7 @@ export class AnimTimeline {
   get numSequences(): number { return this.animSequences.length; }
   get atBeginning(): boolean { return this.nextSeqIndex === 0; }
   get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
+  get stepNumber(): number { return this.nextSeqIndex + 1; }
 
   constructor(config: Partial<AnimTimelineConfig> = {}) {
     this.id = AnimTimeline.id++;
