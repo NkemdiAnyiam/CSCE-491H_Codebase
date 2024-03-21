@@ -210,7 +210,7 @@ export class AnimTimeline {
 
   id; // used to uniquely identify this specific timeline
   animSequences: AnimSequence[] = []; // array of every AnimSequence in this timeline
-  nextSeqIndex = 0; // index into animSequences
+  loadedSeqIndex = 0; // index into animSequences
   isAnimating = false; // true if currently in the middle of executing animations; false otherwise
   skippingOn = false; // used to determine whether or not all animations should be instantaneous
   isPaused = false;
@@ -230,9 +230,9 @@ export class AnimTimeline {
   };
 
   get numSequences(): number { return this.animSequences.length; }
-  get atBeginning(): boolean { return this.nextSeqIndex === 0; }
-  get atEnd(): boolean { return this.nextSeqIndex === this.numSequences; }
-  get stepNumber(): number { return this.nextSeqIndex + 1; }
+  get atBeginning(): boolean { return this.loadedSeqIndex === 0; }
+  get atEnd(): boolean { return this.loadedSeqIndex === this.numSequences; }
+  get stepNumber(): number { return this.loadedSeqIndex + 1; }
 
   constructor(config: Partial<AnimTimelineConfig> = {}) {
     this.id = AnimTimeline.id++;
@@ -448,31 +448,31 @@ export class AnimTimeline {
     return direction;
   }
 
-  // plays current AnimSequence and increments nextSeqIndex
+  // plays current AnimSequence and increments loadedSeqIndex
   private async stepForward(): Promise<boolean> {
     this.currDirection = 'forward';
     const sequences = this.animSequences;
 
-    if (this.config.debugMode) { console.log(`-->> ${this.nextSeqIndex}: ${sequences[this.nextSeqIndex].getDescription()}`); }
+    if (this.config.debugMode) { console.log(`-->> ${this.loadedSeqIndex}: ${sequences[this.loadedSeqIndex].getDescription()}`); }
 
-    const toPlay = sequences[this.nextSeqIndex];
+    const toPlay = sequences[this.loadedSeqIndex];
     this.inProgressSequences.set(toPlay.id, toPlay);
-    await sequences[this.nextSeqIndex].play(); // wait for the current AnimSequence to finish all of its animations
+    await sequences[this.loadedSeqIndex].play(); // wait for the current AnimSequence to finish all of its animations
     this.inProgressSequences.delete(toPlay.id);
 
-    ++this.nextSeqIndex;
+    ++this.loadedSeqIndex;
     const autoplayNext = !this.atEnd && (
-      sequences[this.nextSeqIndex - 1].autoplaysNextSequence || // sequence that was just played
-      sequences[this.nextSeqIndex].autoplays // new next sequence
+      sequences[this.loadedSeqIndex - 1].autoplaysNextSequence // sequence that was just played
+      || sequences[this.loadedSeqIndex].autoplays // new next sequence
     );
 
     return autoplayNext;
   }
 
-  // decrements nextSeqIndex and rewinds the AnimSequence
+  // decrements loadedSeqIndex and rewinds the AnimSequence
   private async stepBackward(): Promise<boolean> {
     this.currDirection = 'backward';
-    const prevSeqIndex = --this.nextSeqIndex;
+    const prevSeqIndex = --this.loadedSeqIndex;
     const sequences = this.animSequences;
 
     if (this.config.debugMode) { console.log(`<<-- ${prevSeqIndex}: ${sequences[prevSeqIndex].getDescription()}`); }
@@ -483,8 +483,8 @@ export class AnimTimeline {
     this.inProgressSequences.delete(toRewind.id);
     
     const autorewindPrevious = !this.atBeginning && (
-      sequences[prevSeqIndex - 1].autoplaysNextSequence || // new prev sequence
-      sequences[prevSeqIndex].autoplays // sequence that was just rewound
+      sequences[prevSeqIndex - 1].autoplaysNextSequence // new prev sequence
+      || sequences[prevSeqIndex].autoplays // sequence that was just rewound
     );
 
     return autorewindPrevious;
@@ -518,7 +518,7 @@ export class AnimTimeline {
 
     // find target index based on finding sequence with matching tag
     if (tag) {
-      // get nextSeqIndex corresponding to matching AnimSequence
+      // get loadedSeqIndex corresponding to matching AnimSequence
       targetIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
       if (targetIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found.`); }
     }
@@ -553,15 +553,15 @@ export class AnimTimeline {
     let wasSkipping = this.skippingOn;
     if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleActivation(); }
 
-    // keep skipping forwards or backwards depending on direction of nextSeqIndex
-    if (this.nextSeqIndex <= targetIndex) {
+    // keep skipping forwards or backwards depending on direction of loadedSeqIndex
+    if (this.loadedSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
-      while (this.nextSeqIndex < targetIndex) { await this.stepForward(); } // could be <= to play the sequence as well
+      while (this.loadedSeqIndex < targetIndex) { await this.stepForward(); } // could be <= to play the sequence as well
       this.playbackButtons.forwardButton?.styleDeactivation();
     }
     else {
       this.playbackButtons.backwardButton?.styleActivation();
-      while (this.nextSeqIndex > targetIndex) { await this.stepBackward(); }
+      while (this.loadedSeqIndex > targetIndex) { await this.stepBackward(); }
       this.playbackButtons.backwardButton?.styleDeactivation(); // could be tagIndex+1 to prevent the sequence from being undone
     }
 
