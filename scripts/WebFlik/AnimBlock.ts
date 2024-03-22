@@ -32,6 +32,9 @@ export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOption
 export type ExitBlockConfig = AnimBlockConfig & {
   exitType: 'display-none' | 'visibility-hidden'
 };
+export type TransitionBlockConfig = AnimBlockConfig & {
+  removeInlineStylesOnFinish: boolean;
+}
 
 type Segment = [
   endDelay: number,
@@ -740,7 +743,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
       this.animation.finish();
     }
     else if (this.animation.direction === 'forward') {
-      this.play(parentSequence!); // TODO: Fine cleaner looking solution (perhaps simple if-else)
+      this.play(parentSequence!); // TODO: Find cleaner looking solution (perhaps simple if-else)
       this.animation.finish();
     }
   }
@@ -1086,8 +1089,28 @@ export class ScrollerBlock<TBankEntry extends AnimationBankEntry = AnimationBank
   }
 }
 
-export class TransitionBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
-  protected get defaultConfig(): Partial<AnimBlockConfig> {
+export class TransitionBlock<TBankEntry extends AnimationBankEntry<TransitionBlock, TransitionBlockConfig> = AnimationBankEntry> extends AnimBlock<TBankEntry> {
+  // determines whether properties affected by this transition should be removed from inline style upon finishing animation
+  private removeInlineStyleOnFinish: boolean = false;
+
+  protected get defaultConfig(): Partial<TransitionBlockConfig> {
     return {};
+  }
+
+  /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<TransitionBlockConfig> = {}) {
+    super.initialize(animArgs, userConfig);
+
+    this.removeInlineStyleOnFinish = userConfig.removeInlineStylesOnFinish ?? this.bankEntry.config?.removeInlineStylesOnFinish ?? this.defaultConfig.removeInlineStylesOnFinish!;
+
+    return this;
+  }
+
+  protected _onFinishForward(): void {
+    if (this.removeInlineStyleOnFinish) {
+      const keyframe = this.animArgs[0] as Keyframe;
+      for (const property in keyframe) {
+        (this.domElem as HTMLElement).style[property as any] = "";
+      }
+    }
   }
 }
