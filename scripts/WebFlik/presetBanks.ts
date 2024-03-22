@@ -387,7 +387,26 @@ export const presetTransitions = {
     generateKeyframes(keyframe: Keyframe) {
       const computedStyles = getComputedStyle(this.domElem);
       const original = Object.keys(keyframe).reduce((acc, key) => {
-        return {...acc, [key]: computedStyles[key as keyof CSSStyleDeclaration]};
+        // when longhand properties are set in CSS (like border-right), the corresponding shorthand property is NOT set in the
+        // CSSStyleDeclaration (i.e., getComputedStyle()), so we cannot rely on shorthand when we want to transition back to
+        // the original style. So if key is some applicable shorthand, we must convert to longhand to store as the original.
+        let longhandKeys: (keyof CSSStyleDeclaration)[] = [];
+        switch(key) {
+          case 'border':
+          case 'margin':
+          case 'padding':
+            longhandKeys = [`${key}Top`, `${key}Right`, `${key}Bottom`, `${key}Left`];
+            break;
+          case 'borderRadius':
+            longhandKeys = [`borderTopLeftRadius`, `borderTopRightRadius`, `borderBottomRightRadius`, `borderBottomLeftRadius`];
+            break;
+          // TODO: Check to see if inset needs to be handled as well
+          // if the key is already longhand (such as opacity), key will be the only entry
+          default:
+            longhandKeys = [key as keyof CSSStyleDeclaration];
+        }
+        
+        return {...acc, ...longhandKeys.reduce((acc, key) => {return {...acc, [key]: computedStyles[key]}}, {})};
       }, {});
       return [ [original, {...keyframe}] ];
     },

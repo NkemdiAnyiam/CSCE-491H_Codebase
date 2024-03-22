@@ -1099,9 +1099,7 @@ export class TransitionBlock<TBankEntry extends AnimationBankEntry<TransitionBlo
 
   /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<TransitionBlockConfig> = {}) {
     super.initialize(animArgs, userConfig);
-
     this.removeInlineStyleOnFinish = userConfig.removeInlineStylesOnFinish ?? this.bankEntry.config?.removeInlineStylesOnFinish ?? this.defaultConfig.removeInlineStylesOnFinish!;
-
     return this;
   }
 
