@@ -68,6 +68,15 @@ export class AnimSequence implements AnimSequenceConfig {
   // CHANGE NOTE: AnimSequence now stores references to all in-progress blocks
   private inProgressBlocks: Map<number, AnimBlock> = new Map();
 
+  onStart: {do: () => void; undo: () => void;} = {
+    do: () => {},
+    undo: () => {},
+  };
+  onFinish: {do: () => void; undo: () => void;} = {
+    do: () => {},
+    undo: () => {},
+  };
+
   constructor(config: Partial<AnimSequenceConfig> = {}) {
     this.id = AnimSequence.id++;
 
@@ -85,6 +94,16 @@ export class AnimSequence implements AnimSequenceConfig {
       animBlock.setID(this.id, this.timelineID); // timelineID is really the only thing new there
       animBlock.parentTimeline = this.parentTimeline;
     }
+  }
+  setOnStart(promiseFunctions: {do: () => void, undo: () => void}): AnimSequence { 
+    this.onStart.do = promiseFunctions.do;
+    this.onStart.undo = promiseFunctions.undo;
+    return this;
+  }
+  setOnFinish(promiseFunctions: {do: () => void, undo: () => void}): AnimSequence { 
+    this.onFinish.do = promiseFunctions.do;
+    this.onFinish.undo = promiseFunctions.undo;
+    return this;
   }
 
   addBlocks(...animBlocks: AnimBlock[]): AnimSequence {
@@ -108,6 +127,8 @@ export class AnimSequence implements AnimSequenceConfig {
     this.inProgress = true;
 
     this.commit();
+
+    this.onStart.do();
 
     if (this.animBlocks.length === 0) { return true; }
     const activeGroupings = this.animBlockGroupings_activeFinishOrder;
@@ -153,6 +174,7 @@ export class AnimSequence implements AnimSequenceConfig {
     this.wasPlayed = true;
     this.wasRewinded = false;
     this.usingFinish = false;
+    this.onFinish.do();
     return true;
   }
 
@@ -164,6 +186,8 @@ export class AnimSequence implements AnimSequenceConfig {
 
     const activeGroupings = this.animBlockGroupings_backwardActiveFinishOrder;
     const numGroupings = activeGroupings.length;
+
+    this.onFinish.undo();
 
     for (let i = 0; i < numGroupings; ++i) {
       const activeGrouping = activeGroupings[i];
@@ -178,6 +202,7 @@ export class AnimSequence implements AnimSequenceConfig {
     let parallelBlocks: Promise<void>[] = [];
     const groupings = this.animBlockGroupings_endDelayFinishOrder;
     const groupingsLength = groupings.length;
+    
     for (let i = groupingsLength - 1; i >= 0; --i) {
       parallelBlocks = [];
       const grouping = groupings[i];
@@ -212,6 +237,7 @@ export class AnimSequence implements AnimSequenceConfig {
     this.wasPlayed = false;
     this.wasRewinded = true;
     this.usingFinish = false;
+    this.onStart.undo();
     return true;
   }
   
