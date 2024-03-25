@@ -573,6 +573,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   }
 
   private isAnimating = false;
+  private isPaused = false;
   duration: number = 500;
   delay: number = 0;
   endDelay: number = 0;
@@ -724,14 +725,20 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   /**@internal*/pause(parentSequence: AnimSequence): void;
   pause(parentSequence?: AnimSequence): void {
     if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('pause'); }
-    if (this.isAnimating) { this.animation.pause(); }
+    if (this.isAnimating) {
+      this.isPaused = true;
+      this.animation.pause();
+    }
   }
 
   unpause(): void;
   /**@internal*/unpause(parentSequence: AnimSequence): void;
   unpause(parentSequence?: AnimSequence): void {
     if (this.parentSequence !== parentSequence) { this.throwChildPlaybackError('unpause'); }
-    if (!this.isAnimating) { this.animation.play(); }
+    if (this.isPaused) {
+      this.isPaused = false;
+      this.animation.play();
+    }
   }
 
   finish(): void;
