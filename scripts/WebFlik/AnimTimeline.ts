@@ -70,13 +70,13 @@ class WbfkPlaybackButton extends HTMLElement {
     const htmlString = `
       <style>
         :host {
-          width: 8rem;
-          height: 8rem;
+          width: 25.6px;
+          height: 25.6px;
           display: inline-block;
           background-color: var(--wbfk-playback-button-background-color);
-          padding: 0.5rem !important;
+          padding: 1.6px !important;
         
-          box-shadow: -1rem 1rem 1rem rgba(0, 0, 0, 0.4);
+          box-shadow: -3.2px 3.2px 3.2px rgba(0, 0, 0, 0.4);
           transform: scale(1);
           transition: all 0.02s;
         
@@ -97,7 +97,7 @@ class WbfkPlaybackButton extends HTMLElement {
         
         :host(.playback-button--pressed) {
           transform: scale(0.90);
-          box-shadow: -0.2rem 0.2rem 0.2rem rgba(0, 0, 0, 0.8);
+          box-shadow: -0.64px 0.64px 0.64px rgba(0, 0, 0, 0.8);
         }
         
         :host(.playback-button--pressed[trigger="press"]) {
