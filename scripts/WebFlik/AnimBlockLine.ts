@@ -39,6 +39,7 @@ export class WbfkConnector extends HTMLElement {
   private lineMask: SVGLineElement;
   private gBody: SVGGElement;
   private mask: SVGMaskElement;
+  get lineElement(): Readonly<SVGLineElement> { return this.lineLayer; }
 
   // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
   pointA?: [elemA: Element, leftOffset: number, topOffset: number];
