@@ -87,6 +87,7 @@ export class WbfkConnector extends HTMLElement {
     const markerWidth: number = Number(this.getAttribute('marker-width')) || 5;
     const markerHeight: number = Number(this.getAttribute('marker-height')) || 7;
 
+    // TODO: In the future, https://github.com/w3c/csswg-drafts/issues/8361 could help prevent <svg> from contributing to overflow
     const htmlString = `
       <style>
         :host {
