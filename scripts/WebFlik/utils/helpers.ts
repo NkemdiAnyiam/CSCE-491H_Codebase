@@ -1,4 +1,4 @@
-import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, connectorOffset } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -27,6 +27,24 @@ export const splitXYTupleString = (tupleStr: `${CssLength}, ${CssLength}` | unde
 export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignment}` | undefined): [x: CssXAlignment, y: CssYAlignment] | undefined => {
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 };
+export const parseConnectorOffset = (offset: connectorOffset): parsedConnectorOffset => {
+  if (typeof offset === 'number') { return [offset, 0]; }
+
+  const match =
+    offset.match(/^((?:-)?\d+(?:\.\d+)?\%)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?px))?$/)
+    || offset.match(/^((?:-)?\d+(?:\.\d+)?px)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?\%))?$/);
+  if (!match) {
+    throw new Error(`Invalid connector offset string ${offset}.`);
+  }
+  const [val1, operator = '+', val2] = match.slice(1, 4);
+
+  if (val1.includes('%')) {
+    return [Number.parseFloat(val1) / 100, Number.parseFloat(val2 ?? '0px') * (operator === '+' ? 1 : -1)];
+  }
+  else {
+    return [Number.parseFloat(val2 ?? '0%') / 100, Number.parseFloat(val1 ?? '0%') * (operator === '+' ? 1 : -1)];
+  }
+}
 
 export const computeSelfScrollingBounds = (scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} => {
   // determines the intersection point of the target

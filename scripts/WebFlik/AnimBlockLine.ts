@@ -1,8 +1,8 @@
 import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { CustomErrors } from "./utils/errors";
-import { equalWithinTol, overrideHidden, unOverrideHidden } from "./utils/helpers";
-import { AnimationCategory } from "./utils/interfaces";
+import { equalWithinTol, overrideHidden, parseConnectorOffset, unOverrideHidden } from "./utils/helpers";
+import { AnimationCategory, parsedConnectorOffset, connectorOffset } from "./utils/interfaces";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -42,8 +42,8 @@ export class WbfkConnector extends HTMLElement {
   get lineElement(): Readonly<SVGLineElement> { return this.lineLayer; }
 
   // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
-  pointA?: [elemA: Element, leftOffset: number, topOffset: number];
-  pointB?: [elemB: Element, leftOffset: number, topOffset: number];
+  pointA?: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  pointB?: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
   pointTrackingEnabled: boolean = true;
   private continuousTrackingReqId: number = NaN;
 
@@ -266,10 +266,10 @@ export class WbfkConnector extends HTMLElement {
 
     // change x and y coords of our <svg>'s nested <line> based on the bounding boxes of the A and B reference elements
     // the offset with respect to the reference elements' tops and lefts is calculated using linear interpolation
-    const ax = (1 - pointA[1]) * aLeft + (pointA[1]) * aRight + connectorLeftOffset;
-    const ay = (1 - pointA[2]) * aTop + (pointA[2]) * aBottom + connectorTopOffset;
-    const bx = (1 - pointB[1]) * bLeft + (pointB[1]) * bRight + connectorLeftOffset;
-    const by = (1 - pointB[2]) * bTop + (pointB[2]) * bBottom + connectorTopOffset;
+    const ax = (1 - pointA[1][0]) * aLeft + (pointA[1][0]) * aRight  + pointA[1][1] + connectorLeftOffset;
+    const ay = (1 - pointA[2][0]) * aTop  + (pointA[2][0]) * aBottom + pointA[2][1] + connectorTopOffset;
+    const bx = (1 - pointB[1][0]) * bLeft + (pointB[1][0]) * bRight  + pointB[1][1] + connectorLeftOffset;
+    const by = (1 - pointB[2][0]) * bTop  + (pointB[2][0]) * bBottom + pointB[2][1] + connectorTopOffset;
     let changedX = false;
     let changedY = false;
     if (!equalWithinTol(ax, this.ax)) {
@@ -316,10 +316,10 @@ customElements.define('wbfk-connector', WbfkConnector);
 
 export class ConnectorSetterBlock extends AnimBlock {
   domElem: WbfkConnector;
-  previousPointA?: [elemA: Element, leftOffset: number, topOffset: number];
-  previousPointB?: [elemB: Element, leftOffset: number, topOffset: number];
-  pointA: [elemA: Element, leftOffset: number, topOffset: number];
-  pointB: [elemB: Element, leftOffset: number, topOffset: number];
+  previousPointA?: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  previousPointB?: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  pointA: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  pointB: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
 
   connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
   previousConnectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
@@ -334,8 +334,8 @@ export class ConnectorSetterBlock extends AnimBlock {
   
   constructor(
     connectorElem: WbfkConnector | null,
-    pointA: [elemA: Element | null, leftOffset: number, topOffset: number],
-    pointB: [elemB: Element | null, leftOffset: number, topOffset: number],
+    pointA: [elemA: Element | null, leftOffset: connectorOffset, topOffset: connectorOffset],
+    pointB: [elemB: Element | null, leftOffset: connectorOffset, topOffset: connectorOffset],
     animName: string,
     bank: AnimationBank,
     category: AnimationCategory,
@@ -352,8 +352,8 @@ export class ConnectorSetterBlock extends AnimBlock {
     }
 
     this.domElem = connectorElem;
-    this.pointA = pointA as [elemA: Element, leftOffset: number, topOffset: number];
-    this.pointB = pointB as [elemB: Element, leftOffset: number, topOffset: number];
+    this.pointA = [pointA[0], parseConnectorOffset(pointA[1]), parseConnectorOffset(pointA[2])];
+    this.pointB = [pointB[0], parseConnectorOffset(pointB[1]), parseConnectorOffset(pointB[2])];
 
     this.connectorConfig = this.applyLineConfig(connectorConfig);
   }

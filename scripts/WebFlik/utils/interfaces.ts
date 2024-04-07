@@ -42,4 +42,10 @@ export type CssLength = `${number}${CssLengthUnit}`;
 export type CssYAlignment = | 'top' | 'bottom' | 'center';
 export type CssXAlignment = | 'left' | 'right' | 'center';
 
+type percentage = `${number}%`;
+type pixel = `${number}px`
+type operator = '+' | '-';
+export type connectorOffset = number | percentage | pixel | `${percentage} ${operator} ${pixel}` | `${pixel} ${operator} ${percentage}`;
+export type parsedConnectorOffset = [percentage: number, pixels: number];
+
 export type AnimationCategory = `${'Connector ' | ''}Entrance` | `${'Connector ' | ''}Exit` | 'Emphasis' | 'Motion' | 'Transition' | 'Connector Setter' | 'Scroller'
