@@ -2,7 +2,7 @@ import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { CustomErrors } from "./utils/errors";
 import { equalWithinTol, overrideHidden, parseConnectorOffset, unOverrideHidden } from "./utils/helpers";
-import { AnimationCategory, parsedConnectorOffset, connectorOffset } from "./utils/interfaces";
+import { AnimationCategory, parsedConnectorOffset, ConnectorOffsetH, ConnectorOffsetV } from "./utils/interfaces";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -334,8 +334,8 @@ export class ConnectorSetterBlock extends AnimBlock {
   
   constructor(
     connectorElem: WbfkConnector | null,
-    pointA: [elemA: Element | null, leftOffset: connectorOffset, topOffset: connectorOffset],
-    pointB: [elemB: Element | null, leftOffset: connectorOffset, topOffset: connectorOffset],
+    pointA: [elemA: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
+    pointB: [elemB: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
     animName: string,
     bank: AnimationBank,
     category: AnimationCategory,
@@ -352,8 +352,8 @@ export class ConnectorSetterBlock extends AnimBlock {
     }
 
     this.domElem = connectorElem;
-    this.pointA = [pointA[0], parseConnectorOffset(pointA[1]), parseConnectorOffset(pointA[2])];
-    this.pointB = [pointB[0], parseConnectorOffset(pointB[1]), parseConnectorOffset(pointB[2])];
+    this.pointA = [pointA[0], parseConnectorOffset(pointA[1], 'horizontal'), parseConnectorOffset(pointA[2], 'vertical')];
+    this.pointB = [pointB[0], parseConnectorOffset(pointB[1], 'horizontal'), parseConnectorOffset(pointB[2], 'vertical')];
 
     this.connectorConfig = this.applyLineConfig(connectorConfig);
   }

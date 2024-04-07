@@ -1,4 +1,4 @@
-import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, connectorOffset } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, ConnectorOffsetH, ConnectorOffsetV } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -27,22 +27,66 @@ export const splitXYTupleString = (tupleStr: `${CssLength}, ${CssLength}` | unde
 export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignment}` | undefined): [x: CssXAlignment, y: CssYAlignment] | undefined => {
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 };
-export const parseConnectorOffset = (offset: connectorOffset): parsedConnectorOffset => {
+
+export function parseConnectorOffset(offset: number | ConnectorOffsetV, alignment: 'vertical'): parsedConnectorOffset;
+export function parseConnectorOffset(offset: number | ConnectorOffsetH, alignment: 'horizontal'): parsedConnectorOffset;
+export function parseConnectorOffset(offset: number | ConnectorOffsetH | ConnectorOffsetV, alignment: 'vertical' | 'horizontal' | null = null): parsedConnectorOffset {
   if (typeof offset === 'number') { return [offset, 0]; }
 
-  const match =
-    offset.match(/^((?:-)?\d+(?:\.\d+)?\%)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?px))?$/)
-    || offset.match(/^((?:-)?\d+(?:\.\d+)?px)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?\%))?$/);
+  let match: RegExpMatchArray | null = null;
+  
+  switch(alignment) {
+    case 'horizontal':
+      match =
+        offset.match(/^((?:-)?\d+(?:\.\d+)?\%|left|center|right)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?px))?$/)
+        || offset.match(/^((?:-)?\d+(?:\.\d+)?px|left|center|right)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?\%))?$/);
+      break;
+    case 'vertical':
+      match =
+        offset.match(/^((?:-)?\d+(?:\.\d+)?\%|top|center|bottom)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?px))?$/)
+        || offset.match(/^((?:-)?\d+(?:\.\d+)?px|top|center|bottom)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?\%))?$/);
+      break;
+    default:
+      throw new TypeError(`Invalid alignment value ${alignment}. Must be 'horizontal' or 'vertical'.`);
+  }
+
+  
   if (!match) {
-    throw new Error(`Invalid connector offset string ${offset}.`);
+    throw new Error(`Invalid connector offset string ${offset} using alignment ${alignment}.`);
   }
   const [val1, operator = '+', val2] = match.slice(1, 4);
+  const sign = operator === '+' ? 1 : -1;
 
   if (val1.includes('%')) {
-    return [Number.parseFloat(val1) / 100, Number.parseFloat(val2 ?? '0px') * (operator === '+' ? 1 : -1)];
+    return [Number.parseFloat(val1) / 100, Number.parseFloat(val2 ?? '0px') * sign];
+  }
+  else if (val1.includes('px')) {
+    return [Number.parseFloat(val2 ?? '0%') / 100, Number.parseFloat(val1) * sign];
   }
   else {
-    return [Number.parseFloat(val2 ?? '0%') / 100, Number.parseFloat(val1 ?? '0%') * (operator === '+' ? 1 : -1)];
+    let alignmentPerc = -1;
+    switch(val1 as CssXAlignment | CssYAlignment) {
+      case "left":
+      case "top":
+        alignmentPerc = 0;
+        break;
+      case "right":
+      case "bottom":
+        alignmentPerc = 1;
+        break;
+      case "center":
+        alignmentPerc = 0.5;
+        break;
+      default:
+        throw new TypeError(`Something wrong occured for ${val1} to be ${val1}`)
+    }
+
+    if (val2?.includes('%')) {
+      return [alignmentPerc + Number.parseFloat(val2 ?? '0%') / 100 * sign, 0];
+    }
+    else {
+      return [alignmentPerc, Number.parseFloat(val2 ?? '0px') * sign];
+    }
   }
 }
 

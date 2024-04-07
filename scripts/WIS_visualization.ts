@@ -83,7 +83,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: `Describe that we're about to move bars onto graph`,
     })
     .addBlocks(
-      ConnectorSetter(connector_placeBars, [textbox_placeBars, 0.5, 1], [getJobBarEl(jobsUnsorted[0]), 0.5, 0]),
+      ConnectorSetter(connector_placeBars, [textbox_placeBars, 'center', 'bottom'], [getJobBarEl(jobsUnsorted[0]), 'center', 'top']),
       ConnectorEntrance(connector_placeBars, '~trace', ['from-B']),
       Entrance(textbox_placeBars, '~fade-in', []),
     );
