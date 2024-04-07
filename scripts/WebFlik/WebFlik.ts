@@ -45,9 +45,9 @@ TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes']
 
 // CHANGE NOTE: AnimNameIn now handles keyof and Extract
 // extracts only those strings in an object whose paired value is a KeyframesBankEntry
-export type AnimationNameIn<TBank extends AnimationBank> = Extract<keyof {
+export type AnimationNameIn<TBank extends AnimationBank> = Exclude<keyof {
   [key in keyof TBank as TBank[key] extends AnimationBankEntry ? key : never]: TBank[key];
-}, string>;
+}, number | symbol>;
 
 
 class _WebFlik {
