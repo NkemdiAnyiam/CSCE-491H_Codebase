@@ -43,10 +43,10 @@ export type CssYAlignment = | 'top' | 'bottom' | 'center';
 export type CssXAlignment = | 'left' | 'right' | 'center';
 
 type percentage = `${number}%`;
-type pixel = `${number}px`
+type pixels = `${number}px`
 type operator = '+' | '-';
-export type ConnectorOffsetH = percentage | pixel | CssXAlignment | `${percentage} ${operator} ${pixel}` | `${pixel} ${operator} ${percentage}` | `${CssXAlignment} ${operator} ${pixel | percentage}`;
-export type ConnectorOffsetV = percentage | pixel | CssYAlignment | `${percentage} ${operator} ${pixel}` | `${pixel} ${operator} ${percentage}` | `${CssYAlignment} ${operator} ${pixel | percentage}`;
+export type EndpointXPlacement = percentage | pixels | CssXAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssXAlignment} ${operator} ${pixels | percentage}`;
+export type EndpointYPlacement = percentage | pixels | CssYAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssYAlignment} ${operator} ${pixels | percentage}`;
 export type parsedConnectorOffset = [percentage: number, pixels: number];
 
 export type AnimationCategory = `${'Connector ' | ''}Entrance` | `${'Connector ' | ''}Exit` | 'Emphasis' | 'Motion' | 'Transition' | 'Connector Setter' | 'Scroller'

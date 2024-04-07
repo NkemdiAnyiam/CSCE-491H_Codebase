@@ -1,4 +1,4 @@
-import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, ConnectorOffsetH, ConnectorOffsetV } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, EndpointXPlacement, EndpointYPlacement } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -28,12 +28,12 @@ export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignme
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 };
 
-export function parseConnectorOffset(offset: number | ConnectorOffsetV, alignment: 'vertical'): parsedConnectorOffset;
-export function parseConnectorOffset(offset: number | ConnectorOffsetH, alignment: 'horizontal'): parsedConnectorOffset;
-export function parseConnectorOffset(offset: number | ConnectorOffsetH | ConnectorOffsetV, alignment: 'vertical' | 'horizontal' | null = null): parsedConnectorOffset {
+export function parseConnectorOffset(offset: number | EndpointYPlacement, alignment: 'vertical'): parsedConnectorOffset;
+export function parseConnectorOffset(offset: number | EndpointXPlacement, alignment: 'horizontal'): parsedConnectorOffset;
+export function parseConnectorOffset(offset: number | EndpointXPlacement | EndpointYPlacement, alignment: 'vertical' | 'horizontal'): parsedConnectorOffset {
   if (typeof offset === 'number') { return [offset, 0]; }
 
-  let match: RegExpMatchArray | null = null;
+  let match;
   
   switch(alignment) {
     case 'horizontal':
@@ -47,13 +47,14 @@ export function parseConnectorOffset(offset: number | ConnectorOffsetH | Connect
         || offset.match(/^((?:-)?\d+(?:\.\d+)?px|top|center|bottom)(?: (\+|-) ((?:-)?\d+(?:\.\d+)?\%))?$/);
       break;
     default:
-      throw new TypeError(`Invalid alignment value ${alignment}. Must be 'horizontal' or 'vertical'.`);
+      throw new RangeError(`Invalid alignment value ${alignment}. Must be 'horizontal' or 'vertical'.`);
   }
 
   
   if (!match) {
-    throw new Error(`Invalid connector offset string ${offset} using alignment ${alignment}.`);
+    throw new RangeError(`Invalid connector offset string ${offset} using alignment ${alignment}.`);
   }
+
   const [val1, operator = '+', val2] = match.slice(1, 4);
   const sign = operator === '+' ? 1 : -1;
 
@@ -64,7 +65,7 @@ export function parseConnectorOffset(offset: number | ConnectorOffsetH | Connect
     return [Number.parseFloat(val2 ?? '0%') / 100, Number.parseFloat(val1) * sign];
   }
   else {
-    let alignmentPerc = -1;
+    let alignmentPerc;
     switch(val1 as CssXAlignment | CssYAlignment) {
       case "left":
       case "top":
@@ -78,7 +79,7 @@ export function parseConnectorOffset(offset: number | ConnectorOffsetH | Connect
         alignmentPerc = 0.5;
         break;
       default:
-        throw new TypeError(`Something wrong occured for ${val1} to be ${val1}`)
+        throw new RangeError(`Something wrong occured for ${val1} to be ${val1}`);
     }
 
     if (val2?.includes('%')) {

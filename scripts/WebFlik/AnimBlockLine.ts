@@ -2,7 +2,7 @@ import { AnimBlock, AnimBlockConfig } from "./AnimBlock";
 import { AnimationBank, AnimationBankEntry } from "./WebFlik";
 import { CustomErrors } from "./utils/errors";
 import { equalWithinTol, overrideHidden, parseConnectorOffset, unOverrideHidden } from "./utils/helpers";
-import { AnimationCategory, parsedConnectorOffset, ConnectorOffsetH, ConnectorOffsetV } from "./utils/interfaces";
+import { AnimationCategory, parsedConnectorOffset, EndpointXPlacement, EndpointYPlacement } from "./utils/interfaces";
 
 export type WbfkConnectorConfig = {
   pointTrackingEnabled: boolean;
@@ -41,9 +41,8 @@ export class WbfkConnector extends HTMLElement {
   private mask: SVGMaskElement;
   get lineElement(): Readonly<SVGLineElement> { return this.lineLayer; }
 
-  // TODO: potentially use form <number><CssLengthUnit> for leftOffset and topOffset
-  pointA?: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
-  pointB?: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  pointA?: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  pointB?: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
   pointTrackingEnabled: boolean = true;
   private continuousTrackingReqId: number = NaN;
 
@@ -316,10 +315,10 @@ customElements.define('wbfk-connector', WbfkConnector);
 
 export class ConnectorSetterBlock extends AnimBlock {
   domElem: WbfkConnector;
-  previousPointA?: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
-  previousPointB?: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
-  pointA: [elemA: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
-  pointB: [elemB: Element, leftOffset: parsedConnectorOffset, topOffset: parsedConnectorOffset];
+  previousPointA?: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  previousPointB?: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  pointA: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  pointB: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
 
   connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
   previousConnectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
@@ -334,8 +333,8 @@ export class ConnectorSetterBlock extends AnimBlock {
   
   constructor(
     connectorElem: WbfkConnector | null,
-    pointA: [elemA: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
-    pointB: [elemB: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
+    pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
+    pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
     animName: string,
     bank: AnimationBank,
     category: AnimationCategory,

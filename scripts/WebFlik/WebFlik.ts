@@ -3,7 +3,7 @@ import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSet
 import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./presetBanks";
 import { useEasing } from "./utils/easing";
 import { createStyles } from "./utils/helpers";
-import { ConnectorOffsetH, ConnectorOffsetV } from "./utils/interfaces";
+import { EndpointXPlacement, EndpointYPlacement } from "./utils/interfaces";
 
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -126,8 +126,8 @@ class _WebFlik {
 
       ConnectorSetter: function(
         connectorElem: WbfkConnector,
-        pointA: [elemA: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
-        pointB: [elemB: Element | null, leftOffset: number | ConnectorOffsetH, topOffset: number | ConnectorOffsetV],
+        pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
+        pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
         connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig
       ) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
