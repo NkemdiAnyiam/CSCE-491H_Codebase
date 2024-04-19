@@ -1036,6 +1036,7 @@ export class EntranceBlock<TBankEntry extends AnimationBankEntry = AnimationBank
   }
 }
 
+// TODO: prevent already hidden blocks from being allowed to use exit animation
 export class ExitBlock<TBankEntry extends AnimationBankEntry<ExitBlock, ExitBlockConfig> = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   private exitType: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
 
