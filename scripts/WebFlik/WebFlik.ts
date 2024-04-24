@@ -126,8 +126,8 @@ class _WebFlik {
 
       ConnectorSetter: function(
         connectorElem: WbfkConnector,
-        pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
-        pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
+        pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+        pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
         connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig
       ) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);

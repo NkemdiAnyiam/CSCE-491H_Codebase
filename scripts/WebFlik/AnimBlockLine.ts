@@ -41,8 +41,8 @@ export class WbfkConnector extends HTMLElement {
   private mask: SVGMaskElement;
   get lineElement(): Readonly<SVGLineElement> { return this.lineLayer; }
 
-  pointA?: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
-  pointB?: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  pointA: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset] = [document.body, [0,0], [0,0]];
+  pointB: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset] = [document.body, [0,100], [0,100]];
   pointTrackingEnabled: boolean = true;
   private continuousTrackingReqId: number = NaN;
 
@@ -317,8 +317,8 @@ export class ConnectorSetterBlock extends AnimBlock {
   domElem: WbfkConnector;
   previousPointA?: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
   previousPointB?: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
-  pointA: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
-  pointB: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset];
+  pointA: [elemA: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset] | 'use-preserved';
+  pointB: [elemB: Element, xPlacement: parsedConnectorOffset, yPlacement: parsedConnectorOffset] | 'use-preserved';
 
   connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
   previousConnectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig;
@@ -333,8 +333,8 @@ export class ConnectorSetterBlock extends AnimBlock {
   
   constructor(
     connectorElem: WbfkConnector | null,
-    pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
-    pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement],
+    pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+    pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
     animName: string,
     bank: AnimationBank,
     category: AnimationCategory,
@@ -343,16 +343,19 @@ export class ConnectorSetterBlock extends AnimBlock {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
-    if (!(pointA?.[0] instanceof Element)) {
+
+    const pointAElement = pointA[0] === 'preserve' ? connectorElem!.pointA?.[0] : pointA?.[0];
+    if (!(pointAElement instanceof Element)) {
       throw this.generateError(CustomErrors.InvalidElementError, `Point A element must not be null or undefined.`);
     }
-    if (!(pointB?.[0] instanceof Element)) {
+    const pointBElement = pointB[0] === 'preserve' ? connectorElem?.pointB?.[0] : pointB?.[0];
+    if (!(pointBElement instanceof Element)) {
       throw this.generateError(CustomErrors.InvalidElementError, `Point B element must not be null or undefined.`);
     }
 
     this.domElem = connectorElem;
-    this.pointA = [pointA[0], parseConnectorOffset(pointA[1], 'horizontal'), parseConnectorOffset(pointA[2], 'vertical')];
-    this.pointB = [pointB[0], parseConnectorOffset(pointB[1], 'horizontal'), parseConnectorOffset(pointB[2], 'vertical')];
+    this.pointA = pointA[0] === 'preserve' ? 'use-preserved' : [pointAElement, parseConnectorOffset(pointA[1], 'horizontal'), parseConnectorOffset(pointA[2], 'vertical')];
+    this.pointB = pointB[0] === 'preserve' ? 'use-preserved' : [pointBElement, parseConnectorOffset(pointB[1], 'horizontal'), parseConnectorOffset(pointB[2], 'vertical')];
 
     this.connectorConfig = this.applyLineConfig(connectorConfig);
   }
@@ -361,14 +364,14 @@ export class ConnectorSetterBlock extends AnimBlock {
     this.previousPointA = this.domElem.pointA;
     this.previousPointB = this.domElem.pointB;
     this.previousConnectorConfig.pointTrackingEnabled = this.domElem.pointTrackingEnabled;
-    this.domElem.pointA = this.pointA;
-    this.domElem.pointB = this.pointB;
+    if (this.pointA !== 'use-preserved') { this.domElem.pointA = this.pointA; }
+    if (this.pointB !== 'use-preserved') { this.domElem.pointB = this.pointB; }
     this.domElem.pointTrackingEnabled = this.connectorConfig.pointTrackingEnabled;
   }
 
   protected _onStartBackward(): void {
-    this.domElem.pointA = this.previousPointA;
-    this.domElem.pointB = this.previousPointB;
+    this.domElem.pointA = this.previousPointA!;
+    this.domElem.pointB = this.previousPointB!;
     this.domElem.pointTrackingEnabled = this.previousConnectorConfig.pointTrackingEnabled;
   }
 
