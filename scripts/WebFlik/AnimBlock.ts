@@ -689,6 +689,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
       this.generateError
     );
 
+    // TODO: Figure out how to disable any pausing/stepping functionality in the timeline while stopped for roadblocks
     this.animation.pauseForRoadblocks = () => {
       if (this.parentSequence) { this.parentSequence.pause(); }
       else { this.pause(); }
