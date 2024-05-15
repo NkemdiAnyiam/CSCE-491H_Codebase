@@ -367,7 +367,7 @@ export const presetMotions = {
   
         // backward
         [{translate: `calc(${negateNumString(translateX)} + ${negateNumString(offsetSelfX)})`
-                   + `calc(${negateNumString(translateY)} + ${negateNumString(offsetSelfY)})`}],
+                   + ` calc(${negateNumString(translateY)} + ${negateNumString(offsetSelfY)})`}],
       ];
     },
   },
