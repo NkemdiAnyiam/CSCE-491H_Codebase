@@ -53,7 +53,8 @@ export const presetEntrances = {
           case 'from-top-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-top')}px`;
           case 'from-bottom-left': return `${computeOrthoDist('from-left')}px ${computeOrthoDist('from-bottom')}px`;
           case 'from-bottom-right': return `${computeOrthoDist('from-right')}px ${computeOrthoDist('from-bottom')}px`;
-          default: throw new RangeError(`Invalid fromDirection "${direction}". Must be "from-left", "from-right", "from-top", "from-bottom", "from-top-left", "from-top-right", "from-bottom-left", or "from-bottom-right".`);
+          default: throw new RangeError(`Invalid fromDirection "${direction}". Must be "from-left", "from-right", "from-top",`
+            + ` "from-bottom", "from-top-left", "from-top-right", "from-bottom-left", or "from-bottom-right".`);
         }
       };
 
