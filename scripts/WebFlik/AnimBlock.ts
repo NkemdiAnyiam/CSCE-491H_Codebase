@@ -265,12 +265,6 @@ export class WebFlikAnimation extends Animation {
   // accepts a time to wait for (converted to an endDelay) and returns a Promise that is resolved at that time
   generateTimePromise(
     direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'beginning' | 'end' | `${number}%`,
-  ): Promise<void>;
-  generateTimePromise( direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ): Promise<void>;
-  generateTimePromise(
-    direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
   ): Promise<void> {
@@ -322,13 +316,6 @@ export class WebFlikAnimation extends Animation {
     });
   }
 
-  addIntegrityblocks(
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<unknown>[]
-  ): void;
-  addIntegrityblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<unknown>[]): void;
   /**@internal*/
   addIntegrityblocks(
     direction: 'forward' | 'backward',
@@ -339,13 +326,6 @@ export class WebFlikAnimation extends Animation {
     this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
   }
 
-  addRoadblocks(
-    direction: 'forward' | 'backward',
-    phase: 'delayPhase' | 'activePhase' | 'endDelayPhase',
-    timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<unknown>[]
-  ): void;
-  addRoadblocks(direction: 'forward' | 'backward', phase: 'whole', timePosition: number | `${number}%`, ...promises: Promise<unknown>[]): void;
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
