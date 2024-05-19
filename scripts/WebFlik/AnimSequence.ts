@@ -153,7 +153,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
       // ensure that no block finishes its active phase before any block that should finish its active phase first (according to the calculated "perfect" timing)
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].addIntegrityblocks('forward', 'activePhase', 'end', activeGrouping[j-1].generateTimePromise('forward', 'activePhase', 'end'));
+        activeGrouping[j].addIntegrityblocks('forward', 'activePhase', 'end', [activeGrouping[j-1].generateTimePromise('forward', 'activePhase', 'end')]);
         // activeGrouping2[j].animation.addIntegrityblocks('forward', 'endDelayPhase', 'end', activeGrouping2[j-1].animation.getFinished('forward', 'endDelayPhase'));
       }
     }
@@ -205,7 +205,7 @@ export class AnimSequence implements AnimSequenceConfig {
 
       // ensure that no block finishes rewinding its active phase before any block that should finishing doing so first first (according to the calculated "perfect" timing)
       for (let j = 1; j < groupingLength; ++j) {
-        activeGrouping[j].addIntegrityblocks('backward', 'activePhase', 'beginning', activeGrouping[j-1].generateTimePromise('backward', 'activePhase', 'beginning'));
+        activeGrouping[j].addIntegrityblocks('backward', 'activePhase', 'beginning', [activeGrouping[j-1].generateTimePromise('backward', 'activePhase', 'beginning')]);
       }
     }
     

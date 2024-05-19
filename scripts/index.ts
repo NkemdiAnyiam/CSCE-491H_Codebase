@@ -47,7 +47,7 @@ const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_text
 // scroll.generateTimePromise('forward', 'activePhase', '50%').then(() => {
 //   scroll.finish(); // should finish it
 // })
-// scroll.addRoadblocks('forward', 'activePhase', '90%', wait(3000));
+// scroll.addRoadblocks('forward', 'activePhase', '90%', [() => wait(3000)]);
 
 const toggleSequence = new AnimSequence().addBlocks(...[
   // scroll,

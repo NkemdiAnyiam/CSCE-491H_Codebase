@@ -325,18 +325,18 @@ export class WebFlikAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
+    promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
-    this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
+    this.addAwaiteds(direction, phase, timePosition, 'integrityblock', promises);
   }
 
   addRoadblocks(
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
+    promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
-    this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
+    this.addAwaiteds(direction, phase, timePosition, 'roadblock', promises);
   }
 
   private addAwaiteds(
@@ -344,7 +344,7 @@ export class WebFlikAnimation extends Animation {
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
     awaitedType: 'integrityblock' | 'roadblock',
-    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
+    promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
     // if the animation is already finished in the given direction, do nothing
     if (this.isFinished && this.direction === direction) {
