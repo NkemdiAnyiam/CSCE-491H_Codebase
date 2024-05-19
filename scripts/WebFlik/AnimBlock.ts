@@ -39,8 +39,8 @@ export type TransitionBlockConfig = AnimBlockConfig & {
 type Segment = [
   endDelay: number,
   callbacks: ((...args: any[]) => void)[],
-  roadblocks: Promise<unknown>[],
-  integrityblocks: Promise<unknown>[],
+  roadblocks: (Promise<unknown> | (() => Promise<unknown>))[],
+  integrityblocks: (Promise<unknown> | (() => Promise<unknown>))[],
   // true when awaiting delay/endDelay periods while the awaited delay/endDelay duration is 0
   skipEndDelayUpdation: boolean,
   header: Partial<{
@@ -187,10 +187,14 @@ export class WebFlikAnimation extends Animation {
       if (roadblocks.length > 0) {
         this.pauseForRoadblocks();
         roadblocked = true;
-        await Promise.all(roadblocks);
+        // for any functions, replace the entry with the return value (a promise)
+        await Promise.all(roadblocks.map(rBlock => typeof rBlock === 'function' ? rBlock() : rBlock));
       }
-      if (integrityblocks.length > 0) { await Promise.all(integrityblocks); }
-      // Call all callbacks that awaited the completions of this phase
+      if (integrityblocks.length > 0) {
+        // for any functions, replace the entry with the return value (a promise)
+        await Promise.all(integrityblocks.map(iBlock => typeof iBlock === 'function' ? iBlock() : iBlock));
+      }
+      // Call all callbacks that awaited the completion of this phase
       for (const callback of callbacks) { callback(); }
 
       // extra await allows additional pushes to preempt next segment when they should
@@ -321,7 +325,7 @@ export class WebFlikAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<unknown>[]
+    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
     this.addAwaiteds(direction, phase, timePosition, 'integrityblock', ...promises);
   }
@@ -330,7 +334,7 @@ export class WebFlikAnimation extends Animation {
     direction: 'forward' | 'backward',
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
-    ...promises: Promise<unknown>[]
+    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
     this.addAwaiteds(direction, phase, timePosition, 'roadblock', ...promises);
   }
@@ -340,7 +344,7 @@ export class WebFlikAnimation extends Animation {
     phase: 'delayPhase' | 'activePhase' | 'endDelayPhase' | 'whole',
     timePosition: number | 'beginning' | 'end' | `${number}%`,
     awaitedType: 'integrityblock' | 'roadblock',
-    ...promises: Promise<unknown>[]
+    ...promises: (Promise<unknown> | (() => Promise<unknown>))[]
   ): void {
     // if the animation is already finished in the given direction, do nothing
     if (this.isFinished && this.direction === direction) {

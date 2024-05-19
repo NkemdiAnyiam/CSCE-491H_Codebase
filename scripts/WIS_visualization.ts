@@ -49,7 +49,6 @@ export function generateVisualization (jobsUnsorted: Job[]) {
   setUpDataDisplayScroll(dataDisplay);
   animateDataDisplay(dataDisplay, jobScheduler);
   animateJobCard(document.querySelector('.job-card') as HTMLElement); // naturally starts at the root job card
-  // setupPlaybackControls(animTimeline);
 };
 
 // allows the data display (left view with the time graph and arrays) to scroll horizontally
