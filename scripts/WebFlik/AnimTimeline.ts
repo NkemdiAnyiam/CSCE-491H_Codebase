@@ -250,11 +250,20 @@ export class AnimTimeline {
   }
 
   setupPlaybackControls(): typeof this.playbackButtons {
-    const forwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-forward"][timeline-name="${this.config.timelineName}"]`);
-    const backwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="step-backward"][timeline-name="${this.config.timelineName}"]`);
-    const pauseButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="pause"][timeline-name="${this.config.timelineName}"]`);
-    const fastForwardButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="fast-forward"][timeline-name="${this.config.timelineName}"]`);
-    const toggleSkippingButton: WbfkPlaybackButton | null = document.querySelector(`wbfk-playback-button[action="toggle-skipping"][timeline-name="${this.config.timelineName}"]`);
+    const potentialButtonsContainer = document.querySelector(`[timeline-name="${this.config.timelineName}"]`);
+
+    // find the button if it has the correct timeline-name directly on it
+    const getButtonDirect = (action: WbfkPlaybackButton['action']) => document.querySelector<WbfkPlaybackButton>(`wbfk-playback-button[action="${action}"][timeline-name="${this.config.timelineName}"]`);
+    // find the button if it is nested in a container with the correct timeline-name and does not have a timeline-name of its own
+    const getButtonGroupChild = (action: WbfkPlaybackButton['action']) => potentialButtonsContainer?.querySelector<WbfkPlaybackButton>(`wbfk-playback-button[action="${action}"]:not([timeline-name])`) ?? null;
+    // search for button directly, then search for child of button group
+    const getButton = (action: WbfkPlaybackButton['action']) => getButtonDirect(action) ?? getButtonGroupChild(action) ?? null;
+
+    const forwardButton = getButton("step-forward");
+    const backwardButton = getButton("step-backward");
+    const pauseButton = getButton("pause");
+    const fastForwardButton = getButton("fast-forward");
+    const toggleSkippingButton = getButton("toggle-skipping");
 
     if (forwardButton) {
       forwardButton.activate = () => {

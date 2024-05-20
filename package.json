@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "pre-start": "rm -rf ./.parcel-cache ./.cache ./dist",
-    "start": "npm run pre-start && npx parcel index.html",
+    "start": "npm run pre-start && npx parcel@2.7.0 index.html --no-cache",
     "clean-up": "rm -rf ./.parcel-cache ./.cache ./dist ./node_modules",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
