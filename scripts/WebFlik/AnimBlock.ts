@@ -29,8 +29,11 @@ type KeyframeTimingOptions = {
 }
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
+export type EntranceBlockConfig = AnimBlockConfig & {
+  hideFirst: 'display-none' | 'visibility-hidden' | null;
+};
 export type ExitBlockConfig = AnimBlockConfig & {
-  exitType: 'display-none' | 'visibility-hidden'
+  exitType: 'display-none' | 'visibility-hidden';
 };
 export type TransitionBlockConfig = AnimBlockConfig & {
   removeInlineStylesOnFinish: boolean;
@@ -966,14 +969,33 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   }
 }
 
-export class EntranceBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
+export class EntranceBlock<TBankEntry extends AnimationBankEntry<EntranceBlock, EntranceBlockConfig> = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   private backwardsHidingMethod: ExitBlockConfig['exitType'] = '' as ExitBlockConfig['exitType'];
 
-  protected get defaultConfig(): Partial<AnimBlockConfig> {
+  protected get defaultConfig(): Partial<EntranceBlockConfig> {
     return {
       commitsStyles: false,
       pregeneratesKeyframes: true,
+      hideFirst: null,
     };
+  }
+
+  /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<EntranceBlockConfig> = {}) {
+    super.initialize(animArgs, userConfig);
+
+    const initialHidingType = userConfig.hideFirst ?? this.bankEntry.config?.hideFirst ?? this.defaultConfig.hideFirst!;
+    switch(initialHidingType) {
+      case "display-none":
+        this.domElem.classList.add('wbfk-hidden');
+        break;
+      case "visibility-hidden":
+        this.domElem.classList.add('wbfk-invisible');
+        break;
+      default:
+        break;
+    }
+
+    return this;
   }
 
   protected _onStartForward(): void {

@@ -1,4 +1,4 @@
-import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, MotionBlock, ScrollerBlock, TransitionBlock, ExitBlockConfig } from "./AnimBlock";
+import { AnimBlock, EntranceBlock, ExitBlock, EmphasisBlock, AnimBlockConfig, MotionBlock, ScrollerBlock, TransitionBlock, ExitBlockConfig, EntranceBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSetterBlock, WbfkConnectorConfig } from "./AnimBlockLine";
 import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./presetBanks";
 import { useEasing } from "./utils/easing";
@@ -68,7 +68,7 @@ class _WebFlik {
   >
   (
     customBankAddons: {
-      entrances?: UserEntranceBank & AnimationBank<EntranceBlock>;
+      entrances?: UserEntranceBank & AnimationBank<EntranceBlock, EntranceBlockConfig>;
       exits?: UserExitBank & AnimationBank<ExitBlock, ExitBlockConfig>;
       emphases?: UserEmphasisBank & AnimationBank<EmphasisBlock>;
       motions?: UserMotionBank & AnimationBank<MotionBlock>;

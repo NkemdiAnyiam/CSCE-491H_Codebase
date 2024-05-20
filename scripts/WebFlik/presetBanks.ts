@@ -1,4 +1,4 @@
-import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig, TransitionBlockConfig } from "./AnimBlock";
+import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig, TransitionBlockConfig, EntranceBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
 import { AnimationBank } from "./WebFlik";
 import { computeSelfScrollingBounds, negateNumString, overrideHidden, splitXYAlignmentString, splitXYTupleString, unOverrideHidden } from "./utils/helpers";
@@ -133,7 +133,7 @@ export const presetEntrances = {
   },
 
   // invalidProperty: 5,
-} satisfies AnimationBank<EntranceBlock>;
+} satisfies AnimationBank<EntranceBlock, EntranceBlockConfig>;
 
 
 export const presetExits = {
