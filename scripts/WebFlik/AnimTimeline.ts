@@ -49,25 +49,25 @@ class WbfkPlaybackButton extends HTMLElement {
     let buttonShapeHtmlStr: string;
     switch(action) {
       case "step-forward":
-        buttonShapeHtmlStr = `<polygon points="22.468 81.83 67.404 40.915 22.468 0 22.468 81.83"/>`;
+        buttonShapeHtmlStr = /*html*/`<polygon points="22.468 81.83 67.404 40.915 22.468 0 22.468 81.83"/>`;
         break;
       case "step-backward":
-        buttonShapeHtmlStr = `<polygon points="59.362 81.83 14.426 40.915 59.362 0 59.362 81.83"/>`;
+        buttonShapeHtmlStr = /*html*/`<polygon points="59.362 81.83 14.426 40.915 59.362 0 59.362 81.83"/>`;
         break;
       case "pause":
-        buttonShapeHtmlStr = `<path d="M13.753,0h17.43V81.83H13.753ZM49.974,81.83H67.4V0H49.974Z"/>`;
+        buttonShapeHtmlStr = /*html*/`<path d="M13.753,0h17.43V81.83H13.753ZM49.974,81.83H67.4V0H49.974Z"/>`;
         break;
       case "fast-forward":
-        buttonShapeHtmlStr = `<path d="M0,0,36.936,40.915,0,81.83ZM44.936,81.83,81.872,40.915,44.936,0Z"/>`;
+        buttonShapeHtmlStr = /*html*/`<path d="M0,0,36.936,40.915,0,81.83ZM44.936,81.83,81.872,40.915,44.936,0Z"/>`;
         break;
       case "toggle-skipping":
-        buttonShapeHtmlStr = `<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
+        buttonShapeHtmlStr = /*html*/`<path d="M0,0,23.866,17.34,0,34.681ZM28.982,34.681,52.848,17.34,28.982,0Zm28.982,0L81.83,17.34,57.964,0ZM81.83,47.149,57.964,64.489,81.83,81.83Zm-28.982,0L28.982,64.489,52.848,81.83Zm-28.982,0L0,64.489,23.866,81.83Z"/>`;
         break;
       default: throw new RangeError(`Invalid 'action' attribute value "${action}" for WebFlik playback button. Must be "step-forward", "step-backward", "pause", "fast-forward", or "toggle-skipping".`);
     }
     this.action = action;
 
-    const htmlString = `
+    const htmlString = /*html*/`
       <style>
         :host {
           width: 25.6px;

@@ -183,8 +183,8 @@ class _WebFlik {
 
 export const WebFlik = new _WebFlik();
 
-createStyles(`
-/* Using :where makes it possible to easily for developer to override the default color */
+createStyles(/*css*/`
+/* Using :where makes it possible for developer to easily override the default color */
 :where(:root) {
   --wbfk-highlight-color: #F9F278;
   --wbfk-playback-button-press-color: #db0000;

@@ -87,7 +87,7 @@ export class WbfkConnector extends HTMLElement {
     const markerHeight: number = Number(this.getAttribute('marker-height')) || 7;
 
     // TODO: In the future, https://github.com/w3c/csswg-drafts/issues/8361 could help prevent <svg> from contributing to overflow
-    const htmlString = `
+    const htmlString = /*html*/`
       <style>
         :host {
           --a-marker-opacity: 1;
