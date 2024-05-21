@@ -540,9 +540,16 @@ export class AnimTimeline {
 
     // find target index based on finding sequence with matching tag
     if (tag) {
+      const tagMatch = (tag: RegExp | string, sequence: AnimSequence): boolean => tag instanceof RegExp ? !!sequence.getTag().match(tag) : sequence.getTag() === tag;
+
       // get loadedSeqIndex corresponding to matching AnimSequence
       const sequenceInset = direction === 'forward' ? this.loadedSeqIndex + 1 : 0;
-      targetIndex = findLastIndex(sequencesSubset, animSequence => tag instanceof RegExp ? !!animSequence.getTag().match(tag) : animSequence.getTag() === tag) + sequenceInset + offset;
+      targetIndex = (direction === 'backward'
+        ? findLastIndex(sequencesSubset, animSequence => tagMatch(tag, animSequence))
+        : sequencesSubset.findIndex(animSequence => tagMatch(tag, animSequence))
+      )
+        + sequenceInset + offset;
+
       if (targetIndex - sequenceInset - offset === -1) { throw new Error(`Tag name "${tag}" not found.`); }
     }
     // find target index based on either the beginning or end of the timeline
