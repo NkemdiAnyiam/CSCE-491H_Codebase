@@ -1,4 +1,5 @@
 import { AnimSequence } from "./AnimSequence";
+import { findLastIndex } from "./utils/helpers";
 
 type AnimTimelineConfig = {
   debugMode: boolean;
@@ -500,9 +501,9 @@ export class AnimTimeline {
   }
 
   // immediately skips to first AnimSequence in animSequences with either matching tag field or position
-  async skipTo(options: Partial<{tag: string, position: never, offset: number}>): Promise<void>;
+  async skipTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, direction?: 'forward' | 'backward' | 'scan'): Promise<void>;
   async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
-  async skipTo(options: Partial<{tag: string, position: 'beginning' | 'end', offset: number}> = {}): Promise<void> {
+  async skipTo(options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {}, direction: 'forward' | 'backward' | 'scan' = 'scan'): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use skipTo() while currently animating.'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline.'); }
@@ -524,12 +525,25 @@ export class AnimTimeline {
     if (!Number.isSafeInteger(offset)) { throw new TypeError(`Invalid offset "${offset}". Value must be an integer.`); }
 
     let targetIndex: number;
+    let sequencesSubset: AnimSequence[] = [];
+    switch(direction) {
+      case "forward":
+        sequencesSubset = this.animSequences.slice(this.loadedSeqIndex + 1);
+        break;
+      case "backward":
+        sequencesSubset = this.animSequences.slice(0, this.loadedSeqIndex);
+        break;
+      case "scan":
+      default:
+        sequencesSubset = this.animSequences;
+    }
 
     // find target index based on finding sequence with matching tag
     if (tag) {
       // get loadedSeqIndex corresponding to matching AnimSequence
-      targetIndex = this.animSequences.findIndex(animSequence => animSequence.getTag() === tag) + offset;
-      if (targetIndex - offset === -1) { throw new Error(`Tag name "${tag}" not found.`); }
+      const sequenceInset = direction === 'forward' ? this.loadedSeqIndex + 1 : 0;
+      targetIndex = findLastIndex(sequencesSubset, animSequence => tag instanceof RegExp ? !!animSequence.getTag().match(tag) : animSequence.getTag() === tag) + sequenceInset + offset;
+      if (targetIndex - sequenceInset - offset === -1) { throw new Error(`Tag name "${tag}" not found.`); }
     }
     // find target index based on either the beginning or end of the timeline
     else {
