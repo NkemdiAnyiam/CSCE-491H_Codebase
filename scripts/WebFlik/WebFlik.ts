@@ -96,38 +96,38 @@ class _WebFlik {
     return {
       Entrance: function<
         BankType extends typeof combinedEntranceBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(domElem: Element | null, animName: AnimName, ...params: Parameters<EntranceBlock<EntryType>['initialize']>) {
+      >(domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<EntranceBlock<EntryType>['initialize']>) {
         return new EntranceBlock<EntryType>(domElem, animName, combinedEntranceBank, 'Entrance').initialize(...params);
       },
 
       Exit: function<
         BankType extends typeof combinedExitBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(domElem: Element | null, animName: AnimName, ...params: Parameters<ExitBlock<EntryType>['initialize']>) {
+      >(domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<ExitBlock<EntryType>['initialize']>) {
         return new ExitBlock<EntryType>(domElem, animName, combinedExitBank, 'Exit').initialize(...params);
       },
 
       Emphasis: function<
         BankType extends typeof combinedEmphasisBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(domElem: Element | null, animName: AnimName, ...params: Parameters<EmphasisBlock<EntryType>['initialize']>) {
+      >(domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<EmphasisBlock<EntryType>['initialize']>) {
         return new EmphasisBlock<EntryType>(domElem, animName, combinedEmphasisBank, 'Emphasis').initialize(...params);
       },
 
       Motion: function<
         BankType extends typeof combinedMotionBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(domElem: Element | null, animName: AnimName, ...params: Parameters<MotionBlock<EntryType>['initialize']>) {
+      >(domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<MotionBlock<EntryType>['initialize']>) {
         return new MotionBlock<EntryType>(domElem, animName, combinedMotionBank, 'Motion').initialize(...params);
       },
 
       Transition: function<
         BankType extends typeof combinedTransitionBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(domElem: Element | null, animName: AnimName, ...params: Parameters<TransitionBlock<EntryType>['initialize']>) {
+      >(domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<TransitionBlock<EntryType>['initialize']>) {
         return new TransitionBlock<EntryType>(domElem, animName, combinedTransitionBank, 'Transition').initialize(...params);
       },
 
       ConnectorSetter: function(
         connectorElem: WbfkConnector,
-        pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
-        pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+        pointA: [elemA: Element | null | undefined, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+        pointB: [elemB: Element | null | undefined, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
         connectorConfig: WbfkConnectorConfig = {} as WbfkConnectorConfig
       ) {
         return new ConnectorSetterBlock(connectorElem, pointA, pointB, `~set-line-points`, {}, 'Connector Setter', connectorConfig).initialize([]);
@@ -135,17 +135,17 @@ class _WebFlik {
 
       ConnectorEntrance: function<
         BankType extends typeof combinedConnectorEntranceBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]
-      >(connectorElem: WbfkConnector | null, animName: AnimName, ...params: Parameters<ConnectorEntranceBlock<EntryType>['initialize']>) {
+      >(connectorElem: WbfkConnector | null | undefined, animName: AnimName, ...params: Parameters<ConnectorEntranceBlock<EntryType>['initialize']>) {
         return new ConnectorEntranceBlock<EntryType>(connectorElem, animName, combinedConnectorEntranceBank, 'Connector Entrance').initialize(...params);
       },
 
       ConnectorExit: function<BankType extends typeof combinedConnectorExitBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]>
-      (connectorElem: WbfkConnector | null, animName: AnimName, ...params: Parameters<ConnectorExitBlock<EntryType>['initialize']>)
+      (connectorElem: WbfkConnector | null | undefined, animName: AnimName, ...params: Parameters<ConnectorExitBlock<EntryType>['initialize']>)
       { return new ConnectorExitBlock<EntryType>(connectorElem, animName, combinedConnectorExitBank, 'Connector Exit').initialize(...params); },
       
       Scroller: function
       <BankType extends typeof combinedScrollerBank, AnimName extends AnimationNameIn<BankType>, EntryType extends BankType[AnimName]>
-      (domElem: Element | null, animName: AnimName, ...params: Parameters<ScrollerBlock<EntryType>['initialize']>) {
+      (domElem: Element | null | undefined, animName: AnimName, ...params: Parameters<ScrollerBlock<EntryType>['initialize']>) {
         return new ScrollerBlock<EntryType>(domElem, animName, combinedScrollerBank, 'Scroller').initialize(...params);
       },
     };

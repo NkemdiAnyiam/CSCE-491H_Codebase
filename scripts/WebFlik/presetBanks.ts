@@ -287,9 +287,9 @@ export const presetEmphases = {
 
 export const presetMotions = {
   ['~move-to']: {
-    generateKeyframes(targetElem: Element | null, translationOptions: Partial<MoveToOptions> = {}) {
+    generateKeyframes(targetElem: Element | null | undefined, translationOptions: Partial<MoveToOptions> = {}) {
       if (!targetElem) {
-        throw new TypeError(`Target for ~move-to must not be null`);
+        throw new TypeError(`Target for ~move-to must not be null or undefined.`);
       }
 
       const alignmentComponents = splitXYAlignmentString(translationOptions.alignment);
@@ -545,8 +545,8 @@ export const presetConnectorExits = {
 
 export const presetScrolls = {
   [`~scroll-self`]: {
-    generateRafMutators(target: Element | null, scrollOptions: Partial<ScrollingOptions> = {}) {
-      if (!target) { throw new TypeError(`Target for ~scroll-self must not be null`); }
+    generateRafMutators(target: Element | null | undefined, scrollOptions: Partial<ScrollingOptions> = {}) {
+      if (!target) { throw new TypeError(`Target for ~scroll-self must not be null or undefined.`); }
       const {
         preserveX = false,
         preserveY = false,

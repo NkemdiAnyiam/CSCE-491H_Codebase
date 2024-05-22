@@ -573,7 +573,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   get activeFinishTime() { return( this.fullStartTime + this.delay + this.duration) / this.playbackRate; }
   get fullFinishTime() { return (this.fullStartTime + this.delay + this.duration + this.endDelay) / this.playbackRate; }
 
-  constructor(domElem: Element | null, public animName: string, bank: AnimationBank, public category: AnimationCategory) {
+  constructor(domElem: Element | null | undefined, public animName: string, bank: AnimationBank, public category: AnimationCategory) {
     this.id = AnimBlock.id++;
     
     if ((category === 'Entrance' || category === 'Exit') && domElem instanceof WbfkConnector) {

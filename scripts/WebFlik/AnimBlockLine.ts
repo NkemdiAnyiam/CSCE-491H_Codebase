@@ -332,9 +332,9 @@ export class ConnectorSetterBlock extends AnimBlock {
   }
   
   constructor(
-    connectorElem: WbfkConnector | null,
-    pointA: [elemA: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
-    pointB: [elemB: Element | null, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+    connectorElem: WbfkConnector | null | undefined,
+    pointA: [elemA: Element | null | undefined, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
+    pointB: [elemB: Element | null | undefined, xPlacement: number | EndpointXPlacement, yPlacement: number | EndpointYPlacement] | ['preserve'],
     animName: string,
     bank: AnimationBank,
     category: AnimationCategory,
@@ -393,7 +393,7 @@ export class ConnectorEntranceBlock<TBankEntry extends AnimationBankEntry = Anim
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
+  constructor(connectorElem: WbfkConnector | null | undefined, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
@@ -424,7 +424,7 @@ export class ConnectorExitBlock<TBankEntry extends AnimationBankEntry = Animatio
     };
   }
 
-  constructor(connectorElem: WbfkConnector | null, public animName: string, bank: AnimationBank, category: AnimationCategory) {
+  constructor(connectorElem: WbfkConnector | null | undefined, public animName: string, bank: AnimationBank, category: AnimationCategory) {
     super(connectorElem, animName, bank, category);
 
     if (!(connectorElem instanceof WbfkConnector)) { throw this.generateError(CustomErrors.InvalidElementError, `Must pass ${WbfkConnector.name} element.`); }
