@@ -1022,14 +1022,15 @@ export class EntranceBlock<TBankEntry extends AnimationBankEntry<EntranceBlock, 
       }
       else {
         str = `Entrance() can only act on elements that are already hidden, but this element was not hidden.` +
-        ` To hide an element, you can exit it with Exit() or add either "wbfk-hidden" or "wbfk-invisible" to its class list in the HTML.`;
+        ` To hide an element, you can 1) use the 'hideFirst' config option to immediately hide the element from the very start, 2) exit it with Exit(), or` +
+        ` 3) manually add either "wbfk-hidden" or "wbfk-invisible" to its class list in the HTML.`;
       }
       throw this.generateError(CustomErrors.InvalidEntranceAttempt,
         str +
         `${errorTip(
           `Tip: "wbfk-hidden" applies a 'display: none' CSS style, which completely unrenders an element.` +
           ` "wbfk-invisible" applies a 'visibility: hidden' CSS style, which just makes the element invisible while still taking up space.` +
-          ` When using Exit(), you may set the config option 'exitType' to "display-none" (the default) or "visibility-hidden", but behind the scenes, this just determines whether to add` +
+          ` When using 'exitType' with Exit() or 'hideFirst' with Entrance(), you may set the config options to "display-none" (the default for exitType) or "visibility-hidden", but behind the scenes, this just determines whether to add` +
           ` the class "wbfk-hidden" or the class "wbfk-invisible" at the end of the animation.`
         )}`
       );
