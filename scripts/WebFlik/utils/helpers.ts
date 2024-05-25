@@ -100,11 +100,11 @@ export function parseConnectorOffset(offset: number | EndpointXPlacement | Endpo
 
 export const computeSelfScrollingBounds = (scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} => {
   // determines the intersection point of the target
-  const offsetPercX: number = scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? 0;
-  const offsetPercY: number = scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? 0;
+  const [offsetPercX, offsetPixelsX] = parseConnectorOffset(scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? '0px', 'horizontal');
+  const [offsetPercY, offsetPixelsY] = parseConnectorOffset(scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? '0px', 'vertical');
   // determines the intersection point of the scrolling container
-  const placementOffsetPercX: number = scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? 0;
-  const placementOffsetPercY: number = scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? 0;
+  const [placementOffsetPercX, placementOffsetPixelsX] = parseConnectorOffset(scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? '0px', 'horizontal');
+  const [placementOffsetPercY, placementOffsetPixelsY] = parseConnectorOffset(scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? '0px', 'vertical');
 
   const selfRect = scrollable.getBoundingClientRect();
   const targetRect = target!.getBoundingClientRect();
@@ -118,9 +118,10 @@ export const computeSelfScrollingBounds = (scrollable: Element, target: Element,
   const maxSelfViewHeight = Math.min(selfRect.height, window.innerHeight);
 
   // initial position of the intersection point of the target relative to the top of the scrolling container
+  // note that offsetPixels and placementOffsetPixels effectively mean the same thing
   const oldTargetIntersectionPointPos = [
-    targetInnerLeft + (targetRect.width * offsetPercX),
-    targetInnerTop + (targetRect.height * offsetPercY)
+    targetInnerLeft + (targetRect.width * offsetPercX) + offsetPixelsX + placementOffsetPixelsX,
+    targetInnerTop + (targetRect.height * offsetPercY) + offsetPixelsY + placementOffsetPixelsY
   ];
   // new position of the intersection point of the target relative to the top of the scrolling container
   const newTargetIntersectionPointPos = [
@@ -134,8 +135,8 @@ export const computeSelfScrollingBounds = (scrollable: Element, target: Element,
   // Same logic but opposite for needing to scroll down.
   // Same logic applies to horizontal scrolling with left and right instead of up and down.
   const [scrollDirectionX, scrollDirectionY] = [
-    newTargetIntersectionPointPos[0] > oldTargetIntersectionPointPos[1] ? 'left' : 'right',
-    newTargetIntersectionPointPos[1] > oldTargetIntersectionPointPos[0] ? 'up' : 'down',
+    newTargetIntersectionPointPos[0] > oldTargetIntersectionPointPos[0] ? 'left' : 'right',
+    newTargetIntersectionPointPos[1] > oldTargetIntersectionPointPos[1] ? 'up' : 'down',
   ];
 
   const toXY: [number, number] = [0, 0];

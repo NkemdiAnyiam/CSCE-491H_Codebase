@@ -27,12 +27,12 @@ export interface MoveToOptions extends TranslationOffset {
 }
 
 export type ScrollingOptions = {
-  scrollableOffset?: [x: number, y: number];
-  scrollableOffsetX?: number;
-  scrollableOffsetY?: number;
-  targetOffset?: [x: number, y: number];
-  targetOffsetX?: number;
-  targetOffsetY?: number;
+  scrollableOffset?: [x: EndpointXPlacement | number, y: EndpointYPlacement | number];
+  scrollableOffsetX?: EndpointXPlacement | number;
+  scrollableOffsetY?: EndpointYPlacement | number;
+  targetOffset?: [x: EndpointXPlacement | number, y: EndpointYPlacement | number];
+  targetOffsetX?: EndpointXPlacement | number;
+  targetOffsetY?: EndpointYPlacement | number;
   preserveX?: boolean;
   preserveY?: boolean;
 };
