@@ -27,12 +27,12 @@ export interface MoveToOptions extends TranslationOffset {
 }
 
 export type ScrollingOptions = {
-  scrollableOffset?: [x: EndpointXPlacement | number, y: EndpointYPlacement | number];
-  scrollableOffsetX?: EndpointXPlacement | number;
-  scrollableOffsetY?: EndpointYPlacement | number;
-  targetOffset?: [x: EndpointXPlacement | number, y: EndpointYPlacement | number];
-  targetOffsetX?: EndpointXPlacement | number;
-  targetOffsetY?: EndpointYPlacement | number;
+  scrollableOffset?: [x: MultiUnitOffsetX | number, y: MultiUnitOffsetY | number];
+  scrollableOffsetX?: MultiUnitOffsetX | number;
+  scrollableOffsetY?: MultiUnitOffsetY | number;
+  targetOffset?: [x: MultiUnitOffsetX | number, y: MultiUnitOffsetY | number];
+  targetOffsetX?: MultiUnitOffsetX | number;
+  targetOffsetY?: MultiUnitOffsetY | number;
   preserveX?: boolean;
   preserveY?: boolean;
 };
@@ -45,8 +45,8 @@ export type CssXAlignment = | 'left' | 'right' | 'center';
 type percentage = `${number}%`;
 type pixels = `${number}px`
 type operator = '+' | '-';
-export type EndpointXPlacement = percentage | pixels | CssXAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssXAlignment} ${operator} ${pixels | percentage}`;
-export type EndpointYPlacement = percentage | pixels | CssYAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssYAlignment} ${operator} ${pixels | percentage}`;
-export type parsedConnectorOffset = [percentage: number, pixels: number];
+export type MultiUnitOffsetX = percentage | pixels | CssXAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssXAlignment} ${operator} ${pixels | percentage}`;
+export type MultiUnitOffsetY = percentage | pixels | CssYAlignment | `${percentage} ${operator} ${pixels}` | `${pixels} ${operator} ${percentage}` | `${CssYAlignment} ${operator} ${pixels | percentage}`;
+export type ParsedMultiUnitOffset = [percentage: number, pixels: number];
 
 export type AnimationCategory = `${'Connector ' | ''}Entrance` | `${'Connector ' | ''}Exit` | 'Emphasis' | 'Motion' | 'Transition' | 'Connector Setter' | 'Scroller'

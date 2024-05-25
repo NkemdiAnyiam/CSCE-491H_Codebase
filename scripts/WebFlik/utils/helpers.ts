@@ -1,4 +1,4 @@
-import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, parsedConnectorOffset, EndpointXPlacement, EndpointYPlacement } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, ParsedMultiUnitOffset, MultiUnitOffsetX, MultiUnitOffsetY } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -35,9 +35,9 @@ export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignme
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 };
 
-export function parseConnectorOffset(offset: number | EndpointYPlacement, alignment: 'vertical'): parsedConnectorOffset;
-export function parseConnectorOffset(offset: number | EndpointXPlacement, alignment: 'horizontal'): parsedConnectorOffset;
-export function parseConnectorOffset(offset: number | EndpointXPlacement | EndpointYPlacement, alignment: 'vertical' | 'horizontal'): parsedConnectorOffset {
+export function parseMultiUnitOffset(offset: number | MultiUnitOffsetY, alignment: 'vertical'): ParsedMultiUnitOffset;
+export function parseMultiUnitOffset(offset: number | MultiUnitOffsetX, alignment: 'horizontal'): ParsedMultiUnitOffset;
+export function parseMultiUnitOffset(offset: number | MultiUnitOffsetX | MultiUnitOffsetY, alignment: 'vertical' | 'horizontal'): ParsedMultiUnitOffset {
   if (typeof offset === 'number') { return [offset, 0]; }
 
   let match;
@@ -59,18 +59,21 @@ export function parseConnectorOffset(offset: number | EndpointXPlacement | Endpo
 
   
   if (!match) {
-    throw new RangeError(`Invalid connector offset string ${offset} using alignment ${alignment}.`);
+    throw new RangeError(`Invalid offset string ${offset} using alignment ${alignment}.`);
   }
 
   const [val1, operator = '+', val2] = match.slice(1, 4);
   const sign = operator === '+' ? 1 : -1;
 
+  // if first value is a percentage, then the second MUST be px (or nothing)
   if (val1.includes('%')) {
     return [Number.parseFloat(val1) / 100, Number.parseFloat(val2 ?? '0px') * sign];
   }
+  // if the first value is px, then the second MUST be a percentage (or nothing), so just swap placement in tuple
   else if (val1.includes('px')) {
     return [Number.parseFloat(val2 ?? '0%') / 100, Number.parseFloat(val1) * sign];
   }
+  // otherwise, first value must be a keyword, and second could be px, %, or nothing
   else {
     let alignmentPerc;
     switch(val1 as CssXAlignment | CssYAlignment) {
@@ -89,9 +92,11 @@ export function parseConnectorOffset(offset: number | EndpointXPlacement | Endpo
         throw new RangeError(`Something wrong occured for ${val1} to be ${val1}`);
     }
 
+    // if second value is a percentage
     if (val2?.includes('%')) {
       return [alignmentPerc + Number.parseFloat(val2 ?? '0%') / 100 * sign, 0];
     }
+    // if second value is px
     else {
       return [alignmentPerc, Number.parseFloat(val2 ?? '0px') * sign];
     }
@@ -100,11 +105,11 @@ export function parseConnectorOffset(offset: number | EndpointXPlacement | Endpo
 
 export const computeSelfScrollingBounds = (scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} => {
   // determines the intersection point of the target
-  const [offsetPercX, offsetPixelsX] = parseConnectorOffset(scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? '0px', 'horizontal');
-  const [offsetPercY, offsetPixelsY] = parseConnectorOffset(scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? '0px', 'vertical');
+  const [offsetPercX, offsetPixelsX] = parseMultiUnitOffset(scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? '0px', 'horizontal');
+  const [offsetPercY, offsetPixelsY] = parseMultiUnitOffset(scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? '0px', 'vertical');
   // determines the intersection point of the scrolling container
-  const [placementOffsetPercX, placementOffsetPixelsX] = parseConnectorOffset(scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? '0px', 'horizontal');
-  const [placementOffsetPercY, placementOffsetPixelsY] = parseConnectorOffset(scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? '0px', 'vertical');
+  const [placementOffsetPercX, placementOffsetPixelsX] = parseMultiUnitOffset(scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? '0px', 'horizontal');
+  const [placementOffsetPercY, placementOffsetPixelsY] = parseMultiUnitOffset(scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? '0px', 'vertical');
 
   const selfRect = scrollable.getBoundingClientRect();
   const targetRect = target!.getBoundingClientRect();
