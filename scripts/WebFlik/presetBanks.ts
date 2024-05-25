@@ -1,6 +1,6 @@
 import { TransitionBlock, EmphasisBlock, EntranceBlock, ExitBlock, ScrollerBlock, MotionBlock, ExitBlockConfig, TransitionBlockConfig, EntranceBlockConfig } from "./AnimBlock";
 import { ConnectorEntranceBlock, ConnectorExitBlock } from "./AnimBlockLine";
-import { AnimationBank } from "./WebFlik";
+import { AnimationBank, WebFlik } from "./WebFlik";
 import { computeSelfScrollingBounds, negateNumString, overrideHidden, splitXYAlignmentString, splitXYTupleString, unOverrideHidden } from "./utils/helpers";
 import { MoveToOptions, TranslateOptions, CssLengthUnit, ScrollingOptions } from "./utils/interfaces";
 import { useEasing } from "./utils/easing";
@@ -289,7 +289,7 @@ export const presetMotions = {
   ['~move-to']: {
     generateKeyframes(targetElem: Element | null | undefined, translationOptions: Partial<MoveToOptions> = {}) {
       if (!targetElem) {
-        throw new TypeError(`Target for ~move-to must not be null or undefined.`);
+        throw new TypeError(`Target for ~move-to must not be null`);
       }
 
       const alignmentComponents = splitXYAlignmentString(translationOptions.alignment);
@@ -544,38 +544,111 @@ export const presetConnectorExits = {
 
 
 export const presetScrolls = {
+  // [`~scroll-self`]: {
+  //   generateRafMutators(target: Element | null | undefined, scrollOptions: Partial<ScrollingOptions> = {}) {
+  //     if (!target) { throw new TypeError(`Target for ~scroll-self must not be null`); }
+  //     const {
+  //       preserveX = false,
+  //       preserveY = false,
+  //     } = scrollOptions;
+
+  //     const {
+  //       fromXY: [x_from, y_from],
+  //       toXY: [x_to, y_to]
+  //     } = computeSelfScrollingBounds(this.domElem, target, scrollOptions);
+
+  //     const forwardMutator = () => {
+  //       this.domElem.scrollTo({
+  //         /* @ts-ignore */
+  //         behavior: "instant",
+  //         ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
+  //         ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
+  //       });
+  //     };
+
+  //     const backwardMutator = () => {
+  //       this.domElem.scrollTo({
+  //         /* @ts-ignore */
+  //         behavior: "instant",
+  //         ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
+  //         ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
+  //       });
+  //     };
+
+  //     return [forwardMutator, backwardMutator];
+  //   },
+  //   config: {
+  //     pregeneratesKeyframes: false,
+  //   }
+  // },
+
   [`~scroll-self`]: {
-    generateRafMutators(target: Element | null | undefined, scrollOptions: Partial<ScrollingOptions> = {}) {
-      if (!target) { throw new TypeError(`Target for ~scroll-self must not be null or undefined.`); }
+    generateRafMutatorGenerators(target: Element | null | undefined, scrollOptions: Partial<ScrollingOptions> = {}) {
+      if (!target) { throw new TypeError(`Target for ~scroll-self must not be null`); }
       const {
         preserveX = false,
         preserveY = false,
       } = scrollOptions;
 
-      const {
-        fromXY: [x_from, y_from],
-        toXY: [x_to, y_to]
-      } = computeSelfScrollingBounds(this.domElem, target, scrollOptions);
+      let [x_from, y_from, x_to, y_to] = [0, 0, 0, 0];
 
-      const forwardMutator = () => {
-        this.domElem.scrollTo({
-          /* @ts-ignore */
-          behavior: "instant",
-          ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
-          ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
-        });
+      const forwardGenerator = () => {
+        const {
+          fromXY,
+          toXY
+        } = computeSelfScrollingBounds(this.domElem, target, scrollOptions);
+        [x_from, y_from] = fromXY;
+        [x_to, y_to] = toXY;
+        WebFlik.scrollAnchorsStack.push([target, scrollOptions]);
+
+        const { display, visibility } = getComputedStyle(target);
+        // TODO: improve warning
+        if (display === 'none' || visibility === 'hidden') {
+          console.warn('Tried to scroll to invisible element');
+          return () => {};
+        }
+        return () => {
+          this.domElem.scrollTo({
+            /* @ts-ignore */
+            behavior: "instant",
+            ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
+            ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
+          });
+        }
       };
 
-      const backwardMutator = () => {
-        this.domElem.scrollTo({
-          /* @ts-ignore */
-          behavior: "instant",
-          ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
-          ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
-        });
+      const backwardGenerator = () => {
+        WebFlik.scrollAnchorsStack.pop();
+        if (WebFlik.scrollAnchorsStack.length > 0) {
+          const [anchor, anchorOptions] = WebFlik.scrollAnchorsStack[WebFlik.scrollAnchorsStack.length - 1];
+
+          const {
+            fromXY: [x_from, y_from],
+            toXY: [x_to, y_to]
+          } = computeSelfScrollingBounds(this.domElem, anchor, anchorOptions);
+  
+          return () => {
+            this.domElem.scrollTo({
+              /* @ts-ignore */
+              behavior: "instant",
+              ...(!preserveX ? {left: this.computeTween(x_from, x_to)} : {}),
+              ...(!preserveY ? {top: this.computeTween(y_from, y_to)} : {}),
+            });
+          }
+        }
+        else {
+          return () => {
+            this.domElem.scrollTo({
+              /* @ts-ignore */
+              behavior: "instant",
+              ...(!preserveX ? {left: this.computeTween(x_to, x_from)} : {}),
+              ...(!preserveY ? {top: this.computeTween(y_to, y_from)} : {}),
+            });
+          }
+        }
       };
 
-      return [forwardMutator, backwardMutator];
+      return [forwardGenerator, backwardGenerator];
     },
     config: {
       pregeneratesKeyframes: false,

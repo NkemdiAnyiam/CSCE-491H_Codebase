@@ -3,7 +3,7 @@ import { ConnectorEntranceBlock, ConnectorExitBlock, WbfkConnector, ConnectorSet
 import { presetEntrances, presetExits, presetEmphases, presetMotions, presetConnectorEntrances, presetConnectorExits, presetScrolls, presetTransitions } from "./presetBanks";
 import { useEasing } from "./utils/easing";
 import { createStyles } from "./utils/helpers";
-import { EndpointXPlacement, EndpointYPlacement } from "./utils/interfaces";
+import { EndpointXPlacement, EndpointYPlacement, ScrollingOptions } from "./utils/interfaces";
 
 type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
@@ -161,6 +161,9 @@ class _WebFlik {
       },
     };
   }
+
+  /**@internal */
+  scrollAnchorsStack: [target: Element, scrollOptions: ScrollingOptions][] = [];
 
   get utils() {
     return {
