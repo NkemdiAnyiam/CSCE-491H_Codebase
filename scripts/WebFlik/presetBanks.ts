@@ -601,9 +601,8 @@ export const presetScrolls = {
         [x_to, y_to] = toXY;
         WebFlik.scrollAnchorsStack.push([target, scrollOptions]);
 
-        const { display, visibility } = getComputedStyle(target);
-        // TODO: improve warning
-        if (display === 'none' || visibility === 'hidden') {
+        if (getComputedStyle(target).display === 'none') {
+          // TODO: improve warning
           console.warn('Tried to scroll to invisible element');
           return () => {};
         }
