@@ -555,6 +555,10 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     forwardMutator: () => void;
     backwardMutator: () => void;
   };
+  /**@internal */rafMutatorGenerators?: {
+    forwardGenerator: () => () => void;
+    backwardGenerator: () => () => void;
+  }
   computeTween(initialVal: number, finalVal: number): number {
     return initialVal + (finalVal - initialVal) * this.rafLoopsProgress;
   }
@@ -613,17 +617,16 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     // the default value to make it as unlikely as possible that anything the user does is obstructed.
     let [forwardFrames, backwardFrames]: [Keyframe[], Keyframe[] | undefined] = [[{fontFeatureSettings: 'normal'}], []];
 
-    if (this.bankEntry.generateKeyframes) {
-      // if pregenerating, produce F and B frames now
-      if (this.pregeneratesKeyframes) {
-        try {
+    try {
+      // generateKeyframes()
+      if (this.bankEntry.generateKeyframes) {
+        // if pregenerating, produce F and B frames now
+        if (this.pregeneratesKeyframes) {
           [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
         }
-        catch (err: unknown) { throw this.generateError(err as Error); }
       }
-    }
-    else if (this.bankEntry.generateKeyframeGenerators) {
-      try {
+      // generateKeyframeGenerators()
+      else if (this.bankEntry.generateKeyframeGenerators) {
         const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
         this.keyframesGenerators = {forwardGenerator, backwardGenerator};
         // if pregenerating, produce F and B frames now
@@ -631,17 +634,23 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
           [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator?.()];
         }
       }
-      catch (err: unknown) { throw this.generateError(err as Error); }
-    }
-    else {
-      if (this.pregeneratesKeyframes) {
-        try {
+      // generateRafMutators()
+      else if (this.bankEntry.generateRafMutators) {
+        if (this.pregeneratesKeyframes) {
           const [forwardMutator, backwardMutator] = this.bankEntry.generateRafMutators.call(this, ...animArgs);
           this.rafMutators = { forwardMutator, backwardMutator };
         }
-        catch (err: unknown) { throw this.generateError(err as Error); }
+      }
+      // generateRafMutatorGenerators()
+      else {
+        const [forwardGenerator, backwardGenerator] = this.bankEntry.generateRafMutatorGenerators.call(this, ...animArgs);
+        this.rafMutatorGenerators = {forwardGenerator, backwardGenerator};
+        if (this.pregeneratesKeyframes) {
+          this.rafMutators = {forwardMutator: forwardGenerator(), backwardMutator: backwardGenerator()};
+        }
       }
     }
+    catch (err: unknown) { throw this.generateError(err as Error); }
 
     // playbackRate is not included because it is computed at the time of animating
     const keyframeOptions: KeyframeEffectOptions = {
@@ -807,11 +816,16 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
                 const [forwardMutator, backwardMutator] = bankEntry.generateRafMutators.call(this, ...this.animArgs);
                 this.rafMutators = { forwardMutator, backwardMutator };
               }
+              // if generateRafMutatorGenerators() is the method of generation, generate f-ward mutator
+              else {
+                const forwardMutator = this.rafMutatorGenerators!.forwardGenerator();
+                this.rafMutators = { forwardMutator, backwardMutator(){} };
+              }
             }
             catch (err: unknown) { throw this.generateError(err as Error); }
           }
 
-          if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafMutators || bankEntry.generateRafMutatorGenerators) { requestAnimationFrame(this.loop); }
 
           // sets it back to 'forwards' in case it was set to 'none' in a previous running
           animation.effect?.updateTiming({fill: 'forwards'});
@@ -831,11 +845,18 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
                 const {forwardGenerator, backwardGenerator} = this.keyframesGenerators!;
                 this.animation.setBackwardFrames(backwardGenerator?.() ?? forwardGenerator(), backwardGenerator ? false : true);
               }
+              else if (bankEntry.generateRafMutators) {
+                // do nothing (backward mutator would have already been set during forward direction)
+              }
+              else {
+                const backwardMutator = this.rafMutatorGenerators!.backwardGenerator();
+                this.rafMutators = { forwardMutator(){}, backwardMutator };
+              }
             }
             catch (err: unknown) { throw this.generateError(err as Error); }
           }
 
-          if (bankEntry.generateRafMutators) { requestAnimationFrame(this.loop); }
+          if (bankEntry.generateRafMutators || bankEntry.generateRafMutatorGenerators) { requestAnimationFrame(this.loop); }
           break;
   
         default:

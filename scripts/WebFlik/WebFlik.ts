@@ -9,21 +9,30 @@ type KeyframesGenerator<T extends unknown> = {
   generateKeyframes(this: T, ...animArgs: unknown[]): [forward: Keyframe[], backward?: Keyframe[]];
   generateKeyframeGenerators?: never;
   generateRafMutators?: never;
+  generateRafMutatorGenerators?: never;
 };
 type KeyframesFunctionsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateKeyframeGenerators(this: T, ...animArgs: unknown[]): [forwardGenerator: () => Keyframe[], backwardGenerator?: () => Keyframe[]];
   generateRafMutators?: never;
+  generateRafMutatorGenerators?: never;
 };
 type RafMutatorsGenerator<T extends unknown> = {
   generateKeyframes?: never;
   generateKeyframeGenerators?: never;
   generateRafMutators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardMutator: () => void, backwardMutator: () => void];
+  generateRafMutatorGenerators?: never;
+};
+type RafMutatorsFunctionsGenerator<T extends unknown> = {
+  generateKeyframes?: never;
+  generateKeyframeGenerators?: never;
+  generateRafMutators?: never;
+  generateRafMutatorGenerators(this: T & Readonly<(Pick<AnimBlock, 'computeTween'>)>, ...animArgs: unknown[]): [forwardGenerator: () => () => void, backwardGenerator: () => () => void];
 };
 
 export type AnimationBankEntry<TBlockThis extends unknown = unknown, TConfig extends unknown = unknown> = Readonly<
   { config?: Partial<TConfig>; }
-  & (KeyframesGenerator<TBlockThis> | KeyframesFunctionsGenerator<TBlockThis> | RafMutatorsGenerator<TBlockThis>)
+  & (KeyframesGenerator<TBlockThis> | KeyframesFunctionsGenerator<TBlockThis> | RafMutatorsGenerator<TBlockThis> | RafMutatorsFunctionsGenerator<TBlockThis>)
 >;
 
 // represents an object where every string key is paired with a KeyframesBankEntry value
@@ -38,7 +47,9 @@ export type GeneratorParams<TBankEntry extends AnimationBankEntry> = Parameters<
 TBankEntry extends KeyframesGenerator<unknown> ? TBankEntry['generateKeyframes'] : (
   TBankEntry extends KeyframesFunctionsGenerator<unknown> ? TBankEntry['generateKeyframeGenerators'] : (
     TBankEntry extends RafMutatorsGenerator<unknown> ? TBankEntry['generateRafMutators'] : (
-      never
+      TBankEntry extends RafMutatorsFunctionsGenerator<unknown> ? TBankEntry['generateRafMutatorGenerators'] : (
+        never
+      )
     )
   )
 )
@@ -164,7 +175,7 @@ class _WebFlik {
       if (!bank) { return; }
       for (const animName in bank) {
         const entry = bank[animName];
-        const generator = entry.generateKeyframes ?? entry.generateKeyframeGenerators ?? entry.generateRafMutators;
+        const generator = entry.generateKeyframes ?? entry.generateKeyframeGenerators ?? entry.generateRafMutators ?? entry.generateRafMutatorGenerators;
         if (generator.toString().match(/^\(.*\) => .*/)) {
           errors.push(`"${animName}"`);
         }
