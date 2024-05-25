@@ -326,7 +326,7 @@ export class ConnectorSetterBlock extends AnimBlock {
     return {
       duration: 0,
       commitsStyles: false,
-      pregeneratesKeyframes: true,
+      runGeneratorsNow: true,
       startsNextBlock: true,
     };
   }
@@ -389,7 +389,7 @@ export class ConnectorEntranceBlock<TBankEntry extends AnimationBankEntry = Anim
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
-      // pregenerateKeyframes: true,
+      // runGeneratorsNow: true,
     };
   }
 
@@ -420,7 +420,7 @@ export class ConnectorExitBlock<TBankEntry extends AnimationBankEntry = Animatio
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
       commitsStyles: false,
-      // pregenerateKeyframes: true,
+      // runGeneratorsNow: true,
     };
   }
 

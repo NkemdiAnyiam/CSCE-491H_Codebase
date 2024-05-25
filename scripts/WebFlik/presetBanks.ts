@@ -64,7 +64,7 @@ export const presetEntrances = {
       ];
     },
     config: {
-      pregeneratesKeyframes: false,
+      runGeneratorsNow: false,
       composite: 'accumulate',
     }
   },
@@ -187,7 +187,7 @@ export const presetExits = {
       ];
     },
     config: {
-      pregeneratesKeyframes: false,
+      runGeneratorsNow: false,
       composite: 'accumulate',
     }
   },
@@ -650,7 +650,7 @@ export const presetScrolls = {
       return [forwardGenerator, backwardGenerator];
     },
     config: {
-      pregeneratesKeyframes: false,
+      runGeneratorsNow: false,
     }
   },
 } satisfies AnimationBank<ScrollerBlock>;

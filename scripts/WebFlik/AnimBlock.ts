@@ -17,7 +17,7 @@ type CustomKeyframeEffectOptions = {
   classesToAddOnStart: string[];
   classesToRemoveOnFinish: string[];
   classesToRemoveOnStart: string[];
-  pregeneratesKeyframes: boolean;
+  runGeneratorsNow: boolean;
 }
 
 type KeyframeTimingOptions = {
@@ -30,7 +30,7 @@ type KeyframeTimingOptions = {
 
 export type AnimBlockConfig = KeyframeTimingOptions & CustomKeyframeEffectOptions;
 export type EntranceBlockConfig = AnimBlockConfig & {
-  hideFirst: 'display-none' | 'visibility-hidden' | null;
+  hideNowType: 'display-none' | 'visibility-hidden' | null;
 };
 export type ExitBlockConfig = AnimBlockConfig & {
   exitType: 'display-none' | 'visibility-hidden';
@@ -546,7 +546,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
   classesToAddOnStart: string[] = [];
   classesToRemoveOnFinish: string[] = [];
   classesToRemoveOnStart: string[] = [];
-  pregeneratesKeyframes: boolean = false;
+  runGeneratorsNow: boolean = false;
   /**@internal*/keyframesGenerators?: {
     forwardGenerator: () => Keyframe[];
     backwardGenerator?: () => Keyframe[];
@@ -621,7 +621,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
       // generateKeyframes()
       if (this.bankEntry.generateKeyframes) {
         // if pregenerating, produce F and B frames now
-        if (this.pregeneratesKeyframes) {
+        if (this.runGeneratorsNow) {
           [forwardFrames, backwardFrames] = this.bankEntry.generateKeyframes.call(this, ...animArgs);
         }
       }
@@ -630,13 +630,13 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
         const [forwardGenerator, backwardGenerator] = this.bankEntry.generateKeyframeGenerators.call(this, ...animArgs);
         this.keyframesGenerators = {forwardGenerator, backwardGenerator};
         // if pregenerating, produce F and B frames now
-        if (this.pregeneratesKeyframes) {
+        if (this.runGeneratorsNow) {
           [forwardFrames, backwardFrames] = [forwardGenerator(), backwardGenerator?.()];
         }
       }
       // generateRafMutators()
       else if (this.bankEntry.generateRafMutators) {
-        if (this.pregeneratesKeyframes) {
+        if (this.runGeneratorsNow) {
           const [forwardMutator, backwardMutator] = this.bankEntry.generateRafMutators.call(this, ...animArgs);
           this.rafMutators = { forwardMutator, backwardMutator };
         }
@@ -645,7 +645,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
       else {
         const [forwardGenerator, backwardGenerator] = this.bankEntry.generateRafMutatorGenerators.call(this, ...animArgs);
         this.rafMutatorGenerators = {forwardGenerator, backwardGenerator};
-        if (this.pregeneratesKeyframes) {
+        if (this.runGeneratorsNow) {
           this.rafMutators = {forwardMutator: forwardGenerator(), backwardMutator: backwardGenerator()};
         }
       }
@@ -771,7 +771,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
     const animation = this.animation;
     animation.setDirection(direction);
     // If keyframes are generated here, clear the current frames to prevent interference with generators
-    if (!this.pregeneratesKeyframes && direction === 'forward') {
+    if (!this.runGeneratorsNow && direction === 'forward') {
       animation.setForwardAndBackwardFrames([{fontFeatureSettings: 'normal'}], []);
     }
     this.useCompoundedPlaybackRate();
@@ -800,7 +800,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
           // If keyframes were not pregenerated, generate them now
           // Keyframe generation is done here so that generations operations that rely on the side effects of class modifications and _onStartForward()...
           // ...can function properly.
-          if (!this.pregeneratesKeyframes) {
+          if (!this.runGeneratorsNow) {
             try {
               // if generateKeyframes() is the method of generation, generate f-ward and b-ward frames
               if (bankEntry.generateKeyframes) {
@@ -836,7 +836,7 @@ export abstract class AnimBlock<TBankEntry extends AnimationBankEntry = Animatio
           this.domElem.classList.add(...this.classesToRemoveOnFinish);
           this.domElem.classList.remove(...this.classesToAddOnFinish);
 
-          if (!this.pregeneratesKeyframes) {
+          if (!this.runGeneratorsNow) {
             try {
               if (bankEntry.generateKeyframes) {
                 // do nothing (backward keyframes would have already been set during forward direction)
@@ -998,16 +998,16 @@ export class EntranceBlock<TBankEntry extends AnimationBankEntry<EntranceBlock, 
   protected get defaultConfig(): Partial<EntranceBlockConfig> {
     return {
       commitsStyles: false,
-      pregeneratesKeyframes: true,
-      hideFirst: null,
+      runGeneratorsNow: true,
+      hideNowType: null,
     };
   }
 
   /**@internal*/initialize(animArgs: GeneratorParams<TBankEntry>, userConfig: Partial<EntranceBlockConfig> = {}) {
     super.initialize(animArgs, userConfig);
 
-    const initialHidingType = userConfig.hideFirst ?? this.bankEntry.config?.hideFirst ?? this.defaultConfig.hideFirst!;
-    switch(initialHidingType) {
+    const hideNow = userConfig.hideNowType ?? this.bankEntry.config?.hideNowType ?? this.defaultConfig.hideNowType!;
+    switch(hideNow) {
       case "display-none":
         this.domElem.classList.add('wbfk-hidden');
         break;
@@ -1074,7 +1074,7 @@ export class ExitBlock<TBankEntry extends AnimationBankEntry<ExitBlock, ExitBloc
   protected get defaultConfig(): Partial<ExitBlockConfig> {
     return {
       commitsStyles: false,
-      pregeneratesKeyframes: true,
+      runGeneratorsNow: true,
       exitType: 'display-none',
     };
   }
