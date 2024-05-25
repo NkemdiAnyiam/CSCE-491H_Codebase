@@ -67,7 +67,7 @@ class _WebFlik {
   <
    // default = {} ensures intellisense for a given bank still works
    // without specifying the field (why? not sure)
-    UserEntranceBank extends AnimationBank = {},
+    UserEntranceBank extends AnimationBank<EntranceBlock, EntranceBlockConfig> = {},
     UserExitBank extends AnimationBank<ExitBlock, ExitBlockConfig> = {},
     UserEmphasisBank extends AnimationBank = {},
     UserMotionBank extends AnimationBank = {},
