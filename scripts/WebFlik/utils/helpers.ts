@@ -1,4 +1,4 @@
-import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, ParsedMultiUnitOffset, MultiUnitOffsetX, MultiUnitOffsetY } from "./interfaces";
+import { CssLength, CssXAlignment, CssYAlignment, ScrollingOptions, ParsedMultiUnitPlacement, MultiUnitPlacementX, MultiUnitPlacementY } from "./interfaces";
 
 export const equalWithinTol = (numA: number, numB: number): boolean => Math.abs(numA - numB) < 0.001;
 export const mergeArrays = <T>(...arrays: Array<T>[]): Array<T> => Array.from(new Set(new Array<T>().concat(...arrays)));
@@ -35,9 +35,9 @@ export const splitXYAlignmentString = (tupleStr: `${CssXAlignment} ${CssYAlignme
   return tupleStr?.split(' ') as [x: CssXAlignment, y: CssYAlignment] | undefined;
 };
 
-export function parseMultiUnitOffset(offset: number | MultiUnitOffsetY, alignment: 'vertical'): ParsedMultiUnitOffset;
-export function parseMultiUnitOffset(offset: number | MultiUnitOffsetX, alignment: 'horizontal'): ParsedMultiUnitOffset;
-export function parseMultiUnitOffset(offset: number | MultiUnitOffsetX | MultiUnitOffsetY, alignment: 'vertical' | 'horizontal'): ParsedMultiUnitOffset {
+export function parseMultiUnitPlacement(offset: number | MultiUnitPlacementY, alignment: 'vertical'): ParsedMultiUnitPlacement;
+export function parseMultiUnitPlacement(offset: number | MultiUnitPlacementX, alignment: 'horizontal'): ParsedMultiUnitPlacement;
+export function parseMultiUnitPlacement(offset: number | MultiUnitPlacementX | MultiUnitPlacementY, alignment: 'vertical' | 'horizontal'): ParsedMultiUnitPlacement {
   if (typeof offset === 'number') { return [offset, 0]; }
 
   let match;
@@ -105,11 +105,11 @@ export function parseMultiUnitOffset(offset: number | MultiUnitOffsetX | MultiUn
 
 export const computeSelfScrollingBounds = (scrollable: Element, target: Element, scrollOptions: ScrollingOptions): {fromXY: [number, number], toXY: [number, number]} => {
   // determines the intersection point of the target
-  const [offsetPercX, offsetPixelsX] = parseMultiUnitOffset(scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? '0px', 'horizontal');
-  const [offsetPercY, offsetPixelsY] = parseMultiUnitOffset(scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? '0px', 'vertical');
+  const [offsetPercX, offsetPixelsX] = parseMultiUnitPlacement(scrollOptions.targetOffsetX ?? scrollOptions.targetOffset?.[0] ?? '0px', 'horizontal');
+  const [offsetPercY, offsetPixelsY] = parseMultiUnitPlacement(scrollOptions.targetOffsetY ?? scrollOptions.targetOffset?.[1] ?? '0px', 'vertical');
   // determines the intersection point of the scrolling container
-  const [placementOffsetPercX, placementOffsetPixelsX] = parseMultiUnitOffset(scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? '0px', 'horizontal');
-  const [placementOffsetPercY, placementOffsetPixelsY] = parseMultiUnitOffset(scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? '0px', 'vertical');
+  const [placementOffsetPercX, placementOffsetPixelsX] = parseMultiUnitPlacement(scrollOptions.scrollableOffsetX ?? scrollOptions.scrollableOffset?.[0] ?? '0px', 'horizontal');
+  const [placementOffsetPercY, placementOffsetPixelsY] = parseMultiUnitPlacement(scrollOptions.scrollableOffsetY ?? scrollOptions.scrollableOffset?.[1] ?? '0px', 'vertical');
 
   const selfRect = scrollable.getBoundingClientRect();
   const targetRect = target!.getBoundingClientRect();
