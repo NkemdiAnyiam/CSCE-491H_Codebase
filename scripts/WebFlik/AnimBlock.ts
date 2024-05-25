@@ -1120,6 +1120,7 @@ export class MotionBlock<TBankEntry extends AnimationBankEntry = AnimationBankEn
   }
 }
 
+// TODO: implement rewindScrollBehavior: 'prior-user-position' | 'prior-scroll-target' = 'prior-scroll-target'
 export class ScrollerBlock<TBankEntry extends AnimationBankEntry = AnimationBankEntry> extends AnimBlock<TBankEntry> {
   protected get defaultConfig(): Partial<AnimBlockConfig> {
     return {
