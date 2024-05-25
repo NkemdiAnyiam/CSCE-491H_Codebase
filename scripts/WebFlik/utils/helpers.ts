@@ -144,19 +144,23 @@ export const computeSelfScrollingBounds = (scrollable: Element, target: Element,
     case "left":
       // Capped at 0 because that's the minimum scrollLeft value
       toXY[0] = Math.max(newTargetIntersectionPointPos[0], 0);
+      break;
     case "right":
       // Capped at the highest scrollWidth value, which equals the scroll width minus the
       // minimum between the width of the scrolling container and the viewport width)
       toXY[0] = Math.min(newTargetIntersectionPointPos[0], scrollable.scrollWidth - maxSelfViewWidth);
+      break;
   }
   switch(scrollDirectionY) {
     case "up":
       // Capped at 0 because that's the minimum scrollTop value
       toXY[1] = Math.max(newTargetIntersectionPointPos[1], 0);
+      break;
     case "down":
       // Capped at the highest scrollTop value, which equals the scroll height minus the
       // minimum between the height of the scrolling container and the viewport height)
       toXY[1] = Math.min(newTargetIntersectionPointPos[1], scrollable.scrollHeight - maxSelfViewHeight);
+      break;
   }
 
   return {fromXY, toXY};
