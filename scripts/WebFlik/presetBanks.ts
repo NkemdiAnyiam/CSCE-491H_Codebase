@@ -578,7 +578,7 @@ export const presetScrolls = {
   //     return [forwardMutator, backwardMutator];
   //   },
   //   config: {
-  //     pregeneratesKeyframes: false,
+  //     runGeneratorsNow: false,
   //   }
   // },
 
