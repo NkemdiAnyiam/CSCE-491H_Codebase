@@ -500,7 +500,7 @@ export class AnimTimeline {
     return autorewindPrevious;
   }
 
-  async jumpToSequenceTag(
+  jumpToSequenceTag(
     tag: string | RegExp,
     options: Partial<{
       search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward';
@@ -515,10 +515,10 @@ export class AnimTimeline {
       searchOffset = 0,
       autoplayDetection = 'none',
     } = options;
-    this.jumpTo({ tag, search, searchOffset, targetOffset, autoplayDetection });
+    return this.jumpTo({ tag, search, searchOffset, targetOffset, autoplayDetection });
   }
 
-  async jumpToPosition(
+  jumpToPosition(
     position: 'beginning' | 'end',
     options: Partial<{targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}> = {},
   ): Promise<void> {
@@ -526,7 +526,7 @@ export class AnimTimeline {
       targetOffset = 0,
       autoplayDetection = 'none',
     } = options;
-    this.jumpTo({ position, targetOffset, autoplayDetection });
+    return this.jumpTo({ position, targetOffset, autoplayDetection });
   }
 
   // immediately jumps to an AnimSequence in animSequences with the matching search arguments
