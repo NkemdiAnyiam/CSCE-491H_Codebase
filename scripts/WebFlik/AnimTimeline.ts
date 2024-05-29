@@ -566,7 +566,7 @@ export class AnimTimeline {
     // Math.max(0) prevents wrapping
     if (tag) {
       const { search = 'forward-from-beginning', searchOffset = 0 } = options;
-      if (!Number.isSafeInteger(targetOffset)) { throw new TypeError(`Invalid searchOffser "${searchOffset}". Value must be an integer.`); }
+      if (!Number.isSafeInteger(targetOffset)) { throw new TypeError(`Invalid searchOffset "${searchOffset}". Value must be an integer.`); }
       
       let isBackwardSearch = false;
       let sequencesSubset: AnimSequence[] = [];
