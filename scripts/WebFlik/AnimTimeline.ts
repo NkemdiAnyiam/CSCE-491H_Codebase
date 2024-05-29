@@ -519,7 +519,7 @@ export class AnimTimeline {
   }
 
   jumpToPosition(
-    position: 'beginning' | 'end',
+    position: 'beginning' | 'end' | number,
     options: Partial<{targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}> = {},
   ): Promise<void> {
     const {
@@ -537,11 +537,11 @@ export class AnimTimeline {
     targetOffset: number;
     autoplayDetection: 'forward' | 'backward' | 'none';
   }): Promise<void>;
-  private async jumpTo(options: {position: 'beginning' | 'end'; targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}): Promise<void>;
+  private async jumpTo(options: {position: 'beginning' | 'end' | number; targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}): Promise<void>;
   private async jumpTo(
     options: { targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none'; } & (
       {tag: string | RegExp; search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset?: number; position?: never}
-      | {position: 'beginning' | 'end'; tag?: never}
+      | {position: 'beginning' | 'end' | number; tag?: never}
     ),
   ): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use jumpTo() while currently animating.'); }
@@ -566,6 +566,8 @@ export class AnimTimeline {
     // Math.max(0) prevents wrapping
     if (tag) {
       const { search = 'forward-from-beginning', searchOffset = 0 } = options;
+      if (!Number.isSafeInteger(targetOffset)) { throw new TypeError(`Invalid searchOffser "${searchOffset}". Value must be an integer.`); }
+      
       let isBackwardSearch = false;
       let sequencesSubset: AnimSequence[] = [];
       switch(search) {
@@ -601,14 +603,18 @@ export class AnimTimeline {
     }
     // find target index based on either the beginning or end of the timeline
     else {
-      switch(position!) {
-        case "beginning":
+      switch(true) {
+        case position === "beginning":
           targetIndex = 0 + targetOffset;
           break;
-        case "end":
+        case position === "end":
           targetIndex = this.numSequences + targetOffset;
           break;
-        default: throw new RangeError(`Invalid jumpTo() position "${position}". Must be "beginning" or "end".`);
+        case typeof position === 'number':
+          if (!Number.isSafeInteger(position)) { throw new TypeError(`Invalid position "${position}". When using a number, value must be an integer.`); }
+          targetIndex = position;
+          break;
+        default: throw new RangeError(`Invalid jumpTo() position "${position}". Must be "beginning", "end", or an integer.`);
       }
     }
 
