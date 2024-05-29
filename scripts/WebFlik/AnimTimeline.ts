@@ -632,6 +632,19 @@ export class AnimTimeline {
 
     // keep skipping forwards or backwards depending on direction of loadedSeqIndex
 
+    const continueAutoplayForward = async () => {
+      while (
+        !this.atEnd
+        && (this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence || this.animSequences[this.loadedSeqIndex]?.autoplays)
+      ) { await this.stepForward(); }
+    }
+    const continueAutoplayBackward = async () => {
+      while (
+        !this.atBeginning
+        && (this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence || this.animSequences[this.loadedSeqIndex]?.autoplays)
+      ) { await this.stepBackward(); }
+    }
+
     // play to the target sequence without playing the sequence
     if (this.loadedSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
@@ -639,11 +652,12 @@ export class AnimTimeline {
       switch(autoplayDetection) {
         // if autoplay detection forward, play as long as the loaded sequence is supposed to be autoplayed
         case "forward":
-          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+          await continueAutoplayForward();
           break;
         // if autoplay detection backward, rewind as long as the loaded sequence is supposed to be autoplayed
         case "backward":
-          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepBackward(); }
+          await continueAutoplayBackward();
+          break;
         case "none": // do nothing
         default:
           break;
@@ -656,10 +670,11 @@ export class AnimTimeline {
       while (this.loadedSeqIndex > targetIndex) { await this.stepBackward(); }
       switch(autoplayDetection) {
         case "forward":
-          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+          await continueAutoplayForward();
           break;
         case "backward":
-          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepBackward(); }
+          await continueAutoplayBackward();
+          break;
         case "none": // do nothing
         default:
           break;
