@@ -500,12 +500,16 @@ export class AnimTimeline {
     return autorewindPrevious;
   }
 
-  async jumpToSequenceTag(tag: string | RegExp, options: {search: 'from-beginning' | 'from-end' | 'forward' | 'backward', offset: number}): Promise<void> {
+  async jumpToSequenceTag(
+    tag: string | RegExp,
+    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward', searchOffset: number, offset: number}> = {}
+  ): Promise<void> {
     const {
-      search = 'from-beginning',
-      offset = 0
+      search = 'forward-from-beginning',
+      offset = 0,
+      searchOffset = 0,
     } = options;
-    this.jumpTo({tag, offset}, search);
+    this.jumpTo({tag, offset}, search, searchOffset);
   }
 
   async jumpToPosition(position: 'beginning' | 'end', options: {offset: number}): Promise<void> {
@@ -516,11 +520,12 @@ export class AnimTimeline {
   }
 
   // immediately jumps to an AnimSequence in animSequences with the matching search arguments
-  private async jumpTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, search?: 'forward' | 'backward' | 'from-beginning' | 'from-end'): Promise<void>;
-  private async jumpTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
+  private async jumpTo(options: {tag: string | RegExp, offset: number}, search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end', searchOffset?: number): Promise<void>;
+  private async jumpTo(options: {position: 'beginning' | 'end', offset: number}): Promise<void>;
   private async jumpTo(
     options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {},
-    search: 'forward' | 'backward' | 'from-beginning' | 'from-end' = 'from-beginning'
+    search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end' = 'forward-from-beginning',
+    searchOffset: number = 0,
   ): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use jumpTo() while currently animating.'); }
     // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
@@ -550,29 +555,31 @@ export class AnimTimeline {
       let sequencesSubset: AnimSequence[] = [];
       switch(search) {
         case "forward":
-          sequencesSubset = this.animSequences.slice(this.loadedSeqIndex + 1);
+          sequencesSubset = this.animSequences.slice(this.loadedSeqIndex + 1 + searchOffset);
           break;
         case "backward":
-          sequencesSubset = this.animSequences.slice(0, this.loadedSeqIndex);
+          sequencesSubset = this.animSequences.slice(0, this.loadedSeqIndex + searchOffset);
           isBackwardSearch = true;
           break;
-        case "from-beginning":
-          sequencesSubset = this.animSequences;
+        case "forward-from-beginning":
+          sequencesSubset = this.animSequences.slice(searchOffset);
           break;
-        case "from-end":
-          sequencesSubset = this.animSequences;
+        case "backward-from-end":
+          sequencesSubset = this.animSequences.slice(0, this.numSequences + searchOffset);
           isBackwardSearch = true;
           break;
         default:
           throw new TypeError(`Invalid search value "${search}".`);
       }
-      const tagMatch = (tag: RegExp | string, sequence: AnimSequence): boolean => tag instanceof RegExp ? !!sequence.getTag().match(tag) : sequence.getTag() === tag;
+      let isForwardSearch = !isBackwardSearch;
+      const sequenceMatchesTag = (sequence: AnimSequence, tag: RegExp | string): boolean => tag instanceof RegExp ? !!sequence?.getTag().match(tag) : sequence?.getTag() === tag;
 
-      // get loadedSeqIndex corresponding to matching AnimSequence
-      const sequenceInset = search === 'forward' ? this.loadedSeqIndex + 1 : 0;
+      // accounts for the number of sequences preceding the target subset
+      const sequenceInset = isForwardSearch ? this.numSequences - sequencesSubset.length : 0;
+      // get index corresponding to matching AnimSequence + offset
       targetIndex = (isBackwardSearch
-        ? findLastIndex(sequencesSubset, animSequence => tagMatch(tag, animSequence))
-        : sequencesSubset.findIndex(animSequence => tagMatch(tag, animSequence))
+        ? findLastIndex(sequencesSubset, animSequence => sequenceMatchesTag(animSequence, tag))
+        : sequencesSubset.findIndex(animSequence => sequenceMatchesTag(animSequence, tag))
       ) + sequenceInset + offset;
 
       if (targetIndex - sequenceInset - offset === -1) { throw new Error(`Sequence tag "${tag}" not found.`); }
