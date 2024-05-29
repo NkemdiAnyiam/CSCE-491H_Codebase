@@ -437,7 +437,6 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Hide naive approach explanations',
-      tag: 'explain naive bad',
       autoplaysNextSequence: true,
     })
     .addBlocks(
@@ -461,6 +460,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = new AnimSequence({
       description: 'Explain why naive approach is bad',
+      tag: 'explain naive bad',
     })
     .addBlocks(
       Motion(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem'}],
