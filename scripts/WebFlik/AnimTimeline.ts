@@ -509,33 +509,33 @@ export class AnimTimeline {
       offset = 0,
       searchOffset = 0,
     } = options;
-    this.jumpTo({tag, offset}, search, searchOffset);
+    this.jumpTo({ tag, search, searchOffset, offset });
   }
 
   async jumpToPosition(position: 'beginning' | 'end', options: {offset: number}): Promise<void> {
     const {
       offset = 0,
     } = options;
-    this.jumpTo({position, offset});
+    this.jumpTo({ position, offset });
   }
 
   // immediately jumps to an AnimSequence in animSequences with the matching search arguments
-  private async jumpTo(options: {tag: string | RegExp, offset: number}, search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end', searchOffset?: number): Promise<void>;
+  private async jumpTo(options: {tag: string | RegExp, offset: number, search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end', searchOffset: number}): Promise<void>;
   private async jumpTo(options: {position: 'beginning' | 'end', offset: number}): Promise<void>;
   private async jumpTo(
-    options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {},
-    search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end' = 'forward-from-beginning',
-    searchOffset: number = 0,
+    options: Partial<{
+      offset: number,
+      position: 'beginning' | 'end',
+      tag: string | RegExp,
+      search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'
+      searchOffset: number
+    }> = {},
   ): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use jumpTo() while currently animating.'); }
     // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingJumpTo) { throw new Error('Cannot perform simultaneous calls to jumpTo() in timeline.'); }
 
-    const {
-      tag,
-      offset = 0,
-      position
-    } = options;
+    const { offset = 0, position, tag } = options;
 
     // cannot specify both tag and position
     if (tag !== undefined && position !== undefined) {
@@ -550,7 +550,9 @@ export class AnimTimeline {
     let targetIndex: number;
 
     // find target index based on finding sequence with matching tag
+    // TODO: Potentially prevent forward searches from starting at the end of the array when negative numbers are used
     if (tag) {
+      const { search = 'forward-from-beginning', searchOffset = 0 } = options;
       let isBackwardSearch = false;
       let sequencesSubset: AnimSequence[] = [];
       switch(search) {
@@ -575,14 +577,14 @@ export class AnimTimeline {
       const sequenceMatchesTag = (sequence: AnimSequence, tag: RegExp | string): boolean => tag instanceof RegExp ? !!sequence?.getTag().match(tag) : sequence?.getTag() === tag;
 
       // accounts for the number of sequences preceding the target subset
-      const sequenceInset = isForwardSearch ? this.numSequences - sequencesSubset.length : 0;
+      const forwardSearchInset = isForwardSearch ? this.numSequences - sequencesSubset.length : 0;
       // get index corresponding to matching AnimSequence + offset
       targetIndex = (isBackwardSearch
         ? findLastIndex(sequencesSubset, animSequence => sequenceMatchesTag(animSequence, tag))
         : sequencesSubset.findIndex(animSequence => sequenceMatchesTag(animSequence, tag))
-      ) + sequenceInset + offset;
+      ) + forwardSearchInset + offset;
 
-      if (targetIndex - sequenceInset - offset === -1) { throw new Error(`Sequence tag "${tag}" not found.`); }
+      if (targetIndex - forwardSearchInset - offset === -1) { throw new Error(`Sequence tag "${tag}" not found.`); }
     }
     // find target index based on either the beginning or end of the timeline
     else {
