@@ -500,10 +500,25 @@ export class AnimTimeline {
     return autorewindPrevious;
   }
 
+  async skipToSequenceTag(tag: string | RegExp, options: {direction: 'scan' | 'forward' | 'backward', offset: number}): Promise<void> {
+    const {
+      direction = 'scan',
+      offset = 0
+    } = options;
+    this.skipTo({tag, offset}, direction);
+  }
+
+  async skipToPosition(position: 'beginning' | 'end', options: {offset: number}): Promise<void> {
+    const {
+      offset = 0,
+    } = options;
+    this.skipTo({position, offset});
+  }
+
   // immediately skips to first AnimSequence in animSequences with either matching tag field or position
-  async skipTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, direction?: 'forward' | 'backward' | 'scan'): Promise<void>;
-  async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
-  async skipTo(options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {}, direction: 'forward' | 'backward' | 'scan' = 'scan'): Promise<void> {
+  private async skipTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, search?: 'forward' | 'backward' | 'scan'): Promise<void>;
+  private async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
+  private async skipTo(options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {}, direction: 'forward' | 'backward' | 'scan' = 'scan'): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use skipTo() while currently animating.'); }
     // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline.'); }
