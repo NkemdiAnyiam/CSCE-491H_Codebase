@@ -502,35 +502,44 @@ export class AnimTimeline {
 
   async jumpToSequenceTag(
     tag: string | RegExp,
-    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward'; searchOffset: number; targetOffset: number; detectAutoplay: boolean;}> = {},
+    options: Partial<{
+      search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward';
+      searchOffset: number;
+      targetOffset: number;
+      autoplayDetection: 'forward' | 'backward' | 'none';
+    }> = {},
   ): Promise<void> {
     const {
       search = 'forward-from-beginning',
       targetOffset = 0,
       searchOffset = 0,
-      detectAutoplay = false,
+      autoplayDetection = 'none',
     } = options;
-    this.jumpTo({ tag, search, searchOffset, targetOffset, detectAutoplay });
+    this.jumpTo({ tag, search, searchOffset, targetOffset, autoplayDetection });
   }
 
   async jumpToPosition(
     position: 'beginning' | 'end',
-    options: Partial<{targetOffset: number; detectAutoplay: boolean;}> = {},
+    options: Partial<{targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}> = {},
   ): Promise<void> {
     const {
       targetOffset = 0,
-      detectAutoplay = false,
+      autoplayDetection = 'none',
     } = options;
-    this.jumpTo({ position, targetOffset, detectAutoplay });
+    this.jumpTo({ position, targetOffset, autoplayDetection });
   }
 
   // immediately jumps to an AnimSequence in animSequences with the matching search arguments
   private async jumpTo(options: {
-    tag: string | RegExp; targetOffset: number; search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset: number; detectAutoplay: boolean;
+    tag: string | RegExp;
+    search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end';
+    searchOffset: number;
+    targetOffset: number;
+    autoplayDetection: 'forward' | 'backward' | 'none';
   }): Promise<void>;
-  private async jumpTo(options: {position: 'beginning' | 'end'; targetOffset: number; detectAutoplay: boolean;}): Promise<void>;
+  private async jumpTo(options: {position: 'beginning' | 'end'; targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none';}): Promise<void>;
   private async jumpTo(
-    options: { targetOffset: number; detectAutoplay: boolean; } & (
+    options: { targetOffset: number; autoplayDetection: 'forward' | 'backward' | 'none'; } & (
       {tag: string | RegExp; search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset?: number; position?: never}
       | {position: 'beginning' | 'end'; tag?: never}
     ),
@@ -539,7 +548,7 @@ export class AnimTimeline {
     // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingJumpTo) { throw new Error('Cannot perform simultaneous calls to jumpTo() in timeline.'); }
 
-    const { targetOffset, detectAutoplay, position, tag } = options;
+    const { targetOffset, autoplayDetection, position, tag } = options;
 
     // cannot specify both tag and position
     if (tag !== undefined && position !== undefined) {
@@ -622,13 +631,22 @@ export class AnimTimeline {
     if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleActivation(); }
 
     // keep skipping forwards or backwards depending on direction of loadedSeqIndex
+
     // play to the target sequence without playing the sequence
     if (this.loadedSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
       while (this.loadedSeqIndex < targetIndex) { await this.stepForward(); }
-      
-      if (detectAutoplay) {
-        while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+      switch(autoplayDetection) {
+        // if autoplay detection forward, play as long as the loaded sequence is supposed to be autoplayed
+        case "forward":
+          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+          break;
+        // if autoplay detection backward, rewind as long as the loaded sequence is supposed to be autoplayed
+        case "backward":
+          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepBackward(); }
+        case "none": // do nothing
+        default:
+          break;
       }
       this.playbackButtons.forwardButton?.styleDeactivation();
     }
@@ -636,9 +654,15 @@ export class AnimTimeline {
     else {
       this.playbackButtons.backwardButton?.styleActivation();
       while (this.loadedSeqIndex > targetIndex) { await this.stepBackward(); }
-      // if autoplay detection, play as long as the loaded sequence is supposed to be autoplayed
-      if (detectAutoplay) {
-        while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+      switch(autoplayDetection) {
+        case "forward":
+          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
+          break;
+        case "backward":
+          while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepBackward(); }
+        case "none": // do nothing
+        default:
+          break;
       }
       this.playbackButtons.backwardButton?.styleDeactivation();
     }
