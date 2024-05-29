@@ -502,7 +502,7 @@ export class AnimTimeline {
 
   async jumpToSequenceTag(
     tag: string | RegExp,
-    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward'; searchOffset: number; offset: number; detectAutoplay: boolean;}> = {}
+    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward'; searchOffset: number; offset: number; detectAutoplay: boolean;}> = {},
   ): Promise<void> {
     const {
       search = 'forward-from-beginning',
@@ -515,7 +515,7 @@ export class AnimTimeline {
 
   async jumpToPosition(
     position: 'beginning' | 'end',
-    options: {offset: number; detectAutoplay: boolean;}
+    options: Partial<{offset: number; detectAutoplay: boolean;}> = {},
   ): Promise<void> {
     const {
       offset = 0,
@@ -530,20 +530,16 @@ export class AnimTimeline {
   }): Promise<void>;
   private async jumpTo(options: {position: 'beginning' | 'end'; offset: number; detectAutoplay: boolean;}): Promise<void>;
   private async jumpTo(
-    options: Partial<{
-      offset: number;
-      detectAutoplay: boolean;
-      position: 'beginning' | 'end';
-      tag: string | RegExp;
-      search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end';
-      searchOffset: number;
-    }> = {},
+    options: { offset: number; detectAutoplay: boolean; } & (
+      {tag: string | RegExp; search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset?: number; position?: never}
+      | {position: 'beginning' | 'end'; tag?: never}
+    ),
   ): Promise<void> {
     if (this.isAnimating) { throw new Error('Cannot use jumpTo() while currently animating.'); }
     // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingJumpTo) { throw new Error('Cannot perform simultaneous calls to jumpTo() in timeline.'); }
 
-    const { offset = 0, detectAutoplay = false, position, tag } = options;
+    const { offset, detectAutoplay, position, tag } = options;
 
     // cannot specify both tag and position
     if (tag !== undefined && position !== undefined) {
