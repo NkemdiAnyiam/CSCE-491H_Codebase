@@ -502,35 +502,35 @@ export class AnimTimeline {
 
   async jumpToSequenceTag(
     tag: string | RegExp,
-    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward'; searchOffset: number; offset: number; detectAutoplay: boolean;}> = {},
+    options: Partial<{search: 'forward-from-beginning' | 'backward-from-end' | 'forward' | 'backward'; searchOffset: number; targetOffset: number; detectAutoplay: boolean;}> = {},
   ): Promise<void> {
     const {
       search = 'forward-from-beginning',
-      offset = 0,
+      targetOffset = 0,
       searchOffset = 0,
       detectAutoplay = false,
     } = options;
-    this.jumpTo({ tag, search, searchOffset, offset, detectAutoplay });
+    this.jumpTo({ tag, search, searchOffset, targetOffset, detectAutoplay });
   }
 
   async jumpToPosition(
     position: 'beginning' | 'end',
-    options: Partial<{offset: number; detectAutoplay: boolean;}> = {},
+    options: Partial<{targetOffset: number; detectAutoplay: boolean;}> = {},
   ): Promise<void> {
     const {
-      offset = 0,
+      targetOffset = 0,
       detectAutoplay = false,
     } = options;
-    this.jumpTo({ position, offset, detectAutoplay });
+    this.jumpTo({ position, targetOffset, detectAutoplay });
   }
 
   // immediately jumps to an AnimSequence in animSequences with the matching search arguments
   private async jumpTo(options: {
-    tag: string | RegExp; offset: number; search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset: number; detectAutoplay: boolean;
+    tag: string | RegExp; targetOffset: number; search: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset: number; detectAutoplay: boolean;
   }): Promise<void>;
-  private async jumpTo(options: {position: 'beginning' | 'end'; offset: number; detectAutoplay: boolean;}): Promise<void>;
+  private async jumpTo(options: {position: 'beginning' | 'end'; targetOffset: number; detectAutoplay: boolean;}): Promise<void>;
   private async jumpTo(
-    options: { offset: number; detectAutoplay: boolean; } & (
+    options: { targetOffset: number; detectAutoplay: boolean; } & (
       {tag: string | RegExp; search?: 'forward' | 'backward' | 'forward-from-beginning' | 'backward-from-end'; searchOffset?: number; position?: never}
       | {position: 'beginning' | 'end'; tag?: never}
     ),
@@ -539,7 +539,7 @@ export class AnimTimeline {
     // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
     if (this.usingJumpTo) { throw new Error('Cannot perform simultaneous calls to jumpTo() in timeline.'); }
 
-    const { offset, detectAutoplay, position, tag } = options;
+    const { targetOffset, detectAutoplay, position, tag } = options;
 
     // cannot specify both tag and position
     if (tag !== undefined && position !== undefined) {
@@ -549,7 +549,7 @@ export class AnimTimeline {
     if (tag === undefined && position === undefined) {
       throw new TypeError(`jumpTo() must receive either the tag or the position. Neither were received.`);
     }
-    if (!Number.isSafeInteger(offset)) { throw new TypeError(`Invalid offset "${offset}". Value must be an integer.`); }
+    if (!Number.isSafeInteger(targetOffset)) { throw new TypeError(`Invalid offset "${targetOffset}". Value must be an integer.`); }
 
     let targetIndex: number;
 
@@ -586,18 +586,18 @@ export class AnimTimeline {
       targetIndex = (isBackwardSearch
         ? findLastIndex(sequencesSubset, animSequence => sequenceMatchesTag(animSequence, tag))
         : sequencesSubset.findIndex(animSequence => sequenceMatchesTag(animSequence, tag))
-      ) + forwardSearchInset + offset;
+      ) + forwardSearchInset + targetOffset;
 
-      if (targetIndex - forwardSearchInset - offset === -1) { throw new Error(`Sequence tag "${tag}" not found.`); }
+      if (targetIndex - forwardSearchInset - targetOffset === -1) { throw new Error(`Sequence tag "${tag}" not found.`); }
     }
     // find target index based on either the beginning or end of the timeline
     else {
       switch(position!) {
         case "beginning":
-          targetIndex = 0 + offset;
+          targetIndex = 0 + targetOffset;
           break;
         case "end":
-          targetIndex = this.numSequences + offset;
+          targetIndex = this.numSequences + targetOffset;
           break;
         default: throw new RangeError(`Invalid jumpTo() position "${position}". Must be "beginning" or "end".`);
       }
@@ -605,7 +605,7 @@ export class AnimTimeline {
 
     // check to see if requested target index is within timeline bounds
     {
-      const errorPrefixString = `Jumping to ${tag ? `tag "${tag}"` : `position "${position}"`} with offset "${offset}" goes`;
+      const errorPrefixString = `Jumping to ${tag ? `tag "${tag}"` : `position "${position}"`} with offset "${targetOffset}" goes`;
       const errorPostfixString = `but requested index was ${targetIndex}.`;
       if (targetIndex < 0)
       { throw new RangeError(`${errorPrefixString} before timeline bounds. Minimium index = 0, ${errorPostfixString}`); }
