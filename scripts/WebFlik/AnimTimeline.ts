@@ -622,17 +622,21 @@ export class AnimTimeline {
     if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleActivation(); }
 
     // keep skipping forwards or backwards depending on direction of loadedSeqIndex
+    // play to the target sequence without playing the sequence
     if (this.loadedSeqIndex <= targetIndex) {
       this.playbackButtons.forwardButton?.styleActivation();
-      while (this.loadedSeqIndex < targetIndex) { await this.stepForward(); } // could be <= to play the sequence as well
+      while (this.loadedSeqIndex < targetIndex) { await this.stepForward(); }
+      
       if (detectAutoplay) {
         while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
       }
       this.playbackButtons.forwardButton?.styleDeactivation();
     }
+    // rewind to the target sequence and rewind the sequence as well
     else {
       this.playbackButtons.backwardButton?.styleActivation();
-      while (this.loadedSeqIndex > targetIndex) { await this.stepBackward(); } // could be tagIndex+1 to prevent the sequence from being undonewhile (this.loadedSeqIndex < targetIndex) { await this.stepForward(); } // could be <= to play the sequence as well
+      while (this.loadedSeqIndex > targetIndex) { await this.stepBackward(); }
+      // if autoplay detection, play as long as the loaded sequence is supposed to be autoplayed
       if (detectAutoplay) {
         while (this.animSequences[this.loadedSeqIndex].autoplays || this.animSequences[this.loadedSeqIndex - 1]?.autoplaysNextSequence) { await this.stepForward(); }
       }
