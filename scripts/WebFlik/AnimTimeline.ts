@@ -563,24 +563,24 @@ export class AnimTimeline {
     let targetIndex: number;
 
     // find target index based on finding sequence with matching tag
-    // TODO: Potentially prevent forward searches from starting at the end of the array when negative numbers are used
+    // Math.max(0) prevents wrapping
     if (tag) {
       const { search = 'forward-from-beginning', searchOffset = 0 } = options;
       let isBackwardSearch = false;
       let sequencesSubset: AnimSequence[] = [];
       switch(search) {
         case "forward":
-          sequencesSubset = this.animSequences.slice(this.loadedSeqIndex + 1 + searchOffset);
+          sequencesSubset = this.animSequences.slice(Math.max(this.loadedSeqIndex + 1 + searchOffset, 0));
           break;
         case "backward":
-          sequencesSubset = this.animSequences.slice(0, this.loadedSeqIndex + searchOffset);
+          sequencesSubset = this.animSequences.slice(0, Math.max(this.loadedSeqIndex + searchOffset, 0));
           isBackwardSearch = true;
           break;
         case "forward-from-beginning":
-          sequencesSubset = this.animSequences.slice(searchOffset);
+          sequencesSubset = this.animSequences.slice(Math.max(searchOffset, 0));
           break;
         case "backward-from-end":
-          sequencesSubset = this.animSequences.slice(0, this.numSequences + searchOffset);
+          sequencesSubset = this.animSequences.slice(0, Math.max(this.numSequences + searchOffset));
           isBackwardSearch = true;
           break;
         default:
