@@ -216,7 +216,7 @@ export class AnimTimeline {
   skippingOn = false; // used to determine whether or not all animations should be instantaneous
   isPaused = false;
   currDirection: 'forward' | 'backward' = 'forward'; // set to 'forward' after stepForward() or 'backward' after stepBackward()
-  usingSkipTo = false; // true if currently using skipTo()
+  usingJumpTo = false; // true if currently using jumpTo()
   playbackRate = 1;
   config: AnimTimelineConfig;
   // CHANGE NOTE: AnimTimeline now stores references to in-progress sequences and also does not act directly on individual animations
@@ -500,28 +500,28 @@ export class AnimTimeline {
     return autorewindPrevious;
   }
 
-  async skipToSequenceTag(tag: string | RegExp, options: {direction: 'scan' | 'forward' | 'backward', offset: number}): Promise<void> {
+  async jumpToSequenceTag(tag: string | RegExp, options: {direction: 'scan' | 'forward' | 'backward', offset: number}): Promise<void> {
     const {
       direction = 'scan',
       offset = 0
     } = options;
-    this.skipTo({tag, offset}, direction);
+    this.jumpTo({tag, offset}, direction);
   }
 
-  async skipToPosition(position: 'beginning' | 'end', options: {offset: number}): Promise<void> {
+  async jumpToPosition(position: 'beginning' | 'end', options: {offset: number}): Promise<void> {
     const {
       offset = 0,
     } = options;
-    this.skipTo({position, offset});
+    this.jumpTo({position, offset});
   }
 
-  // immediately skips to first AnimSequence in animSequences with either matching tag field or position
-  private async skipTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, search?: 'forward' | 'backward' | 'scan'): Promise<void>;
-  private async skipTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
-  private async skipTo(options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {}, direction: 'forward' | 'backward' | 'scan' = 'scan'): Promise<void> {
-    if (this.isAnimating) { throw new Error('Cannot use skipTo() while currently animating.'); }
-    // Calls to skipTo() must be separated using await or something that similarly prevents simultaneous execution of code
-    if (this.usingSkipTo) { throw new Error('Cannot perform simultaneous calls to skipTo() in timeline.'); }
+  // immediately jumps to first AnimSequence in animSequences with either matching tag field or position
+  private async jumpTo(options: Partial<{tag: string | RegExp, position: never, offset: number}>, search?: 'forward' | 'backward' | 'scan'): Promise<void>;
+  private async jumpTo(options: Partial<{tag: never, position: 'beginning' | 'end', offset: number}>): Promise<void>;
+  private async jumpTo(options: Partial<{tag: string | RegExp, position: 'beginning' | 'end', offset: number}> = {}, direction: 'forward' | 'backward' | 'scan' = 'scan'): Promise<void> {
+    if (this.isAnimating) { throw new Error('Cannot use jumpTo() while currently animating.'); }
+    // Calls to jumpTo() must be separated using await or something that similarly prevents simultaneous execution of code
+    if (this.usingJumpTo) { throw new Error('Cannot perform simultaneous calls to jumpTo() in timeline.'); }
 
     const {
       tag,
@@ -531,11 +531,11 @@ export class AnimTimeline {
 
     // cannot specify both tag and position
     if (tag !== undefined && position !== undefined) {
-      throw new TypeError(`Skipping must be done while specifying either the tag or the position, not both. Received tag="${tag}" and position="${position}."`);
+      throw new TypeError(`jumpTo() must receive either the tag or the position, not both. Received tag="${tag}" and position="${position}."`);
     }
     // can only specify one of tag or position, not both
     if (tag === undefined && position === undefined) {
-      throw new TypeError(`Skipping must be done while specifying either the tag or the position. Neither were received.`);
+      throw new TypeError(`jumpTo() must receive either the tag or the position. Neither were received.`);
     }
     if (!Number.isSafeInteger(offset)) { throw new TypeError(`Invalid offset "${offset}". Value must be an integer.`); }
 
@@ -576,13 +576,13 @@ export class AnimTimeline {
         case "end":
           targetIndex = this.numSequences + offset;
           break;
-        default: throw new RangeError(`Invalid skipTo() position "${position}". Must be "beginning" or "end".`);
+        default: throw new RangeError(`Invalid jumpTo() position "${position}". Must be "beginning" or "end".`);
       }
     }
 
     // check to see if requested target index is within timeline bounds
     {
-      const errorPrefixString = `Skipping to ${tag ? `tag "${tag}"` : `position "${position}"`} with offset "${offset}" goes`;
+      const errorPrefixString = `Jumping to ${tag ? `tag "${tag}"` : `position "${position}"`} with offset "${offset}" goes`;
       const errorPostfixString = `but requested index was ${targetIndex}.`;
       if (targetIndex < 0)
       { throw new RangeError(`${errorPrefixString} before timeline bounds. Minimium index = 0, ${errorPostfixString}`); }
@@ -590,8 +590,8 @@ export class AnimTimeline {
         { throw new RangeError(`${errorPrefixString} ahead of timeline bounds. Max index = ${this.numSequences}, ${errorPostfixString}`); }
     }
 
-    this.usingSkipTo = true;
-    // if paused, then unpause to perform the skipping; then re-pause
+    this.usingJumpTo = true;
+    // if paused, then unpause to perform the jumping; then re-pause
     let wasPaused = this.isPaused;
     if (wasPaused) { this.togglePause(false); }
     // if skipping is not currently enabled, activate skipping button styling
@@ -613,7 +613,7 @@ export class AnimTimeline {
     if (!wasSkipping) { this.playbackButtons.toggleSkippingButton?.styleDeactivation(); }
     if (wasPaused) { this.togglePause(true); }
 
-    this.usingSkipTo = false;
+    this.usingJumpTo = false;
   }
 
   toggleSkipping(isSkipping?: boolean): boolean;

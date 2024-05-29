@@ -6,7 +6,7 @@ import { AnimTimeline } from "./AnimTimeline";
  *
  * @interface AnimSequenceConfig
  * @property {string} description — This string is logged when debugging mode is enabled.
- * @property {boolean} tag — This string can be used as an argument to AnimTimeline.prototype.skipTo().
+ * @property {boolean} tag — This string can be used as an argument to AnimTimeline.prototype.jumpToSequenceTag().
  * @property {boolean} autoplaysNextSequence — If true, the next sequence in the timeline will automatically play after this sequence finishes.
  * @property {boolean} autoplays — If true, this sequence will automatically play after the previous sequence in the timeline finishes.
  */
@@ -20,7 +20,7 @@ type AnimSequenceConfig = {
   description: string;
 
   /**
-   * This string can be used as an argument to AnimTimeline.prototype.skipTo().
+   * This string can be used as an argument to AnimTimeline.prototype.jumpToSequenceTag()
    * @defaultValue `''`
   */
   tag: string;
@@ -48,7 +48,7 @@ export class AnimSequence implements AnimSequenceConfig {
   timelineID: number = NaN; // set to match the id of the AnimTimeline to which it belongs
   parentTimeline?: AnimTimeline; // pointer to parent AnimTimeline
   description: string = '<blank sequence description>';
-  tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's skipTo()
+  tag: string = ''; // helps idenfity current AnimSequence for using AnimTimeline's jumpToSequenceTag()
   autoplaysNextSequence: boolean = false; // decides whether the next AnimSequence should automatically play after this one
   autoplays: boolean = false;
   basePlaybackRate: number = 1;
@@ -57,7 +57,7 @@ export class AnimSequence implements AnimSequenceConfig {
   inProgress = false;
   /**@internal*/wasPlayed = false;
   /**@internal*/wasRewinded = false;
-  get skippingOn() { return this.parentTimeline?.skippingOn || this.parentTimeline?.usingSkipTo || this.usingFinish; }
+  get skippingOn() { return this.parentTimeline?.skippingOn || this.parentTimeline?.usingJumpTo || this.usingFinish; }
   get compoundedPlaybackRate() { return this.basePlaybackRate * (this.parentTimeline?.playbackRate ?? 1); }
   private animBlocks: AnimBlock[] = []; // array of animBlocks
 
