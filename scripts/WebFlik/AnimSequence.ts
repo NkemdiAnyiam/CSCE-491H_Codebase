@@ -77,10 +77,13 @@ export class AnimSequence implements AnimSequenceConfig {
     undo: () => {},
   };
 
-  constructor(config: Partial<AnimSequenceConfig> = {}) {
+  constructor(config: Partial<AnimSequenceConfig>, ...animBlocks: AnimBlock[]);
+  constructor(...animBlocks: AnimBlock[]);
+  constructor(config: Partial<AnimSequenceConfig> | AnimBlock = {}, ...animBlocks: AnimBlock[]) {
     this.id = AnimSequence.id++;
 
-    Object.assign(this, config);
+    Object.assign(this, config instanceof AnimBlock ? {} : config);
+    this.addBlocks(...(config instanceof AnimBlock ? [config, ...animBlocks] : animBlocks));
   }
 
   getDescription() { return this.description; }
