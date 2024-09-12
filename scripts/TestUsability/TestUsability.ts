@@ -1,4 +1,5 @@
-import { WebFlik, WbfkConnector } from "../WebFlik";
+import { webflik } from "webflik";
+import { WbfkClassTypes } from "webflik/types";
 
 const {
   Entrance,
@@ -7,29 +8,29 @@ const {
   Motion,
   ConnectorSetter,
   ConnectorEntrance,
-} = WebFlik.createAnimationBanks({
-  entrances: {
+} = webflik.createAnimationFactories({
+  customEntranceEffects: {
     [`super-jump`]: {
-      generateKeyframes: (penut: string) => [[{opacity: '1'}], []],
+      generateKeyframes: (penut: string) => { return {forwardFrames: [{opacity: '1'}], backwardFrames: []} },
     },
     [`pinwheel`]: {
       generateKeyframes(numSpins: number, direction: 'clockwise' | 'counter-clockwise') {
-        const thing = this.animName;
-        return [[], []]
+        const thing = this.getEffectDetails('effectName');
+        return {forwardFrames: [], backwardFrames: []};
       },
     }
     // [`preset-anim-name`]: [{fontSize: '4px'}],
   },
 
-  exits: {
+  customExitEffects: {
     [`super-jump-prime`]: {
-      generateKeyframes: (name: string) => [[{opacity: '1'}]],
+      generateKeyframes: (name: string) => { return {forwardFrames: [{opacity: '1'}]} },
     },
     [`mega-exit`]: {
       generateKeyframes(age: number) {
-        return [[{opacity: '1'}]]
+        return {forwardFrames: [{opacity: '1'}]}
       },
-      config: {
+      defaultConfig: {
         exitType: 'visibility-hidden'
       }
     },
@@ -41,8 +42,9 @@ const {
 const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500});
 Entrance(someHtmlElement, '~wipe', ['from-left']);
-ConnectorSetter(new WbfkConnector(), [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
-ConnectorEntrance(new WbfkConnector(), '~trace', ['from-A'])
+const thing: WbfkClassTypes['WbfkConnector'] = {} as WbfkClassTypes['WbfkConnector'];
+ConnectorSetter(thing, [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
+ConnectorEntrance(thing, '~trace', ['from-A'])
 // Exit(someHtmlElement, '', ['kyle']);
 // Emphasis(someHtmlElement, '')
 // Translation(someHtmlElement, '~translate', [{}])

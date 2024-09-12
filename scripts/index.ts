@@ -1,9 +1,9 @@
 import { enableButton, disableButton} from './utility';
 // import { wait } from './utility';
 import { createForm_multiInput, createForm_textarea } from './jobForm';
-import { WebFlik, AnimSequence } from './WebFlik';
+import { webflik } from 'webflik';
 
-const {Exit, Entrance, /* Scroller */} = WebFlik.createAnimationBanks({});
+const {Exit, Entrance, /* Scroller */} = webflik.createAnimationFactories({});
 
 const maxNumJobs = 8;
 const maxTime = 11;
@@ -49,7 +49,7 @@ const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_text
 // })
 // scroll.addRoadblocks('forward', 'activePhase', '90%', [() => wait(3000)]);
 
-const toggleSequence = new AnimSequence().addBlocks(...[
+const toggleSequence = webflik.newSequence().addClips(...[
   // scroll,
   Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),

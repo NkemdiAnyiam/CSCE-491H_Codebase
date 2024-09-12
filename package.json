@@ -22,5 +22,8 @@
   "homepage": "https://github.com/NkemdiAnyiam/CSCE-491H_WIS-Visualization-with-AnimTimeline#readme",
   "devDependencies": {
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "webflik": "file:webflik-0.12.0.tgz"
   }
 }

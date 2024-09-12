@@ -1,9 +1,9 @@
 import { stoi, stof, enableButton, disableButton, getRandInt, getRandIntRange } from './utility';
 import { Job } from './Job';
 import { generateVisualization } from "./WIS_visualization";
-import { WebFlik } from './WebFlik';
+import { webflik } from 'webflik';
 
-const {Exit} = WebFlik.createAnimationBanks({});
+const {Exit} = webflik.createAnimationFactories({});
 
 
 /****************************************/
