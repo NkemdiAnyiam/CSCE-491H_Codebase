@@ -1,9 +1,9 @@
 import { enableButton, disableButton} from './utility';
 // import { wait } from './utility';
 import { createForm_multiInput, createForm_textarea } from './jobForm';
-import { webflik } from 'webflik';
+import { webimator } from 'webimator';
 
-const {Exit, Entrance, /* Scroller */} = webflik.createAnimationFactories({});
+const {Exit, Entrance, /* Scroller */} = webimator.createAnimationClipFactories();
 
 const maxNumJobs = 8;
 const maxTime = 11;
@@ -49,11 +49,11 @@ const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_text
 // })
 // scroll.addRoadblocks('forward', 'activePhase', '90%', [() => wait(3000)]);
 
-const toggleSequence = webflik.newSequence().addClips(...[
+const toggleSequence = webimator.newSequence(
   // scroll,
   Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),
-]);
+);
 
 function swapForm(e: MouseEvent) {
   const toggleButton = e.target as HTMLButtonElement;

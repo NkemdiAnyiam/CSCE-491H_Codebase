@@ -1,13 +1,13 @@
 import { JobScheduler } from './JobScheduler';
 import { SceneCreator } from './SceneCreator';
-import { webflik } from 'webflik';
-import {WbfkClassTypes} from 'webflik/types';
+import { webimator } from 'webimator';
+import * as WbmtrTypes from 'webimator/types-and-interfaces';
 import { Job } from './Job';
 
 // \[\s'std',\s(.*'~)(high|un-high)(.*')(.*)\s\]
 // (\s*)(\[ 'line)
 
-const animTimeline = webflik.newTimeline({debugMode: true, timelineName: 'wis-viz'});
+const animTimeline = webimator.newTimeline({debugMode: true, timelineName: 'wis-viz'});
 
 const {
   Entrance,
@@ -18,7 +18,7 @@ const {
   ConnectorEntrance,
   ConnectorExit,
   Scroller,
-} = webflik.createAnimationFactories();
+} = webimator.createAnimationClipFactories();
 
 export function generateVisualization (jobsUnsorted: Job[]) {
   const dataDisplay = document.querySelector('.data-display') as HTMLElement;
@@ -69,7 +69,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box') as HTMLElement;
-  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const paragraph_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
   const paragraph_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
   const paragraph_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
@@ -79,7 +79,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // DESCRIBE THAT WE'RE ABOUT TO MOVE BARS ONTO GRAPH
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: `Describe that we're about to move bars onto graph`,
     })
     .addClips(
@@ -95,7 +95,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS ONTO TIME GRAPH IN UNSORTED ORDER
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Move job bars onto time graph in unsorted order',
     })
     .addClips(
@@ -121,7 +121,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS BACK OFF OF THE TIME GRAPH
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Move job bars back off of the time graph',
     })
     .addClips(
@@ -142,7 +142,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // MOVE JOB BARS BACK ONTO THE TIME GRAPH (SORTED BY FINISH TIME) AND UPDATE TIME GRAPH ROW HEADERS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Move job bars back onto the time graph (sorted by finish time) and update time graph row headers'
     });
     jobsSorted.forEach((job) => {
@@ -178,14 +178,14 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const cArray = arrayGroup_j_c.querySelector('.array--c') as HTMLElement;
   const jArray1 = arrayGroup_j_c.querySelector('.array--j');
   const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box') as HTMLElement;
-  const connector_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const paragraph_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
   const paragraph_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
   // EXPLAIN WHAT A COMPATIBLE JOB IS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain what a compatible job is',
     })
     .addClips(
@@ -203,7 +203,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHAT C ARRAY WILL BE USED FOR
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain what c array will be used for',
     })
     .addClips(
@@ -221,7 +221,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE EXPLANATION OF C ARRAY'S PURPOSE AND CONTINUE INTO NEXT PHASE
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: `Hide explanation of c array's purpose and continue into next phase`,
       autoplaysNextSequence: true, // after hiding, immediately continue into next phase
     })
@@ -239,7 +239,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box') as HTMLElement;
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
-  const timeGraphArrowEl = timeGraphEl.querySelector('wbfk-connector') as WbfkClassTypes['WbfkConnector']; // arrow connecting c entry and compatible job's row header
+  const timeGraphArrowEl = timeGraphEl.querySelector('wbmtr-connector') as WbmtrTypes.WbmtrConnector; // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
     const jobBarEl = getJobBarEl(job)!;
     // get j array block corresponding to current job bar
@@ -259,7 +259,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
     // MOVE CBAR TO CURRENT JOB BAR, UNHIDE IT, AND HIGHLIGHT CURRENT JOB BAR AND J ARRAY BLOCK
     {
-      const animSequence = webflik.newSequence({
+      const animSequence = webimator.newSequence({
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addClips(
@@ -277,8 +277,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
     // MOVE CBAR, HIGHLIGHT COMPATIBLE JOB IF EXISTS, AND POINT TO C ARRAY
     {
-      const animSequence = webflik.newSequence({description: 'Move cbar and highlight compatible job if it exists'});
-      const animSequence2 = webflik.newSequence({description:'Point to c array and fill entry'});
+      const animSequence = webimator.newSequence({description: 'Move cbar and highlight compatible job if it exists'});
+      const animSequence2 = webimator.newSequence({description:'Point to c array and fill entry'});
       // If the compatible job exists, Move cbar to compatible job bar and highlight it
       // Then point arrow from compatible row header to current c-array entry
       if (compatibleJobBarEl) {
@@ -324,7 +324,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
     // HIDE CBAR AND ARROW AND UN-HIGHLIGHT EVERYTHING
     {
-      const animSequence = webflik.newSequence({
+      const animSequence = webimator.newSequence({
         description: 'Hide cbar and arrow and un-highlight everything',
         autoplaysNextSequence: true,
       });
@@ -350,7 +350,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
-  const connector_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box') as HTMLElement;
   const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
   const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
@@ -358,7 +358,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // STATE THAT NOW WE NEED TO FIND THE MAXIMUM WEIGHT
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'State that now we need to find the maximum weight',
       tag: 'finished c array',
     })
@@ -374,7 +374,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // SHOW NAIVE APPROACH TO FINDING MAX WEIGHT
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain naive approach to finding max weight',
       tag: 'show naive',
     })
@@ -389,12 +389,12 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   }
 
   const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
-  const connector_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain possibility that job is part of optimal sequence',
       tag: 'explain naive',
     })
@@ -411,12 +411,12 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   }
 
   const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
-  const connector_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS **NOT** PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain possibility that job is NOT part of optimal sequence',
       tag: 'explain naive p2'
     })
@@ -436,7 +436,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE NAIVE APPROACH EXPLANATIONS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Hide naive approach explanations',
       autoplaysNextSequence: true,
     })
@@ -454,12 +454,12 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .text-box');
-  const connector_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   /****************************************************** */
   // EXPLAIN WHY NAIVE APPROACH IS BAD
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain why naive approach is bad',
       tag: 'explain naive bad',
     })
@@ -480,7 +480,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // COLLAPSE TEXT BOXES ABOUT THE NAIVE APPROACH
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Collapse text boxes about the naive approach',
       autoplaysNextSequence: true,
     })
@@ -495,14 +495,14 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const MArray = arrayGroup_j_M.querySelector('.array--M') as HTMLElement;
   const jArray2 = arrayGroup_j_M.querySelector('.array--j');
   const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box') as HTMLElement;
-  const connector_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const paragraph_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
   const paragraph_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
   // EXPLAIN MEMOIZATION
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain memoization',
       tag: 'introduce memoization',
     })
@@ -522,7 +522,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // EXPLAIN WHAT M ARRAY WILL BE USED FOR
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Explain what M array will be used for',
     })
     .addClips(
@@ -539,12 +539,12 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .text-box');
-  const connector_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   /****************************************************** */
   // SHOW MEMOIZED ALGORITHM
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Show memoized algorithm',
     })
     .addClips(
@@ -565,7 +565,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   // HIDE M ARRAY TEXT EXPLANATION BOXES
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Hide M array text explanation boxes',
       // autoplaysNextSequence: true,
     })
@@ -579,9 +579,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 };
 
 // recursively creates animation sequences for the job card tree
-function animateJobCard(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['WbfkConnector'], parentArrowSource: Element, aboveBullet: Element): any;
+function animateJobCard(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrConnector, parentArrowSource: Element, aboveBullet: Element): any;
 function animateJobCard(jobCard: HTMLElement): any;
-function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['WbfkConnector'], parentArrowSource?: Element, aboveBullet?: Element) {
+function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.WbmtrConnector, parentArrowSource?: Element, aboveBullet?: Element) {
   if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
   if (isNaN(SJNum)) { throw new Error(`Invalid SJ number found while reading from a jobCard.dataset.sjnum`); }
@@ -590,19 +590,19 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box') as HTMLElement;
   const paragraph_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
   const paragraph_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
 
-  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbfkClassTypes['WbfkConnector'];
+  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WbmtrConnector;
 
 
   const arrowContainer = jobCard.querySelector('.arrow-container');
   const formulaContainer = jobCard.querySelector('.formula-container');
   const formulaComputation = jobCard.querySelector('.formula-computation');
   const formulaResult = jobCard.querySelector('.formula-result');
-  const connector_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box') as HTMLElement;
   const paragraph_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
   const paragraph_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
@@ -611,7 +611,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
 
   const computation1 = jobCard.querySelector('.computation--1') as HTMLElement;
   const computationResult1 = computation1.querySelector('.computation-result');
-  const connector_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box') as HTMLElement;
   const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
   const paragraph_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
@@ -619,15 +619,15 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   const cAccessContainer = jobCard.querySelector('.c-access-container');
   const cAccess = jobCard.querySelector('.c-access');
   const cEntry = jobCard.querySelector('.c-entry');
-  const connector_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box') as HTMLElement;
   const paragraph_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
   const paragraph_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
-  const connector_toCBlock = jobCard.querySelector('.connector--c-access-to-c-block') as WbfkClassTypes['WbfkConnector'];
+  const connector_toCBlock = jobCard.querySelector('.connector--c-access-to-c-block') as WbmtrTypes.WbmtrConnector;
   const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container') as HTMLElement;
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
   const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
-  const connector_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box') as HTMLElement;
   const paragraph_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box__paragraph--find');
   const paragraph_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box__paragraph--found');
@@ -636,11 +636,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   const computation2 = jobCard.querySelector('.computation--2') as HTMLElement;
   const computationResult2 = computation2.querySelector('.computation-result');
   const OPTExpression2 = computation2.querySelector('.OPT-expression') as HTMLElement;
-  const connector_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box') as HTMLElement;
   const paragraph_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
   const paragraph_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
-  const connector_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
   const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
   const nextSJNum = computation2.querySelector('.next-SJ-num');
@@ -656,8 +656,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
 
 
-  const connector_upTree = jobCard.querySelector('.connector--up-tree') as WbfkClassTypes['WbfkConnector'];
-  const connector_downTree = jobCard.querySelector('.connector--down-tree') as WbfkClassTypes['WbfkConnector'];
+  const connector_upTree = jobCard.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
+  const connector_downTree = jobCard.querySelector('.connector--down-tree') as WbmtrTypes.WbmtrConnector;
   const jobCardBullet = jobCard.querySelector('.job-card-bullet') as HTMLElement;
 
 
@@ -665,13 +665,13 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FADE IN JOB CARD AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Fade in job card and M access',
       tag: 'start',
       autoplays: true,
     });
     if (parentArrowDown && parentArrowSource && aboveBullet) {
-      const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbfkClassTypes['WbfkConnector'];
+      const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WbmtrConnector;
       animSequence.addClips(
         Entrance(jobCard, '~fade-in', [], {startsNextClipToo: true}),
         ConnectorSetter(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
@@ -702,7 +702,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // POINT TO M BLOCK ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Point to M block array entry',
     })
     .addClips(
@@ -718,7 +718,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON FORMULA CONTAINER
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on formula container',
     })
     .addClips(
@@ -743,7 +743,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON COMPUTATION 1
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on computation 1',
     })
     .addClips(
@@ -765,7 +765,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON C ACCESS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on c access',
     })
     .addClips(
@@ -787,7 +787,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // POINT TO C ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Point to c array entry',
     })
     .addClips(
@@ -803,7 +803,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // REVERSE ARROW AND REPLACE C ACCESS WITH VALUE
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Reverse arrow and replace c access with value',
     })
     .addClips(
@@ -827,7 +827,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON OPT EXPRESSION 1 AS A WHOLE
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on OPT expression 1 as a whole',
     })
     .addClips(
@@ -853,10 +853,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // RECURSION 1
   /****************************************************** */
   const jobCardChild1Content = jobCardChild1.querySelector('.job-card-content') as HTMLElement;
-  const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as WbfkClassTypes['WbfkConnector'];
+  const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = webflik.newSequence({autoplaysNextSequence: true});
+    const animSeqPassDown = webimator.newSequence({autoplaysNextSequence: true});
     // add blocks to hide text about OPT expression before recursion
     animSeqPassDown.addClips(
       Exit(textbox_OPTExpression1, '~fade-out', [], {startsNextClipToo: true}),
@@ -870,7 +870,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
     /****************************************************** */
     // REPLACE OPT1 EXPRESSION WITH ANSWER, CHANGE TEXT BOX TEXT
     /****************************************************** */
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Replace OPT1 expression with answer, change text box text',
       tag: 'OPT point 1',
     })
@@ -895,7 +895,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // REMOVE ARROW COMING FROM CHILD, HIDE CURRENT TEXT; REPLACE COMPUTATION EXPRESSION WITH ANSWER; AND FOCUS ON WHOLE COMPUTATION1 (SWAP TEXT AS WELL)
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: `Remove arrow coming from child, hide current text, replace computation expression with answer, and focus on whole computation1 (swap text as well)`,
     })
     .addClips(
@@ -922,7 +922,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON COMPUTATION 2
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on computation 2',
       tag: 'focus comp 2',
     })
@@ -945,7 +945,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // REPLACE SUBTRACTION WITH RESULT; THEN FOCUS ON OPT EXPRESSION 2
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Replace subtraction with result; then focus on OPT expression 2'
     })
     .addClips(
@@ -968,10 +968,10 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // RECURSION 2
   /****************************************************** */
   const jobCardChild2Content = jobCardChild2.querySelector('.job-card-content') as HTMLElement;
-  const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as WbfkClassTypes['WbfkConnector'];
+  const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
-    const animSeqPassDown = webflik.newSequence({
+    const animSeqPassDown = webimator.newSequence({
       autoplaysNextSequence: true,
     })
     .addClips(
@@ -986,7 +986,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
     /****************************************************** */
     // REPLACE OPT2 EXPRESSION WITH ANSWER, HIDE OLD TEXT, AND ADD COMPUTATION 2 TEXT WITH SWAPPED TEXT
     /****************************************************** */
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Replace OPT2 expression with answer, hide old text, and add computation 2 text with swapped text',
     })
     .addClips(
@@ -1015,7 +1015,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // FOCUS ON WHOLE FORMULA CONTAINER
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Focus on whole formula container',
     })
     .addClips(
@@ -1041,7 +1041,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // REPLACE FORMULA CONTAINER CONTENTS WITH FINAL ANSWER
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Replace formula container contents with final answer',
       tag: 'replace formula container contents',
     })
@@ -1061,7 +1061,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // SHOW ONLY M CONTAINER, REPLACE M ACCESS WITH FINAL COMPUTED OPTIMAL VALUE, AND UPDATE M ARRAY BLOCK
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Show only M container, replace M access with final computed optimal value, and update M array block',
       tag: 'found max',
     })
@@ -1093,7 +1093,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   // REMOVE ARROW POINTING FROM M BLOCK AND SHOW FINAL TEXT BOX
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Remove arrow pointing from M block and show final text box',
     })
     .addClips(
@@ -1115,7 +1115,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
   /****************************************************** */
   if (parentArrowDown) {
     // just for hiding the last text box before moving back up the tree
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'If this is child block, hide parent arrow and unhighlight M access',
       tag: 'finish a main card',
       autoplaysNextSequence: true,
@@ -1132,7 +1132,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbfkClassTypes['
 };
 
 // terminal function that creates the animation sequences for job stubs (which are leaves of the job card tree)
-function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['WbfkConnector'], parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
+function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrConnector, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
   if (!jobCard) { throw new Error('jobCard in animateJobStub() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
   const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
@@ -1140,17 +1140,17 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbfk-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
   const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
   const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
-  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbfkClassTypes['WbfkConnector'];
+  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WbmtrConnector;
 
 
   const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
 
   
-  const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbfkClassTypes['WbfkConnector'];
+  const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WbmtrConnector;
   const connector_upTree = jobCard.querySelector('.connector--up-tree');
   const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
@@ -1159,7 +1159,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
   // FADE IN JOB STUB AND M ACCESS
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Fade in job stub and M access',
     })
     .addClips(
@@ -1184,7 +1184,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
   // POINT TO M BLOCK ARRAY ENTRY
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Point to M block array entry',
     })
     .addClips(
@@ -1200,7 +1200,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
   // POINT BACK TO M ACCESS FROM M BLOCK
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Point back to M access from M block',
     })
     .addClips(
@@ -1221,7 +1221,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
   // RETURN BLOCK THAT INITIALLY HIDES REMAINING STUFF AND POINTS TO PARENT
   /****************************************************** */
   {
-    const animSequence = webflik.newSequence({
+    const animSequence = webimator.newSequence({
       description: 'Hide parent arrow and unhighlight M access',
       autoplaysNextSequence: true,
     })
@@ -1239,19 +1239,19 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbfkClassTypes['W
 
 
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-wait(5000).then(async () => {
-  await animTimeline.step('forward');
-  await wait(1000);
-  animTimeline.step('backward');
-  await wait(200);
-  animTimeline.togglePause();
-  await wait(1000);
-  animTimeline.togglePause();
-  animTimeline.toggleSkipping();
-  await wait(500);
-  animTimeline.jumpToPosition('end', {targetOffset: 0});
-})
+// const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// wait(5000).then(async () => {
+//   await animTimeline.step('forward');
+//   await wait(1000);
+//   animTimeline.step('backward');
+//   await wait(200);
+//   animTimeline.togglePause();
+//   await wait(1000);
+//   animTimeline.togglePause();
+//   animTimeline.toggleSkipping();
+//   await wait(500);
+//   animTimeline.jumpToPosition('end', {targetOffset: 0});
+// })
 
 
 
