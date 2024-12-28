@@ -24,6 +24,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "webimator": "^0.17.6"
+    "webimator": "file:../webimator/tarballs/webimator-0.23.0.tgz"
   }
 }

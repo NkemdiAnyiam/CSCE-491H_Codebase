@@ -69,7 +69,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars .text-box') as HTMLElement;
-  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_placeBars = dataDisplay.querySelector('.text-box-line-group--place-bars wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const paragraph_placeBars_unorder = textbox_placeBars.querySelector('.text-box__paragraph--unorder');
   const paragraph_placeBars_unorder2 = textbox_placeBars.querySelector('.text-box__paragraph--unorder-2');
   const paragraph_placeBars_order = textbox_placeBars.querySelector('.text-box__paragraph--order');
@@ -178,7 +178,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const cArray = arrayGroup_j_c.querySelector('.array--c') as HTMLElement;
   const jArray1 = arrayGroup_j_c.querySelector('.array--j');
   const textbox_cArray = dataDisplay.querySelector('.text-box-line-group--c-array .text-box') as HTMLElement;
-  const connector_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_cArray = dataDisplay.querySelector('.text-box-line-group--c-array wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const paragraph_cArray_explain = textbox_cArray.querySelector('.text-box__paragraph--explain');
   const paragraph_cArray_refArray = textbox_cArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
@@ -239,7 +239,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   /****************************************************** */
   const textbox_fillCArray = dataDisplay.querySelector('.text-box-line-group--fill-c-array .text-box') as HTMLElement;
   const cBar = document.querySelector('.time-graph__c-bar'); // vertical bar
-  const timeGraphArrowEl = timeGraphEl.querySelector('wbmtr-connector') as WbmtrTypes.WbmtrConnector; // arrow connecting c entry and compatible job's row header
+  const timeGraphArrowEl = timeGraphEl.querySelector('wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement; // arrow connecting c entry and compatible job's row header
   jobsSorted.forEach((job) => {
     const jobBarEl = getJobBarEl(job)!;
     // get j array block corresponding to current job bar
@@ -263,7 +263,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         description: 'Move cbar to current job bar, unhide it, and highlight current job bar and j array block',
       })
       .addClips(
-        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitsStyles: 'forcefully'}),
+        Motion(cBar, '~move-to', [jobBarEl, {preserveY: true}], {duration: 0, commitsStyles: true}),
         Emphasis(jobBarEl, '~highlight', [], {startsNextClipToo: true}),
         Emphasis(jBlock, '~highlight', [], {startsNextClipToo: true}),
         Entrance(cBar, '~wipe', ['from-top']),
@@ -285,7 +285,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
         row = document.querySelector(`.time-graph__row[data-joblettersorted="${compatibleJobBarEl.dataset.jobletter}"]`) as HTMLElement;
         rowSJNum = row.querySelector('.time-graph__SJ-num');
         animSequence.addClips(
-          Motion(cBar, '~move-to', [compatibleJobBarEl, {alignmentX: 'right', preserveY: true}]),
+          Motion(cBar, '~move-to', [compatibleJobBarEl, {alignment: 'right top', preserveY: true}]),
           Emphasis(compatibleJobBarEl, '~highlight', []),
         );
         animSequence2.addClips(
@@ -297,7 +297,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       // Then point arrow from bottom of cbar to current c-array entry
       else {
         animSequence.addClips(
-          Motion(cBar, '~move-to', [timeGraphEl, {alignmentX: 'left', preserveY: true}]),
+          Motion(cBar, '~move-to', [timeGraphEl, {alignment: 'left top', preserveY: true}]),
         );
         animSequence2.addClips(
           ConnectorSetter(timeGraphArrowEl, [cBar, 0, 1], [cBlock, 0.5, 0]),
@@ -350,7 +350,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_finishedCArray = dataDisplay.querySelector('.text-box-line-group--finished-c-array .text-box');
-  const connector_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_showNaive = dataDisplay.querySelector('.text-box-line-group--show-naive .text-box') as HTMLElement;
   const algorithm_term1 = textbox_showNaive.querySelector('.algorithm__term-1');
   const algorithm_term2 = textbox_showNaive.querySelector('.algorithm__term-2');
@@ -360,7 +360,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = webimator.newSequence({
       description: 'State that now we need to find the maximum weight',
-      tag: 'finished c array',
+      jumpTag: 'finished c array',
     })
     .addClips(
       Entrance(textbox_finishedCArray, '~fade-in', []),
@@ -376,10 +376,10 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = webimator.newSequence({
       description: 'Explain naive approach to finding max weight',
-      tag: 'show naive',
+      jumpTag: 'show naive',
     })
     .addClips(
-      Motion(textbox_showNaive, '~move-to', [textbox_finishedCArray, {offsetTargetY: '100%', offsetSelfY: '10rem'}], {duration: 0, commitsStyles: 'forcefully'}),
+      Motion(textbox_showNaive, '~move-to', [textbox_finishedCArray, {targetOffset: '0% 100%', selfOffset: '0% 10rem'}], {duration: 0, commitsStyles: true}),
       ConnectorSetter(connector_showNaive, [textbox_finishedCArray, 0.5, 1], [textbox_showNaive, 0.5, 0]),
       ConnectorEntrance(connector_showNaive, '~trace', ['from-top']),
       Entrance(textbox_showNaive, '~fade-in', []),
@@ -389,18 +389,18 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   }
 
   const textbox_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 .text-box');
-  const connector_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_explainNaive1 = dataDisplay.querySelector('.text-box-line-group--explain-naive-1 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
     const animSequence = webimator.newSequence({
       description: 'Explain possibility that job is part of optimal sequence',
-      tag: 'explain naive',
+      jumpTag: 'explain naive',
     })
     .addClips(
-      Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem', offsetTargetX: '-100%', offsetSelfX: '10rem', alignmentX: 'left'}],
-        {duration: 0, commitsStyles: 'forcefully'}),
+      Motion(textbox_explainNaive1, '~move-to', [textbox_showNaive, {targetOffset: '-100% 100%', selfOffset: '10rem 10rem', alignment: 'left top'}],
+        {duration: 0, commitsStyles: true}),
       Emphasis(algorithm_term1, '~highlight', []),
       ConnectorSetter(connector_explainNaive1, [algorithm_term1, 0.5, 1], [textbox_explainNaive1, 0.5, 0]),
       ConnectorEntrance(connector_explainNaive1, '~trace', ['from-top']),
@@ -411,18 +411,18 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   }
 
   const textbox_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 .text-box');
-  const connector_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_explainNaive2 = dataDisplay.querySelector('.text-box-line-group--explain-naive-2 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   /****************************************************** */
   // EXPLAIN POSSIBILITY THAT JOB IS **NOT** PART OF OPTIMAL SEQUENCE
   /****************************************************** */
   {
     const animSequence = webimator.newSequence({
       description: 'Explain possibility that job is NOT part of optimal sequence',
-      tag: 'explain naive p2'
+      jumpTag: 'explain naive p2'
     })
     .addClips(
-      Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {offsetSelf: '-10rem, 10rem', offsetTarget: '100%, 100%', alignmentX: 'right'}],
-        {duration: 0, commitsStyles: 'forcefully'}),
+      Motion(textbox_explainNaive2, '~move-to', [textbox_showNaive, {selfOffset: '-10rem 10rem', targetOffset: '100% 100%', alignment: 'right top'}],
+        {duration: 0, commitsStyles: true}),
       Emphasis(algorithm_term2, '~highlight', []),
       ConnectorSetter(connector_explainNaive2, [algorithm_term2, 0.5, 1], [textbox_explainNaive2, 0.5, 0]),
       ConnectorEntrance(connector_explainNaive2, '~trace', ['from-top']),
@@ -454,18 +454,18 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad .text-box');
-  const connector_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_explainNaiveBad = dataDisplay.querySelector('.text-box-line-group--explain-naive-bad wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   /****************************************************** */
   // EXPLAIN WHY NAIVE APPROACH IS BAD
   /****************************************************** */
   {
     const animSequence = webimator.newSequence({
       description: 'Explain why naive approach is bad',
-      tag: 'explain naive bad',
+      jumpTag: 'explain naive bad',
     })
     .addClips(
-      Motion(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {offsetTargetY: '100%', offsetSelfY: '10rem'}],
-        {duration: 0, commitsStyles: 'forcefully'}),
+      Motion(textbox_explainNaiveBad, '~move-to', [textbox_showNaive, {targetOffset: '0% 100%', selfOffset: '0rem 10rem'}],
+        {duration: 0, commitsStyles: true}),
       ConnectorSetter(connector_explainNaiveBad, [textbox_showNaive, 0.5, 1], [textbox_explainNaiveBad, 0.5, 0]),
       ConnectorEntrance(connector_explainNaiveBad, '~trace', ['from-top']),
       Entrance(textbox_explainNaiveBad, '~fade-in', []),
@@ -495,7 +495,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   const MArray = arrayGroup_j_M.querySelector('.array--M') as HTMLElement;
   const jArray2 = arrayGroup_j_M.querySelector('.array--j');
   const textbox_MArray = dataDisplay.querySelector('.text-box-line-group--M-array .text-box') as HTMLElement;
-  const connector_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_MArray = dataDisplay.querySelector('.text-box-line-group--M-array wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const paragraph_MArray_explain = textbox_MArray.querySelector('.text-box__paragraph--explain');
   const paragraph_MArray_refArray = textbox_MArray.querySelector('.text-box__paragraph--ref-array');
   /****************************************************** */
@@ -504,7 +504,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
   {
     const animSequence = webimator.newSequence({
       description: 'Explain memoization',
-      tag: 'introduce memoization',
+      jumpTag: 'introduce memoization',
     })
     .addClips(
       Entrance(jArray2, '~wipe', ['from-left']),
@@ -539,7 +539,7 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 
 
   const textbox_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized .text-box');
-  const connector_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_showMemoized = dataDisplay.querySelector('.text-box-line-group--show-memoized wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   /****************************************************** */
   // SHOW MEMOIZED ALGORITHM
   /****************************************************** */
@@ -548,8 +548,8 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
       description: 'Show memoized algorithm',
     })
     .addClips(
-      Motion(textbox_showMemoized, '~move-to', [textbox_MArray, {offsetTargetX: '100%', offsetSelfX: '6.25rem', preserveY: true}],
-        {duration: 0, commitsStyles: 'forcefully'}),
+      Motion(textbox_showMemoized, '~move-to', [textbox_MArray, {targetOffset: '100% 0%', selfOffset: '6.25rem 0rem', preserveY: true}],
+        {duration: 0, commitsStyles: true}),
       ConnectorSetter(connector_showMemoized, [textbox_MArray, 1, 0.5], [textbox_showMemoized, 0, 0.5]),
       ConnectorEntrance(connector_showMemoized, '~trace', ['from-A']),
       Entrance( textbox_showMemoized, '~fade-in', []),
@@ -579,9 +579,9 @@ function animateDataDisplay(dataDisplay: HTMLElement, jobScheduler: JobScheduler
 };
 
 // recursively creates animation sequences for the job card tree
-function animateJobCard(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrConnector, parentArrowSource: Element, aboveBullet: Element): any;
+function animateJobCard(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WebimatorConnectorElement, parentArrowSource: Element, aboveBullet: Element): any;
 function animateJobCard(jobCard: HTMLElement): any;
-function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.WbmtrConnector, parentArrowSource?: Element, aboveBullet?: Element) {
+function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.WebimatorConnectorElement, parentArrowSource?: Element, aboveBullet?: Element) {
   if (!jobCard) { throw new Error('jobCard in animateJobCard() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
   if (isNaN(SJNum)) { throw new Error(`Invalid SJ number found while reading from a jobCard.dataset.sjnum`); }
@@ -590,19 +590,19 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box') as HTMLElement;
   const paragraph_MAccess_intro = textbox_MAccess.querySelector('.text-box__paragraph--intro');
   const paragraph_MAccess_solved = textbox_MAccess.querySelector('.text-box__paragraph--solved');
 
-  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WbmtrConnector;
+  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WebimatorConnectorElement;
 
 
   const arrowContainer = jobCard.querySelector('.arrow-container');
   const formulaContainer = jobCard.querySelector('.formula-container');
   const formulaComputation = jobCard.querySelector('.formula-computation');
   const formulaResult = jobCard.querySelector('.formula-result');
-  const connector_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_formulaComputation = jobCard.querySelector('.text-box-line-group--formula-computation .text-box') as HTMLElement;
   const paragraph_formulaComputation_find = textbox_formulaComputation.querySelector('.text-box__paragraph--find');
   const paragraph_formulaComputation_max = textbox_formulaComputation.querySelector('.text-box__paragraph--max');
@@ -611,7 +611,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
 
   const computation1 = jobCard.querySelector('.computation--1') as HTMLElement;
   const computationResult1 = computation1.querySelector('.computation-result');
-  const connector_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_computation1 = jobCard.querySelector('.text-box-line-group--computation--1 .text-box') as HTMLElement;
   const computationExpression1 = jobCard.querySelector('.computation--1 .computation-expression');
   const paragraph_computation1_intro = textbox_computation1.querySelector('.text-box__paragraph--intro');
@@ -619,15 +619,15 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   const cAccessContainer = jobCard.querySelector('.c-access-container');
   const cAccess = jobCard.querySelector('.c-access');
   const cEntry = jobCard.querySelector('.c-entry');
-  const connector_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_cAccess = jobCard.querySelector('.text-box-line-group--c-access wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_cAccess = jobCard.querySelector('.text-box-line-group--c-access .text-box') as HTMLElement;
   const paragraph_cAccess_find = textbox_cAccess.querySelector('.text-box__paragraph--find');
   const paragraph_cAccess_found = textbox_cAccess.querySelector('.text-box__paragraph--found');
-  const connector_toCBlock = jobCard.querySelector('.connector--c-access-to-c-block') as WbmtrTypes.WbmtrConnector;
+  const connector_toCBlock = jobCard.querySelector('.connector--c-access-to-c-block') as WbmtrTypes.WebimatorConnectorElement;
   const OPTExpressionContainer1 = jobCard.querySelector('.computation-expression--1 .OPT-expression-container') as HTMLElement;
   const OPTExpression1 = OPTExpressionContainer1.querySelector('.OPT-expression');
   const OPTResult1 = OPTExpressionContainer1.querySelector('.OPT-result');
-  const connector_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_OPTExpression1 = jobCard.querySelector('.text-box-line-group--OPT-expression-1 .text-box') as HTMLElement;
   const paragraph_OPTExpression1_find = textbox_OPTExpression1.querySelector('.text-box__paragraph--find');
   const paragraph_OPTExpression1_found = textbox_OPTExpression1.querySelector('.text-box__paragraph--found');
@@ -636,11 +636,11 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   const computation2 = jobCard.querySelector('.computation--2') as HTMLElement;
   const computationResult2 = computation2.querySelector('.computation-result');
   const OPTExpression2 = computation2.querySelector('.OPT-expression') as HTMLElement;
-  const connector_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_computation2 = jobCard.querySelector('.text-box-line-group--computation--2 .text-box') as HTMLElement;
   const paragraph_computation2_intro = textbox_computation2.querySelector('.text-box__paragraph--intro');
   const paragraph_computation2_summary = textbox_computation2.querySelector('.text-box__paragraph--summary');
-  const connector_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_OPTExpression2 = jobCard.querySelector('.text-box-line-group--OPT-expression-2 .text-box');
   const nextSJNumExpression = computation2.querySelector('.next-SJ-num-expression');
   const nextSJNum = computation2.querySelector('.next-SJ-num');
@@ -656,8 +656,8 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   const cBlock = document.querySelector(`.array--c .array__array-block--${SJNum}`);
 
 
-  const connector_upTree = jobCard.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
-  const connector_downTree = jobCard.querySelector('.connector--down-tree') as WbmtrTypes.WbmtrConnector;
+  const connector_upTree = jobCard.querySelector('.connector--up-tree') as WbmtrTypes.WebimatorConnectorElement;
+  const connector_downTree = jobCard.querySelector('.connector--down-tree') as WbmtrTypes.WebimatorConnectorElement;
   const jobCardBullet = jobCard.querySelector('.job-card-bullet') as HTMLElement;
 
 
@@ -667,16 +667,16 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   {
     const animSequence = webimator.newSequence({
       description: 'Fade in job card and M access',
-      tag: 'start',
+      jumpTag: 'start',
       autoplays: true,
     });
     if (parentArrowDown && parentArrowSource && aboveBullet) {
-      const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WbmtrConnector;
+      const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WebimatorConnectorElement;
       animSequence.addClips(
         Entrance(jobCard, '~fade-in', [], {startsNextClipToo: true}),
         ConnectorSetter(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
         ConnectorEntrance(parentArrowDown, '~trace', ['from-A'], {startsNextClipToo: true}),
-        Scroller(document.documentElement, '~scroll-self', [jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}], {startsNextClipToo: true}),
+        Scroller(document.documentElement, '~scroll-self', [jobCardContent, {targetOffset: [0, 0.5], scrollableOffset: [0, 0.5], preserveX: true}], {startsNextClipToo: true}),
         ConnectorSetter(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
         ConnectorEntrance(connector_bulletConnector, '~trace', ['from-A'], {startsWithPrevious: true}),
       );
@@ -853,7 +853,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   // RECURSION 1
   /****************************************************** */
   const jobCardChild1Content = jobCardChild1.querySelector('.job-card-content') as HTMLElement;
-  const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
+  const connector_upFromChild1 = jobCardChild1Content.querySelector('.connector--up-tree') as WbmtrTypes.WebimatorConnectorElement;
   const MAccessContainer_fromChild1 = jobCardChild1Content.querySelector('.M-access-container');
   {
     const animSeqPassDown = webimator.newSequence({autoplaysNextSequence: true});
@@ -872,12 +872,12 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
     /****************************************************** */
     const animSequence = webimator.newSequence({
       description: 'Replace OPT1 expression with answer, change text box text',
-      tag: 'OPT point 1',
+      jumpTag: 'OPT point 1',
     })
     .addClips(
       ConnectorSetter(connector_upFromChild1, [MAccessContainer_fromChild1, 0.5, -0.2], [OPTExpressionContainer1, 0, 1.1]),
       ConnectorEntrance(connector_upFromChild1, '~trace', ['from-A']),
-      Scroller(document.querySelector('html'), '~scroll-self', [jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}], {startsWithPrevious: true}),
+      Scroller(document.querySelector('html'), '~scroll-self', [jobCardContent, {targetOffset: [0, 0.5], scrollableOffset: [0, 0.5], preserveX: true}], {startsWithPrevious: true}),
       Exit(OPTExpression1, '~wipe', ['from-right']),
       Entrance(OPTResult1, '~wipe', ['from-right'], {startsNextClipToo: true}),
       Exit(paragraph_OPTExpression1_find, '~fade-out', [], { duration: 250 }),
@@ -924,7 +924,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   {
     const animSequence = webimator.newSequence({
       description: 'Focus on computation 2',
-      tag: 'focus comp 2',
+      jumpTag: 'focus comp 2',
     })
     .addClips(
       Exit(textbox_computation1, '~fade-out', [], {startsNextClipToo: true}),
@@ -968,7 +968,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   // RECURSION 2
   /****************************************************** */
   const jobCardChild2Content = jobCardChild2.querySelector('.job-card-content') as HTMLElement;
-  const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as WbmtrTypes.WbmtrConnector;
+  const connector_upFromChild2 = jobCardChild2Content.querySelector('.connector--up-tree') as WbmtrTypes.WebimatorConnectorElement;
   const MAccessContainer_fromChild2 = jobCardChild2Content.querySelector('.M-access-container');
   {
     const animSeqPassDown = webimator.newSequence({
@@ -992,7 +992,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
     .addClips(
       ConnectorSetter(connector_upFromChild2, [MAccessContainer_fromChild2, 0.5, -0.2], [computation2, 0, 1.1]),
       ConnectorEntrance(connector_upFromChild2, '~trace', ['from-A']),
-      Scroller(document.querySelector('html'), '~scroll-self', [jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}], {startsWithPrevious: true}),
+      Scroller(document.querySelector('html'), '~scroll-self', [jobCardContent, {targetOffset: [0, 0.5], scrollableOffset: [0, 0.5], preserveX: true}], {startsWithPrevious: true}),
 
       Exit(paragraph_computation2_intro, '~disappear', []),
       Entrance(paragraph_computation2_summary, '~appear', []),
@@ -1043,7 +1043,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   {
     const animSequence = webimator.newSequence({
       description: 'Replace formula container contents with final answer',
-      tag: 'replace formula container contents',
+      jumpTag: 'replace formula container contents',
     })
     .addClips(
       Exit(formulaComputation, '~wipe', ['from-right']),
@@ -1063,7 +1063,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
   {
     const animSequence = webimator.newSequence({
       description: 'Show only M container, replace M access with final computed optimal value, and update M array block',
-      tag: 'found max',
+      jumpTag: 'found max',
     })
     .addClips(
       // hide formula container
@@ -1117,7 +1117,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
     // just for hiding the last text box before moving back up the tree
     const animSequence = webimator.newSequence({
       description: 'If this is child block, hide parent arrow and unhighlight M access',
-      tag: 'finish a main card',
+      jumpTag: 'finish a main card',
       autoplaysNextSequence: true,
     })
     .addClips(
@@ -1132,7 +1132,7 @@ function animateJobCard(jobCard: HTMLElement, parentArrowDown?: WbmtrTypes.Wbmtr
 };
 
 // terminal function that creates the animation sequences for job stubs (which are leaves of the job card tree)
-function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrConnector, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
+function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WebimatorConnectorElement, parentArrowSource: HTMLElement, aboveBullet: HTMLElement) {
   if (!jobCard) { throw new Error('jobCard in animateJobStub() must not be null'); }
   const SJNum = Number.parseInt(jobCard.dataset.sjnum ?? '');
   const jobCardContent = jobCard.querySelector('.job-card-content') as HTMLElement;
@@ -1140,17 +1140,17 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrC
   const MAccessContainer = jobCard.querySelector('.M-access-container');
   const MAccess = jobCard.querySelector('.M-access');
   const MEntry = jobCard.querySelector('.M-entry');
-  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_MAccess = jobCard.querySelector('.text-box-line-group--M-access wbmtr-connector') as WbmtrTypes.WebimatorConnectorElement;
   const textbox_MAccess = jobCard.querySelector('.text-box-line-group--M-access .text-box');
   const textbox_MAccess_p1 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--1');
   const textbox_MAccess_p2 = jobCard.querySelector('.text-box-line-group--M-access .text-box .text-box__paragraph--2');
-  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WbmtrConnector;
+  const connector_toMBlock = jobCard.querySelector('.connector--M-access-to-M-block') as WbmtrTypes.WebimatorConnectorElement;
 
 
   const MBlock = document.querySelector(`.array--M .array__array-block--${SJNum}`);
 
   
-  const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WbmtrConnector;
+  const connector_bulletConnector = jobCard.querySelector('.connector--bullet-connector') as WbmtrTypes.WebimatorConnectorElement;
   const connector_upTree = jobCard.querySelector('.connector--up-tree');
   const jobCardBullet = jobCard.querySelector('.job-card-bullet');
 
@@ -1166,7 +1166,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrC
       Entrance(jobCard, '~fade-in', [], {startsNextClipToo: true}),
       ConnectorSetter(connector_bulletConnector, [aboveBullet, 0.5, 0.5], [jobCardBullet, 0.5, 0.5]),
       ConnectorEntrance(connector_bulletConnector, '~trace', ['from-A'], {startsNextClipToo: true}),
-      Scroller(document.documentElement, '~scroll-self', [jobCardContent, {targetOffsetY: 0.5, scrollableOffsetY: 0.5, preserveX: true}], {startsNextClipToo: true}),
+      Scroller(document.documentElement, '~scroll-self', [jobCardContent, {targetOffset: [0, 0.5], scrollableOffset: [0, 0.5], preserveX: true}], {startsNextClipToo: true}),
       ConnectorSetter(parentArrowDown, [parentArrowSource, 0, 1], [SJNumLabel, 0.5, -0.2]),
       ConnectorEntrance(parentArrowDown, '~trace', ['from-A'], {startsWithPrevious: true}),
       Entrance(MAccess, '~fade-in', []),
@@ -1265,7 +1265,7 @@ function animateJobStub(jobCard: HTMLElement, parentArrowDown: WbmtrTypes.WbmtrC
   // // animTimeline.skipTo('introduce memoization');
 
   // // skips to tag and checks to see if DISABLED_FROM_EDGE should be added or removed from forward/backward buttons
-  // const skipTo = (tag: string, offset: number) => {
+  // const skipTo = (jumpTag: string, offset: number) => {
   //   animTimeline.skipTo(tag, offset)
   //   .then(() => {
   //     // if (animTimeline.atBeginning) { backwardButton.classList.add(DISABLED_FROM_EDGE); }
