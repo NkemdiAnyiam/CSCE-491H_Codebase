@@ -1,5 +1,5 @@
-import { webimator } from "webimator";
-import * as WbmtrTypes from "webimator/types-and-interfaces";
+import { webchalk } from "webchalk-animate";
+import * as WebChalkTypes from "webchalk-animate/types-and-interfaces";
 
 const {
   Entrance,
@@ -8,15 +8,15 @@ const {
   Motion,
   ConnectorSetter,
   ConnectorEntrance,
-} = webimator.createAnimationClipFactories({
+} = webchalk.createAnimationClipFactories({
   customEntranceEffects: {
     [`super-jump`]: {
-      generateKeyframes: (penut: string) => { return {forwardFrames: [{opacity: '1'}], backwardFrames: []} },
+      composeEffect: (penut: string) => { return {forwardKeyframesGenerator: () => [{opacity: '1'}], backwardKeyframesGenerator: () => []} },
     },
     [`pinwheel`]: {
-      generateKeyframes(numSpins: number, direction: 'clockwise' | 'counter-clockwise') {
+      composeEffect(numSpins: number, direction: 'clockwise' | 'counter-clockwise') {
         const thing = this.getEffectDetails('effectName');
-        return {forwardFrames: [], backwardFrames: []};
+        return {forwardKeyframesGenerator: () => [], backwardKeyframesGenerator: () => []};
       },
     }
     // [`preset-anim-name`]: [{fontSize: '4px'}],
@@ -24,11 +24,11 @@ const {
 
   customExitEffects: {
     [`super-jump-prime`]: {
-      generateKeyframes: (name: string) => { return {forwardFrames: [{opacity: '1'}]} },
+      composeEffect: (name: string) => { return {forwardKeyframesGenerator: () => [{opacity: '1'}]} },
     },
     [`mega-exit`]: {
-      generateKeyframes(age: number) {
-        return {forwardFrames: [{opacity: '1'}]}
+      composeEffect(age: number) {
+        return {forwardKeyframesGenerator: () => [{opacity: '1'}]}
       },
       defaultConfig: {
         exitType: 'visibility-hidden'
@@ -42,7 +42,7 @@ const {
 const someHtmlElement = new HTMLElement();
 Entrance(someHtmlElement, 'pinwheel', [4, 'counter-clockwise'], {duration: 500});
 Entrance(someHtmlElement, '~wipe', ['from-left']);
-const thing: WbmtrTypes.WbmtrConnector = {} as WbmtrTypes.WbmtrConnector;
+const thing: WebChalkTypes.WebChalkConnectorElement = {} as WebChalkTypes.WebChalkConnectorElement;
 ConnectorSetter(thing, [new HTMLElement(), 0.3, 1], [new HTMLElement, 0.1, 1]);
 ConnectorEntrance(thing, '~trace', ['from-A'])
 // Exit(someHtmlElement, '', ['kyle']);

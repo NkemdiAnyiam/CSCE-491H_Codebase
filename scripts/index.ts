@@ -1,9 +1,9 @@
 import { enableButton, disableButton} from './utility';
 // import { wait } from './utility';
 import { createForm_multiInput, createForm_textarea } from './jobForm';
-import { webimator } from 'webimator';
+import { webchalk } from 'webchalk-animate';
 
-const {Exit, Entrance, /* Scroller */} = webimator.createAnimationClipFactories();
+const {Exit, Entrance, /* Scroller */} = webchalk.createAnimationClipFactories();
 
 const maxNumJobs = 8;
 const maxTime = 11;
@@ -49,7 +49,7 @@ const {enableForm: enableForm_TA, disableForm: disableForm_TA} = createForm_text
 // })
 // scroll.addRoadblocks('forward', 'activePhase', '90%', [() => wait(3000)]);
 
-const toggleSequence = webimator.newSequence(
+const toggleSequence = webchalk.newSequence(
   // scroll,
   Exit(jobForm_multiInput, '~wipe', ['from-right'], { duration: 250 }),
   Entrance(jobForm_textarea, '~wipe', ['from-right'], { duration: 250 }),

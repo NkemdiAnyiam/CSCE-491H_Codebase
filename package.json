@@ -24,6 +24,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "webimator": "file:../webimator/tarballs/webimator-0.23.0.tgz"
+    "webchalk-animate": "file:../webchalk/tarballs/webchalk-animate-0.29.0.tgz"
   }
 }
